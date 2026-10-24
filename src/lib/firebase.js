@@ -1,5 +1,10 @@
 import { initializeApp, getApps } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { 
+  getFirestore, 
+  initializeFirestore, 
+  persistentLocalCache, 
+  persistentMultipleTabManager 
+} from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -14,8 +19,25 @@ const firebaseConfig = {
 // Initialiser Firebase (éviter de re-initialiser en dev avec hot-reload)
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-// Base de données Firestore (produits, commandes, etc.)
-export const db = getFirestore(app);
+// Base de données Firestore avec persistance locale permanente (IndexedDB)
+// Côté navigateur : active le cache permanent multi-onglets
+// Côté serveur (SSR/Node) : getFirestore standard
+let firestoreDb;
+if (typeof window !== "undefined") {
+  try {
+    firestoreDb = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
+  } catch {
+    firestoreDb = getFirestore(app);
+  }
+} else {
+  firestoreDb = getFirestore(app);
+}
+
+export const db = firestoreDb;
 
 // Storage pour les images de produits
 export const storage = getStorage(app);

@@ -1,0 +1,20 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ==========================================
+    // RÈGLES DE STOCKAGE PERMANENT PRINCE CFA
+    // Images de produits et médias de la boutique
+    // ==========================================
+
+    match /{allPaths=**} {
+      // Lecture libre de toutes les images pour l'affichage de la boutique
+      // Écriture pour les photos de produits (taille max 10 Mo, image uniquement)
+      allow read: if true;
+      allow write: if request.resource == null || (
+        request.resource.size < 10 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*')
+      );
+    }
+  }
+}
