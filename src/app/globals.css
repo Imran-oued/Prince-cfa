@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
+  --font-sans: var(--font-outfit), sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+:root {
+  --background: #09090b;
+  --foreground: #ffffff;
+  --card: #121216;
+  --gold: #d4af37;
+  --gold-hover: #e5c158;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background-color: var(--gold);
+  color: var(--background);
+}
+
+/* Base high-tech & luxury utilities */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Empêcher le zoom automatique d'iOS Safari au focus des champs (seuil critique : 16px) */
+@media screen and (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+button, 
+a, 
+input, 
+select, 
+textarea,
+[role="button"],
+.cursor-pointer {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[role="button"] {
+  cursor: pointer;
+}
+
+.glass-panel {
+  background: rgba(18, 18, 22, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+/* Animations d'apparition et d'effets slide */
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.slide-in-from-bottom-8 {
+  animation: slideInFromBottom 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.slide-in-from-top-4,
+.slide-in-from-top-2 {
+  animation: slideInFromTop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+
