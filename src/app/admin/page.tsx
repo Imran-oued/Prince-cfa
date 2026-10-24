@@ -714,30 +714,13 @@ export default function AdminPage() {
     setStorageItems(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Demande de changement de catégorie avec détection de spécifications existantes
-  const handleCategoryChangeRequest = (newCategory: string) => {
-    if (newCategory === formCategory) return;
-
-    const hasExistingSpecs = Object.values(formSpecs).some(
-      v => v !== undefined && v !== null && String(v).trim() !== ""
-    );
-
-    if (hasExistingSpecs) {
-      setCategorySwitchPending({ from: formCategory, to: newCategory });
-    } else {
-      setFormCategory(newCategory);
-      setFormSpecs({});
-      setFormErrors({});
-    }
-  };
-
-  // Confirmation du changement de catégorie (avec option de préservation compatible)
-  const confirmCategorySwitch = (preserveCompatible: boolean) => {
-    if (!categorySwitchPending) return;
-    const targetCat = categorySwitchPending.to;
+  // Application du changement de catégorie avec gestion des variantes et suggestions
+  const applyCategorySwitch = (newCategory: string, preserveCompatible = false) => {
+    const newConfig = getCategoryConfig(newCategory);
+    const oldConfig = getCategoryConfig(formCategory);
 
     if (preserveCompatible) {
-      const targetFields = getCategoryConfig(targetCat).fields.map(f => f.key);
+      const targetFields = newConfig.fields.map(f => f.key);
       const filteredSpecs: Record<string, any> = {};
       for (const [k, v] of Object.entries(formSpecs)) {
         if (targetFields.includes(k)) {
@@ -749,8 +732,52 @@ export default function AdminPage() {
       setFormSpecs({});
     }
 
-    setFormCategory(targetCat);
+    // Réinitialisation absolue des variantes de stockage si la nouvelle catégorie ne les supporte pas (ex: Motos)
+    if (!newConfig.supportsStorageVariants) {
+      setStorageItems([]);
+    }
+
+    // Si on est en création d'un nouveau produit, adapter les suggestions de marque, garantie et accessoires
+    if (!editingId) {
+      setCommonFormData(prev => {
+        const wasOldCategoryBrand = oldConfig.popularBrands?.some(
+          b => b.toLowerCase() === prev.brand.trim().toLowerCase()
+        );
+        return {
+          ...prev,
+          brand: wasOldCategoryBrand ? "" : prev.brand,
+          warranty: newConfig.defaultWarranty || prev.warranty,
+          accessories: prev.accessories && prev.accessories !== oldConfig.defaultAccessories
+            ? prev.accessories
+            : (newConfig.defaultAccessories || "")
+        };
+      });
+    }
+
+    setFormCategory(newCategory);
     setFormErrors({});
+  };
+
+  // Demande de changement de catégorie avec détection de spécifications existantes
+  const handleCategoryChangeRequest = (newCategory: string) => {
+    if (newCategory === formCategory) return;
+
+    const hasExistingSpecs = Object.values(formSpecs).some(
+      v => v !== undefined && v !== null && String(v).trim() !== ""
+    );
+
+    if (hasExistingSpecs) {
+      setCategorySwitchPending({ from: formCategory, to: newCategory });
+    } else {
+      applyCategorySwitch(newCategory, false);
+    }
+  };
+
+  // Confirmation du changement de catégorie (avec option de préservation compatible)
+  const confirmCategorySwitch = (preserveCompatible: boolean) => {
+    if (!categorySwitchPending) return;
+    const targetCat = categorySwitchPending.to;
+    applyCategorySwitch(targetCat, preserveCompatible);
     setCategorySwitchPending(null);
   };
 
@@ -767,12 +794,15 @@ export default function AdminPage() {
     const mainImage = imageList.length > 0 ? imageList[0] : "https://placehold.co/600x600/121216/d4af37?text=NOUVEAU";
     const allImages = imageList.length > 0 ? imageList : [mainImage];
 
-    const parsedStorage: StorageOption[] = storageItems
-      .filter(item => item.capacity.trim() !== "")
-      .map(item => ({
-        capacity: item.capacity.trim(),
-        price: Number(item.price) || Number(commonFormData.price) || 0
-      }));
+    // Les options de stockage ne sont transmises QUE si la catégorie les autorise
+    const parsedStorage: StorageOption[] = getCategoryConfig(formCategory).supportsStorageVariants
+      ? storageItems
+          .filter(item => item.capacity.trim() !== "")
+          .map(item => ({
+            capacity: item.capacity.trim(),
+            price: Number(item.price) || Number(commonFormData.price) || 0
+          }))
+      : [];
 
     const rawPayload = {
       id: editingId || undefined,
@@ -789,7 +819,7 @@ export default function AdminPage() {
       colors: parsedColors,
       image: mainImage,
       images: allImages,
-      storageOptions: parsedStorage,
+      storageOptions: parsedStorage.length > 0 ? parsedStorage : undefined,
       specs: formSpecs
     };
 
@@ -972,17 +1002,18 @@ export default function AdminPage() {
     setFormErrors({});
     setModalViewMode("form");
     setCategorySwitchPending(null);
+    const phoneConfig = getCategoryConfig("phones");
     setCommonFormData({
       name: "",
-      brand: "Apple",
+      brand: "",
       price: "",
       salePrice: "",
       desc: "",
       colors: "",
       stock: "10",
       condition: "neuf",
-      warranty: "Garantie 12 Mois Certifiée",
-      accessories: "",
+      warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
+      accessories: phoneConfig.defaultAccessories || "",
     });
     setIsModalOpen(true);
   };
@@ -2014,8 +2045,78 @@ export default function AdminPage() {
                         )}
                       </div>
 
-                      {/* Variantes de stockage */}
-                      {storageItems.length > 0 && (
+                      {/* Bloc Spécial Moto Électrique en aperçu */}
+                      {formCategory === "mobility" && (
+                        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                          <div className="flex items-center justify-between text-gold text-xs font-bold uppercase tracking-wider">
+                            <span className="flex items-center gap-1.5">
+                              <Zap className="w-4 h-4 text-gold" aria-hidden="true" />
+                              <span>Performances Moto Électrique</span>
+                            </span>
+                            <span className="text-[10px] text-zinc-400">0% Carburant</span>
+                          </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                            <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                              <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Moteur</span>
+                              <span className="text-sm font-black text-white">
+                                {formSpecs.motorPower ? `${formSpecs.motorPower} W` : "—"}
+                              </span>
+                            </div>
+                            <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                              <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Autonomie</span>
+                              <span className="text-sm font-black text-emerald-400">
+                                {formSpecs.rangeKm ? `${formSpecs.rangeKm} km` : "—"}
+                              </span>
+                            </div>
+                            <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                              <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Vitesse Max</span>
+                              <span className="text-sm font-black text-gold">
+                                {formSpecs.maxSpeedKm ? `${formSpecs.maxSpeedKm} km/h` : "—"}
+                              </span>
+                            </div>
+                            <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                              <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Batterie</span>
+                              <span className="text-sm font-black text-white">
+                                {formSpecs.batteryCapacityWh ? `${formSpecs.batteryCapacityWh} Wh` : (formSpecs.batteryVoltage ? `${formSpecs.batteryVoltage}V` : "—")}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bloc Spécial Ordinateurs en aperçu */}
+                      {formCategory === "computers" && (
+                        <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 space-y-2">
+                          <div className="flex items-center justify-between text-blue-400 text-xs font-bold uppercase tracking-wider">
+                            <span className="flex items-center gap-1.5">
+                              <Laptop className="w-4 h-4 text-blue-400" aria-hidden="true" />
+                              <span>Configuration Clé — Ordinateur</span>
+                            </span>
+                            <span className="text-[10px] text-zinc-400 font-mono">{formSpecs.os || "OS"}</span>
+                          </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                            <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                              <span className="text-[9px] text-zinc-400 uppercase font-semibold block">CPU</span>
+                              <span className="text-xs font-black text-white line-clamp-1">{formSpecs.processor || "—"}</span>
+                            </div>
+                            <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                              <span className="text-[9px] text-zinc-400 uppercase font-semibold block">RAM</span>
+                              <span className="text-sm font-black text-gold">{formSpecs.ram ? `${formSpecs.ram} Go` : "—"}</span>
+                            </div>
+                            <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                              <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Stockage</span>
+                              <span className="text-xs font-black text-emerald-400">{formSpecs.storageSize || "—"}</span>
+                            </div>
+                            <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                              <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Écran</span>
+                              <span className="text-xs font-black text-white">{formSpecs.screenSize ? `${formSpecs.screenSize}"` : "—"}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Variantes de stockage (SEULEMENT si la catégorie les autorise) */}
+                      {getCategoryConfig(formCategory).supportsStorageVariants && storageItems.length > 0 && (
                         <div className="space-y-1.5">
                           <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Options de capacité :</span>
                           <div className="flex flex-wrap gap-2">
@@ -2154,7 +2255,7 @@ export default function AdminPage() {
                           required 
                           value={commonFormData.name} 
                           onChange={e => setCommonFormData({ ...commonFormData, name: e.target.value })} 
-                          placeholder="Ex: iPhone 15 Pro Max 256 Go, MacBook Pro 16 M3 Max, Moto Super Soco" 
+                          placeholder={getCategoryConfig(formCategory).placeholderName || "Ex: Nom du modèle..."} 
                           className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
                             formErrors.name ? "border-red-500" : "border-white/10"
                           }`}
@@ -2162,16 +2263,46 @@ export default function AdminPage() {
                         {formErrors.name && <span className="text-[10px] text-red-400 mt-1 block">{formErrors.name}</span>}
                       </div>
 
-                      {/* Marque */}
-                      <div>
-                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
-                          Marque Fabricant
-                        </label>
+                      {/* Marque Fabricant avec suggestions intelligentes par catégorie */}
+                      <div className="sm:col-span-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
+                          <label className="text-[11px] text-zinc-400 uppercase font-bold block">
+                            Marque Fabricant
+                          </label>
+                          {getCategoryConfig(formCategory).popularBrands && getCategoryConfig(formCategory).popularBrands.length > 0 && (
+                            <span className="text-[10px] text-zinc-500">
+                              Marques suggérées pour {getCategoryConfig(formCategory).shortLabel} :
+                            </span>
+                          )}
+                        </div>
+                        
+                        {getCategoryConfig(formCategory).popularBrands && getCategoryConfig(formCategory).popularBrands.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-2.5">
+                            {getCategoryConfig(formCategory).popularBrands.map((brandName) => {
+                              const isSelected = commonFormData.brand.trim().toLowerCase() === brandName.toLowerCase();
+                              return (
+                                <button
+                                  key={brandName}
+                                  type="button"
+                                  onClick={() => setCommonFormData({ ...commonFormData, brand: brandName })}
+                                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all border cursor-pointer ${
+                                    isSelected
+                                      ? "bg-gold text-black border-gold shadow-[0_0_10px_rgba(212,175,55,0.3)]"
+                                      : "bg-white/5 text-zinc-300 border-white/10 hover:border-gold/50 hover:text-white hover:bg-white/10"
+                                  }`}
+                                >
+                                  {isSelected ? `✓ ${brandName}` : brandName}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
                         <input 
                           type="text" 
                           value={commonFormData.brand} 
                           onChange={e => setCommonFormData({ ...commonFormData, brand: e.target.value })} 
-                          placeholder="Ex: Apple, Samsung, Dell, Super Soco, Anker" 
+                          placeholder={getCategoryConfig(formCategory).popularBrands && getCategoryConfig(formCategory).popularBrands[0] ? `Ex: ${getCategoryConfig(formCategory).popularBrands.slice(0, 3).join(", ")}... ou saisie libre` : "Ex: Nom du fabricant ou marque..."} 
                           className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
                         />
                       </div>
@@ -2260,28 +2391,50 @@ export default function AdminPage() {
 
                       {/* Garantie vendeur */}
                       <div>
-                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
-                          Garantie Vendeur / Fabricant
-                        </label>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[11px] text-zinc-400 uppercase font-bold block">
+                            Garantie Vendeur / Fabricant
+                          </label>
+                          {getCategoryConfig(formCategory).defaultWarranty && commonFormData.warranty !== getCategoryConfig(formCategory).defaultWarranty && (
+                            <button
+                              type="button"
+                              onClick={() => setCommonFormData({ ...commonFormData, warranty: getCategoryConfig(formCategory).defaultWarranty })}
+                              className="text-[10px] text-gold hover:underline cursor-pointer"
+                            >
+                              Appliquer par défaut
+                            </button>
+                          )}
+                        </div>
                         <input 
                           type="text" 
                           value={commonFormData.warranty} 
                           onChange={e => setCommonFormData({ ...commonFormData, warranty: e.target.value })} 
-                          placeholder="Ex: Garantie 12 Mois Certifiée" 
+                          placeholder={getCategoryConfig(formCategory).defaultWarranty || "Ex: Garantie 12 Mois Certifiée"} 
                           className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
                         />
                       </div>
 
                       {/* Accessoires inclus */}
                       <div>
-                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
-                          Accessoires Inclus dans le Coffret
-                        </label>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[11px] text-zinc-400 uppercase font-bold block">
+                            Accessoires Inclus dans le Coffret
+                          </label>
+                          {getCategoryConfig(formCategory).defaultAccessories && commonFormData.accessories !== getCategoryConfig(formCategory).defaultAccessories && (
+                            <button
+                              type="button"
+                              onClick={() => setCommonFormData({ ...commonFormData, accessories: getCategoryConfig(formCategory).defaultAccessories })}
+                              className="text-[10px] text-gold hover:underline cursor-pointer"
+                            >
+                              Appliquer par défaut
+                            </button>
+                          )}
+                        </div>
                         <input 
                           type="text" 
                           value={commonFormData.accessories} 
                           onChange={e => setCommonFormData({ ...commonFormData, accessories: e.target.value })} 
-                          placeholder="Ex: Chargeur rapide 35W, Câble tressé, Clé de contact, Manuel" 
+                          placeholder={getCategoryConfig(formCategory).defaultAccessories || "Ex: Chargeur, Manuel, Accessoires..."} 
                           className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
                         />
                       </div>

@@ -23,6 +23,10 @@ export interface CategoryDefinition {
   description: string;
   iconName: string;
   supportsStorageVariants: boolean; // Autorise les options multi-stockage avec prix différents (ex: 128Go, 256Go)
+  popularBrands: string[]; // Marques suggérées par clic rapide
+  placeholderName: string;
+  defaultWarranty: string;
+  defaultAccessories: string;
   fields: SpecFieldDefinition[];
 }
 
@@ -34,6 +38,10 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     description: "Smartphones haut de gamme, iPhones et téléphones mobiles",
     iconName: "Smartphone",
     supportsStorageVariants: true,
+    popularBrands: ["Apple", "Samsung", "Google Pixel", "Xiaomi", "Tecno", "Infinix", "Huawei", "Honor", "Itel", "Oppo"],
+    placeholderName: "Ex: iPhone 15 Pro Max 256 Go Titane Naturel",
+    defaultWarranty: "Garantie 12 Mois Certifiée",
+    defaultAccessories: "Câble USB-C officiel, Boîte d'origine, Extracteur de SIM",
     fields: [
       {
         key: "model",
@@ -76,7 +84,7 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         min: 50,
         max: 100,
         required: false,
-        helpText: "Pertinent pour les produits d'occasion ou reconditionnés",
+        helpText: "Pertinent pour les téléphones d'occasion ou reconditionnés",
       },
       {
         key: "simFormat",
@@ -131,6 +139,10 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     description: "PC portables, MacBooks, PC de bureau et stations de travail",
     iconName: "Laptop",
     supportsStorageVariants: true,
+    popularBrands: ["Apple", "Dell", "HP", "Lenovo", "Asus", "Acer", "MSI", "Microsoft"],
+    placeholderName: "Ex: MacBook Pro 16 M3 Max, Dell XPS 15 9530",
+    defaultWarranty: "Garantie 12 Mois Constructeur",
+    defaultAccessories: "Chargeur d'origine haute puissance, Câble secteur",
     fields: [
       {
         key: "model",
@@ -253,6 +265,10 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     description: "iPads, tablettes graphiques et tablettes Android",
     iconName: "Tablet",
     supportsStorageVariants: true,
+    popularBrands: ["Apple", "Samsung", "Xiaomi", "Lenovo", "Huawei"],
+    placeholderName: "Ex: iPad Pro 11 M4 OLED, Galaxy Tab S9 Ultra",
+    defaultWarranty: "Garantie 12 Mois Certifiée",
+    defaultAccessories: "Câble USB-C, Adaptateur secteur 20W",
     fields: [
       {
         key: "model",
@@ -339,7 +355,11 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     shortLabel: "Motos",
     description: "Motos et scooters électriques haute performance",
     iconName: "Zap",
-    supportsStorageVariants: false,
+    supportsStorageVariants: false, // JAMAIS de stockage de téléphone pour les motos
+    popularBrands: ["Super Soco", "Niu", "Sur-Ron", "Yadea", "Horwin", "Segway", "Talaria", "Prince Moto"],
+    placeholderName: "Ex: Moto Électrique Super Soco TC Max 5000W / 72V",
+    defaultWarranty: "Garantie 2 Ans Batterie & Moteur",
+    defaultAccessories: "Chargeur rapide secteur 220V, 2 Paires de clés + télécommande alarme, Rétroviseurs, Trousse outils, Casque homologué offert",
     fields: [
       {
         key: "model",
@@ -364,22 +384,33 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         label: "Capacité de la batterie",
         type: "number",
         unit: "Wh",
-        placeholder: "Ex: 3240 (soit 3.24 kWh)",
+        placeholder: "Ex: 3840 (soit 3.84 kWh)",
         min: 500,
         max: 30000,
         required: true,
         helpText: "Capacité totale de stockage en Watt-heures (Wh)",
       },
       {
+        key: "batteryVoltage",
+        label: "Tension de fonctionnement (V)",
+        type: "number",
+        unit: "V",
+        placeholder: "Ex: 72 ou 60",
+        min: 24,
+        max: 120,
+        required: false,
+        helpText: "Tension du système en Volts (ex: 72V, 60V)",
+      },
+      {
         key: "rangeKm",
         label: "Autonomie annoncée",
         type: "number",
         unit: "km",
-        placeholder: "Ex: 110",
+        placeholder: "Ex: 120",
         min: 10,
         max: 500,
         required: true,
-        helpText: "Distance estimée parcourable sur une seule charge complète",
+        helpText: "Distance estimée franchissable sur une seule charge complète",
       },
       {
         key: "maxSpeedKm",
@@ -390,25 +421,16 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         min: 20,
         max: 200,
         required: true,
+        helpText: "Vitesse de pointe sur voie dégagée",
       },
       {
         key: "chargeTimeHours",
         label: "Temps de recharge complète",
         type: "number",
         unit: "heures",
-        placeholder: "Ex: 3.5",
+        placeholder: "Ex: 4",
         min: 0.5,
         max: 24,
-        required: false,
-      },
-      {
-        key: "maxLoadKg",
-        label: "Charge maximale supportée",
-        type: "number",
-        unit: "kg",
-        placeholder: "Ex: 150",
-        min: 50,
-        max: 400,
         required: false,
       },
       {
@@ -416,11 +438,50 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         label: "Type de batterie",
         type: "select",
         options: [
-          { label: "Lithium-Ion amovible", value: "lithium_removable" },
-          { label: "Lithium-Ion fixe", value: "lithium_fixed" },
-          { label: "Lithium Fer Phosphate (LFP)", value: "lfp" },
+          { label: "Lithium-Ion amovible (rechargeable à domicile)", value: "lithium_removable" },
+          { label: "Lithium-Ion fixe haute capacité", value: "lithium_fixed" },
+          { label: "Lithium Fer Phosphate (LFP ultra-durable)", value: "lfp" },
           { label: "Plomb-acide scellée (GEL)", value: "lead_acid" },
         ],
+        required: false,
+      },
+      {
+        key: "transmission",
+        label: "Transmission",
+        type: "select",
+        options: [
+          { label: "Courroie crantée silencieuse (Belt Drive)", value: "belt" },
+          { label: "Chaîne renforcée (Chain Drive)", value: "chain" },
+          { label: "Moteur direct intégré dans la roue (Hub Motor)", value: "hub_motor" },
+        ],
+        required: false,
+      },
+      {
+        key: "brakes",
+        label: "Système de freinage",
+        type: "text",
+        placeholder: "Ex: Double disque hydraulique CBS avant/arrière",
+        required: false,
+      },
+      {
+        key: "licenseRequired",
+        label: "Permis / Homologation",
+        type: "select",
+        options: [
+          { label: "Sans permis (Équivalent 50cc, dès 14 ans)", value: "no_license" },
+          { label: "Permis A1 ou Permis B + formation (Équivalent 125cc)", value: "permis_a1_b" },
+          { label: "Permis Moto A / A2 (Grosse cylindrée)", value: "permis_a" },
+        ],
+        required: false,
+      },
+      {
+        key: "maxLoadKg",
+        label: "Charge maximale supportée",
+        type: "number",
+        unit: "kg",
+        placeholder: "Ex: 160",
+        min: 50,
+        max: 400,
         required: false,
       },
     ],
@@ -433,12 +494,16 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     description: "Écouteurs, chargeurs rapides, coques, câbles et protections",
     iconName: "Headphones",
     supportsStorageVariants: false,
+    popularBrands: ["Apple", "Anker", "Samsung", "Baseus", "Oraimo", "JBL", "Sony", "Ugreen"],
+    placeholderName: "Ex: Chargeur Rapide GaN 65W Multi-Ports USB-C",
+    defaultWarranty: "Garantie 6 Mois Échange à Neuf",
+    defaultAccessories: "Câble de charge renforcé, Manuel d'utilisation",
     fields: [
       {
         key: "model",
         label: "Modèle ou Référence",
         type: "text",
-        placeholder: "Ex: AirPods Pro 2, Adaptateur USB-C 35W Duo",
+        placeholder: "Ex: AirPods Pro 2, Adaptateur USB-C 65W GaN",
         required: true,
       },
       {
@@ -446,22 +511,22 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         label: "Type d'accessoire",
         type: "select",
         options: [
-          { label: "Écouteurs & Casques audio", value: "audio" },
           { label: "Chargeurs & Blocs d'alimentation", value: "charger" },
+          { label: "Écouteurs & Casques audio", value: "audio" },
           { label: "Câbles de charge & données", value: "cable" },
           { label: "Batteries externes (Powerbanks)", value: "powerbank" },
           { label: "Coques, Étuis & Verres trempés", value: "protection" },
           { label: "Supports, Trépieds & Stabilisateurs", value: "stand" },
-          { label: "Claviers, Souris & Hubs", value: "peripherals" },
+          { label: "Claviers, Souris & Hubs USB", value: "peripherals" },
           { label: "Autre accessoire", value: "other" },
         ],
         required: true,
       },
       {
         key: "compatibility",
-        label: "Compatibilité",
+        label: "Compatibilité appareils",
         type: "text",
-        placeholder: "Ex: iPhone 11 à 16, Samsung Galaxy, Universel USB-C",
+        placeholder: "Ex: iPhone 11 à 16, Samsung Galaxy, Universel USB-C, MacBook",
         required: true,
         helpText: "Précisez avec quels appareils ou marques ce produit fonctionne",
       },
@@ -489,6 +554,10 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     description: "Téléviseurs intelligents, écrans OLED et moniteurs",
     iconName: "Tv",
     supportsStorageVariants: false,
+    popularBrands: ["Samsung", "LG", "Sony", "TCL", "Hisense", "Xiaomi"],
+    placeholderName: "Ex: Samsung 65\" Neo QLED 4K Smart TV",
+    defaultWarranty: "Garantie 2 Ans Constructeur",
+    defaultAccessories: "Télécommande Magic Remote avec piles, Câble d'alimentation, Support pieds",
     fields: [
       {
         key: "screenSize",
@@ -513,8 +582,8 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         label: "Technologie de dalle",
         type: "select",
         options: [
-          { label: "OLED / QD-OLED", value: "oled" },
-          { label: "QLED / Mini-LED", value: "qled" },
+          { label: "OLED / QD-OLED (Noirs absolus)", value: "oled" },
+          { label: "QLED / Mini-LED (Haute luminosité)", value: "qled" },
           { label: "LED / Nanocell", value: "led" },
         ],
         required: false,
@@ -543,12 +612,16 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     description: "Enceintes de fête, boomers et barres de son",
     iconName: "Speaker",
     supportsStorageVariants: false,
+    popularBrands: ["JBL", "Sony", "Harman Kardon", "Bose", "Marshall", "Oraimo"],
+    placeholderName: "Ex: JBL PartyBox 310 Bluetooth 240W",
+    defaultWarranty: "Garantie 12 Mois Certifiée",
+    defaultAccessories: "Câble d'alimentation secteur, Câble audio auxiliaire",
     fields: [
       {
         key: "power",
         label: "Puissance sonore",
         type: "text",
-        placeholder: "Ex: 1200W RMS, 800W Peak",
+        placeholder: "Ex: 240W RMS, 800W Peak",
         required: true,
       },
       {
@@ -562,7 +635,7 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         key: "battery_life",
         label: "Autonomie sur batterie",
         type: "text",
-        placeholder: "Ex: 18 heures (Batterie rechargeable)",
+        placeholder: "Ex: 18 heures (Batterie rechargeable intégrée)",
         required: false,
       },
       {
@@ -582,6 +655,10 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     description: "Kits solaires, onduleurs et batteries de stockage",
     iconName: "Sun",
     supportsStorageVariants: false,
+    popularBrands: ["Victron Energy", "Felicity Solar", "Huawei Solar", "Must", "Growatt", "Sunova"],
+    placeholderName: "Ex: Kit Solaire Hybride 5kW avec Batterie Lithium 5.12kWh",
+    defaultWarranty: "Garantie 5 Ans Onduleur & Batteries",
+    defaultAccessories: "Câbles solaires MC4, Coffret de protection DC/AC, Manuel d'installation",
     fields: [
       {
         key: "panels",
@@ -625,6 +702,10 @@ export function getCategoryConfig(categoryId: string): CategoryDefinition {
       description: "Articles et accessoires divers",
       iconName: "Package",
       supportsStorageVariants: false,
+      popularBrands: ["Générique", "Autre"],
+      placeholderName: "Nom du produit",
+      defaultWarranty: "Garantie 6 Mois",
+      defaultAccessories: "Accessoires standards",
       fields: [],
     }
   );
@@ -636,4 +717,3 @@ export function getCategoryConfig(categoryId: string): CategoryDefinition {
 export function isStorageVariantCategory(categoryId: string): boolean {
   return Boolean(getCategoryConfig(categoryId).supportsStorageVariants);
 }
-

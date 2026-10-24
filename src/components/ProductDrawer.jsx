@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { SHOP_CONFIG } from '@/config/shop';
-import { X, Star, HardDrive, Check } from 'lucide-react';
-import { getCategoryConfig } from '@/config/categories';
+import { X, Star, HardDrive, Check, Zap, Laptop } from 'lucide-react';
+import { getCategoryConfig, isStorageVariantCategory } from '@/config/categories';
 
 const SPEC_LABELS = {
   screen: 'Écran',
@@ -43,6 +43,9 @@ export default function ProductDrawer({
 
   const getInitialCapacity = (p) => {
     if (!p) return '';
+    const supportsStorage = isStorageVariantCategory(p.category) || p.category === 'phones';
+    if (!supportsStorage) return '';
+
     const caps = (p.storageOptions && p.storageOptions.length > 0)
       ? p.storageOptions
       : (p.category === 'phones'
@@ -99,14 +102,12 @@ export default function ProductDrawer({
       details.push({ label: 'État du produit', value: condLabel });
     }
 
-    // 4. Capacité de stockage sélectionnée (si variantes de stockage)
-    const currentCapacity = selectedCapacity || 
-                            (currentProduct.storageOptions && currentProduct.storageOptions[0]?.capacity) || 
-                            currentProduct.specs?.storageSize || '';
-    if (currentCapacity) {
+    // 4. Capacité de stockage sélectionnée (SEULEMENT si la catégorie supporte les variantes)
+    const supportsStorage = isStorageVariantCategory(currentProduct.category) || currentProduct.category === 'phones';
+    if (supportsStorage && selectedCapacity) {
       details.push({
         label: 'Capacité de stockage',
-        value: String(currentCapacity)
+        value: String(selectedCapacity)
       });
     }
 
@@ -262,6 +263,9 @@ export default function ProductDrawer({
   // Calcul des capacités disponibles (GB, Tera)
   const availableCapacities = useMemo(() => {
     if (!currentProduct) return [];
+    const supportsStorage = isStorageVariantCategory(currentProduct.category) || currentProduct.category === 'phones';
+    if (!supportsStorage) return [];
+
     if (currentProduct.storageOptions && Array.isArray(currentProduct.storageOptions) && currentProduct.storageOptions.length > 0) {
       return currentProduct.storageOptions;
     }
@@ -537,7 +541,7 @@ export default function ProductDrawer({
               <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-yellow-600">
                 {currentPrice.toLocaleString('fr-FR')} FCFA
               </span>
-              {selectedCapacity && (
+              {availableCapacities.length > 0 && selectedCapacity && (
                 <span className="text-xs text-gold/90 bg-gold/10 border border-gold/30 px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5">
                   <HardDrive className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
                   <span>{selectedCapacity}</span>
@@ -546,6 +550,76 @@ export default function ProductDrawer({
               <span className="text-xs text-zinc-500 uppercase tracking-widest font-semibold ml-auto">TVA incluse</span>
             </div>
           </div>
+
+          {/* Badge de Performances Spécifiques pour Moto Électrique */}
+          {currentProduct.category === 'mobility' && currentProduct.specs && (
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+              <div className="flex items-center justify-between text-gold text-xs font-bold uppercase tracking-wider">
+                <span className="flex items-center gap-1.5">
+                  <Zap className="w-4 h-4 text-gold" aria-hidden="true" />
+                  <span>Performances Moto Électrique</span>
+                </span>
+                <span className="text-[10px] text-zinc-400">Écologique · 0% Carburant</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Moteur</span>
+                  <span className="text-sm font-black text-white">
+                    {currentProduct.specs.motorPower ? `${currentProduct.specs.motorPower} W` : "—"}
+                  </span>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Autonomie</span>
+                  <span className="text-sm font-black text-emerald-400">
+                    {currentProduct.specs.rangeKm ? `${currentProduct.specs.rangeKm} km` : "—"}
+                  </span>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Vitesse</span>
+                  <span className="text-sm font-black text-gold">
+                    {currentProduct.specs.maxSpeedKm ? `${currentProduct.specs.maxSpeedKm} km/h` : "—"}
+                  </span>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Batterie</span>
+                  <span className="text-sm font-black text-white">
+                    {currentProduct.specs.batteryCapacityWh ? `${currentProduct.specs.batteryCapacityWh} Wh` : (currentProduct.specs.batteryVoltage ? `${currentProduct.specs.batteryVoltage}V` : "—")}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Badge de Spécifications Clés pour Ordinateurs */}
+          {currentProduct.category === 'computers' && currentProduct.specs && (
+            <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 space-y-2">
+              <div className="flex items-center justify-between text-blue-400 text-xs font-bold uppercase tracking-wider">
+                <span className="flex items-center gap-1.5">
+                  <Laptop className="w-4 h-4 text-blue-400" aria-hidden="true" />
+                  <span>Configuration Clé — Ordinateur</span>
+                </span>
+                <span className="text-[10px] text-zinc-400 font-mono">{currentProduct.specs.os || "OS"}</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">CPU</span>
+                  <span className="text-xs font-black text-white line-clamp-1">{currentProduct.specs.processor || "—"}</span>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">RAM</span>
+                  <span className="text-sm font-black text-gold">{currentProduct.specs.ram ? `${currentProduct.specs.ram} Go` : "—"}</span>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Stockage</span>
+                  <span className="text-xs font-black text-emerald-400">{currentProduct.specs.storageSize || "—"}</span>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Écran</span>
+                  <span className="text-xs font-black text-white">{currentProduct.specs.screenSize ? `${currentProduct.specs.screenSize}"` : "—"}</span>
+                </div>
+              </div>
+            </div>
+          )}
 
 
 
