@@ -616,24 +616,6 @@ export default function Home() {
               <ArrowDown className="w-4 h-4 text-black group-hover:translate-y-1 transition-transform" />
             </a>
           </div>
-
-          {/* Tagline de Réassurance */}
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs sm:text-sm text-zinc-400 font-medium pt-2">
-            <span className="inline-flex items-center gap-1.5 text-zinc-300">
-              <span className="w-1.5 h-1.5 rounded-full bg-gold"></span>
-              Commande simple
-            </span>
-            <span className="text-zinc-600 hidden sm:inline">·</span>
-            <span className="inline-flex items-center gap-1.5 text-zinc-300">
-              <span className="w-1.5 h-1.5 rounded-full bg-gold"></span>
-              Paiement Orange Money ou Wave
-            </span>
-            <span className="text-zinc-600 hidden sm:inline">·</span>
-            <span className="inline-flex items-center gap-1.5 text-zinc-300">
-              <span className="w-1.5 h-1.5 rounded-full bg-gold"></span>
-              Assistance WhatsApp
-            </span>
-          </div>
         </div>
 
         {/* Badges de Réassurance Prestige (Point 4) */}
