@@ -942,7 +942,7 @@ export default function Home() {
 
       {/* Footer Luxueux */}
       <footer className="w-full border-t border-white/10 bg-[#08080a] relative z-20 mt-16 pt-16 pb-12 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
           
           {/* Col 1 : Marque */}
           <div className="space-y-4 md:col-span-1">
@@ -991,21 +991,6 @@ export default function Home() {
                 <span>Facture légale certifiée</span>
               </li>
             </ul>
-          </div>
-
-          {/* Col 4 : Administration & Accès */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-widest text-gold">Espace Boutique</h4>
-            <p className="text-xs text-zinc-400">
-              Vous êtes le propriétaire ou gestionnaire de Prince CFA ?
-            </p>
-            <a 
-              href="/admin" 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gold/30 bg-gold/10 text-gold text-xs font-bold uppercase tracking-wider hover:bg-gold hover:text-black transition-all"
-            >
-              <Crown className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
-              <span>Accès Panneau Admin</span>
-            </a>
           </div>
 
         </div>
