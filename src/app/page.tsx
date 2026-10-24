@@ -14,6 +14,7 @@ import {
   Store, 
   ArrowRight, 
   ArrowLeft, 
+  ArrowDown,
   ShoppingBag, 
   ShieldCheck, 
   Crown, 
@@ -584,14 +585,55 @@ export default function Home() {
       <main className="z-10 flex flex-col items-center w-full mt-32 px-4 sm:px-8 max-w-7xl pb-24 sm:pb-0">
         
         {/* Section Hero Percutante */}
-        <div className="space-y-8 py-16 text-center animate-in slide-in-from-bottom-8 duration-1000 fade-in">
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight text-foreground drop-shadow-lg">
-            PRINCE <span className="text-transparent bg-clip-text bg-gradient-to-br from-gold to-yellow-600">CFA</span>
+        <div className="space-y-6 py-12 sm:py-16 text-center animate-in slide-in-from-bottom-8 duration-1000 fade-in max-w-4xl mx-auto">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground drop-shadow-lg">
+            PRINCE <span className="text-transparent bg-clip-text bg-gradient-to-br from-gold to-yellow-600">CFA</span> MALL
           </h1>
-          <p className="text-xl sm:text-2xl text-zinc-300 max-w-3xl mx-auto font-light tracking-wide leading-relaxed">
-            L&apos;Énergie du Prestige. L&apos;Excellence de la Technologie.<br/>
-            <span className="text-zinc-500 text-lg">Découvrez une sélection où la performance absolue rencontre le luxe.</span>
-          </p>
+          
+          <div className="space-y-3">
+            <p className="text-xl sm:text-2xl lg:text-3xl font-medium text-white tracking-wide">
+              Bienvenue dans l&apos;univers de la technologie.
+            </p>
+            <p className="text-sm sm:text-base lg:text-lg text-zinc-300 max-w-2xl mx-auto font-light leading-relaxed">
+              Smartphones, ordinateurs et accessoires technologiques : trouvez ce qu&apos;il vous faut au meilleur prix.
+            </p>
+          </div>
+
+          {/* Bouton Découvrir nos produits */}
+          <div className="pt-2">
+            <a
+              href="#produits"
+              onClick={(e) => {
+                e.preventDefault();
+                const target = document.getElementById('produits');
+                if (target) {
+                  target.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black font-bold text-sm sm:text-base tracking-wider uppercase shadow-[0_4px_25px_rgba(212,175,55,0.35)] hover:shadow-[0_4px_35px_rgba(212,175,55,0.6)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer group"
+            >
+              <span>Découvrir nos produits</span>
+              <ArrowDown className="w-4 h-4 text-black group-hover:translate-y-1 transition-transform" />
+            </a>
+          </div>
+
+          {/* Tagline de Réassurance */}
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs sm:text-sm text-zinc-400 font-medium pt-2">
+            <span className="inline-flex items-center gap-1.5 text-zinc-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-gold"></span>
+              Commande simple
+            </span>
+            <span className="text-zinc-600 hidden sm:inline">·</span>
+            <span className="inline-flex items-center gap-1.5 text-zinc-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-gold"></span>
+              Paiement Orange Money ou Wave
+            </span>
+            <span className="text-zinc-600 hidden sm:inline">·</span>
+            <span className="inline-flex items-center gap-1.5 text-zinc-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-gold"></span>
+              Assistance WhatsApp
+            </span>
+          </div>
         </div>
 
         {/* Badges de Réassurance Prestige (Point 4) */}
@@ -639,7 +681,7 @@ export default function Home() {
         </div>
 
         {/* Barres de Filtres Dynamiques */}
-        <div className="flex flex-col items-center w-full max-w-5xl mx-auto mt-8 mb-16 relative z-20">
+        <div id="produits" className="flex flex-col items-center w-full max-w-5xl mx-auto mt-8 mb-16 relative z-20 scroll-mt-28">
           
           {/* Catégories Principales */}
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
