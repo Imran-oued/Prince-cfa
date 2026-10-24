@@ -1,0 +1,639 @@
+/**
+ * Configuration déclarative des catégories et de leurs caractéristiques spécifiques
+ * Prince CFA Mall — Architecture extensible et typée
+ */
+
+export interface SpecFieldDefinition {
+  key: string;
+  label: string;
+  type: "text" | "number" | "select";
+  unit?: string;
+  placeholder?: string;
+  required?: boolean;
+  options?: Array<{ label: string; value: string }>;
+  helpText?: string;
+  min?: number;
+  max?: number;
+}
+
+export interface CategoryDefinition {
+  id: string;
+  label: string;
+  shortLabel: string;
+  description: string;
+  iconName: string;
+  supportsStorageVariants: boolean; // Autorise les options multi-stockage avec prix différents (ex: 128Go, 256Go)
+  fields: SpecFieldDefinition[];
+}
+
+export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
+  phones: {
+    id: "phones",
+    label: "Téléphones",
+    shortLabel: "Smartphones",
+    description: "Smartphones haut de gamme, iPhones et téléphones mobiles",
+    iconName: "Smartphone",
+    supportsStorageVariants: true,
+    fields: [
+      {
+        key: "model",
+        label: "Modèle",
+        type: "text",
+        placeholder: "Ex: iPhone 15 Pro Max, Galaxy S24 Ultra",
+        required: true,
+      },
+      {
+        key: "ram",
+        label: "Mémoire RAM",
+        type: "select",
+        unit: "Go",
+        options: [
+          { label: "4 Go", value: "4" },
+          { label: "6 Go", value: "6" },
+          { label: "8 Go", value: "8" },
+          { label: "12 Go", value: "12" },
+          { label: "16 Go", value: "16" },
+        ],
+        required: false,
+      },
+      {
+        key: "batteryCapacity",
+        label: "Capacité batterie",
+        type: "number",
+        unit: "mAh",
+        placeholder: "Ex: 4422",
+        min: 500,
+        max: 10000,
+        required: false,
+        helpText: "Capacité constructeur de la batterie en milliampères-heures",
+      },
+      {
+        key: "batteryHealth",
+        label: "État de la batterie (%)",
+        type: "number",
+        unit: "%",
+        placeholder: "Ex: 100 ou 92",
+        min: 50,
+        max: 100,
+        required: false,
+        helpText: "Pertinent pour les produits d'occasion ou reconditionnés",
+      },
+      {
+        key: "simFormat",
+        label: "Format & Nombre de SIM",
+        type: "select",
+        options: [
+          { label: "Simple SIM (Nano-SIM)", value: "single_sim" },
+          { label: "Double SIM physique (Nano + Nano)", value: "dual_sim_physical" },
+          { label: "SIM physique + eSIM", value: "sim_and_esim" },
+          { label: "Double eSIM (100% digitale)", value: "dual_esim" },
+        ],
+        required: false,
+      },
+      {
+        key: "screen",
+        label: "Écran & Technologie",
+        type: "text",
+        placeholder: "Ex: 6.7\" Super Retina XDR OLED 120Hz",
+        required: false,
+      },
+      {
+        key: "processor",
+        label: "Puce / Processeur",
+        type: "text",
+        placeholder: "Ex: Apple A17 Pro, Snapdragon 8 Gen 3",
+        required: false,
+      },
+      {
+        key: "camera",
+        label: "Appareil photo",
+        type: "text",
+        placeholder: "Ex: Triple capteur 48MP + 12MP + 12MP",
+        required: false,
+      },
+      {
+        key: "network",
+        label: "Réseau cellulaire",
+        type: "select",
+        options: [
+          { label: "5G Ultra-rapide", value: "5G" },
+          { label: "4G LTE", value: "4G" },
+        ],
+        required: false,
+      },
+    ],
+  },
+
+  computers: {
+    id: "computers",
+    label: "Ordinateurs",
+    shortLabel: "Ordinateurs",
+    description: "PC portables, MacBooks, PC de bureau et stations de travail",
+    iconName: "Laptop",
+    supportsStorageVariants: true,
+    fields: [
+      {
+        key: "model",
+        label: "Modèle",
+        type: "text",
+        placeholder: "Ex: MacBook Pro 16 M3 Max, Dell XPS 15",
+        required: true,
+      },
+      {
+        key: "computerType",
+        label: "Type d'ordinateur",
+        type: "select",
+        options: [
+          { label: "Ordinateur Portable (Laptop)", value: "laptop" },
+          { label: "Ordinateur de Bureau (Desktop / Tour)", value: "desktop" },
+          { label: "Tout-en-un (All-in-One / iMac)", value: "all_in_one" },
+          { label: "Station de travail (Workstation)", value: "workstation" },
+        ],
+        required: true,
+      },
+      {
+        key: "processor",
+        label: "Processeur (CPU)",
+        type: "text",
+        placeholder: "Ex: Apple M3 Pro, Intel Core i7-14700H, AMD Ryzen 7",
+        required: true,
+      },
+      {
+        key: "ram",
+        label: "Mémoire RAM",
+        type: "select",
+        unit: "Go",
+        options: [
+          { label: "8 Go", value: "8" },
+          { label: "16 Go", value: "16" },
+          { label: "18 Go unifiée", value: "18" },
+          { label: "24 Go unifiée", value: "24" },
+          { label: "32 Go", value: "32" },
+          { label: "64 Go", value: "64" },
+          { label: "128 Go", value: "128" },
+        ],
+        required: true,
+      },
+      {
+        key: "storageSize",
+        label: "Capacité de stockage principale",
+        type: "select",
+        options: [
+          { label: "256 Go", value: "256 Go" },
+          { label: "512 Go", value: "512 Go" },
+          { label: "1 To (1000 Go)", value: "1 To" },
+          { label: "2 To (2000 Go)", value: "2 To" },
+          { label: "4 To", value: "4 To" },
+        ],
+        required: true,
+      },
+      {
+        key: "storageType",
+        label: "Type de stockage",
+        type: "select",
+        options: [
+          { label: "SSD NVMe PCIe (Ultra rapide)", value: "ssd_nvme" },
+          { label: "SSD SATA", value: "ssd_sata" },
+          { label: "Disque Dur HDD", value: "hdd" },
+          { label: "Hybride SSD + HDD", value: "hybrid" },
+        ],
+        required: true,
+      },
+      {
+        key: "gpu",
+        label: "Carte graphique (GPU)",
+        type: "text",
+        placeholder: "Ex: NVIDIA RTX 4070 (8 Go), GPU Apple 18 cœurs, Intel Iris Xe",
+        required: false,
+      },
+      {
+        key: "screenSize",
+        label: "Taille de l'écran",
+        type: "select",
+        unit: "pouces",
+        options: [
+          { label: "13 à 13.6 pouces", value: "13.3" },
+          { label: "14 à 14.2 pouces", value: "14.2" },
+          { label: "15 à 15.6 pouces", value: "15.6" },
+          { label: "16 à 16.2 pouces", value: "16.2" },
+          { label: "17.3 pouces", value: "17.3" },
+          { label: "24 pouces (Tout-en-un)", value: "24" },
+          { label: "27 pouces et plus", value: "27" },
+          { label: "Sans écran (Unité centrale)", value: "none" },
+        ],
+        required: false,
+      },
+      {
+        key: "screenResolution",
+        label: "Résolution d'écran",
+        type: "text",
+        placeholder: "Ex: Retina XDR (3456 x 2234), Full HD 1080p, 4K UHD",
+        required: false,
+      },
+      {
+        key: "os",
+        label: "Système d'exploitation",
+        type: "select",
+        options: [
+          { label: "macOS Sonoma / Sequoia", value: "macos" },
+          { label: "Windows 11 Professionnel", value: "win11_pro" },
+          { label: "Windows 11 Famille", value: "win11_home" },
+          { label: "Linux (Ubuntu / Fedora)", value: "linux" },
+          { label: "Sans OS / FreeDOS", value: "no_os" },
+        ],
+        required: true,
+      },
+    ],
+  },
+
+  tablets: {
+    id: "tablets",
+    label: "Tablettes",
+    shortLabel: "Tablettes",
+    description: "iPads, tablettes graphiques et tablettes Android",
+    iconName: "Tablet",
+    supportsStorageVariants: true,
+    fields: [
+      {
+        key: "model",
+        label: "Modèle",
+        type: "text",
+        placeholder: "Ex: iPad Pro 11 M4, Galaxy Tab S9 Ultra",
+        required: true,
+      },
+      {
+        key: "screenSize",
+        label: "Taille de l'écran",
+        type: "text",
+        unit: "pouces",
+        placeholder: "Ex: 11\" ou 13\" Ultra Retina Tandem OLED",
+        required: true,
+      },
+      {
+        key: "storageSize",
+        label: "Capacité de stockage",
+        type: "select",
+        options: [
+          { label: "64 Go", value: "64 Go" },
+          { label: "128 Go", value: "128 Go" },
+          { label: "256 Go", value: "256 Go" },
+          { label: "512 Go", value: "512 Go" },
+          { label: "1 To", value: "1 To" },
+          { label: "2 To", value: "2 To" },
+        ],
+        required: true,
+      },
+      {
+        key: "ram",
+        label: "Mémoire RAM",
+        type: "select",
+        unit: "Go",
+        options: [
+          { label: "4 Go", value: "4" },
+          { label: "8 Go", value: "8" },
+          { label: "12 Go", value: "12" },
+          { label: "16 Go", value: "16" },
+        ],
+        required: false,
+      },
+      {
+        key: "connectivity",
+        label: "Connectivité",
+        type: "select",
+        options: [
+          { label: "Wi-Fi uniquement", value: "wifi_only" },
+          { label: "Wi-Fi + Cellulaire (4G / 5G)", value: "wifi_cellular" },
+        ],
+        required: true,
+      },
+      {
+        key: "processor",
+        label: "Puce / Processeur",
+        type: "text",
+        placeholder: "Ex: Puce Apple M4, Snapdragon 8 Gen 2",
+        required: false,
+      },
+      {
+        key: "batteryCapacity",
+        label: "Capacité batterie",
+        type: "number",
+        unit: "mAh",
+        placeholder: "Ex: 8160",
+        min: 1000,
+        max: 20000,
+        required: false,
+      },
+      {
+        key: "stylusSupport",
+        label: "Compatibilité Stylet / Clavier",
+        type: "text",
+        placeholder: "Ex: Apple Pencil Pro, Magic Keyboard",
+        required: false,
+      },
+    ],
+  },
+
+  mobility: {
+    id: "mobility",
+    label: "Motos Électriques",
+    shortLabel: "Motos",
+    description: "Motos et scooters électriques haute performance",
+    iconName: "Zap",
+    supportsStorageVariants: false,
+    fields: [
+      {
+        key: "model",
+        label: "Modèle",
+        type: "text",
+        placeholder: "Ex: Super Soco TC Max, Niu NQi GT, Sur-Ron Storm",
+        required: true,
+      },
+      {
+        key: "motorPower",
+        label: "Puissance du moteur",
+        type: "number",
+        unit: "W",
+        placeholder: "Ex: 5000",
+        min: 250,
+        max: 50000,
+        required: true,
+        helpText: "Puissance nominale ou en crête du moteur électrique en Watts",
+      },
+      {
+        key: "batteryCapacityWh",
+        label: "Capacité de la batterie",
+        type: "number",
+        unit: "Wh",
+        placeholder: "Ex: 3240 (soit 3.24 kWh)",
+        min: 500,
+        max: 30000,
+        required: true,
+        helpText: "Capacité totale de stockage en Watt-heures (Wh)",
+      },
+      {
+        key: "rangeKm",
+        label: "Autonomie annoncée",
+        type: "number",
+        unit: "km",
+        placeholder: "Ex: 110",
+        min: 10,
+        max: 500,
+        required: true,
+        helpText: "Distance estimée parcourable sur une seule charge complète",
+      },
+      {
+        key: "maxSpeedKm",
+        label: "Vitesse maximale",
+        type: "number",
+        unit: "km/h",
+        placeholder: "Ex: 95",
+        min: 20,
+        max: 200,
+        required: true,
+      },
+      {
+        key: "chargeTimeHours",
+        label: "Temps de recharge complète",
+        type: "number",
+        unit: "heures",
+        placeholder: "Ex: 3.5",
+        min: 0.5,
+        max: 24,
+        required: false,
+      },
+      {
+        key: "maxLoadKg",
+        label: "Charge maximale supportée",
+        type: "number",
+        unit: "kg",
+        placeholder: "Ex: 150",
+        min: 50,
+        max: 400,
+        required: false,
+      },
+      {
+        key: "batteryType",
+        label: "Type de batterie",
+        type: "select",
+        options: [
+          { label: "Lithium-Ion amovible", value: "lithium_removable" },
+          { label: "Lithium-Ion fixe", value: "lithium_fixed" },
+          { label: "Lithium Fer Phosphate (LFP)", value: "lfp" },
+          { label: "Plomb-acide scellée (GEL)", value: "lead_acid" },
+        ],
+        required: false,
+      },
+    ],
+  },
+
+  accessories: {
+    id: "accessories",
+    label: "Accessoires Technologiques",
+    shortLabel: "Accessoires",
+    description: "Écouteurs, chargeurs rapides, coques, câbles et protections",
+    iconName: "Headphones",
+    supportsStorageVariants: false,
+    fields: [
+      {
+        key: "model",
+        label: "Modèle ou Référence",
+        type: "text",
+        placeholder: "Ex: AirPods Pro 2, Adaptateur USB-C 35W Duo",
+        required: true,
+      },
+      {
+        key: "accessoryType",
+        label: "Type d'accessoire",
+        type: "select",
+        options: [
+          { label: "Écouteurs & Casques audio", value: "audio" },
+          { label: "Chargeurs & Blocs d'alimentation", value: "charger" },
+          { label: "Câbles de charge & données", value: "cable" },
+          { label: "Batteries externes (Powerbanks)", value: "powerbank" },
+          { label: "Coques, Étuis & Verres trempés", value: "protection" },
+          { label: "Supports, Trépieds & Stabilisateurs", value: "stand" },
+          { label: "Claviers, Souris & Hubs", value: "peripherals" },
+          { label: "Autre accessoire", value: "other" },
+        ],
+        required: true,
+      },
+      {
+        key: "compatibility",
+        label: "Compatibilité",
+        type: "text",
+        placeholder: "Ex: iPhone 11 à 16, Samsung Galaxy, Universel USB-C",
+        required: true,
+        helpText: "Précisez avec quels appareils ou marques ce produit fonctionne",
+      },
+      {
+        key: "connectionType",
+        label: "Connectivité / Liaison",
+        type: "select",
+        options: [
+          { label: "Sans-fil Bluetooth", value: "bluetooth" },
+          { label: "Filaire USB-C", value: "usbc" },
+          { label: "Filaire Lightning", value: "lightning" },
+          { label: "Sans-fil induction / MagSafe", value: "magsafe_qi" },
+          { label: "Filaire Jack 3.5mm", value: "jack" },
+          { label: "Non applicable (passif)", value: "none" },
+        ],
+        required: false,
+      },
+    ],
+  },
+
+  tv: {
+    id: "tv",
+    label: "TV & Écrans",
+    shortLabel: "TV & Écrans",
+    description: "Téléviseurs intelligents, écrans OLED et moniteurs",
+    iconName: "Tv",
+    supportsStorageVariants: false,
+    fields: [
+      {
+        key: "screenSize",
+        label: "Diagonale de l'écran",
+        type: "text",
+        placeholder: "Ex: 65 pouces (165 cm)",
+        required: true,
+      },
+      {
+        key: "resolution",
+        label: "Résolution",
+        type: "select",
+        options: [
+          { label: "4K Ultra HD (3840 x 2160)", value: "4k" },
+          { label: "8K Ultra HD (7680 x 4320)", value: "8k" },
+          { label: "Full HD (1920 x 1080)", value: "fhd" },
+        ],
+        required: true,
+      },
+      {
+        key: "panel",
+        label: "Technologie de dalle",
+        type: "select",
+        options: [
+          { label: "OLED / QD-OLED", value: "oled" },
+          { label: "QLED / Mini-LED", value: "qled" },
+          { label: "LED / Nanocell", value: "led" },
+        ],
+        required: false,
+      },
+      {
+        key: "smart",
+        label: "Système Smart TV",
+        type: "text",
+        placeholder: "Ex: Google TV, webOS, Tizen OS",
+        required: false,
+      },
+      {
+        key: "audio",
+        label: "Système audio intégré",
+        type: "text",
+        placeholder: "Ex: Dolby Atmos 60W 2.2",
+        required: false,
+      },
+    ],
+  },
+
+  audio: {
+    id: "audio",
+    label: "Boomers & Hi-Fi",
+    shortLabel: "Boomers",
+    description: "Enceintes de fête, boomers et barres de son",
+    iconName: "Speaker",
+    supportsStorageVariants: false,
+    fields: [
+      {
+        key: "power",
+        label: "Puissance sonore",
+        type: "text",
+        placeholder: "Ex: 1200W RMS, 800W Peak",
+        required: true,
+      },
+      {
+        key: "connectivity",
+        label: "Connectivité",
+        type: "text",
+        placeholder: "Ex: Bluetooth 5.3, USB, Aux, Entrée Micro & Guitare",
+        required: false,
+      },
+      {
+        key: "battery_life",
+        label: "Autonomie sur batterie",
+        type: "text",
+        placeholder: "Ex: 18 heures (Batterie rechargeable)",
+        required: false,
+      },
+      {
+        key: "waterproof",
+        label: "Indice de protection étanchéité",
+        type: "text",
+        placeholder: "Ex: IPX4 anti-éclaboussures, IP67",
+        required: false,
+      },
+    ],
+  },
+
+  solar: {
+    id: "solar",
+    label: "Énergie Solaire",
+    shortLabel: "Solaire",
+    description: "Kits solaires, onduleurs et batteries de stockage",
+    iconName: "Sun",
+    supportsStorageVariants: false,
+    fields: [
+      {
+        key: "panels",
+        label: "Panneaux Solaires",
+        type: "text",
+        placeholder: "Ex: 6x 550W Monocristallin Demi-cellules",
+        required: true,
+      },
+      {
+        key: "inverter",
+        label: "Onduleur / Régulateur",
+        type: "text",
+        placeholder: "Ex: 5kW Hybride MPPT 48V",
+        required: true,
+      },
+      {
+        key: "storage",
+        label: "Capacité de stockage batteries",
+        type: "text",
+        placeholder: "Ex: Lithium LiFePO4 5.12 kWh 100Ah",
+        required: true,
+      },
+    ],
+  },
+};
+
+/**
+ * Obtenir la liste ordonnée des catégories disponibles
+ */
+export const CATEGORIES_LIST = Object.values(PRODUCT_CATEGORIES);
+
+/**
+ * Obtenir la configuration d'une catégorie donnée (avec repli sûr)
+ */
+export function getCategoryConfig(categoryId: string): CategoryDefinition {
+  return (
+    PRODUCT_CATEGORIES[categoryId] || {
+      id: categoryId || "other",
+      label: "Autre Catégorie",
+      shortLabel: "Autre",
+      description: "Articles et accessoires divers",
+      iconName: "Package",
+      supportsStorageVariants: false,
+      fields: [],
+    }
+  );
+}
+
+/**
+ * Vérifier si une catégorie supporte les variantes de stockage à prix multiples
+ */
+export function isStorageVariantCategory(categoryId: string): boolean {
+  return Boolean(getCategoryConfig(categoryId).supportsStorageVariants);
+}
+

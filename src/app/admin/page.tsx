@@ -37,8 +37,28 @@ import {
   Upload,
   HardDrive,
   Eye,
-  Clock
+  Clock,
+  Laptop,
+  Smartphone,
+  Tablet,
+  Zap,
+  Headphones,
+  Tv,
+  Speaker,
+  Sun,
+  Layers
 } from "lucide-react";
+import { 
+  PRODUCT_CATEGORIES, 
+  CATEGORIES_LIST, 
+  getCategoryConfig, 
+  CategoryDefinition, 
+  SpecFieldDefinition 
+} from "@/config/categories";
+import { 
+  validateAndCleanProduct, 
+  normalizeProductSpecs 
+} from "@/lib/productValidation";
 
 function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -70,6 +90,29 @@ function WaveIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
+function getCategoryIcon(catId: string, className = "w-4 h-4") {
+  switch (catId) {
+    case "phones":
+      return <Smartphone className={className} aria-hidden="true" />;
+    case "computers":
+      return <Laptop className={className} aria-hidden="true" />;
+    case "tablets":
+      return <Tablet className={className} aria-hidden="true" />;
+    case "mobility":
+      return <Zap className={className} aria-hidden="true" />;
+    case "accessories":
+      return <Headphones className={className} aria-hidden="true" />;
+    case "tv":
+      return <Tv className={className} aria-hidden="true" />;
+    case "audio":
+      return <Speaker className={className} aria-hidden="true" />;
+    case "solar":
+      return <Sun className={className} aria-hidden="true" />;
+    default:
+      return <Package className={className} aria-hidden="true" />;
+  }
+}
+
 interface StorageOption {
   capacity: string;
   price: number;
@@ -83,8 +126,10 @@ interface StorageEntry {
 interface AdminProduct {
   id: string | number;
   name: string;
+  slug?: string;
   category: string;
   price: number;
+  salePrice?: number | null;
   desc?: string;
   image: string;
   brand?: string;
@@ -92,12 +137,14 @@ interface AdminProduct {
   colors?: string[];
   images?: string[];
   storageOptions?: StorageOption[];
-  specs?: Record<string, string | number | boolean | undefined>;
+  specs?: Record<string, any>;
   stock?: number;
-  condition?: "neuf" | "occasion" | string;
+  condition?: "neuf" | "occasion" | "reconditionne" | string;
   warranty?: string;
   accessories?: string;
   ram?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface OrderItem {
@@ -195,22 +242,24 @@ export default function AdminPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
   
-  const [formData, setFormData] = useState({
+  // Données dynamiques des produits selon la catégorie
+  const [formCategory, setFormCategory] = useState<string>("phones");
+  const [commonFormData, setCommonFormData] = useState({
     name: "",
-    category: "tech",
     brand: "",
     price: "",
+    salePrice: "",
     desc: "",
-    image: "https://placehold.co/600x600/121216/d4af37?text=NOUVEAU",
     colors: "",
-    images: "",
-    storageOptions: "",
     stock: "10",
     condition: "neuf",
     warranty: "Garantie 12 Mois Certifiée",
     accessories: "",
-    ram: ""
   });
+  const [formSpecs, setFormSpecs] = useState<Record<string, any>>({});
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [modalViewMode, setModalViewMode] = useState<"form" | "preview">("form");
+  const [categorySwitchPending, setCategorySwitchPending] = useState<{ from: string; to: string } | null>(null);
 
   // Gestion dynamique des options de stockage (cases successives) et des photos multiples
   const [storageItems, setStorageItems] = useState<StorageEntry[]>([]);
@@ -601,13 +650,7 @@ export default function AdminPage() {
       }
 
       if (compressedUrls.length > 0) {
-        // Ajouter les nouvelles images : les nouveaux fichiers sélectionnés sont ajoutés
-        // Le 1er fichier de la sélection devient l'image principale si aucune n'existait ou si souhaité
-        setImageList(prev => {
-          const updated = [...compressedUrls, ...prev.filter(old => !compressedUrls.includes(old))];
-          setFormData(f => ({ ...f, image: updated[0] }));
-          return updated;
-        });
+        setImageList(prev => [...compressedUrls, ...prev.filter(old => !compressedUrls.includes(old))]);
       }
     } catch (err) {
       console.error("Erreur lors du traitement des images :", err);
@@ -625,17 +668,12 @@ export default function AdminPage() {
     const [selected] = updated.splice(index, 1);
     updated.unshift(selected);
     setImageList(updated);
-    setFormData(prev => ({ ...prev, image: updated[0] }));
   };
 
   // Supprimer une photo de la liste
   const handleRemoveImage = (index: number) => {
     const updated = imageList.filter((_, i) => i !== index);
     setImageList(updated);
-    setFormData(prev => ({ 
-      ...prev, 
-      image: updated.length > 0 ? updated[0] : "https://placehold.co/600x600/121216/d4af37?text=NOUVEAU" 
-    }));
   };
 
   // Ajouter une photo via lien URL
@@ -646,11 +684,7 @@ export default function AdminPage() {
       setNewImageUrl("");
       return;
     }
-    const updated = [...imageList, trimmed];
-    setImageList(updated);
-    if (updated.length === 1) {
-      setFormData(prev => ({ ...prev, image: updated[0] }));
-    }
+    setImageList(prev => [...prev, trimmed]);
     setNewImageUrl("");
   };
 
@@ -658,7 +692,7 @@ export default function AdminPage() {
   const handleAddStorageItem = (capacity = "", price = "") => {
     setStorageItems(prev => [
       ...prev,
-      { capacity, price: price || formData.price || "" }
+      { capacity, price: price || commonFormData.price || "" }
     ]);
   };
 
@@ -668,7 +702,7 @@ export default function AdminPage() {
     }
     setStorageItems(prev => [
       ...prev,
-      { capacity: cap, price: formData.price || "" }
+      { capacity: cap, price: commonFormData.price || "" }
     ]);
   };
 
@@ -680,76 +714,153 @@ export default function AdminPage() {
     setStorageItems(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Sauvegarder un produit (Ajout ou Édition)
+  // Demande de changement de catégorie avec détection de spécifications existantes
+  const handleCategoryChangeRequest = (newCategory: string) => {
+    if (newCategory === formCategory) return;
+
+    const hasExistingSpecs = Object.values(formSpecs).some(
+      v => v !== undefined && v !== null && String(v).trim() !== ""
+    );
+
+    if (hasExistingSpecs) {
+      setCategorySwitchPending({ from: formCategory, to: newCategory });
+    } else {
+      setFormCategory(newCategory);
+      setFormSpecs({});
+      setFormErrors({});
+    }
+  };
+
+  // Confirmation du changement de catégorie (avec option de préservation compatible)
+  const confirmCategorySwitch = (preserveCompatible: boolean) => {
+    if (!categorySwitchPending) return;
+    const targetCat = categorySwitchPending.to;
+
+    if (preserveCompatible) {
+      const targetFields = getCategoryConfig(targetCat).fields.map(f => f.key);
+      const filteredSpecs: Record<string, any> = {};
+      for (const [k, v] of Object.entries(formSpecs)) {
+        if (targetFields.includes(k)) {
+          filteredSpecs[k] = v;
+        }
+      }
+      setFormSpecs(filteredSpecs);
+    } else {
+      setFormSpecs({});
+    }
+
+    setFormCategory(targetCat);
+    setFormErrors({});
+    setCategorySwitchPending(null);
+  };
+
+  // Sauvegarder un produit (Ajout ou Édition avec validation serveur & client)
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    
-    const parsedColors = formData.colors 
-      ? formData.colors.split(",").map(c => c.trim()).filter(c => c)
+    setFormErrors({});
+
+    const parsedColors = commonFormData.colors 
+      ? commonFormData.colors.split(",").map(c => c.trim()).filter(Boolean)
       : [];
 
-    // Détermination de l'image principale (1ère image) et de la liste complète des photos
-    const mainImage = imageList.length > 0 ? imageList[0] : (formData.image || "https://placehold.co/600x600/121216/d4af37?text=NOUVEAU");
-    const allImages = imageList.length > 0 ? imageList : (mainImage ? [mainImage] : []);
+    const mainImage = imageList.length > 0 ? imageList[0] : "https://placehold.co/600x600/121216/d4af37?text=NOUVEAU";
+    const allImages = imageList.length > 0 ? imageList : [mainImage];
 
-    // Conversion propre des cases de stockage & prix
     const parsedStorage: StorageOption[] = storageItems
       .filter(item => item.capacity.trim() !== "")
       .map(item => ({
         capacity: item.capacity.trim(),
-        price: Number(item.price) || Number(formData.price) || 0
+        price: Number(item.price) || Number(commonFormData.price) || 0
       }));
-    
-    const productPayload = {
-      name: formData.name,
-      category: formData.category,
-      brand: formData.brand || "",
-      price: Number(formData.price),
-      desc: formData.desc,
-      image: mainImage,
+
+    const rawPayload = {
+      id: editingId || undefined,
+      name: commonFormData.name,
+      category: formCategory,
+      brand: commonFormData.brand,
+      price: commonFormData.price,
+      salePrice: commonFormData.salePrice || null,
+      desc: commonFormData.desc,
+      stock: commonFormData.stock,
+      condition: commonFormData.condition,
+      warranty: commonFormData.warranty,
+      accessories: commonFormData.accessories,
       colors: parsedColors,
+      image: mainImage,
       images: allImages,
-      stock: Number(formData.stock) || 0,
-      condition: formData.condition,
-      warranty: formData.warranty,
-      accessories: formData.accessories,
-      ...(formData.ram ? { ram: formData.ram } : {}),
-      ...(parsedStorage.length > 0 ? { storageOptions: parsedStorage } : {})
+      storageOptions: parsedStorage,
+      specs: formSpecs
     };
 
-    let updatedList;
-    
-    if (editingId) {
-      if (isCloud && typeof editingId === "string" && !editingId.startsWith("p-") && !editingId.startsWith("phone-") && !editingId.startsWith("shoe-") && !editingId.startsWith("bag-")) {
-        await updateProductFirestore(editingId, productPayload);
-      }
-      updatedList = productsList.map(p => 
-        p.id === editingId ? { ...p, ...productPayload } : p
-      );
-    } else {
-      const newId: string = generateProductId();
-      if (isCloud) {
-        const firestoreId = await addProductFirestore({
-          ...productPayload,
-          rating: 5.0,
-          specs: { info: "Spécifications à ajouter" }
+    // 1. Validation stricte selon les règles de la catégorie
+    const validation = validateAndCleanProduct(rawPayload);
+    if (!validation.valid || !validation.cleanedProduct) {
+      setFormErrors(validation.errors);
+      setIsSaving(false);
+      setModalViewMode("form");
+      alert("Certaines caractéristiques sont incomplètes ou invalides. Veuillez vérifier les champs signalés en rouge.");
+      return;
+    }
+
+    const cleaned = validation.cleanedProduct;
+    let savedProduct: AdminProduct = cleaned;
+
+    // 2. Persistance : via API avec vérification token, ou fallback Firestore
+    try {
+      if (adminToken) {
+        const url = editingId ? `/api/admin/products/${editingId}` : `/api/admin/products`;
+        const method = editingId ? "PUT" : "POST";
+        const res = await fetch(url, {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${adminToken}`
+          },
+          body: JSON.stringify(cleaned)
         });
-        if (firestoreId) {
-          // Utiliser l'ID généré par Firestore
+
+        if (res.ok) {
+          const resData = await res.json();
+          if (resData.product) {
+            savedProduct = resData.product;
+          }
+        } else {
+          // Repli direct Firestore si problème API
+          if (editingId) {
+            await updateProductFirestore(String(editingId), cleaned);
+          } else {
+            const firestoreId = await addProductFirestore(cleaned);
+            if (firestoreId) savedProduct.id = firestoreId;
+          }
+        }
+      } else if (isCloud) {
+        if (editingId) {
+          await updateProductFirestore(String(editingId), cleaned);
+        } else {
+          const firestoreId = await addProductFirestore(cleaned);
+          if (firestoreId) savedProduct.id = firestoreId;
         }
       }
-      const newProduct = {
-        id: newId,
-        ...productPayload,
-        rating: 5.0,
-        specs: { info: "Spécifications à ajouter" }
-      };
-      updatedList = [newProduct, ...productsList];
+    } catch (saveErr) {
+      console.warn("Erreur sauvegarde API/Cloud, enregistrement local", saveErr);
+    }
+
+    // 3. Mise à jour de la liste locale
+    let updatedList: AdminProduct[];
+    if (editingId) {
+      updatedList = productsList.map(p => p.id === editingId ? savedProduct : p);
+    } else {
+      updatedList = [savedProduct, ...productsList];
     }
 
     setProductsList(updatedList);
-    localStorage.setItem("prince_cfa_products", JSON.stringify(updatedList));
+    try {
+      localStorage.setItem("prince_cfa_products", JSON.stringify(updatedList));
+    } catch (e) {
+      console.warn("Erreur LocalStorage", e);
+    }
+
     setIsSaving(false);
     closeModal();
   };
@@ -757,16 +868,38 @@ export default function AdminPage() {
   const handleDelete = async (id: string | number) => {
     if (confirm("Voulez-vous vraiment supprimer ce produit ?")) {
       if (isCloud && typeof id === "string" && !id.startsWith("p-") && !id.startsWith("phone-") && !id.startsWith("shoe-") && !id.startsWith("bag-")) {
-        await deleteProductFirestore(id);
+        try {
+          if (adminToken) {
+            await fetch(`/api/admin/products/${id}`, {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${adminToken}` }
+            });
+          } else {
+            await deleteProductFirestore(id);
+          }
+        } catch {
+          await deleteProductFirestore(id);
+        }
       }
       const updatedList = productsList.filter(p => p.id !== id);
       setProductsList(updatedList);
-      localStorage.setItem("prince_cfa_products", JSON.stringify(updatedList));
+      try {
+        localStorage.setItem("prince_cfa_products", JSON.stringify(updatedList));
+      } catch (e) {
+        console.warn("LocalStorage warning:", e);
+      }
     }
   };
 
   const openModalForEdit = (product: AdminProduct) => {
-    // Initialisation des images : le produit image est toujours en tête
+    const normalized = normalizeProductSpecs(product);
+    setEditingId(product.id);
+    setFormCategory(product.category || "phones");
+    setFormSpecs(normalized.specs ? { ...normalized.specs } : {});
+    setFormErrors({});
+    setModalViewMode("form");
+    setCategorySwitchPending(null);
+
     let initialImages: string[] = [];
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {
       initialImages = [...product.images];
@@ -775,42 +908,32 @@ export default function AdminPage() {
     }
     if (product.image && !initialImages.includes(product.image)) {
       initialImages.unshift(product.image);
-    } else if (product.image && initialImages[0] !== product.image) {
-      initialImages = [product.image, ...initialImages.filter(img => img !== product.image)];
     }
     setImageList(initialImages);
 
-    // Initialisation des cases de stockage (nettoyage de tout null/undefined)
     let initialStorage: StorageEntry[] = [];
-    if (product.storageOptions && Array.isArray(product.storageOptions) && product.storageOptions.length > 0) {
-      initialStorage = product.storageOptions.map((o: StorageOption) => {
-        const hasValidPrice = o.price !== null && o.price !== undefined && !isNaN(Number(o.price));
-        return {
-          capacity: o.capacity || "",
-          price: hasValidPrice ? String(o.price) : String(product.price || "")
-        };
-      });
+    if (product.storageOptions && Array.isArray(product.storageOptions)) {
+      initialStorage = product.storageOptions.map(o => ({
+        capacity: o.capacity || "",
+        price: o.price !== null && o.price !== undefined ? String(o.price) : String(product.price || "")
+      }));
     }
     setStorageItems(initialStorage);
     setNewImageUrl("");
 
-    setFormData({
-      name: product.name,
-      category: product.category,
+    setCommonFormData({
+      name: product.name || "",
       brand: product.brand || "",
-      price: product.price.toString(),
+      price: product.price ? product.price.toString() : "",
+      salePrice: product.salePrice ? product.salePrice.toString() : "",
       desc: product.desc || "",
-      image: product.image,
       colors: product.colors ? product.colors.join(", ") : "",
-      images: initialImages.join(", "),
-      storageOptions: "",
       stock: (product.stock !== undefined ? product.stock : 10).toString(),
-      condition: product.condition || "neuf",
+      condition: (product.condition as any) || "neuf",
       warranty: product.warranty || "Garantie 12 Mois Certifiée",
-      accessories: product.accessories || "",
-      ram: product.ram || (product.specs?.ram ? String(product.specs.ram) : "")
+      accessories: product.accessories || ""
     });
-    setEditingId(product.id);
+
     setIsModalOpen(true);
   };
 
@@ -820,22 +943,48 @@ export default function AdminPage() {
     setImageList([]);
     setStorageItems([]);
     setNewImageUrl("");
-    setFormData({ 
-      name: "", 
-      category: "tech", 
-      brand: "", 
-      price: "", 
-      desc: "", 
-      image: "https://placehold.co/600x600/121216/d4af37?text=NOUVEAU", 
-      colors: "", 
-      images: "",
-      storageOptions: "",
+    setFormCategory("phones");
+    setFormSpecs({});
+    setFormErrors({});
+    setModalViewMode("form");
+    setCategorySwitchPending(null);
+    setCommonFormData({
+      name: "",
+      brand: "",
+      price: "",
+      salePrice: "",
+      desc: "",
+      colors: "",
       stock: "10",
       condition: "neuf",
       warranty: "Garantie 12 Mois Certifiée",
       accessories: "",
-      ram: ""
     });
+  };
+
+  const openModalForNew = () => {
+    setEditingId(null);
+    setImageList([]);
+    setStorageItems([]);
+    setNewImageUrl("");
+    setFormCategory("phones");
+    setFormSpecs({});
+    setFormErrors({});
+    setModalViewMode("form");
+    setCategorySwitchPending(null);
+    setCommonFormData({
+      name: "",
+      brand: "Apple",
+      price: "",
+      salePrice: "",
+      desc: "",
+      colors: "",
+      stock: "10",
+      condition: "neuf",
+      warranty: "Garantie 12 Mois Certifiée",
+      accessories: "",
+    });
+    setIsModalOpen(true);
   };
 
   // Filtrage des commandes
@@ -1573,32 +1722,11 @@ export default function AdminPage() {
               )}
 
               <button 
-                onClick={() => {
-                  setEditingId(null);
-                  setImageList([]);
-                  setStorageItems([]);
-                  setNewImageUrl("");
-                  setFormData({
-                    name: "",
-                    category: "phones",
-                    brand: "Iphones",
-                    price: "",
-                    desc: "",
-                    image: "https://placehold.co/600x600/121216/d4af37?text=NOUVEAU",
-                    colors: "",
-                    images: "",
-                    storageOptions: "",
-                    stock: "10",
-                    condition: "neuf",
-                    warranty: "Garantie 12 Mois Certifiée",
-                    accessories: "",
-                    ram: ""
-                  });
-                  setIsModalOpen(true);
-                }}
-                className="px-4 py-2 rounded-xl bg-gold text-black font-bold text-xs uppercase tracking-wider hover:bg-yellow-400 transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)] cursor-pointer"
+                onClick={openModalForNew}
+                className="px-4 py-2 rounded-xl bg-gold text-black font-bold text-xs uppercase tracking-wider hover:bg-yellow-400 transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)] cursor-pointer flex items-center gap-2"
               >
-                + Ajouter Produit
+                <span>+</span>
+                <span>Ajouter Produit</span>
               </button>
             </div>
           </div>
@@ -1630,18 +1758,37 @@ export default function AdminPage() {
                           <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain" />
                         </div>
                         <div>
-                          <div className="text-white font-bold text-sm">{product.name}</div>
-                          <div className="text-zinc-500 text-xs line-clamp-1 max-w-[250px]">{product.desc}</div>
+                          <div className="text-white font-bold text-sm flex items-center gap-2">
+                            <span>{product.name}</span>
+                            {product.brand && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-400 uppercase">
+                                {product.brand}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-zinc-500 text-xs line-clamp-1 max-w-[280px]">
+                            {product.desc}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="px-3 py-1 rounded-full bg-white/10 text-zinc-300 text-xs uppercase font-medium">
-                        {product.category}
+                      <span className="px-3 py-1 rounded-full bg-white/10 text-zinc-300 text-xs font-medium inline-flex items-center gap-1.5">
+                        {getCategoryIcon(product.category, "w-3.5 h-3.5 text-gold")}
+                        <span>{getCategoryConfig(product.category).label}</span>
                       </span>
                     </td>
                     <td className="p-4 font-bold text-white">
-                      {product.price.toLocaleString('fr-FR')} <span className="text-gold text-xs">FCFA</span>
+                      {product.salePrice ? (
+                        <div>
+                          <span className="text-gold font-extrabold">{product.salePrice.toLocaleString('fr-FR')} FCFA</span>
+                          <span className="block text-[11px] text-zinc-500 line-through">{product.price.toLocaleString('fr-FR')} FCFA</span>
+                        </div>
+                      ) : (
+                        <div>
+                          {product.price.toLocaleString('fr-FR')} <span className="text-gold text-xs">FCFA</span>
+                        </div>
+                      )}
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -1676,344 +1823,815 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Modal Ajout/Modification Produit */}
+      {/* DIALOGUE DE SÉCURITÉ AU CHANGEMENT DE CATÉGORIE */}
+      {categorySwitchPending && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="glass-panel p-6 sm:p-7 rounded-3xl border border-amber-500/50 bg-[#0d0d10] max-w-md w-full space-y-4 shadow-2xl">
+            <div className="flex items-center gap-3 text-amber-400">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-amber-400" aria-hidden="true" />
+              </div>
+              <div>
+                <h4 className="font-bold text-sm uppercase tracking-wider text-white">Changement de catégorie</h4>
+                <p className="text-[11px] text-zinc-400">Confirmation obligatoire</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-zinc-300 leading-relaxed">
+              Vous êtes sur le point de passer de <strong className="text-white">{getCategoryConfig(categorySwitchPending.from).label}</strong> à <strong className="text-gold">{getCategoryConfig(categorySwitchPending.to).label}</strong>.
+            </p>
+            <p className="text-[11px] text-zinc-400 leading-normal">
+              Des caractéristiques spécifiques sont déjà renseignées pour ce produit. Afin d&apos;éviter toute corruption de vos données, choisissez l&apos;action souhaitée :
+            </p>
+
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => confirmCategorySwitch(true)}
+                className="w-full py-3 px-3.5 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/40 text-gold text-xs font-bold transition-all text-left flex items-center justify-between cursor-pointer group"
+              >
+                <span>Conserver les caractéristiques compatibles</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => confirmCategorySwitch(false)}
+                className="w-full py-3 px-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-bold transition-all text-left flex items-center justify-between cursor-pointer"
+              >
+                <span>Réinitialiser les caractéristiques spécifiques</span>
+                <span>↺</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCategorySwitchPending(null)}
+                className="w-full py-2.5 px-3 rounded-xl bg-transparent hover:bg-white/5 text-zinc-400 hover:text-white text-xs text-center transition-all cursor-pointer"
+              >
+                Annuler et rester sur {getCategoryConfig(categorySwitchPending.from).label}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL AJOUT / MODIFICATION DYNAMIQUE PAR CATÉGORIE */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={closeModal}></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+          <div className="absolute inset-0 bg-black/85 backdrop-blur-md" onClick={closeModal}></div>
           
-          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/10 w-full max-w-xl z-10 max-h-[90vh] overflow-y-auto relative">
-            <h3 className="text-xl font-bold text-white mb-6 uppercase tracking-wider">
-              {editingId ? "Modifier le produit" : "Ajouter au catalogue"}
-            </h3>
-
-            <form onSubmit={handleSaveProduct} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1 col-span-2 sm:col-span-1">
-                  <label className="text-xs text-zinc-400 uppercase tracking-wider">Nom du produit</label>
-                  <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:border-gold/50 outline-none" placeholder="Ex: iPhone 14 Pro Max" />
+          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/15 w-full max-w-4xl z-10 max-h-[92vh] flex flex-col relative bg-[#0d0d11]/95 shadow-2xl">
+            
+            {/* Entête du Modal & Bascule Formulaire / Aperçu en direct */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10 flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gold/15 border border-gold/30 flex items-center justify-center text-gold">
+                  {getCategoryIcon(formCategory, "w-5 h-5 text-gold")}
                 </div>
-                
-                <div className="flex flex-col gap-1 col-span-2 sm:col-span-1">
-                  <label className="text-xs text-zinc-400 uppercase tracking-wider">Catégorie</label>
-                  <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:border-gold/50 outline-none">
-                    <option value="phones">Téléphones</option>
-                    <option value="tv">TV & Écrans</option>
-                    <option value="tech">High-Tech</option>
-                    <option value="audio">Boomers</option>
-                    <option value="mobility">Motos Électriques</option>
-                    <option value="solar">Solaire</option>
-                  </select>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
+                    {editingId ? "Modifier le produit" : "Ajouter un produit"}
+                  </h3>
+                  <p className="text-xs text-zinc-400">
+                    Catégorie active : <strong className="text-gold">{getCategoryConfig(formCategory).label}</strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* Sélecteur de mode Formulaire / Aperçu */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center bg-black/60 p-1 rounded-xl border border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setModalViewMode("form")}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      modalViewMode === "form"
+                        ? "bg-gold text-black shadow"
+                        : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>Formulaire</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setModalViewMode("preview")}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      modalViewMode === "preview"
+                        ? "bg-gold text-black shadow"
+                        : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>Aperçu en direct</span>
+                  </button>
                 </div>
 
-                <div className="flex flex-col gap-1 col-span-2 sm:col-span-1">
-                  <label className="text-xs text-zinc-400 uppercase tracking-wider">Marque (Optionnel)</label>
-                  <input type="text" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} className="bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:border-gold/50 outline-none" placeholder="Ex: Apple, Samsung, Google Pixel..." />
-                </div>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                  title="Fermer"
+                >
+                  <X className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
 
-                <div className="flex flex-col gap-1 col-span-2 sm:col-span-1">
-                  <label className="text-xs text-zinc-400 uppercase tracking-wider">Prix de base (FCFA)</label>
-                  <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:border-gold/50 outline-none" placeholder="Ex: 850000" />
-                </div>
+            {/* Contenu Défilant */}
+            <div className="overflow-y-auto flex-1 py-6 pr-1 space-y-6">
 
-                {/* Upload et sélection multi-photos (La 1ère est l'image principale) */}
-                <div className="col-span-2 p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                        <Camera className="w-4 h-4 text-gold" aria-hidden="true" />
-                        <span>Photos du Produit (Multi-fichiers)</span>
-                      </label>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">
-                        Sélectionnez <strong className="text-gold">plusieurs fichiers</strong> dans votre explorateur. Le <strong className="text-white">premier fichier</strong> sera automatiquement l&apos;image principale du produit.
-                      </p>
-                    </div>
-
-                    <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gold hover:bg-yellow-400 text-black text-xs font-extrabold uppercase tracking-wider cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.25)] transition-all flex-shrink-0">
-                      <Upload className="w-4 h-4 text-black" aria-hidden="true" />
-                      <span>{isCompressingImages ? "Traitement..." : "Choisir des fichiers"}</span>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        multiple 
-                        disabled={isCompressingImages}
-                        onChange={handleMultipleImagesUpload}
-                        className="hidden" 
-                      />
-                    </label>
+              {/* VUE 1 : APERÇU EN DIRECT (LIVE PREVIEW) */}
+              {modalViewMode === "preview" && (
+                <div className="space-y-6 animate-in fade-in duration-200">
+                  <div className="p-4 rounded-2xl bg-gold/5 border border-gold/20 flex items-center gap-3 text-gold text-xs">
+                    <Eye className="w-4 h-4 flex-shrink-0 text-gold" aria-hidden="true" />
+                    <span>Voici comment votre produit sera affiché sur la boutique et dans la fiche détaillée du client.</span>
                   </div>
 
-                  {/* Galerie visuelle des photos sélectionnées */}
-                  {imageList.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-                      {imageList.map((imgSrc, index) => (
-                        <div 
-                          key={index} 
-                          className={`relative group rounded-xl overflow-hidden border p-1 bg-black/60 transition-all ${
-                            index === 0 
-                              ? "border-gold shadow-[0_0_15px_rgba(212,175,55,0.25)] ring-1 ring-gold/50" 
-                              : "border-white/10 hover:border-white/30"
-                          }`}
-                        >
-                          <div className="aspect-square w-full rounded-lg bg-black/40 flex items-center justify-center overflow-hidden relative">
-                            <img 
-                              src={imgSrc} 
-                              alt={`Photo ${index + 1}`} 
-                              className="w-full h-full object-contain"
-                            />
-                            
-                            {/* Badge Image Principale ou Numéro */}
-                            <div className="absolute top-1.5 left-1.5 pointer-events-none">
-                              {index === 0 ? (
-                                <span className="px-2 py-0.5 rounded-md bg-gold text-black text-[10px] font-black uppercase tracking-wider shadow inline-flex items-center gap-1">
-                                  <Crown className="w-3 h-3" aria-hidden="true" />
-                                  <span>Principale</span>
-                                </span>
-                              ) : (
-                                <span className="px-1.5 py-0.5 rounded-md bg-black/80 text-zinc-300 text-[10px] font-bold border border-white/10">
-                                  Photo #{index + 1}
-                                </span>
-                              )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-3xl bg-black/60 border border-white/10">
+                    {/* Colonne Gauche : Photos */}
+                    <div className="space-y-3">
+                      <div className="aspect-square w-full rounded-2xl bg-black/80 border border-white/10 flex items-center justify-center overflow-hidden p-4 relative">
+                        <img 
+                          src={imageList.length > 0 ? imageList[0] : "https://placehold.co/600x600/121216/d4af37?text=PRINCE+CFA"} 
+                          alt="Aperçu" 
+                          className="max-w-full max-h-full object-contain"
+                        />
+                        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-gold/90 text-black text-[10px] font-black uppercase tracking-wider">
+                          {commonFormData.condition === "neuf" ? "Neuf scellé" : commonFormData.condition === "reconditionne" ? "Reconditionné A+" : "Occasion certifiée"}
+                        </span>
+                      </div>
+
+                      {imageList.length > 1 && (
+                        <div className="flex gap-2 overflow-x-auto pb-1">
+                          {imageList.map((img, i) => (
+                            <div key={i} className="w-14 h-14 rounded-lg bg-black/50 border border-white/10 p-1 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                              <img src={img} alt={`Thumb ${i+1}`} className="w-full h-full object-contain" />
                             </div>
-
-                            {/* Bouton de suppression rapide */}
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveImage(index)}
-                              className="absolute top-1.5 right-1.5 w-6 h-6 rounded-md bg-red-600/80 hover:bg-red-600 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow"
-                              title="Supprimer cette image"
-                              aria-label="Supprimer cette photo"
-                            >
-                              <X className="w-3.5 h-3.5" aria-hidden="true" />
-                            </button>
-                          </div>
-
-                          {/* Bouton pour définir comme 1ère (Image Principale) */}
-                          {index !== 0 && (
-                            <button
-                              type="button"
-                              onClick={() => handleSetMainImage(index)}
-                              className="w-full mt-1.5 py-1 px-2 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-[10px] text-zinc-300 font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1"
-                            >
-                              <Crown className="w-3 h-3" aria-hidden="true" />
-                              <span>Définir comme 1ère</span>
-                            </button>
-                          )}
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
-                  ) : (
-                    <div className="p-4 rounded-xl border border-dashed border-white/10 text-center text-zinc-500 text-xs">
-                      Aucune photo sélectionnée. Cliquez sur <strong className="text-zinc-300">Choisir des fichiers</strong> pour ajouter vos photos.
-                    </div>
-                  )}
 
-                  {/* Option alternative : Coller une URL */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-white/5">
-                    <input 
-                      type="url" 
-                      value={newImageUrl} 
-                      onChange={e => setNewImageUrl(e.target.value)} 
-                      className="flex-1 bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:border-gold/50 outline-none" 
-                      placeholder="Ou collez un lien URL d'image (https://...)" 
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleAddImageUrl(newImageUrl)}
-                      disabled={!newImageUrl.trim()}
-                      className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors disabled:opacity-30 cursor-pointer"
-                    >
-                      + Ajouter URL
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1 col-span-2">
-                  <label className="text-xs text-zinc-400 uppercase tracking-wider">Couleurs disponibles</label>
-                  <input 
-                    type="text" 
-                    value={formData.colors} 
-                    onChange={e => setFormData({...formData, colors: e.target.value})} 
-                    className="bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:border-gold/50 outline-none" 
-                    placeholder="Ex: Noir Titane, Blanc, Or, Bleu" 
-                  />
-                </div>
-
-                {/* OPTIONS STOCKAGE & PRIX SPÉCIFIQUES DANS DIFFÉRENTES CASES SUCCESSIVES */}
-                {(formData.category === "phones" || formData.category === "tech" || storageItems.length > 0) && (
-                  <div className="col-span-2 p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    {/* Colonne Droite : Fiche Technique */}
+                    <div className="space-y-4">
                       <div>
-                        <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                          <HardDrive className="w-4 h-4 text-gold" aria-hidden="true" />
-                          <span>Options de Stockage & Prix Spécifiques</span>
-                        </label>
-                        <p className="text-[11px] text-zinc-400 mt-0.5">
-                          Chaque option est affichée successivement dans des cases distinctes (Capacité et Prix).
+                        {commonFormData.brand && (
+                          <span className="text-xs font-bold text-gold uppercase tracking-wider">
+                            {commonFormData.brand}
+                          </span>
+                        )}
+                        <h4 className="text-xl font-black text-white mt-1">
+                          {commonFormData.name || "Nom du produit"}
+                        </h4>
+                        <div className="text-xs text-zinc-400 mt-1 flex items-center gap-2">
+                          <span>Catégorie : <strong>{getCategoryConfig(formCategory).label}</strong></span>
+                          <span>•</span>
+                          <span>Stock : <strong className={Number(commonFormData.stock) > 0 ? "text-green-400" : "text-red-400"}>{commonFormData.stock || 0} unité(s)</strong></span>
+                        </div>
+                      </div>
+
+                      {/* Prix */}
+                      <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 flex items-baseline gap-3">
+                        {commonFormData.salePrice ? (
+                          <>
+                            <span className="text-2xl font-black text-gold">
+                              {Number(commonFormData.salePrice).toLocaleString("fr-FR")} FCFA
+                            </span>
+                            <span className="text-xs text-zinc-500 line-through">
+                              {Number(commonFormData.price || 0).toLocaleString("fr-FR")} FCFA
+                            </span>
+                            <span className="px-2 py-0.5 rounded-md bg-red-500/20 text-red-400 text-[10px] font-bold">
+                              PROMO
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-2xl font-black text-gold">
+                            {Number(commonFormData.price || 0).toLocaleString("fr-FR")} FCFA
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Variantes de stockage */}
+                      {storageItems.length > 0 && (
+                        <div className="space-y-1.5">
+                          <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Options de capacité :</span>
+                          <div className="flex flex-wrap gap-2">
+                            {storageItems.map((opt, i) => (
+                              <span key={i} className="px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white flex items-center gap-1.5">
+                                <span>{opt.capacity}</span>
+                                <span className="text-gold text-[10px]">({Number(opt.price).toLocaleString("fr-FR")} F)</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Caractéristiques Spécifiques Renseignées */}
+                      <div className="space-y-2 pt-2 border-t border-white/10">
+                        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Spécifications techniques :</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                          {getCategoryConfig(formCategory).fields.map(f => {
+                            const val = formSpecs[f.key];
+                            if (val === undefined || val === null || String(val).trim() === "") return null;
+                            const optionMatch = f.options?.find(o => o.value === String(val));
+                            const displayVal = optionMatch ? optionMatch.label : String(val);
+
+                            return (
+                              <div key={f.key} className="p-2 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col">
+                                <span className="text-[10px] text-zinc-500 uppercase">{f.label}</span>
+                                <span className="text-white font-semibold mt-0.5">
+                                  {displayVal} {f.unit ? <span className="text-gold text-[10px] ml-1">{f.unit}</span> : null}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <div className="pt-2 border-t border-white/10">
+                        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">Description :</span>
+                        <p className="text-xs text-zinc-300 leading-relaxed font-light whitespace-pre-line">
+                          {commonFormData.desc || "Aucune description saisie."}
                         </p>
                       </div>
 
-                      {/* Raccourcis d'ajout rapide */}
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[10px] text-zinc-500 uppercase font-bold mr-1">Raccourcis :</span>
-                        {["128 Go", "256 Go", "512 Go", "1 To"].map((cap) => (
-                          <button
-                            key={cap}
-                            type="button"
-                            onClick={() => handleQuickAddStorage(cap)}
-                            className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-zinc-300 text-[10px] font-bold border border-white/10 transition-all cursor-pointer"
-                          >
-                            + {cap}
-                          </button>
-                        ))}
+                      {/* Garantie & Accessoires */}
+                      <div className="text-[11px] text-zinc-400 space-y-1 pt-2">
+                        {commonFormData.warranty && <div>🛡️ Garantie : <strong className="text-white">{commonFormData.warranty}</strong></div>}
+                        {commonFormData.accessories && <div>📦 Inclus : <strong className="text-white">{commonFormData.accessories}</strong></div>}
                       </div>
+
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setModalViewMode("form")}
+                      className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                    >
+                      Revenir à l&apos;édition
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveProduct}
+                      disabled={isSaving}
+                      className="px-6 py-2.5 rounded-xl bg-gold text-black font-extrabold text-xs uppercase tracking-wider hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(212,175,55,0.4)] disabled:opacity-50 cursor-pointer"
+                    >
+                      {isSaving ? "Enregistrement..." : (editingId ? "Mettre à jour" : "Confirmer & Enregistrer")}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* VUE 2 : FORMULAIRE DYNAMIQUE DE SAISIE */}
+              {modalViewMode === "form" && (
+                <form onSubmit={handleSaveProduct} className="space-y-6">
+
+                  {/* 1. SÉLECTION DYNAMIQUE DE LA CATÉGORIE */}
+                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-gold" aria-hidden="true" />
+                        <span>1. Choisissez la Catégorie du Produit</span>
+                      </label>
+                      <span className="text-[10px] text-gold font-semibold uppercase">
+                        Adapte les champs automatiquement
+                      </span>
                     </div>
 
-                    {/* Liste des cases successives */}
-                    {storageItems.length > 0 ? (
-                      <div className="space-y-2.5 pt-1">
-                        {storageItems.map((item, idx) => (
-                          <div 
-                            key={idx} 
-                            className="flex items-center gap-2.5 p-3 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition-all"
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      {CATEGORIES_LIST.map((cat) => {
+                        const isSelected = formCategory === cat.id;
+                        return (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => handleCategoryChangeRequest(cat.id)}
+                            className={`p-3 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                              isSelected
+                                ? "border-gold bg-gold/15 shadow-[0_0_15px_rgba(212,175,55,0.25)] ring-1 ring-gold/50"
+                                : "border-white/10 bg-black/40 hover:border-white/30 hover:bg-white/[0.03]"
+                            }`}
                           >
-                            <div className="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center font-black text-xs flex-shrink-0">
-                              #{idx + 1}
+                            <div className="flex items-center justify-between mb-2">
+                              <span className={`p-1.5 rounded-lg ${isSelected ? "bg-gold text-black" : "bg-white/5 text-zinc-400"}`}>
+                                {getCategoryIcon(cat.id, "w-4 h-4")}
+                              </span>
+                              {isSelected && <Check className="w-4 h-4 text-gold" aria-hidden="true" />}
                             </div>
+                            <span className={`text-xs font-bold ${isSelected ? "text-white" : "text-zinc-300"}`}>
+                              {cat.label}
+                            </span>
+                            <span className="text-[10px] text-zinc-500 line-clamp-1 mt-0.5">
+                              {cat.shortLabel}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-                            {/* Case 1: Capacité / Stockage */}
-                            <div className="flex-1">
-                              <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
-                                Case Stockage (Capacité)
-                              </label>
-                              <input 
-                                type="text" 
-                                value={item.capacity} 
-                                onChange={(e) => handleUpdateStorageItem(idx, "capacity", e.target.value)}
-                                placeholder="Ex: 256 Go" 
-                                className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-semibold focus:border-gold/50 outline-none"
+                  {/* 2. INFORMATIONS GÉNÉRALES COMMUNES */}
+                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-4">
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <Tag className="w-4 h-4 text-gold" aria-hidden="true" />
+                      <span>2. Informations Générales Communes</span>
+                    </h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Nom du produit */}
+                      <div className="sm:col-span-2">
+                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
+                          Nom du Produit <span className="text-red-400">*</span>
+                        </label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={commonFormData.name} 
+                          onChange={e => setCommonFormData({ ...commonFormData, name: e.target.value })} 
+                          placeholder="Ex: iPhone 15 Pro Max 256 Go, MacBook Pro 16 M3 Max, Moto Super Soco" 
+                          className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
+                            formErrors.name ? "border-red-500" : "border-white/10"
+                          }`}
+                        />
+                        {formErrors.name && <span className="text-[10px] text-red-400 mt-1 block">{formErrors.name}</span>}
+                      </div>
+
+                      {/* Marque */}
+                      <div>
+                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
+                          Marque Fabricant
+                        </label>
+                        <input 
+                          type="text" 
+                          value={commonFormData.brand} 
+                          onChange={e => setCommonFormData({ ...commonFormData, brand: e.target.value })} 
+                          placeholder="Ex: Apple, Samsung, Dell, Super Soco, Anker" 
+                          className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
+                        />
+                      </div>
+
+                      {/* État du produit */}
+                      <div>
+                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
+                          État du Produit
+                        </label>
+                        <select 
+                          value={commonFormData.condition} 
+                          onChange={e => setCommonFormData({ ...commonFormData, condition: e.target.value })} 
+                          className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
+                        >
+                          <option value="neuf">Neuf sous blister scellé</option>
+                          <option value="occasion">Occasion Certifiée A+</option>
+                          <option value="reconditionne">Reconditionné à Neuf (Certifié)</option>
+                        </select>
+                      </div>
+
+                      {/* Prix de base (FCFA) */}
+                      <div>
+                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
+                          Prix de Vente Normal (FCFA) <span className="text-red-400">*</span>
+                        </label>
+                        <input 
+                          type="number" 
+                          required 
+                          min="0"
+                          value={commonFormData.price} 
+                          onChange={e => setCommonFormData({ ...commonFormData, price: e.target.value })} 
+                          placeholder="Ex: 850000" 
+                          className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs font-bold text-gold outline-none focus:border-gold ${
+                            formErrors.price ? "border-red-500" : "border-white/10"
+                          }`}
+                        />
+                        {formErrors.price && <span className="text-[10px] text-red-400 mt-1 block">{formErrors.price}</span>}
+                      </div>
+
+                      {/* Prix promotionnel (FCFA) */}
+                      <div>
+                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
+                          Prix Promotionnel (FCFA, Facultatif)
+                        </label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          value={commonFormData.salePrice} 
+                          onChange={e => setCommonFormData({ ...commonFormData, salePrice: e.target.value })} 
+                          placeholder="Ex: 790000 (laisser vide si pas de promo)" 
+                          className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
+                            formErrors.salePrice ? "border-red-500" : "border-white/10"
+                          }`}
+                        />
+                        {formErrors.salePrice && <span className="text-[10px] text-red-400 mt-1 block">{formErrors.salePrice}</span>}
+                      </div>
+
+                      {/* Quantité en stock */}
+                      <div>
+                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
+                          Quantité en Stock
+                        </label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          value={commonFormData.stock} 
+                          onChange={e => setCommonFormData({ ...commonFormData, stock: e.target.value })} 
+                          placeholder="Ex: 10" 
+                          className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
+                        />
+                      </div>
+
+                      {/* Couleurs disponibles */}
+                      <div>
+                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
+                          Couleurs (séparées par une virgule)
+                        </label>
+                        <input 
+                          type="text" 
+                          value={commonFormData.colors} 
+                          onChange={e => setCommonFormData({ ...commonFormData, colors: e.target.value })} 
+                          placeholder="Ex: Noir Titane, Blanc, Or, Bleu" 
+                          className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
+                        />
+                      </div>
+
+                      {/* Garantie vendeur */}
+                      <div>
+                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
+                          Garantie Vendeur / Fabricant
+                        </label>
+                        <input 
+                          type="text" 
+                          value={commonFormData.warranty} 
+                          onChange={e => setCommonFormData({ ...commonFormData, warranty: e.target.value })} 
+                          placeholder="Ex: Garantie 12 Mois Certifiée" 
+                          className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
+                        />
+                      </div>
+
+                      {/* Accessoires inclus */}
+                      <div>
+                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
+                          Accessoires Inclus dans le Coffret
+                        </label>
+                        <input 
+                          type="text" 
+                          value={commonFormData.accessories} 
+                          onChange={e => setCommonFormData({ ...commonFormData, accessories: e.target.value })} 
+                          placeholder="Ex: Chargeur rapide 35W, Câble tressé, Clé de contact, Manuel" 
+                          className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
+                        />
+                      </div>
+
+                      {/* Description commerciale */}
+                      <div className="sm:col-span-2">
+                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
+                          Description Commerciale <span className="text-red-400">*</span>
+                        </label>
+                        <textarea 
+                          rows={3} 
+                          required
+                          value={commonFormData.desc} 
+                          onChange={e => setCommonFormData({ ...commonFormData, desc: e.target.value })} 
+                          placeholder="Description élégante mettant en valeur la performance, le design et les points forts..." 
+                          className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none resize-none focus:border-gold ${
+                            formErrors.desc ? "border-red-500" : "border-white/10"
+                          }`}
+                        />
+                        {formErrors.desc && <span className="text-[10px] text-red-400 mt-1 block">{formErrors.desc}</span>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. PHOTOS DU PRODUIT (MULTI-FICHIERS AVEC COMPRESSION) */}
+                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                          <Camera className="w-4 h-4 text-gold" aria-hidden="true" />
+                          <span>3. Photos du Produit (Multi-fichiers)</span>
+                        </label>
+                        <p className="text-[11px] text-zinc-400 mt-0.5">
+                          La <strong className="text-white">première photo</strong> sera l&apos;image principale affichée dans la boutique.
+                        </p>
+                      </div>
+
+                      <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gold hover:bg-yellow-400 text-black text-xs font-extrabold uppercase tracking-wider cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.25)] transition-all flex-shrink-0">
+                        <Upload className="w-4 h-4 text-black" aria-hidden="true" />
+                        <span>{isCompressingImages ? "Traitement..." : "Choisir des fichiers"}</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          multiple 
+                          disabled={isCompressingImages}
+                          onChange={handleMultipleImagesUpload}
+                          className="hidden" 
+                        />
+                      </label>
+                    </div>
+
+                    {imageList.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                        {imageList.map((imgSrc, index) => (
+                          <div 
+                            key={index} 
+                            className={`relative group rounded-xl overflow-hidden border p-1 bg-black/60 transition-all ${
+                              index === 0 
+                                ? "border-gold shadow-[0_0_15px_rgba(212,175,55,0.25)] ring-1 ring-gold/50" 
+                                : "border-white/10 hover:border-white/30"
+                            }`}
+                          >
+                            <div className="aspect-square w-full rounded-lg bg-black/40 flex items-center justify-center overflow-hidden relative">
+                              <img 
+                                src={imgSrc} 
+                                alt={`Photo ${index + 1}`} 
+                                className="w-full h-full object-contain"
                               />
-                            </div>
+                              
+                              <div className="absolute top-1.5 left-1.5 pointer-events-none">
+                                {index === 0 ? (
+                                  <span className="px-2 py-0.5 rounded-md bg-gold text-black text-[10px] font-black uppercase tracking-wider shadow inline-flex items-center gap-1">
+                                    <Crown className="w-3 h-3" aria-hidden="true" />
+                                    <span>Principale</span>
+                                  </span>
+                                ) : (
+                                  <span className="px-1.5 py-0.5 rounded-md bg-black/80 text-zinc-300 text-[10px] font-bold border border-white/10">
+                                    #{index + 1}
+                                  </span>
+                                )}
+                              </div>
 
-                            {/* Case 2: Prix en FCFA */}
-                            <div className="flex-1">
-                              <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
-                                Case Prix (FCFA)
-                              </label>
-                              <input 
-                                type="number" 
-                                value={item.price} 
-                                onChange={(e) => handleUpdateStorageItem(idx, "price", e.target.value)}
-                                placeholder={`Ex: ${formData.price || "625000"}`} 
-                                className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-bold text-gold focus:border-gold/50 outline-none"
-                              />
-                            </div>
-
-                            {/* Bouton Supprimer */}
-                            <div className="pt-4 flex-shrink-0">
                               <button
                                 type="button"
-                                onClick={() => handleRemoveStorageItem(idx)}
-                                className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white transition-colors cursor-pointer"
-                                title="Supprimer cette case de stockage"
-                                aria-label={`Supprimer l'option de stockage ${item.capacity || idx + 1}`}
+                                onClick={() => handleRemoveImage(index)}
+                                className="absolute top-1.5 right-1.5 w-6 h-6 rounded-md bg-red-600/80 hover:bg-red-600 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow"
+                                title="Supprimer cette image"
                               >
-                                <Trash2 className="w-4 h-4" aria-hidden="true" />
+                                <X className="w-3.5 h-3.5" aria-hidden="true" />
                               </button>
                             </div>
+
+                            {index !== 0 && (
+                              <button
+                                type="button"
+                                onClick={() => handleSetMainImage(index)}
+                                className="w-full mt-1.5 py-1 px-2 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-[10px] text-zinc-300 font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1"
+                              >
+                                <Crown className="w-3 h-3" aria-hidden="true" />
+                                <span>Définir comme 1ère</span>
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>
                     ) : (
                       <div className="p-4 rounded-xl border border-dashed border-white/10 text-center text-zinc-500 text-xs">
-                        Aucune option de stockage. Utilisez les raccourcis ci-dessus ou le bouton ci-dessous pour ajouter des cases.
+                        Aucune photo sélectionnée. Cliquez sur <strong className="text-zinc-300">Choisir des fichiers</strong> ou ajoutez un lien ci-dessous.
                       </div>
                     )}
 
-                    {/* Bouton d'ajout d'une nouvelle case */}
-                    <button
-                      type="button"
-                      onClick={() => handleAddStorageItem("", formData.price || "")}
-                      className="w-full py-2.5 rounded-xl border border-dashed border-white/20 hover:border-gold text-zinc-300 hover:text-gold text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer bg-white/[0.01] hover:bg-gold/5"
+                    {/* Ajout par URL */}
+                    <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+                      <input 
+                        type="url" 
+                        value={newImageUrl} 
+                        onChange={e => setNewImageUrl(e.target.value)} 
+                        className="flex-1 bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:border-gold/50 outline-none" 
+                        placeholder="Ou collez un lien URL d'image (https://...)" 
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleAddImageUrl(newImageUrl)}
+                        disabled={!newImageUrl.trim()}
+                        className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors disabled:opacity-30 cursor-pointer"
+                      >
+                        + Ajouter URL
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 4. CARACTÉRISTIQUES SPÉCIFIQUES DYNAMIQUES PAR CATÉGORIE */}
+                  <div className="p-4 rounded-2xl bg-gold/[0.02] border border-gold/30 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {getCategoryIcon(formCategory, "w-4 h-4 text-gold")}
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                          4. Spécifications : {getCategoryConfig(formCategory).label}
+                        </h4>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/30">
+                        {getCategoryConfig(formCategory).fields.length} champ(s) configuré(s)
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {getCategoryConfig(formCategory).fields.map((field) => {
+                        const val = formSpecs[field.key] !== undefined ? formSpecs[field.key] : "";
+                        const errorMsg = formErrors[`specs_${field.key}`];
+
+                        return (
+                          <div key={field.key} className={field.key === "model" ? "sm:col-span-2" : ""}>
+                            <label className="text-[11px] text-zinc-300 uppercase font-bold flex items-center justify-between mb-1">
+                              <span>
+                                {field.label} {field.required && <span className="text-red-400">*</span>}
+                              </span>
+                              {field.unit && (
+                                <span className="text-[10px] text-gold font-mono px-1.5 py-0.2 rounded bg-gold/10 border border-gold/20">
+                                  {field.unit}
+                                </span>
+                              )}
+                            </label>
+
+                            {field.type === "select" ? (
+                              <select
+                                value={val}
+                                onChange={(e) => setFormSpecs({ ...formSpecs, [field.key]: e.target.value })}
+                                className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
+                                  errorMsg ? "border-red-500" : "border-white/10"
+                                }`}
+                              >
+                                <option value="">-- Sélectionner {field.label} --</option>
+                                {field.options?.map((opt) => (
+                                  <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : field.type === "number" ? (
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  min={field.min ?? 0}
+                                  max={field.max ?? Infinity}
+                                  step="any"
+                                  value={val}
+                                  onChange={(e) => setFormSpecs({ ...formSpecs, [field.key]: e.target.value })}
+                                  placeholder={field.placeholder || `Valeur en ${field.unit || "nombre"}`}
+                                  className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
+                                    field.unit ? "pr-14" : ""
+                                  } ${errorMsg ? "border-red-500" : "border-white/10"}`}
+                                />
+                                {field.unit && (
+                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gold font-bold pointer-events-none">
+                                    {field.unit}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <input
+                                type="text"
+                                value={val}
+                                onChange={(e) => setFormSpecs({ ...formSpecs, [field.key]: e.target.value })}
+                                placeholder={field.placeholder || `Saisir ${field.label.toLowerCase()}`}
+                                className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
+                                  errorMsg ? "border-red-500" : "border-white/10"
+                                }`}
+                              />
+                            )}
+
+                            {field.helpText && (
+                              <p className="text-[10px] text-zinc-500 mt-1">{field.helpText}</p>
+                            )}
+                            {errorMsg && (
+                              <span className="text-[10px] text-red-400 mt-1 block font-medium">{errorMsg}</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 5. VARIANTES MULTI-STOCKAGE (UNIQUEMENT SI LA CATÉGORIE LE SUPPORTE) */}
+                  {getCategoryConfig(formCategory).supportsStorageVariants && (
+                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <HardDrive className="w-4 h-4 text-gold" aria-hidden="true" />
+                            <span>5. Options de Stockage & Prix Différenciés</span>
+                          </label>
+                          <p className="text-[11px] text-zinc-400 mt-0.5">
+                            Permet au client de choisir entre différentes capacités avec recalcul automatique du prix.
+                          </p>
+                        </div>
+
+                        {/* Raccourcis d'ajout rapide */}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] text-zinc-500 uppercase font-bold mr-1">Raccourcis :</span>
+                          {["128 Go", "256 Go", "512 Go", "1 To", "2 To"].map((cap) => (
+                            <button
+                              key={cap}
+                              type="button"
+                              onClick={() => handleQuickAddStorage(cap)}
+                              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-zinc-300 text-[10px] font-bold border border-white/10 transition-all cursor-pointer"
+                            >
+                              + {cap}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {storageItems.length > 0 ? (
+                        <div className="space-y-2.5 pt-1">
+                          {storageItems.map((item, idx) => (
+                            <div 
+                              key={idx} 
+                              className="flex items-center gap-2.5 p-3 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition-all"
+                            >
+                              <div className="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center font-black text-xs flex-shrink-0">
+                                #{idx + 1}
+                              </div>
+
+                              <div className="flex-1">
+                                <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
+                                  Capacité de stockage
+                                </label>
+                                <input 
+                                  type="text" 
+                                  value={item.capacity} 
+                                  onChange={(e) => handleUpdateStorageItem(idx, "capacity", e.target.value)}
+                                  placeholder="Ex: 256 Go" 
+                                  className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-semibold focus:border-gold/50 outline-none"
+                                />
+                              </div>
+
+                              <div className="flex-1">
+                                <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
+                                  Prix associé (FCFA)
+                                </label>
+                                <input 
+                                  type="number" 
+                                  value={item.price} 
+                                  onChange={(e) => handleUpdateStorageItem(idx, "price", e.target.value)}
+                                  placeholder={`Ex: ${commonFormData.price || "625000"}`} 
+                                  className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-bold text-gold focus:border-gold/50 outline-none"
+                                />
+                              </div>
+
+                              <div className="pt-4 flex-shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveStorageItem(idx)}
+                                  className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white transition-colors cursor-pointer"
+                                  title="Supprimer cette option"
+                                >
+                                  <Trash2 className="w-4 h-4" aria-hidden="true" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-3.5 rounded-xl border border-dashed border-white/10 text-center text-zinc-500 text-xs">
+                          Optionnel : Utilisez les boutons de raccourci ci-dessus pour ajouter des variantes de stockage si ce modèle existe en plusieurs capacités.
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => handleAddStorageItem("", commonFormData.price || "")}
+                        className="w-full py-2.5 rounded-xl border border-dashed border-white/20 hover:border-gold text-zinc-300 hover:text-gold text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer bg-white/[0.01] hover:bg-gold/5"
+                      >
+                        <span>+</span>
+                        <span>Ajouter une option de stockage personnalisée</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* BOUTONS D'ACTION DU FORMULAIRE */}
+                  <div className="flex gap-4 pt-4 border-t border-white/10">
+                    <button 
+                      type="button" 
+                      onClick={closeModal} 
+                      className="flex-1 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
                     >
-                      <span>+</span>
-                      <span>Ajouter une case de stockage & prix</span>
+                      Annuler
+                    </button>
+
+                    <button 
+                      type="button" 
+                      onClick={() => setModalViewMode("preview")} 
+                      className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-gold font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-2"
+                    >
+                      <Eye className="w-4 h-4 text-gold" aria-hidden="true" />
+                      <span>Aperçu client</span>
+                    </button>
+
+                    <button 
+                      type="submit" 
+                      disabled={isSaving} 
+                      className="flex-1 py-3.5 rounded-xl bg-gold text-black font-extrabold text-xs uppercase tracking-wider hover:bg-yellow-400 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all disabled:opacity-50 cursor-pointer"
+                    >
+                      {isSaving ? "Enregistrement..." : (editingId ? "Mettre à jour" : "Créer le produit")}
                     </button>
                   </div>
-                )}
+                </form>
+              )}
 
-                {/* Caractéristiques Technologiques Spécifiques */}
-                <div className="flex flex-col gap-1 col-span-2 sm:col-span-1">
-                  <label className="text-xs text-zinc-400 uppercase tracking-wider">Quantité en Stock</label>
-                  <input 
-                    type="number" 
-                    min="0"
-                    value={formData.stock} 
-                    onChange={e => setFormData({...formData, stock: e.target.value})} 
-                    className="bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:border-gold/50 outline-none" 
-                    placeholder="Ex: 15" 
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1 col-span-2 sm:col-span-1">
-                  <label className="text-xs text-zinc-400 uppercase tracking-wider">État de l&apos;Appareil</label>
-                  <select 
-                    value={formData.condition} 
-                    onChange={e => setFormData({...formData, condition: e.target.value})} 
-                    className="bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:border-gold/50 outline-none"
-                  >
-                    <option value="neuf">Neuf sous blister scellé</option>
-                    <option value="occasion">Occasion Certifiée A+</option>
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1 col-span-2 sm:col-span-1">
-                  <label className="text-xs text-zinc-400 uppercase tracking-wider">Garantie Vendeur</label>
-                  <input 
-                    type="text" 
-                    value={formData.warranty} 
-                    onChange={e => setFormData({...formData, warranty: e.target.value})} 
-                    className="bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:border-gold/50 outline-none" 
-                    placeholder="Ex: Garantie 12 Mois Certifiée" 
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1 col-span-2 sm:col-span-1">
-                  <label className="text-xs text-zinc-400 uppercase tracking-wider">Mémoire RAM (Optionnel)</label>
-                  <input 
-                    type="text" 
-                    value={formData.ram} 
-                    onChange={e => setFormData({...formData, ram: e.target.value})} 
-                    className="bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:border-gold/50 outline-none" 
-                    placeholder="Ex: 8 Go RAM, 16 Go unifiée" 
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1 col-span-2">
-                  <label className="text-xs text-zinc-400 uppercase tracking-wider">Accessoires Inclus dans la Boîte</label>
-                  <input 
-                    type="text" 
-                    value={formData.accessories} 
-                    onChange={e => setFormData({...formData, accessories: e.target.value})} 
-                    className="bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:border-gold/50 outline-none" 
-                    placeholder="Ex: Chargeur rapide 20W, Câble tressé officiel, Écouteurs" 
-                  />
-                </div>
-                
-                <div className="flex flex-col gap-1 col-span-2">
-                  <label className="text-xs text-zinc-400 uppercase tracking-wider">Description</label>
-                  <textarea required rows={3} value={formData.desc} onChange={e => setFormData({...formData, desc: e.target.value})} className="bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:border-gold/50 outline-none resize-none" placeholder="Description luxueuse..."></textarea>
-                </div>
-              </div>
-
-              <div className="flex gap-4 mt-4 pt-4 border-t border-white/10">
-                <button type="button" onClick={closeModal} className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors cursor-pointer">
-                  Annuler
-                </button>
-                <button type="submit" disabled={isSaving} className="flex-1 py-3 rounded-xl bg-gold text-black font-bold uppercase tracking-widest hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all disabled:opacity-50 cursor-pointer">
-                  {isSaving ? "Enregistrement..." : (editingId ? "Mettre à jour" : "Créer")}
-                </button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

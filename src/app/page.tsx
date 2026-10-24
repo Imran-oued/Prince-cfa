@@ -61,6 +61,9 @@ type Product = {
 const categories = [
   { id: 'all', label: 'Tous' },
   { id: 'phones', label: 'Téléphones' },
+  { id: 'computers', label: 'Ordinateurs' },
+  { id: 'tablets', label: 'Tablettes' },
+  { id: 'accessories', label: 'Accessoires' },
   { id: 'tv', label: 'TV' },
   { id: 'tech', label: 'High-Tech' },
   { id: 'audio', label: 'Boomers' },
@@ -90,6 +93,61 @@ const getColorCode = (name: string) => {
   return '#a1a1aa';
 };
 
+function getProductSummarySnippet(product: Product): string {
+  const specs = product.specs || {};
+  const cat = (product.category || '').toLowerCase();
+
+  if (cat === 'computers' || cat === 'ordinateurs') {
+    const parts = [
+      specs.processor,
+      specs.ram ? `${specs.ram} Go RAM` : null,
+      specs.storageSize ? `${specs.storageSize} ${specs.storageType || ''}`.trim() : null
+    ].filter(Boolean);
+    if (parts.length > 0) return parts.join(' • ');
+  }
+
+  if (cat === 'mobility' || cat === 'motos') {
+    const parts = [
+      specs.motorPower ? `${specs.motorPower} W` : (specs.motor || null),
+      specs.rangeKm ? `${specs.rangeKm} km` : (specs.range || null),
+      specs.maxSpeedKm ? `${specs.maxSpeedKm} km/h` : (specs.speed || null)
+    ].filter(Boolean);
+    if (parts.length > 0) return parts.join(' • ');
+  }
+
+  if (cat === 'tablets' || cat === 'tablettes') {
+    const parts = [
+      specs.screenSize ? `${specs.screenSize}"` : (specs.screen || null),
+      specs.storageSize ? `${specs.storageSize} Go` : null,
+      specs.connectivity
+    ].filter(Boolean);
+    if (parts.length > 0) return parts.join(' • ');
+  }
+
+  if (cat === 'accessories' || cat === 'accessoires') {
+    const parts = [
+      specs.accessoryType,
+      specs.compatibility ? `Pour ${specs.compatibility}` : null
+    ].filter(Boolean);
+    if (parts.length > 0) return parts.join(' • ');
+  }
+
+  if (cat === 'phones' || cat === 'smartphones') {
+    const parts = [
+      specs.screen,
+      specs.processor,
+      specs.ram ? `${specs.ram} Go RAM` : null
+    ].filter(Boolean);
+    if (parts.length > 0) return parts.join(' • ');
+  }
+
+  if (specs.screen || specs.processor) {
+    return [specs.screen, specs.processor].filter(Boolean).join(' • ');
+  }
+
+  return product.desc || '';
+}
+
 function ProductCardItem({ 
   product, 
   onOpen, 
@@ -104,7 +162,7 @@ function ProductCardItem({
   const activeImage = images[activeColorIdx] || product.image;
   const activeColor = product.colors?.[activeColorIdx] || '';
   const optionsCount = product.storageOptions?.length || (product.category === 'phones' ? 4 : 0);
-  const specsSnippet = product.specs?.screen || product.specs?.processor || product.desc;
+  const specsSnippet = getProductSummarySnippet(product);
 
   // Glissement tactile au doigt directement sur la carte (Amazon / AliExpress Style)
   const [touchStartX, setTouchStartX] = useState(0);
@@ -235,7 +293,7 @@ function ProductCardItem({
           {/* Sous-titre / Spécifications courtes */}
           {specsSnippet && (
             <p className="text-[11px] sm:text-xs text-zinc-400 line-clamp-1 mt-0.5">
-              {product.specs?.screen ? `${product.specs.screen} • ` : ''}{product.specs?.processor || product.desc}
+              {specsSnippet}
             </p>
           )}
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { SHOP_CONFIG } from '@/config/shop';
 import { X, Star, HardDrive, Check } from 'lucide-react';
+import { getCategoryConfig } from '@/config/categories';
 
 const SPEC_LABELS = {
   screen: 'Écran',
@@ -72,127 +73,82 @@ export default function ProductDrawer({
     setShowAllSpecs(false);
   }
 
-  // Fiche technique et caractéristiques façon Amazon (Détails 2 colonnes sans aucun emoji)
+  // Fiche technique et caractéristiques dynamiques selon la catégorie (Amazon-like)
   const technicalDetails = useMemo(() => {
     if (!currentProduct) return [];
     const details = [];
 
     // 1. Marque
-    const brandName = currentProduct.brand || (currentProduct.category === 'phones' ? 'Apple' : 'PRINCE CFA');
-    if (brandName) {
-      details.push({ label: 'Marque', value: brandName });
+    if (currentProduct.brand) {
+      details.push({ label: 'Marque', value: currentProduct.brand });
     }
 
-    // 2. Système d'exploitation
-    if (currentProduct.category === 'phones') {
-      const isApple = (brandName || '').toLowerCase().includes('apple') || 
-                      (brandName || '').toLowerCase().includes('iphone') || 
-                      (currentProduct.name || '').toLowerCase().includes('iphone');
-      details.push({
-        label: "Système d'exploitation",
-        value: isApple ? 'iOS' : 'Android'
-      });
-    } else if (currentProduct.specs?.smart) {
-      details.push({
-        label: "Système d'exploitation",
-        value: String(currentProduct.specs.smart)
-      });
-    } else if (currentProduct.category === 'ordinateurs' || (currentProduct.name || '').toLowerCase().includes('macbook')) {
-      details.push({
-        label: "Système d'exploitation",
-        value: (currentProduct.name || '').toLowerCase().includes('mac') ? 'macOS' : 'Windows 11'
-      });
-    }
-
-    // 3. Capacité de stockage mémoire (synchronisée dynamiquement avec la capacité sélectionnée)
-    const currentCapacity = selectedCapacity || 
-                            (currentProduct.storageOptions && currentProduct.storageOptions[0]?.capacity) || 
-                            currentProduct.specs?.storage || 
-                            currentProduct.specs?.ram || '';
-    if (currentCapacity) {
-      details.push({
-        label: 'Capacité de stockage mémoire',
-        value: String(currentCapacity)
-      });
-    }
-
-    // 4. Fréquence de rafraîchissement
-    const screenLower = (currentProduct.specs?.screen || '').toLowerCase();
-    if (screenLower.includes('120hz') || screenLower.includes('promotion')) {
-      details.push({ label: 'Fréquence de rafraîchissement', value: '120 hertz' });
-    } else if (screenLower.includes('144hz')) {
-      details.push({ label: 'Fréquence de rafraîchissement', value: '144 hertz' });
-    } else if (screenLower.includes('60hz')) {
-      details.push({ label: 'Fréquence de rafraîchissement', value: '60 hertz' });
-    } else if (currentProduct.category === 'phones' && (currentProduct.name || '').toLowerCase().includes('pro')) {
-      details.push({ label: 'Fréquence de rafraîchissement', value: '120 hertz' });
-    }
-
-    // 5. Nom de modèle
+    // 2. Modèle ou nom de produit
     details.push({
       label: 'Nom de modèle',
       value: currentProduct.name
     });
 
-    // 6. Opérateur sans fil
-    if (currentProduct.category === 'phones') {
-      const isEsim = (currentProduct.name || '').toLowerCase().includes('esim') || 
-                     (selectedCapacity || '').toLowerCase().includes('esim');
+    // 3. État / Condition
+    if (currentProduct.condition) {
+      const condLabel = currentProduct.condition === 'neuf' 
+        ? 'Neuf sous blister scellé' 
+        : currentProduct.condition === 'reconditionne' 
+        ? 'Reconditionné à Neuf (Certifié)' 
+        : 'Occasion Certifiée A+';
+      details.push({ label: 'État du produit', value: condLabel });
+    }
+
+    // 4. Capacité de stockage sélectionnée (si variantes de stockage)
+    const currentCapacity = selectedCapacity || 
+                            (currentProduct.storageOptions && currentProduct.storageOptions[0]?.capacity) || 
+                            currentProduct.specs?.storageSize || '';
+    if (currentCapacity) {
       details.push({
-        label: 'Opérateur sans fil',
-        value: isEsim ? 'Débloqué (eSIM tout opérateur)' : 'Débloqué'
+        label: 'Capacité de stockage',
+        value: String(currentCapacity)
       });
     }
 
-    // 7. Technologie cellulaire
-    if (currentProduct.category === 'phones') {
-      details.push({
-        label: 'Technologie cellulaire',
-        value: '5G'
+    // 5. Spécifications spécifiques à la catégorie
+    const catConfig = getCategoryConfig(currentProduct.category);
+    if (catConfig && catConfig.fields && currentProduct.specs) {
+      catConfig.fields.forEach(field => {
+        const val = currentProduct.specs[field.key];
+        if (val !== undefined && val !== null && String(val).trim() !== '') {
+          let displayVal = String(val);
+          if (field.options && field.options.length > 0) {
+            const opt = field.options.find(o => o.value === String(val));
+            if (opt) displayVal = opt.label;
+          }
+          if (field.unit && !displayVal.toLowerCase().includes(field.unit.toLowerCase())) {
+            displayVal = `${displayVal} ${field.unit}`;
+          }
+          details.push({ label: field.label, value: displayVal });
+        }
       });
     }
 
-    // 8. Écran
-    if (currentProduct.specs?.screen) {
-      details.push({
-        label: 'Écran',
-        value: String(currentProduct.specs.screen)
-      });
-    }
-
-    // 9. Processeur
-    if (currentProduct.specs?.processor) {
-      details.push({
-        label: 'Processeur',
-        value: String(currentProduct.specs.processor)
-      });
-    }
-
-    // 10. Appareil photo
-    if (currentProduct.specs?.camera) {
-      details.push({
-        label: 'Appareil photo',
-        value: String(currentProduct.specs.camera)
-      });
-    }
-
-    // 11. Batterie & Alimentation
-    if (currentProduct.specs?.battery || currentProduct.specs?.battery_life) {
-      details.push({
-        label: 'Batterie & Alimentation',
-        value: String(currentProduct.specs.battery || currentProduct.specs.battery_life)
-      });
-    }
-
-    // 12. Autres spécifications spécifiques de l'objet specs
+    // 6. Rétrocompatibilité : autres clés de specs présentes dans les anciens produits
     if (currentProduct.specs) {
-      const handledKeys = ['screen', 'processor', 'camera', 'battery', 'battery_life', 'storage', 'smart'];
+      const officialKeys = catConfig?.fields ? catConfig.fields.map(f => f.key) : [];
+      const handledKeys = [...officialKeys, 'info'];
       Object.entries(currentProduct.specs).forEach(([k, v]) => {
-        if (!handledKeys.includes(k) && v && typeof v !== 'object') {
+        if (!handledKeys.includes(k) && v !== undefined && v !== null && String(v).trim() !== '' && typeof v !== 'object') {
           const label = SPEC_LABELS[k] || k.replace(/_/g, ' ');
           details.push({ label, value: String(v) });
         }
       });
+    }
+
+    // 7. Garantie
+    if (currentProduct.warranty) {
+      details.push({ label: 'Garantie', value: currentProduct.warranty });
+    }
+
+    // 8. Accessoires inclus
+    if (currentProduct.accessories) {
+      details.push({ label: 'Accessoires inclus', value: currentProduct.accessories });
     }
 
     return details;
