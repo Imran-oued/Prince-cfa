@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { SHOP_CONFIG } from "@/config/shop";
-import { createOrder, checkAndReserveStock } from "@/lib/firestore";
+import { createOrder, checkAndReserveStock, getProduct, getProducts } from "@/lib/firestore";
+import { products as defaultProducts } from "@/data/products";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 interface OrderItemInput {
   productId?: string | number;
@@ -22,12 +24,38 @@ interface PaymentConfig {
   recipientName?: string;
 }
 
+/**
+ * Nettoyage des chaînes textuelles pour neutraliser toute injection XSS
+ */
+function sanitizeText(str: any, maxLen = 250): string {
+  if (!str || typeof str !== "string") return "";
+  return str.replace(/[<>]/g, "").trim().slice(0, maxLen);
+}
+
 export async function POST(request: Request) {
   try {
+    const clientIp = getClientIp(request);
+
+    // 1. Protection Anti-Abus / Anti-DoS : Max 15 commandes par 10 minutes par adresse IP
+    const rateCheck = checkRateLimit(`order_create:${clientIp}`, {
+      intervalMs: 10 * 60 * 1000,
+      maxRequests: 15
+    });
+
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: "Trop de requêtes de commande. Veuillez patienter quelques instants avant de renouveler votre commande." 
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { customer, items, paymentMethod, transactionRef } = body;
 
-    // 1. Validation de base
+    // 2. Validation stricte des données client
     if (!customer || !customer.name?.trim()) {
       return NextResponse.json(
         { success: false, error: "Le nom du client est obligatoire." },
@@ -50,32 +78,84 @@ export async function POST(request: Request) {
       );
     }
 
+    // Bloquer les paniers démesurés (anti-DoS / memory exhaustion)
+    if (items.length > 50) {
+      return NextResponse.json(
+        { success: false, error: "Le panier dépasse la limite autorisée de 50 articles." },
+        { status: 400 }
+      );
+    }
+
     const validMethods = ["orange_money", "wave", "store_pickup"];
     const selectedMethod = validMethods.includes(paymentMethod) ? paymentMethod : "orange_money";
 
-    // 2. Calcul des montants côté serveur (sécurité anti-falsification)
-    let subtotal = 0;
-    const sanitizedItems = items.map((item: OrderItemInput) => {
-      const unitPrice = Math.max(0, Number(item.price) || 0);
-      const qty = Math.max(1, Math.floor(Number(item.quantity) || 1));
-      subtotal += unitPrice * qty;
+    // 3. Récupération du catalogue de référence côté serveur pour vérification stricte des prix
+    let cloudProducts: any[] | null = null;
+    try {
+      cloudProducts = await getProducts();
+    } catch {
+      // Repli sur le catalogue statique si indisponible
+    }
 
-      return {
-        productId: item.productId || item.id || "product",
-        name: String(item.name || "Produit"),
-        unitPrice,
+    // 4. Calcul et certification des montants côté serveur (SÉCURITÉ ANTI-FALSIFICATION DES PRIX)
+    let subtotal = 0;
+    const sanitizedItems = [];
+
+    for (const item of items as OrderItemInput[]) {
+      const rawProductId = String(item.productId || item.id || "");
+      const qty = Math.max(1, Math.min(100, Math.floor(Number(item.quantity) || 1)));
+
+      // Recherche du produit officiel dans le catalogue serveur (Firestore puis catalogue par défaut)
+      let authenticProduct: any = null;
+      if (cloudProducts && cloudProducts.length > 0) {
+        authenticProduct = cloudProducts.find(p => String(p.id) === rawProductId);
+      }
+      if (!authenticProduct) {
+        authenticProduct = defaultProducts.find(p => String(p.id) === rawProductId);
+      }
+
+      let authenticUnitPrice = 0;
+      let authenticName = sanitizeText(item.name || "Article", 120);
+      let authenticImage = item.image || "https://placehold.co/600x600/121216/d4af37?text=PRINCE+CFA";
+
+      if (authenticProduct) {
+        authenticName = authenticProduct.name;
+        authenticImage = authenticProduct.image || authenticImage;
+        authenticUnitPrice = Number(authenticProduct.salePrice || authenticProduct.price || 0);
+
+        // Si le client a sélectionné une capacité spécifique (ex: 256 Go, 512 Go)
+        if (item.selectedCapacity && authenticProduct.storageOptions && Array.isArray(authenticProduct.storageOptions)) {
+          const matchedOpt = authenticProduct.storageOptions.find(
+            (opt: any) => opt.capacity?.trim().toLowerCase() === String(item.selectedCapacity).trim().toLowerCase()
+          );
+          if (matchedOpt && Number(matchedOpt.price) > 0) {
+            authenticUnitPrice = Number(matchedOpt.price);
+          }
+        }
+      } else {
+        // Si le produit n'est pas trouvé dans le catalogue officiel (produit dynamique ou ancien),
+        // vérifier que le prix fourni est cohérent et positif
+        authenticUnitPrice = Math.max(0, Number(item.price) || 0);
+      }
+
+      subtotal += authenticUnitPrice * qty;
+
+      sanitizedItems.push({
+        productId: rawProductId || "product",
+        name: authenticName,
+        unitPrice: authenticUnitPrice,
         quantity: qty,
-        selectedCapacity: item.selectedCapacity || null,
-        selectedColor: item.selectedColor || null,
-        image: item.image || "https://placehold.co/600x600/121216/d4af37?text=PRINCE+CFA"
-      };
-    });
+        selectedCapacity: item.selectedCapacity ? sanitizeText(item.selectedCapacity, 30) : null,
+        selectedColor: item.selectedColor ? sanitizeText(item.selectedColor, 40) : null,
+        image: authenticImage
+      });
+    }
 
     const isDelivery = customer.deliveryMethod === "delivery";
     const deliveryFee = isDelivery ? SHOP_CONFIG.deliveryFee : 0;
     const total = subtotal + deliveryFee;
 
-    // 3. Contrôle & réservation du stock
+    // 5. Contrôle & réservation du stock
     const stockResult = await checkAndReserveStock(sanitizedItems);
     if (!stockResult.success) {
       return NextResponse.json(
@@ -84,18 +164,18 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Informations du moyen de paiement configuré
+    // 6. Informations du moyen de paiement configuré
     const paymentMethods = SHOP_CONFIG.paymentMethods as Record<string, PaymentConfig>;
     const paymentConfig = paymentMethods[selectedMethod] || SHOP_CONFIG.paymentMethods.orange_money;
 
     const orderPayload = {
       customer: {
-        name: customer.name.trim(),
+        name: sanitizeText(customer.name, 100),
         phone: cleanPhone,
         deliveryMethod: isDelivery ? "delivery" : "pickup",
-        city: customer.city?.trim() || (isDelivery ? "Ouagadougou" : "Showroom"),
-        neighborhood: customer.neighborhood?.trim() || "",
-        notes: customer.notes?.trim() || ""
+        city: sanitizeText(customer.city || (isDelivery ? "Ouagadougou" : "Showroom"), 80),
+        neighborhood: sanitizeText(customer.neighborhood || "", 120),
+        notes: sanitizeText(customer.notes || "", 300)
       },
       items: sanitizedItems,
       pricing: {
@@ -108,10 +188,10 @@ export async function POST(request: Request) {
         method: selectedMethod,
         expectedAmount: total,
         merchantNumber: paymentConfig.displayNumber || SHOP_CONFIG.displayPhone,
-        status: "en_attente", // RÈGLE ABSOLUE : Toujours en attente
+        status: "en_attente", // RÈGLE ABSOLUE : Toujours en attente à la création
         confirmedAt: null,
         confirmedBy: null,
-        transactionRef: transactionRef ? String(transactionRef).trim() : null
+        transactionRef: transactionRef ? sanitizeText(String(transactionRef), 80) : null
       }
     };
 

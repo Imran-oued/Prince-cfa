@@ -1,8 +1,27 @@
 import { NextResponse } from "next/server";
 import { getOrderById, getOrders } from "@/lib/firestore";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
-function sanitizePublicOrder(order: any) {
+/**
+ * Assainit et filtre les données sensibles pour la consultation publique
+ * Protège les données personnelles (RGPD / vie privée)
+ */
+function sanitizePublicOrder(order: any, isPhoneVerified = false) {
   if (!order) return null;
+
+  const rawPhone = order.customer?.phone || "";
+  // Masquage du numéro : ex. 70 •••• 12
+  const phoneMasked = rawPhone.length >= 4 
+    ? rawPhone.replace(/(\d{2})(\d+)(\d{2})$/, "$1 •••• $3")
+    : "••••••••";
+
+  // Si le numéro a été vérifié par le demandeur, on peut afficher le prénom/nom,
+  // sinon on masque le nom pour éviter l'exposition d'identité sur simple devinette d'ID
+  const customerName = isPhoneVerified
+    ? (order.customer?.name || "Client")
+    : (order.customer?.name 
+        ? order.customer.name.split(" ").map((w: string) => w.length > 1 ? `${w[0]}***` : w).join(" ")
+        : "Client");
 
   return {
     id: order.id,
@@ -10,14 +29,11 @@ function sanitizePublicOrder(order: any) {
     updatedAt: order.updatedAt,
     orderStatus: order.orderStatus || "en_attente_paiement",
     customer: {
-      name: order.customer?.name || "Client",
+      name: customerName,
       deliveryMethod: order.customer?.deliveryMethod || "delivery",
       city: order.customer?.city || "Ouagadougou",
-      neighborhood: order.customer?.neighborhood || "",
-      // Masquer partiellement le numéro pour préserver la vie privée en consultation publique
-      phoneMasked: order.customer?.phone
-        ? order.customer.phone.replace(/(\d{2})(\d+)(\d{2})/, "$1 •••• $3")
-        : ""
+      neighborhood: isPhoneVerified ? (order.customer?.neighborhood || "") : "Zone réservée",
+      phoneMasked
     },
     items: (order.items || []).map((item: any) => ({
       name: item.name,
@@ -25,7 +41,7 @@ function sanitizePublicOrder(order: any) {
       selectedCapacity: item.selectedCapacity || null,
       selectedColor: item.selectedColor || null,
       unitPrice: item.unitPrice,
-      image: item.image || "/images/placeholder.png"
+      image: item.image || "https://placehold.co/600x600/121216/d4af37?text=PRINCE+CFA"
     })),
     pricing: {
       subtotal: order.pricing?.subtotal || 0,
@@ -36,8 +52,8 @@ function sanitizePublicOrder(order: any) {
     payment: {
       status: order.payment?.status || "en_attente",
       method: order.payment?.method || "orange_money",
-      confirmedAt: order.payment?.confirmedAt || null,
-      transactionRef: order.payment?.transactionRef || null
+      confirmedAt: order.payment?.confirmedAt || null
+      // La référence interne et les détails de tracking (IMEI/SAV) sont STRICTEMENT exclus
     },
     statusHistory: (order.statusHistory || []).map((h: any) => ({
       status: h.status,
@@ -53,6 +69,24 @@ function cleanDigits(val: string): string {
 
 export async function GET(request: Request) {
   try {
+    const clientIp = getClientIp(request);
+
+    // 1. Limitation de débit anti-scraping : Max 20 requêtes par minute par IP
+    const rateCheck = checkRateLimit(`track:${clientIp}`, {
+      intervalMs: 60 * 1000,
+      maxRequests: 20
+    });
+
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: "Trop de requêtes de suivi. Veuillez patienter une minute avant de réessayer." 
+        },
+        { status: 429 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get("id")?.trim() || "";
     const phone = searchParams.get("phone")?.trim() || "";
@@ -66,37 +100,38 @@ export async function GET(request: Request) {
       );
     }
 
-    // 1. Recherche directe par identifiant exact de commande (ex: CMD-20261023-XXXX)
-    if (orderId && !cleanDigits(orderId).startsWith(orderId)) {
+    // 2. Recherche directe par référence de commande (ex: CMD-20261023-XXXX)
+    if (orderId && orderId.toUpperCase().startsWith("CMD")) {
       const order = await getOrderById(orderId);
       if (order) {
+        let isPhoneVerified = false;
         if (phone) {
           const clientDigits = cleanDigits(phone);
           const orderDigits = cleanDigits(order.customer?.phone || "");
-          if (clientDigits && orderDigits && !orderDigits.endsWith(clientDigits) && !clientDigits.endsWith(orderDigits)) {
-            return NextResponse.json(
-              { success: false, error: "Le numéro de téléphone ne correspond pas à cette référence de commande." },
-              { status: 403 }
-            );
+          if (clientDigits && orderDigits) {
+            if (!orderDigits.endsWith(clientDigits) && !clientDigits.endsWith(orderDigits)) {
+              return NextResponse.json(
+                { success: false, error: "Le numéro de téléphone ne correspond pas à cette référence de commande." },
+                { status: 403 }
+              );
+            }
+            isPhoneVerified = true;
           }
         }
-        return NextResponse.json({ success: true, order: sanitizePublicOrder(order) });
-      }
-    } else if (orderId) {
-      // Si l'orderId ressemble à un identifiant exact, essayons d'abord getOrderById
-      const order = await getOrderById(orderId);
-      if (order) {
-        return NextResponse.json({ success: true, order: sanitizePublicOrder(order) });
+        return NextResponse.json({ 
+          success: true, 
+          order: sanitizePublicOrder(order, isPhoneVerified) 
+        });
       }
     }
 
-    // 2. Recherche par numéro de téléphone (soit via le paramètre phone, soit orderId/query contenant des chiffres)
-    const phoneCandidate = phone || (cleanDigits(orderId).length >= 6 ? orderId : "") || (cleanDigits(query).length >= 6 ? query : "");
+    // 3. Recherche par numéro de téléphone (au moins 8 chiffres requis pour éviter les collisions massives)
+    const phoneCandidate = phone || (cleanDigits(orderId).length >= 8 ? orderId : "") || (cleanDigits(query).length >= 8 ? query : "");
     if (phoneCandidate) {
       const searchDigits = cleanDigits(phoneCandidate);
-      if (searchDigits.length < 6) {
+      if (searchDigits.length < 8) {
         return NextResponse.json(
-          { success: false, error: "Veuillez entrer un numéro de téléphone valide (au moins 8 chiffres)." },
+          { success: false, error: "Un numéro de téléphone complet d'au moins 8 chiffres est requis pour la recherche." },
           { status: 400 }
         );
       }
@@ -109,7 +144,7 @@ export async function GET(request: Request) {
 
       if (matching.length === 0) {
         return NextResponse.json(
-          { success: false, error: `Aucune commande trouvée pour le numéro ${phoneCandidate}. Vérifiez votre saisie.` },
+          { success: false, error: `Aucune commande trouvée pour le numéro indiqué. Vérifiez votre saisie.` },
           { status: 404 }
         );
       }
@@ -119,20 +154,21 @@ export async function GET(request: Request) {
       
       return NextResponse.json({
         success: true,
-        order: sanitizePublicOrder(matching[0]),
-        orders: matching.map(sanitizePublicOrder),
+        order: sanitizePublicOrder(matching[0], true),
+        orders: matching.map((o: any) => sanitizePublicOrder(o, true)),
         totalFound: matching.length
       });
     }
 
-    // 3. Dernier recours : tenter une recherche insensible à la casse sur l'ID dans la liste globale
-    const allOrders = await getOrders();
-    const matchById = (allOrders || []).find((o: any) => 
-      o.id && o.id.toLowerCase() === term.toLowerCase()
-    );
-
-    if (matchById) {
-      return NextResponse.json({ success: true, order: sanitizePublicOrder(matchById) });
+    // 4. Recherche par ID exact sans préfixe
+    if (orderId) {
+      const order = await getOrderById(orderId);
+      if (order) {
+        return NextResponse.json({ 
+          success: true, 
+          order: sanitizePublicOrder(order, false) 
+        });
+      }
     }
 
     return NextResponse.json(

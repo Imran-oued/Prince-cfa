@@ -315,16 +315,7 @@ export default function AdminPage() {
       } else {
         setProductsList(defaultProducts);
       }
-
-      // 2. Commandes
-      try {
-        const loadedOrders = (await getOrders()) as OrderRecord[];
-        if (loadedOrders && Array.isArray(loadedOrders)) {
-          setOrdersList(loadedOrders);
-        }
-      } catch (err) {
-        console.warn("Erreur chargement commandes:", err);
-      }
+      // Les commandes des clients ne sont JAMAIS chargées sans authentification administrateur vérifiée
     }
 
     loadData();
@@ -351,7 +342,7 @@ export default function AdminPage() {
       setAdminToken(data.token);
       setIsAuthenticated(true);
       
-      // Recharger les commandes fraîches depuis l'API
+      // Recharger les commandes fraîches depuis l'API sécurisée
       try {
         const ordersRes = await fetch("/api/admin/orders", {
           headers: { Authorization: `Bearer ${data.token}` }
@@ -378,21 +369,23 @@ export default function AdminPage() {
     setIsAuthenticated(false);
     setAdminToken("");
     setPassword("");
+    setOrdersList([]);
+    setSelectedOrder(null);
   };
 
-  // Recharger manuellement les commandes
+  // Recharger manuellement les commandes via l'API sécurisée
   const refreshOrders = async () => {
+    if (!adminToken) return;
     try {
       const ordersRes = await fetch("/api/admin/orders", {
-        headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {}
+        headers: { Authorization: `Bearer ${adminToken}` }
       });
       if (ordersRes.ok) {
         const data = await ordersRes.json();
         if (data.orders) setOrdersList(data.orders);
       }
-    } catch {
-      const local = (await getOrders()) as OrderRecord[];
-      if (local) setOrdersList(local);
+    } catch (e) {
+      console.warn("Erreur rechargement commandes:", e);
     }
   };
 
