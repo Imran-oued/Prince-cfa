@@ -585,9 +585,6 @@ export default function Home() {
         
         {/* Section Hero Percutante */}
         <div className="space-y-8 py-16 text-center animate-in slide-in-from-bottom-8 duration-1000 fade-in">
-          <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 text-gold text-sm font-medium tracking-widest uppercase mb-4 shadow-[0_0_20px_rgba(212,175,55,0.15)]">
-            L&apos;Élégance Redéfinie
-          </div>
           <h1 className="text-5xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight text-foreground drop-shadow-lg">
             PRINCE <span className="text-transparent bg-clip-text bg-gradient-to-br from-gold to-yellow-600">CFA</span>
           </h1>
