@@ -892,6 +892,7 @@ export default function AdminPage() {
     }
 
     setIsSaving(false);
+    clearDraft();
     closeModal();
   };
 
@@ -921,6 +922,79 @@ export default function AdminPage() {
     }
   };
 
+  // Calcul si des informations ont commencé à être renseignées dans le formulaire
+  const isFormDirty = Boolean(
+    commonFormData.name.trim() ||
+    commonFormData.brand.trim() ||
+    commonFormData.price.trim() ||
+    commonFormData.desc.trim() ||
+    imageList.length > 0 ||
+    storageItems.length > 0 ||
+    Object.values(formSpecs).some(v => v !== undefined && v !== null && String(v).trim() !== "")
+  );
+
+  // État indiquant si un brouillon précédent a été restauré
+  const [draftRestored, setDraftRestored] = useState(false);
+
+  // Sauvegarde automatique du brouillon en arrière-plan (mode création uniquement)
+  useEffect(() => {
+    if (!isModalOpen || editingId) return;
+
+    if (isFormDirty) {
+      try {
+        const draftPayload = {
+          formCategory,
+          commonFormData,
+          formSpecs,
+          storageItems,
+          imageList,
+          savedAt: Date.now()
+        };
+        localStorage.setItem("prince_cfa_product_draft", JSON.stringify(draftPayload));
+      } catch (e) {
+        console.warn("Erreur sauvegarde brouillon:", e);
+      }
+    }
+  }, [isModalOpen, editingId, isFormDirty, formCategory, commonFormData, formSpecs, storageItems, imageList]);
+
+  // Nettoyage du brouillon une fois le produit sauvegardé ou si l'utilisateur annule explicitement
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem("prince_cfa_product_draft");
+    } catch {}
+    setDraftRestored(false);
+  };
+
+  // Verrouillage du scroll en arrière-plan lorsque le modal est ouvert (évite les défilements parasites sur mobile)
+  useEffect(() => {
+    if (isModalOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isModalOpen]);
+
+  // Alerte si l'utilisateur quitte ou rafraîchit la page par mégarde avec un formulaire en cours
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isModalOpen && isFormDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isModalOpen, isFormDirty]);
+
+  // Empêcher la soumission involontaire du formulaire lorsqu'on appuie sur Entrée sur clavier mobile
+  const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
+      e.preventDefault();
+    }
+  };
+
   const openModalForEdit = (product: AdminProduct) => {
     const normalized = normalizeProductSpecs(product);
     setEditingId(product.id);
@@ -929,6 +1003,7 @@ export default function AdminPage() {
     setFormErrors({});
     setModalViewMode("form");
     setCategorySwitchPending(null);
+    setDraftRestored(false);
 
     let initialImages: string[] = [];
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {
@@ -967,6 +1042,7 @@ export default function AdminPage() {
     setIsModalOpen(true);
   };
 
+  // Fermeture définitive et réinitialisation de l'état
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingId(null);
@@ -978,6 +1054,7 @@ export default function AdminPage() {
     setFormErrors({});
     setModalViewMode("form");
     setCategorySwitchPending(null);
+    setDraftRestored(false);
     setCommonFormData({
       name: "",
       brand: "",
@@ -992,29 +1069,70 @@ export default function AdminPage() {
     });
   };
 
+  // Fermeture sécurisée : demande confirmation si des informations ont été saisies pour ne rien perdre
+  const requestCloseModal = () => {
+    if (isFormDirty) {
+      const confirmLeave = window.confirm(
+        "Vous avez commencé à remplir les informations de ce produit.\n\nVoulez-vous vraiment fermer le formulaire ? Les modifications non enregistrées seront perdues."
+      );
+      if (!confirmLeave) return;
+    }
+    clearDraft();
+    closeModal();
+  };
+
   const openModalForNew = () => {
     setEditingId(null);
-    setImageList([]);
-    setStorageItems([]);
-    setNewImageUrl("");
-    setFormCategory("phones");
-    setFormSpecs({});
     setFormErrors({});
     setModalViewMode("form");
     setCategorySwitchPending(null);
-    const phoneConfig = getCategoryConfig("phones");
-    setCommonFormData({
-      name: "",
-      brand: "",
-      price: "",
-      salePrice: "",
-      desc: "",
-      colors: "",
-      stock: "10",
-      condition: "neuf",
-      warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
-      accessories: phoneConfig.defaultAccessories || "",
-    });
+
+    // Vérifier si un brouillon sauvegardé existe
+    let restored = false;
+    try {
+      const savedDraft = localStorage.getItem("prince_cfa_product_draft");
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        // Si le brouillon a moins de 48h et contient des données concrètes
+        if (parsed && (Date.now() - (parsed.savedAt || 0) < 48 * 3600 * 1000)) {
+          if (parsed.commonFormData && (parsed.commonFormData.name || parsed.commonFormData.price || (parsed.imageList && parsed.imageList.length > 0))) {
+            setFormCategory(parsed.formCategory || "phones");
+            setCommonFormData(parsed.commonFormData);
+            setFormSpecs(parsed.formSpecs || {});
+            setStorageItems(parsed.storageItems || []);
+            setImageList(parsed.imageList || []);
+            setNewImageUrl("");
+            setDraftRestored(true);
+            restored = true;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Erreur lecture brouillon", e);
+    }
+
+    if (!restored) {
+      setImageList([]);
+      setStorageItems([]);
+      setNewImageUrl("");
+      setFormCategory("phones");
+      setFormSpecs({});
+      setDraftRestored(false);
+      const phoneConfig = getCategoryConfig("phones");
+      setCommonFormData({
+        name: "",
+        brand: "",
+        price: "",
+        salePrice: "",
+        desc: "",
+        colors: "",
+        stock: "10",
+        condition: "neuf",
+        warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
+        accessories: phoneConfig.defaultAccessories || "",
+      });
+    }
+
     setIsModalOpen(true);
   };
 
@@ -1908,10 +2026,14 @@ export default function AdminPage() {
 
       {/* MODAL AJOUT / MODIFICATION DYNAMIQUE PAR CATÉGORIE */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden">
-          <div className="absolute inset-0 bg-black/85 backdrop-blur-md" onClick={closeModal}></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-6 overflow-hidden">
+          {/* Backdrop sombre sécurisé : sur grand écran, demande confirmation si des données sont saisies ; sur mobile, ne ferme jamais accidentellement */}
+          <div 
+            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+            onClick={requestCloseModal}
+          ></div>
           
-          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/15 w-full max-w-4xl z-10 max-h-[92vh] flex flex-col relative bg-[#0d0d11]/95 shadow-2xl">
+          <div className="glass-panel p-4 sm:p-8 rounded-none sm:rounded-3xl border-0 sm:border border-white/15 w-full h-full sm:h-auto sm:max-h-[92vh] max-w-4xl z-10 flex flex-col relative bg-[#0d0d11] sm:bg-[#0d0d11]/95 shadow-2xl">
             
             {/* Entête du Modal & Bascule Formulaire / Aperçu en direct */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10 flex-shrink-0">
@@ -1961,7 +2083,7 @@ export default function AdminPage() {
 
                 <button
                   type="button"
-                  onClick={closeModal}
+                  onClick={requestCloseModal}
                   className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                   title="Fermer"
                 >
@@ -1970,8 +2092,44 @@ export default function AdminPage() {
               </div>
             </div>
 
+            {/* Bannière d'information si un brouillon a été restauré */}
+            {draftRestored && (
+              <div className="px-3.5 py-2 mx-0 mt-3 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-between text-xs text-gold flex-shrink-0">
+                <span className="flex items-center gap-2 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-gold flex-shrink-0" />
+                  <span>Brouillon précédent restauré automatiquement.</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearDraft();
+                    const phoneConfig = getCategoryConfig("phones");
+                    setFormCategory("phones");
+                    setFormSpecs({});
+                    setStorageItems([]);
+                    setImageList([]);
+                    setCommonFormData({
+                      name: "",
+                      brand: "",
+                      price: "",
+                      salePrice: "",
+                      desc: "",
+                      colors: "",
+                      stock: "10",
+                      condition: "neuf",
+                      warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
+                      accessories: phoneConfig.defaultAccessories || "",
+                    });
+                  }}
+                  className="underline text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer ml-3 flex-shrink-0"
+                >
+                  Recommencer à zéro
+                </button>
+              </div>
+            )}
+
             {/* Contenu Défilant */}
-            <div className="overflow-y-auto flex-1 py-6 pr-1 space-y-6">
+            <div className="overflow-y-auto flex-1 py-4 sm:py-6 pr-1 space-y-6">
 
               {/* VUE 1 : APERÇU EN DIRECT (LIVE PREVIEW) */}
               {modalViewMode === "preview" && (
@@ -2191,7 +2349,11 @@ export default function AdminPage() {
 
               {/* VUE 2 : FORMULAIRE DYNAMIQUE DE SAISIE */}
               {modalViewMode === "form" && (
-                <form onSubmit={handleSaveProduct} className="space-y-6">
+                <form 
+                  onSubmit={handleSaveProduct} 
+                  onKeyDown={handleFormKeyDown}
+                  className="space-y-6"
+                >
 
                   {/* 1. SÉLECTION DYNAMIQUE DE LA CATÉGORIE */}
                   <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
@@ -2758,7 +2920,7 @@ export default function AdminPage() {
                   <div className="flex gap-4 pt-4 border-t border-white/10">
                     <button 
                       type="button" 
-                      onClick={closeModal} 
+                      onClick={requestCloseModal} 
                       className="flex-1 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
                     >
                       Annuler
