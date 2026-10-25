@@ -9,6 +9,7 @@ import {
   deleteDoc,
   orderBy,
   query,
+  runTransaction,
 } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "./firebase.js";
 
@@ -493,36 +494,48 @@ export async function updateOrderInternalTracking(orderId, trackingData = {}) {
 export async function checkAndReserveStock(items) {
   if (!items || !items.length) return { success: true };
 
-  // Si Firestore est configuré, on vérifie et décrémente
+  // Si Firestore est configuré, on vérifie et décrémente de manière transactionnelle et atomique
   if (isFirebaseConfigured()) {
     try {
-      for (const item of items) {
-        const prodId = String(item.productId);
-        const prodDoc = await getProduct(prodId);
-        if (prodDoc) {
-          if (prodDoc.inStock === false) {
-            return {
-              success: false,
-              error: `Stock insuffisant : le produit "${item.name}" est en rupture de stock.`
-            };
-          }
-          if (typeof prodDoc.stock === "number") {
-            if (prodDoc.stock < item.quantity) {
-              return {
-                success: false,
-                error: `Stock insuffisant pour "${item.name}". Disponible: ${prodDoc.stock}, demandé: ${item.quantity}.`
-              };
+      await runTransaction(db, async (transaction) => {
+        // Phase 1 : Toutes les lectures doivent être exécutées en premier (règle stricte Firestore)
+        const updates = [];
+        for (const item of items) {
+          const prodId = String(item.productId);
+          const docRef = doc(db, PRODUCTS_COLLECTION, prodId);
+          const snap = await transaction.get(docRef);
+
+          if (snap.exists()) {
+            const data = snap.data();
+            if (data.inStock === false) {
+              throw new Error(`Stock insuffisant : le produit "${item.name}" est en rupture de stock.`);
             }
-            // Décrémenter le stock
-            await updateDoc(doc(db, PRODUCTS_COLLECTION, prodId), {
-              stock: prodDoc.stock - item.quantity,
-              updatedAt: new Date().toISOString()
-            });
+            if (typeof data.stock === "number") {
+              if (data.stock < item.quantity) {
+                throw new Error(`Stock insuffisant pour "${item.name}". Disponible: ${data.stock}, demandé: ${item.quantity}.`);
+              }
+              updates.push({
+                docRef,
+                newStock: data.stock - item.quantity
+              });
+            }
           }
         }
-      }
+
+        // Phase 2 : Toutes les écritures atomiques
+        const now = new Date().toISOString();
+        for (const u of updates) {
+          transaction.update(u.docRef, {
+            stock: u.newStock,
+            updatedAt: now
+          });
+        }
+      });
     } catch (err) {
-      console.warn("Avertissement gestion de stock Firestore:", err);
+      if (err.message && (err.message.includes("Stock insuffisant") || err.message.includes("rupture de stock"))) {
+        return { success: false, error: err.message };
+      }
+      console.warn("Avertissement gestion de stock Firestore transactionnelle:", err);
     }
   }
 

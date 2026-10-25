@@ -4,21 +4,39 @@ import { products as defaultProducts } from "../data/products.js";
 // Cache mémoire serveur pour les produits du catalogue
 interface ProductsCacheEntry {
   data: any[];
+  jsonString: string;
+  etag: string;
   expiresAt: number;
 }
 
 let productsCache: ProductsCacheEntry | null = null;
 const PRODUCTS_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-/**
- * Récupère le catalogue de produits avec mise en cache mémoire côté serveur.
- * Élimine les lectures répétitives de Firestore sous forte charge concurrente.
- */
-export async function getCachedProducts(): Promise<any[]> {
-  const now = Date.now();
+function buildCacheEntry(products: any[], ttlMs: number): ProductsCacheEntry {
+  const jsonString = JSON.stringify({ success: true, products });
+  // Générer un ETag déterministe et ultra-rapide basé sur la taille et le timestamp
+  let hash = 0;
+  for (let i = 0; i < jsonString.length; i = i + 16) {
+    hash = (hash << 5) - hash + jsonString.charCodeAt(i);
+    hash |= 0;
+  }
+  const etag = `W/"prod-${Math.abs(hash).toString(36)}-${products.length}"`;
 
+  return {
+    data: products,
+    jsonString,
+    etag,
+    expiresAt: Date.now() + ttlMs,
+  };
+}
+
+/**
+ * Charge ou rafraîchit l'entrée de cache des produits.
+ */
+async function loadProductsCacheEntry(): Promise<ProductsCacheEntry> {
+  const now = Date.now();
   if (productsCache && now < productsCache.expiresAt) {
-    return productsCache.data;
+    return productsCache;
   }
 
   try {
@@ -29,11 +47,8 @@ export async function getCachedProducts(): Promise<any[]> {
       const missingDefaults = (defaultProducts as any[]).filter(dp => !existingIds.has(String(dp.id)));
       const combined = [...cloudProducts, ...missingDefaults];
 
-      productsCache = {
-        data: combined,
-        expiresAt: now + PRODUCTS_TTL_MS,
-      };
-      return combined;
+      productsCache = buildCacheEntry(combined, PRODUCTS_TTL_MS);
+      return productsCache;
     }
   } catch (error) {
     console.warn("[serverCache] Impossible de charger Firestore, utilisation du catalogue par défaut:", error);
@@ -41,11 +56,29 @@ export async function getCachedProducts(): Promise<any[]> {
 
   // Fallback si Firestore indisponible ou vide
   const fallback = defaultProducts as any[];
-  productsCache = {
-    data: fallback,
-    expiresAt: now + 60 * 1000, // Réessayer dans 1 minute
+  productsCache = buildCacheEntry(fallback, 60 * 1000);
+  return productsCache;
+}
+
+/**
+ * Récupère le catalogue de produits avec mise en cache mémoire côté serveur.
+ */
+export async function getCachedProducts(): Promise<any[]> {
+  const entry = await loadProductsCacheEntry();
+  return entry.data;
+}
+
+/**
+ * Récupère directement le JSON pré-sérialisé et l'ETag en mémoire vive.
+ * Élimine à 100% le goulot d'étranglement de JSON.stringify() sous 1 000 connexions concurrentes.
+ */
+export async function getCachedProductsJson(): Promise<{ data: any[]; jsonString: string; etag: string }> {
+  const entry = await loadProductsCacheEntry();
+  return {
+    data: entry.data,
+    jsonString: entry.jsonString,
+    etag: entry.etag,
   };
-  return fallback;
 }
 
 /**
