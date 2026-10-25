@@ -24,6 +24,8 @@ import {
   Store, 
   Check, 
   X, 
+  Search,
+  Filter,
   CreditCard, 
   ExternalLink, 
   AlertTriangle, 
@@ -245,6 +247,10 @@ export default function AdminPage() {
   const [isCloud, setIsCloud] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
+  
+  // Recherche et filtrage du catalogue produits
+  const [productSearchQuery, setProductSearchQuery] = useState("");
+  const [productCategoryFilter, setProductCategoryFilter] = useState("all");
   
   // Données dynamiques des produits selon la catégorie
   const [formCategory, setFormCategory] = useState<string>("phones");
@@ -1149,6 +1155,31 @@ export default function AdminPage() {
     return matchQuery && matchStatus;
   });
 
+  // Filtrage des produits du catalogue
+  const filteredProducts = productsList.filter((product) => {
+    // Filtre par catégorie sélectionnée
+    if (productCategoryFilter !== "all" && product.category !== productCategoryFilter) {
+      return false;
+    }
+    // Filtre par mot-clé de recherche (insensible à la casse et accents simples)
+    if (!productSearchQuery.trim()) return true;
+    const q = productSearchQuery.toLowerCase().trim();
+    const name = (product.name || "").toLowerCase();
+    const brand = (product.brand || "").toLowerCase();
+    const desc = (product.desc || "").toLowerCase();
+    const id = String(product.id || "").toLowerCase();
+    const categoryConfig = getCategoryConfig(product.category);
+    const categoryLabel = (categoryConfig?.label || "").toLowerCase();
+
+    return (
+      name.includes(q) ||
+      brand.includes(q) ||
+      desc.includes(q) ||
+      id.includes(q) ||
+      categoryLabel.includes(q)
+    );
+  });
+
   // Statistiques
   const totalCatalogValue = productsList.reduce((sum, p) => sum + (Number(p.price) || 0), 0);
   const totalProductsCount = productsList.length;
@@ -1888,6 +1919,84 @@ export default function AdminPage() {
             </div>
           )}
 
+          {/* Barre de Recherche et Filtres Catalogue */}
+          <div className="p-4 sm:px-6 bg-white/[0.02] border-b border-white/10 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              {/* Champ de recherche texte */}
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
+                <input 
+                  type="text"
+                  value={productSearchQuery}
+                  onChange={(e) => setProductSearchQuery(e.target.value)}
+                  placeholder="Rechercher par nom, marque (Honda, Apple...), ID ou mot-clé..."
+                  className="w-full bg-black/50 border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all"
+                />
+                {productSearchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setProductSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white rounded-md transition-colors cursor-pointer"
+                    title="Effacer la recherche"
+                    aria-label="Effacer la recherche"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Filtre par catégorie */}
+              <div className="relative min-w-[210px]">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center text-zinc-400">
+                  <Filter className="w-3.5 h-3.5 mr-1 text-gold/80" aria-hidden="true" />
+                </div>
+                <select
+                  value={productCategoryFilter}
+                  onChange={(e) => setProductCategoryFilter(e.target.value)}
+                  className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs font-medium text-zinc-200 focus:outline-none focus:border-gold/50 cursor-pointer appearance-none"
+                  aria-label="Filtrer par catégorie"
+                >
+                  <option value="all" className="bg-zinc-900 text-white">
+                    Toutes les catégories ({productsList.length})
+                  </option>
+                  {CATEGORIES_LIST.map((cat) => {
+                    const count = productsList.filter(p => p.category === cat.id).length;
+                    return (
+                      <option key={cat.id} value={cat.id} className="bg-zinc-900 text-white">
+                        {cat.label} ({count})
+                      </option>
+                    );
+                  })}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500 text-xs">
+                  ▼
+                </div>
+              </div>
+            </div>
+
+            {/* Compteur et bouton de réinitialisation */}
+            <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-zinc-400 pt-1 md:pt-0">
+              <span className="font-medium whitespace-nowrap">
+                <span className="text-gold font-bold">{filteredProducts.length}</span> sur {productsList.length} produit{productsList.length > 1 ? "s" : ""}
+              </span>
+
+              {(productSearchQuery || productCategoryFilter !== "all") && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProductSearchQuery("");
+                    setProductCategoryFilter("all");
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white transition-all text-xs flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                  title="Réinitialiser les filtres"
+                >
+                  <X className="w-3 h-3" />
+                  <span>Effacer filtres</span>
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Table des Produits */}
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse">
@@ -1900,7 +2009,7 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
-                {productsList.map((product) => (
+                {filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
@@ -1962,9 +2071,42 @@ export default function AdminPage() {
                     </td>
                   </tr>
                 ))}
-                {productsList.length === 0 && (
+                {filteredProducts.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-zinc-500">Aucun produit dans le catalogue.</td>
+                    <td colSpan={4} className="p-10 text-center">
+                      <div className="max-w-md mx-auto flex flex-col items-center justify-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400">
+                          <Search className="w-5 h-5 text-gold/70" />
+                        </div>
+                        <p className="text-sm font-semibold text-white">
+                          {productsList.length === 0 
+                            ? "Aucun produit dans le catalogue." 
+                            : "Aucun produit ne correspond à vos critères."}
+                        </p>
+                        {productsList.length > 0 && (productSearchQuery || productCategoryFilter !== "all") && (
+                          <div className="flex flex-col items-center gap-2">
+                            <p className="text-xs text-zinc-400">
+                              {productSearchQuery && (
+                                <span>Recherche : &laquo; <strong className="text-white">{productSearchQuery}</strong> &raquo; </span>
+                              )}
+                              {productCategoryFilter !== "all" && (
+                                <span>dans <strong className="text-gold">{getCategoryConfig(productCategoryFilter).label}</strong></span>
+                              )}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setProductSearchQuery("");
+                                setProductCategoryFilter("all");
+                              }}
+                              className="mt-1 px-3 py-1.5 rounded-xl bg-gold/15 text-gold border border-gold/30 hover:bg-gold hover:text-black transition-all text-xs font-semibold cursor-pointer"
+                            >
+                              Réinitialiser la recherche
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 )}
               </tbody>
