@@ -157,7 +157,10 @@ export async function POST(request: Request) {
       }
 
       const authenticName = authenticProduct.name;
-      const authenticImage = authenticProduct.image || item.image || "https://placehold.co/600x600/121216/d4af37?text=PRINCE+CFA";
+      const rawImage = authenticProduct.image || item.image || "https://placehold.co/600x600/121216/d4af37?text=PRINCE+CFA";
+      const authenticImage = (typeof rawImage === "string" && rawImage.startsWith("data:image/"))
+        ? "/products/mobility/moto-electrique-1.jpg"
+        : rawImage;
       let authenticUnitPrice = Number(authenticProduct.salePrice || authenticProduct.price || 0);
 
       // Si le client a sélectionné une capacité spécifique (ex: 256 Go, 512 Go)

@@ -31,7 +31,8 @@ export async function runLoadTest({
   url = "http://127.0.0.1:3000/api/products",
   concurrency = 100,
   durationSeconds = 10,
-  label = "Test de charge"
+  label = "Test de charge",
+  customHeaders = {}
 } = {}) {
   const parsedUrl = new URL(url);
   const isHttps = parsedUrl.protocol === "https:";
@@ -63,7 +64,8 @@ export async function runLoadTest({
             method: "GET",
             headers: {
               "User-Agent": "PrinceCFA-LoadTest/2.0 (HighConcurrency)",
-              "Accept-Encoding": "gzip, deflate"
+              "Accept-Encoding": "gzip, deflate",
+              ...customHeaders
             }
           },
           (res) => {
@@ -154,7 +156,23 @@ if (process.argv[1]?.endsWith("benchmark_detailed.mjs")) {
   console.log(`OS: ${os.type()} ${os.release()} | CPUs: ${os.cpus().length} cœurs`);
   console.log(`======================================================\n`);
 
+  const testEtag = process.argv.includes("--etag");
+
   (async () => {
+    let customHeaders = {};
+    if (testEtag) {
+      try {
+        const probe = await fetch(targetUrl);
+        const etag = probe.headers.get("etag");
+        if (etag) {
+          customHeaders = { "if-none-match": etag };
+          console.log(`[ETag Mode Actif] En-tête If-None-Match envoyé : ${etag}\n`);
+        }
+      } catch (e) {
+        console.warn("Impossible de récupérer l'ETag préalable:", e.message);
+      }
+    }
+
     for (const c of concurrencies) {
       console.log(`▶ Test avec ${c} utilisateurs virtuels simultanés (${duration}s)...`);
       try {
@@ -162,7 +180,8 @@ if (process.argv[1]?.endsWith("benchmark_detailed.mjs")) {
           url: targetUrl,
           concurrency: c,
           durationSeconds: duration,
-          label: `${c} Utilisateurs Simultanés`
+          label: `${c} Utilisateurs Simultanés`,
+          customHeaders
         });
         console.log(`  - Requêtes/s : ${res.reqPerSec} req/s`);
         console.log(`  - Total requêtes : ${res.totalRequests} (Erreurs: ${res.errorsCount} / ${res.errorRate})`);

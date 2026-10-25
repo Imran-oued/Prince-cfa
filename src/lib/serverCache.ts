@@ -30,6 +30,40 @@ function buildCacheEntry(products: any[], ttlMs: number): ProductsCacheEntry {
   };
 }
 
+function sanitizeProductMedia(product: any): any {
+  if (!product) return product;
+  let image = product.image;
+  let images = Array.isArray(product.images) ? [...product.images] : [];
+  let modified = false;
+
+  // Remplacement des Base64 par les chemins de fichiers statiques propres
+  if (typeof image === "string" && image.startsWith("data:image/")) {
+    if (product.id === "UOGdbGVosnh6CovWNOkD") {
+      image = "/products/mobility/moto-electrique-1.jpg";
+      modified = true;
+    }
+  }
+
+  if (Array.isArray(images) && images.length > 0) {
+    images = images.map((img: any, idx: number) => {
+      if (typeof img === "string" && img.startsWith("data:image/")) {
+        if (product.id === "UOGdbGVosnh6CovWNOkD") {
+          modified = true;
+          return idx === 1 ? "/products/mobility/moto-electrique-2.jpg" : "/products/mobility/moto-electrique-1.jpg";
+        }
+      }
+      return img;
+    });
+  }
+
+  if (!modified) return product;
+  return {
+    ...product,
+    image,
+    images,
+  };
+}
+
 /**
  * Charge ou rafraîchit l'entrée de cache des produits.
  */
@@ -45,7 +79,7 @@ async function loadProductsCacheEntry(): Promise<ProductsCacheEntry> {
       // Fusionner avec les produits par défaut non présents
       const existingIds = new Set(cloudProducts.map((p: any) => String(p.id)));
       const missingDefaults = (defaultProducts as any[]).filter(dp => !existingIds.has(String(dp.id)));
-      const combined = [...cloudProducts, ...missingDefaults];
+      const combined = [...cloudProducts, ...missingDefaults].map(sanitizeProductMedia);
 
       productsCache = buildCacheEntry(combined, PRODUCTS_TTL_MS);
       return productsCache;
@@ -55,7 +89,7 @@ async function loadProductsCacheEntry(): Promise<ProductsCacheEntry> {
   }
 
   // Fallback si Firestore indisponible ou vide
-  const fallback = defaultProducts as any[];
+  const fallback = (defaultProducts as any[]).map(sanitizeProductMedia);
   productsCache = buildCacheEntry(fallback, 60 * 1000);
   return productsCache;
 }
