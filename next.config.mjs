@@ -1,5 +1,3 @@
-import type { NextConfig } from "next";
-
 import os from "os";
 
 // Détection automatique de toutes les adresses IP locales pour autoriser les smartphones sur le Wi-Fi
@@ -39,8 +37,8 @@ const getLocalDevOrigins = () => {
   return Array.from(new Set(origins));
 };
 
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   allowedDevOrigins: getLocalDevOrigins(),
   devIndicators: false,
   cacheComponents: true,
