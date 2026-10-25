@@ -38,7 +38,7 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     description: "Smartphones haut de gamme, iPhones et téléphones mobiles",
     iconName: "Smartphone",
     supportsStorageVariants: true,
-    popularBrands: ["Apple", "Samsung", "Google Pixel", "Xiaomi", "Tecno", "Infinix", "Huawei", "Honor", "Itel", "Oppo"],
+    popularBrands: ["Apple", "Samsung", "Google Pixel", "Redmi", "Xiaomi", "Tecno", "Infinix", "Honor", "OALE", "Itel", "Huawei", "Oppo"],
     placeholderName: "Ex: iPhone 15 Pro Max 256 Go Titane Naturel",
     defaultWarranty: "Garantie 12 Mois Certifiée",
     defaultAccessories: "Câble USB-C officiel, Boîte d'origine, Extracteur de SIM",
@@ -265,7 +265,7 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     description: "iPads, tablettes graphiques et tablettes Android",
     iconName: "Tablet",
     supportsStorageVariants: true,
-    popularBrands: ["Apple", "Samsung", "Xiaomi", "Lenovo", "Huawei"],
+    popularBrands: ["Motorola", "BTOUCH", "17 Pro Max", "Apple", "Samsung", "Xiaomi", "Lenovo", "Huawei"],
     placeholderName: "Ex: iPad Pro 11 M4 OLED, Galaxy Tab S9 Ultra",
     defaultWarranty: "Garantie 12 Mois Certifiée",
     defaultAccessories: "Câble USB-C, Adaptateur secteur 20W",
@@ -683,12 +683,162 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
       },
     ],
   },
+  appliances: {
+    id: "appliances",
+    label: "Électroménager",
+    shortLabel: "Électroménager",
+    description: "Réfrigérateurs, climatiseurs, lave-linge, micro-ondes et équipement de maison",
+    iconName: "Refrigerator",
+    supportsStorageVariants: false,
+    popularBrands: ["Samsung", "LG", "Hisense", "Midea", "TCL", "Whirlpool", "Beko", "Sharp", "Bosch", "Nasco", "Solstar"],
+    placeholderName: "Ex: Réfrigérateur Multi-Portes No Frost Inverter 450L",
+    defaultWarranty: "Garantie 12 Mois Constructeur",
+    defaultAccessories: "Câble d'alimentation, Manuel d'utilisation, Kit d'installation",
+    fields: [
+      {
+        key: "applianceType",
+        label: "Type d'appareil",
+        type: "select",
+        options: [
+          { label: "Réfrigérateur / Congélateur", value: "fridge" },
+          { label: "Climatiseur / Split", value: "ac" },
+          { label: "Machine à laver / Lave-linge", value: "washing_machine" },
+          { label: "Micro-ondes / Four", value: "microwave_oven" },
+          { label: "Cuisinière / Plaque de cuisson", value: "cooker" },
+          { label: "Chauffe-eau / Distributeur d'eau", value: "water_heater" },
+          { label: "Robot de cuisine / Mixeur", value: "blender" },
+          { label: "Fer à repasser / Centrale vapeur", value: "iron" },
+          { label: "Autre électroménager", value: "other" },
+        ],
+        required: true,
+      },
+      {
+        key: "capacity",
+        label: "Capacité / Volume",
+        type: "text",
+        placeholder: "Ex: 450 Litres, 9 kg, 1.5 CV (12000 BTU)...",
+        required: false,
+      },
+      {
+        key: "power",
+        label: "Puissance & Consommation",
+        type: "text",
+        placeholder: "Ex: 1200 W, Digital Inverter",
+        required: false,
+      },
+      {
+        key: "energyClass",
+        label: "Classe Énergétique",
+        type: "select",
+        options: [
+          { label: "A+++ (Inverter Ultra-Économique)", value: "A+++" },
+          { label: "A++", value: "A++" },
+          { label: "A+", value: "A+" },
+          { label: "A", value: "A" },
+          { label: "B", value: "B" },
+          { label: "Standard", value: "Standard" },
+        ],
+        required: false,
+      },
+      {
+        key: "features",
+        label: "Fonctionnalités & Moteur",
+        type: "text",
+        placeholder: "Ex: Moteur Inverter Direct Drive, No Frost, Filtre anti-allergène",
+        required: false,
+      },
+    ],
+  },
+
+  electromenager: {
+    id: "electromenager",
+    label: "Électroménager",
+    shortLabel: "Électroménager",
+    description: "Réfrigérateurs, climatiseurs, lave-linge, micro-ondes et équipement de maison",
+    iconName: "Refrigerator",
+    supportsStorageVariants: false,
+    popularBrands: ["Samsung", "LG", "Hisense", "Midea", "TCL", "Whirlpool", "Beko", "Sharp", "Bosch", "Nasco", "Solstar"],
+    placeholderName: "Ex: Réfrigérateur Multi-Portes No Frost Inverter 450L",
+    defaultWarranty: "Garantie 12 Mois Constructeur",
+    defaultAccessories: "Câble d'alimentation, Manuel d'utilisation, Kit d'installation",
+    fields: [
+      {
+        key: "applianceType",
+        label: "Type d'appareil",
+        type: "select",
+        options: [
+          { label: "Réfrigérateur / Congélateur", value: "fridge" },
+          { label: "Climatiseur / Split", value: "ac" },
+          { label: "Machine à laver / Lave-linge", value: "washing_machine" },
+          { label: "Micro-ondes / Four", value: "microwave_oven" },
+          { label: "Cuisinière / Plaque de cuisson", value: "cooker" },
+          { label: "Chauffe-eau / Distributeur d'eau", value: "water_heater" },
+          { label: "Robot de cuisine / Mixeur", value: "blender" },
+          { label: "Fer à repasser / Centrale vapeur", value: "iron" },
+          { label: "Autre électroménager", value: "other" },
+        ],
+        required: true,
+      },
+      {
+        key: "capacity",
+        label: "Capacité / Volume",
+        type: "text",
+        placeholder: "Ex: 450 Litres, 9 kg, 1.5 CV (12000 BTU)...",
+        required: false,
+      },
+      {
+        key: "power",
+        label: "Puissance & Consommation",
+        type: "text",
+        placeholder: "Ex: 1200 W, Digital Inverter",
+        required: false,
+      },
+      {
+        key: "energyClass",
+        label: "Classe Énergétique",
+        type: "select",
+        options: [
+          { label: "A+++ (Inverter Ultra-Économique)", value: "A+++" },
+          { label: "A++", value: "A++" },
+          { label: "A+", value: "A+" },
+          { label: "A", value: "A" },
+          { label: "B", value: "B" },
+          { label: "Standard", value: "Standard" },
+        ],
+        required: false,
+      },
+      {
+        key: "features",
+        label: "Fonctionnalités & Moteur",
+        type: "text",
+        placeholder: "Ex: Moteur Inverter Direct Drive, No Frost, Filtre anti-allergène",
+        required: false,
+      },
+    ],
+  },
 };
 
-/**
- * Obtenir la liste ordonnée des catégories disponibles
- */
-export const CATEGORIES_LIST = Object.values(PRODUCT_CATEGORIES);
+const CATEGORY_CANONICAL_ORDER = [
+  "phones",
+  "computers",
+  "tablets",
+  "tv",
+  "appliances",
+  "accessories",
+  "audio",
+  "mobility",
+  "solar",
+];
+
+export const CATEGORIES_LIST = Object.values(PRODUCT_CATEGORIES)
+  .filter((cat, index, self) => index === self.findIndex((c) => c.label === cat.label))
+  .sort((a, b) => {
+    const idxA = CATEGORY_CANONICAL_ORDER.indexOf(a.id);
+    const idxB = CATEGORY_CANONICAL_ORDER.indexOf(b.id);
+    const posA = idxA === -1 ? 999 : idxA;
+    const posB = idxB === -1 ? 999 : idxB;
+    return posA - posB;
+  });
 
 /**
  * Obtenir la configuration d'une catégorie donnée (avec repli sûr)

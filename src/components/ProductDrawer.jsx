@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { SHOP_CONFIG } from '@/config/shop';
-import { X, Star, HardDrive, Check, Zap, Laptop } from 'lucide-react';
+import { X, Star, HardDrive, Check, Zap, Laptop, Refrigerator, Tablet, ShoppingBag } from 'lucide-react';
 import { getCategoryConfig, isStorageVariantCategory } from '@/config/categories';
 
 const SPEC_LABELS = {
@@ -59,9 +59,21 @@ export default function ProductDrawer({
     return caps.length > 0 ? caps[0].capacity : '';
   };
 
-  const [activeColor, setActiveColor] = useState(product?.colors?.[0] || '');
-  const [selectedCapacity, setSelectedCapacity] = useState(() => getInitialCapacity(product));
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const getInitialColor = (p) => {
+    if (!p) return '';
+    if (p.selectedColor && Array.isArray(p.colors) && p.colors.includes(p.selectedColor)) {
+      return p.selectedColor;
+    }
+    return p.colors?.[0] || '';
+  };
+
+  const [activeColor, setActiveColor] = useState(() => getInitialColor(product));
+  const [selectedCapacity, setSelectedCapacity] = useState(() => product?.selectedCapacity || getInitialCapacity(product));
+  const [activeImageIndex, setActiveImageIndex] = useState(() => {
+    const initCol = getInitialColor(product);
+    const idx = product?.colors?.indexOf(initCol);
+    return idx !== -1 && idx !== undefined ? idx : 0;
+  });
   const [isLiked, setIsLiked] = useState(false);
   const [showAllSpecs, setShowAllSpecs] = useState(false);
 
@@ -69,9 +81,11 @@ export default function ProductDrawer({
   if (product && product !== prevProduct) {
     setPrevProduct(product);
     setCachedProduct(product);
-    setActiveColor(product.colors?.[0] || '');
-    setSelectedCapacity(getInitialCapacity(product));
-    setActiveImageIndex(0);
+    const newColor = getInitialColor(product);
+    setActiveColor(newColor);
+    setSelectedCapacity(product.selectedCapacity || getInitialCapacity(product));
+    const newIdx = product.colors?.indexOf(newColor);
+    setActiveImageIndex(newIdx !== -1 && newIdx !== undefined ? newIdx : 0);
     setIsLiked(false);
     setShowAllSpecs(false);
   }
@@ -160,18 +174,13 @@ export default function ProductDrawer({
   // Liste ordonnée de toutes les photos du produit
   const productImages = useMemo(() => {
     if (!currentProduct) return [];
-    const list = [];
+    if (Array.isArray(currentProduct.images) && currentProduct.images.length > 0) {
+      return currentProduct.images.filter(Boolean);
+    }
     if (currentProduct.image) {
-      list.push(currentProduct.image);
+      return [currentProduct.image];
     }
-    if (currentProduct.images && Array.isArray(currentProduct.images)) {
-      currentProduct.images.forEach(img => {
-        if (img && !list.includes(img)) {
-          list.push(img);
-        }
-      });
-    }
-    return list.length > 0 ? list : ['https://placehold.co/600x600/121216/d4af37?text=PRINCE+CFA'];
+    return ['https://placehold.co/600x600/121216/d4af37?text=PRINCE+CFA'];
   }, [currentProduct]);
 
   // Gestion interactive du glissement au doigt en temps réel avec effet ressort (Spring Physics)
@@ -352,7 +361,7 @@ export default function ProductDrawer({
     <>
       {/* Arrière-plan assombri et flouté (Backdrop) */}
       <div 
-        className={`fixed inset-0 bg-black/75 backdrop-blur-md transition-opacity duration-300 ease-out z-[100] ${
+        className={`fixed inset-0 bg-black/75 backdrop-blur-md transition-opacity duration-300 ease-out z-[140] ${
           slideIn && isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
@@ -361,7 +370,7 @@ export default function ProductDrawer({
 
       {/* Volet Latéral / Slide-Over Drawer depuis le côté droit */}
       <aside 
-        className={`fixed top-0 right-0 h-full w-full sm:w-[540px] md:w-[620px] lg:w-[680px] bg-[#09090b] border-l border-gold/25 shadow-[-20px_0_50px_rgba(0,0,0,0.85),-5px_0_20px_rgba(212,175,55,0.15)] z-[110] transition-transform duration-300 ease-out flex flex-col overflow-hidden will-change-transform ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-[540px] md:w-[620px] lg:w-[680px] bg-[#09090b] border-l border-gold/25 shadow-[-20px_0_50px_rgba(0,0,0,0.85),-5px_0_20px_rgba(212,175,55,0.15)] z-[150] transition-transform duration-300 ease-out flex flex-col overflow-hidden will-change-transform ${
           slideIn && isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'
         }`}
         role="dialog"
@@ -417,13 +426,13 @@ export default function ProductDrawer({
                   return (
                     <div 
                       key={idx}
-                      className="w-full h-full min-w-full flex-shrink-0 p-8 flex items-center justify-center bg-white"
+                      className="w-full h-full min-w-full flex-shrink-0 p-3 sm:p-6 flex items-center justify-center bg-white"
                     >
                       {imgSrc?.length > 4 ? (
                         <img 
                           src={imgSrc} 
                           alt={`${currentProduct.name} - Photo ${idx + 1}`} 
-                          className={`max-w-full max-h-full object-contain pointer-events-none drop-shadow-sm transition-all duration-300 ${
+                          className={`w-full h-full object-contain pointer-events-none drop-shadow-sm transition-all duration-300 ${
                             isCurrent ? 'scale-100 opacity-100' : 'scale-90 opacity-40'
                           }`}
                           onError={(e) => {
@@ -621,6 +630,78 @@ export default function ProductDrawer({
             </div>
           )}
 
+          {/* Badge de Spécifications Clés pour Tablettes */}
+          {(currentProduct.category === 'tablets' || currentProduct.category === 'tablettes') && currentProduct.specs && (
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+              <div className="flex items-center justify-between text-amber-400 text-xs font-bold uppercase tracking-wider">
+                <span className="flex items-center gap-1.5">
+                  <Tablet className="w-4 h-4 text-amber-400" aria-hidden="true" />
+                  <span>Fiche Tablette Officielle</span>
+                </span>
+                <span className="text-[10px] text-zinc-400 font-mono">
+                  {currentProduct.specs.connectivity === 'wifi_cellular' ? '4G/5G + Wi-Fi' : 'Wi-Fi'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Écran</span>
+                  <span className="text-xs font-black text-white">{currentProduct.specs.screenSize || currentProduct.specs.screen || "—"}</span>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">RAM</span>
+                  <span className="text-sm font-black text-gold">{currentProduct.specs.ram ? `${currentProduct.specs.ram} Go` : "—"}</span>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Stockage</span>
+                  <span className="text-xs font-black text-emerald-400">{currentProduct.specs.storageSize || "—"}</span>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Batterie</span>
+                  <span className="text-xs font-black text-white">
+                    {currentProduct.specs.batteryCapacity ? `${currentProduct.specs.batteryCapacity} mAh` : (currentProduct.specs.battery || "—")}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Badge de Spécifications Clés pour Électroménager */}
+          {(currentProduct.category === 'appliances' || currentProduct.category === 'electromenager') && currentProduct.specs && (
+            <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 space-y-2">
+              <div className="flex items-center justify-between text-cyan-400 text-xs font-bold uppercase tracking-wider">
+                <span className="flex items-center gap-1.5">
+                  <Refrigerator className="w-4 h-4 text-cyan-400" aria-hidden="true" />
+                  <span>Fiche Électroménager Officielle</span>
+                </span>
+                {currentProduct.specs.energyClass && (
+                  <span className="text-[10px] bg-cyan-400/20 text-cyan-300 px-2 py-0.5 rounded-full font-mono font-bold">
+                    {currentProduct.specs.energyClass}
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
+                {currentProduct.specs.capacity && (
+                  <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                    <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Capacité</span>
+                    <span className="text-xs font-black text-white">{currentProduct.specs.capacity}</span>
+                  </div>
+                )}
+                {currentProduct.specs.power && (
+                  <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                    <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Technologie</span>
+                    <span className="text-xs font-black text-gold">{currentProduct.specs.power}</span>
+                  </div>
+                )}
+                {currentProduct.specs.applianceType && (
+                  <div className="p-2 rounded-xl bg-black/50 border border-white/5 col-span-2 sm:col-span-1">
+                    <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Type</span>
+                    <span className="text-xs font-black text-emerald-400">{currentProduct.specs.applianceType}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
 
 
           {/* Sélecteur de Couleurs interactif style Amazon (Image 1) */}
@@ -630,7 +711,9 @@ export default function ProductDrawer({
                 <span className="text-xs text-zinc-300 uppercase tracking-wider font-semibold">
                   Couleur : <strong className="text-white normal-case font-bold text-sm ml-1.5">{activeColor}</strong>
                 </span>
-                <span className="text-[11px] text-zinc-500 font-medium">{currentProduct.colors.length} finitions</span>
+                <span className="text-[11px] text-zinc-500 font-medium">
+                  {currentProduct.colors.length} {currentProduct.colors.length > 1 ? 'finitions' : 'finition'}
+                </span>
               </div>
 
               {/* Cartes de variations de couleur façon Amazon */}
@@ -684,7 +767,7 @@ export default function ProductDrawer({
             <div className="space-y-3 pt-3 border-t border-white/10">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-zinc-300 uppercase tracking-wider font-semibold">
-                  Taille / Capacité : <strong className="text-white normal-case font-bold text-sm ml-1.5">{selectedCapacity}</strong>
+                  Capacité : <strong className="text-white normal-case font-bold text-sm ml-1.5">{selectedCapacity}</strong>
                 </span>
                 <span className="text-[11px] text-zinc-500 font-medium">{availableCapacities.length} options</span>
               </div>
@@ -872,42 +955,27 @@ export default function ProductDrawer({
         </div>
 
         {/* Barre d'Action Inférieure Fixée (Sticky Bottom Bar) */}
-        <div className="p-4 sm:p-5 border-t border-white/10 bg-[#09090b]/95 backdrop-blur-md flex flex-col sm:flex-row items-center gap-3 relative z-20">
-          <div className="w-full sm:w-auto flex flex-col pr-2">
-            <span className="text-[10px] text-zinc-400 uppercase tracking-widest">
+        <div className="p-4 sm:p-5 border-t border-white/10 bg-[#09090b]/95 backdrop-blur-md flex items-center justify-between gap-4 relative z-20">
+          <div className="flex flex-col pr-2">
+            <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">
               Total {selectedCapacity ? `(${selectedCapacity})` : ''}
             </span>
-            <span className="text-xl sm:text-2xl font-black text-white whitespace-nowrap">
-              {currentPrice.toLocaleString('fr-FR')} FCFA
+            <span className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-white whitespace-nowrap">
+              {currentPrice.toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
             </span>
           </div>
 
-          <div className="w-full flex-1 flex flex-col sm:flex-row gap-2.5">
-            {/* Bouton WhatsApp direct */}
-            <button 
-              onClick={handleDirectWhatsApp}
-              className="w-full sm:flex-1 py-3.5 sm:py-4 px-4 rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 font-extrabold uppercase tracking-wider text-xs hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-            >
-              <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-              </svg>
-              <span>Commander direct</span>
-            </button>
-
-            {/* Bouton Ajouter au Panier */}
-            <button 
-              onClick={() => {
-                onAddToCart(currentProduct, activeColor, selectedCapacity, currentPrice);
-                onClose();
-              }}
-              className="w-full sm:flex-1 py-3.5 sm:py-4 px-4 rounded-xl border border-gold/40 bg-gradient-to-r from-gold to-yellow-600 text-black font-extrabold uppercase tracking-widest text-xs hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] hover:brightness-110 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-md"
-            >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              <span>Ajouter au panier</span>
-            </button>
-          </div>
+          {/* Bouton Unique Ultra-Prestige : Ajouter au Panier */}
+          <button 
+            onClick={() => {
+              onAddToCart(currentProduct, activeColor, selectedCapacity, currentPrice);
+              onClose();
+            }}
+            className="flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border border-gold/40 bg-gradient-to-r from-gold via-yellow-400 to-yellow-600 text-black font-extrabold uppercase tracking-widest text-xs sm:text-sm hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] hover:brightness-110 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer shadow-lg"
+          >
+            <ShoppingBag className="w-4 h-4 text-black stroke-[2.5]" aria-hidden="true" />
+            <span>Ajouter au panier</span>
+          </button>
         </div>
       </aside>
     </>

@@ -63,8 +63,9 @@ const categories = [
   { id: 'phones', label: 'Téléphones' },
   { id: 'computers', label: 'Ordinateurs' },
   { id: 'tablets', label: 'Tablettes' },
-  { id: 'accessories', label: 'Accessoires' },
   { id: 'tv', label: 'TV' },
+  { id: 'appliances', label: 'Électroménager' },
+  { id: 'accessories', label: 'Accessoires' },
   { id: 'tech', label: 'High-Tech' },
   { id: 'audio', label: 'Boomers' },
   { id: 'mobility', label: 'Motos Électriques' },
@@ -75,6 +76,10 @@ const phoneBrands = ['Iphones', 'Samsung', 'Google Pixel', 'Redmi', 'Huawei', 'T
 
 const getColorCode = (name: string) => {
   const n = (name || '').toLowerCase();
+  if (n.includes('cyan') || n.includes('turquoise')) return '#06b6d4';
+  if (n.includes('émeraude') || n.includes('horizon')) return '#059669';
+  if (n.includes('lavande')) return '#c084fc';
+  if (n.includes('inox') || n.includes('acier')) return '#94a3b8';
   if (n.includes('cuivre') || n.includes('copper')) return '#b45309';
   if (n.includes('platine') || n.includes('platinum')) return '#cbd5e1';
   if (n.includes('ciel') || n.includes('ice') || n.includes('glacier') || n.includes('brume')) return '#7dd3fc';
@@ -117,9 +122,10 @@ function getProductSummarySnippet(product: Product): string {
 
   if (cat === 'tablets' || cat === 'tablettes') {
     const parts = [
-      specs.screenSize ? `${specs.screenSize}"` : (specs.screen || null),
-      specs.storageSize ? `${specs.storageSize} Go` : null,
-      specs.connectivity
+      specs.screenSize ? (String(specs.screenSize).includes('"') || String(specs.screenSize).includes('pouces') ? specs.screenSize : `${specs.screenSize}"`) : (specs.screen || null),
+      specs.storageSize ? (String(specs.storageSize).includes('Go') ? specs.storageSize : `${specs.storageSize} Go`) : null,
+      specs.ram ? `${specs.ram} Go RAM` : null,
+      specs.connectivity === 'wifi_cellular' ? '4G/5G' : (specs.connectivity === 'wifi_only' ? 'Wi-Fi' : specs.connectivity)
     ].filter(Boolean);
     if (parts.length > 0) return parts.join(' • ');
   }
@@ -137,6 +143,16 @@ function getProductSummarySnippet(product: Product): string {
       specs.screen,
       specs.processor,
       specs.ram ? `${specs.ram} Go RAM` : null
+    ].filter(Boolean);
+    if (parts.length > 0) return parts.join(' • ');
+  }
+
+  if (cat === 'appliances' || cat === 'electromenager') {
+    const parts = [
+      specs.applianceType,
+      specs.capacity,
+      specs.power,
+      specs.energyClass ? `Classe ${specs.energyClass}` : null
     ].filter(Boolean);
     if (parts.length > 0) return parts.join(' • ');
   }
@@ -160,8 +176,7 @@ function ProductCardItem({
   const [activeColorIdx, setActiveColorIdx] = useState(0);
   const images = (product.images && product.images.length > 0) ? product.images : (product.image ? [product.image] : []);
   const activeImage = images[activeColorIdx] || product.image;
-  const activeColor = product.colors?.[activeColorIdx] || '';
-  const optionsCount = product.storageOptions?.length || (product.category === 'phones' ? 4 : 0);
+  const activeColor = product.colors?.[activeColorIdx] || product.colors?.[0] || '';
   const specsSnippet = getProductSummarySnippet(product);
 
   // Glissement tactile au doigt directement sur la carte (Amazon / AliExpress Style)
@@ -215,18 +230,18 @@ function ProductCardItem({
       }}
       className="glass-panel p-3 sm:p-4 rounded-2xl sm:rounded-3xl flex flex-row items-stretch transition-all duration-300 hover:shadow-[0_12px_32px_rgba(212,175,55,0.18)] hover:border-gold/40 hover:-translate-y-0.5 active:scale-[0.99] group relative overflow-hidden bg-black/40 border border-white/10 gap-3 sm:gap-4 cursor-pointer"
     >
-      {/* 1. Colonne GAUCHE : Image Style Amazon / AliExpress avec glissement tactile */}
+      {/* 1. Colonne GAUCHE : Image Grande & Immersive Style Amazon avec glissement tactile */}
       <div 
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className="w-32 sm:w-44 md:w-48 flex-shrink-0 rounded-xl sm:rounded-2xl bg-white overflow-hidden flex items-center justify-center p-2.5 sm:p-4 relative shadow-inner group/img select-none"
+        className="w-[38%] min-w-[130px] sm:w-48 md:w-52 flex-shrink-0 rounded-xl sm:rounded-2xl bg-white overflow-hidden flex items-center justify-center p-1.5 sm:p-2.5 relative shadow-md group/img select-none"
       >
         {activeImage?.length > 4 ? (
           <img 
             key={activeImage}
             src={activeImage} 
             alt={product.name} 
-            className="max-w-full max-h-full object-contain group-hover/img:scale-105 transition-all duration-300 animate-in fade-in" 
+            className="w-full h-full object-contain object-center group-hover/img:scale-105 transition-transform duration-300 animate-in fade-in" 
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = `https://placehold.co/600x600/121216/d4af37?text=${encodeURIComponent(product.name)}`;
@@ -297,28 +312,8 @@ function ProductCardItem({
             </p>
           )}
 
-          {/* Options & Étoiles */}
-          <div className="flex flex-wrap items-center gap-2 mt-1">
-            {optionsCount > 0 && (
-              <span className="text-[10px] sm:text-[11px] text-zinc-400 font-medium">
-                Options : <strong className="text-gold font-semibold">{optionsCount} tailles</strong>
-              </span>
-            )}
-            {/* Note & Étoiles masquées pour le moment (conservées pour mise à jour ultérieure) :
-            <div className="flex items-center gap-1 text-[11px]">
-              <span className="font-bold text-white text-[11px]">{product.rating || 4.8}</span>
-              <div className="flex items-center gap-0.5 text-gold" aria-label="Note 5 sur 5">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-2.5 h-2.5 fill-gold text-gold" aria-hidden="true" />
-                ))}
-              </div>
-              <span className="text-zinc-500 text-[10px]">({Math.round((product.rating || 4.8) * 28)})</span>
-            </div>
-            */}
-          </div>
-
           {/* Prix FCFA en grand format doré */}
-          <div className="mt-1.5">
+          <div className="mt-2">
             <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-white tracking-tight">
               {product.price.toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
             </span>
@@ -333,7 +328,7 @@ function ProductCardItem({
             <span className="text-zinc-600">•</span>
             <span className="text-gold flex items-center gap-1">
               <Store className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
-              <span>Retrait Showroom</span>
+              <span>Retrait en Boutique</span>
             </span>
           </p>
 
@@ -345,7 +340,7 @@ function ProductCardItem({
               </div>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {product.colors.map((colorName, idx) => {
-                  const isCurrent = activeColorIdx === idx;
+                  const isCurrent = (product.colors && product.colors.length === 1) || activeColorIdx === idx;
                   const bgHex = getColorCode(colorName);
                   return (
                     <button
@@ -379,7 +374,7 @@ function ProductCardItem({
               }}
               className="flex-1 py-2 px-3 rounded-xl bg-gold/10 hover:bg-gold/20 border border-gold/30 text-gold text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
             >
-              <span>Détails & Tailles</span>
+              <span>Détails</span>
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
             <button
@@ -446,21 +441,14 @@ export default function Home() {
           const defaultMatch = defaultProducts.find(dp => dp.id === p.id);
           const updatedProduct = { ...p };
           if (defaultMatch) {
-            const isNewIphone = String(p.id).startsWith('pcfa-17') || String(p.id).startsWith('pcfa-18');
-            if (isNewIphone) {
-              updatedProduct.image = defaultMatch.image;
-              updatedProduct.images = defaultMatch.images;
-              updatedProduct.colors = defaultMatch.colors;
-              updatedProduct.specs = defaultMatch.specs;
-              updatedProduct.desc = defaultMatch.desc;
-              if (defaultMatch.storageOptions && (!p.storageOptions || p.storageOptions.length <= 1)) {
-                updatedProduct.storageOptions = defaultMatch.storageOptions;
-              }
-            } else {
-              if (defaultMatch.colors && !p.colors) updatedProduct.colors = defaultMatch.colors;
-              if (defaultMatch.images && !p.images) updatedProduct.images = defaultMatch.images;
-              if (defaultMatch.brand && !p.brand) updatedProduct.brand = defaultMatch.brand;
-              if (defaultMatch.storageOptions && !p.storageOptions) updatedProduct.storageOptions = defaultMatch.storageOptions;
+            updatedProduct.image = defaultMatch.image;
+            updatedProduct.images = defaultMatch.images;
+            updatedProduct.colors = defaultMatch.colors;
+            updatedProduct.specs = defaultMatch.specs;
+            updatedProduct.desc = defaultMatch.desc;
+            if (defaultMatch.brand) updatedProduct.brand = defaultMatch.brand;
+            if (defaultMatch.storageOptions && (!p.storageOptions || p.storageOptions.length <= 1)) {
+              updatedProduct.storageOptions = defaultMatch.storageOptions;
             }
           }
           if (updatedProduct.category === 'phones' && !updatedProduct.brand) {
@@ -481,6 +469,9 @@ export default function Home() {
         const existingIds = new Set(migrated.map((p: Product) => String(p.id)));
         const newDefaults = defaultProducts.filter(dp => !existingIds.has(String(dp.id)));
         const combined = [...migrated, ...newDefaults];
+        try {
+          localStorage.setItem("prince_cfa_products", JSON.stringify(combined));
+        } catch {}
         setLocalProducts(combined);
       } else {
         setLocalProducts(defaultProducts);
@@ -545,7 +536,12 @@ export default function Home() {
 
     // 1. Filtre par catégorie (quand aucune recherche active)
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(p => p.category === selectedCategory);
+      filtered = filtered.filter(p => {
+        if (selectedCategory === 'appliances' || selectedCategory === 'electromenager') {
+          return p.category === 'appliances' || p.category === 'electromenager';
+        }
+        return p.category === selectedCategory;
+      });
     }
     
     // 1.5 Filtre par marque (si catégorie Téléphones)
@@ -568,6 +564,17 @@ export default function Home() {
 
   const handleCloseProduct = () => {
     setIsProductDrawerOpen(false);
+  };
+
+  const handleOpenProductFromCart = (cartItem: any) => {
+    const fullProduct = localProducts.find(p => String(p.id) === String(cartItem.id)) || cartItem;
+    const targetProduct: Product = {
+      ...fullProduct,
+      selectedColor: cartItem.selectedColor || fullProduct.selectedColor,
+      selectedCapacity: cartItem.selectedCapacity || fullProduct.selectedCapacity
+    };
+    setSelectedProduct(targetProduct);
+    setIsProductDrawerOpen(true);
   };
 
   const handleAddToCart = (
@@ -634,6 +641,7 @@ export default function Home() {
         updateQuantity={updateCartQuantity}
         removeItem={removeCartItem}
         onClearCart={() => setCartItems([])}
+        onViewProduct={handleOpenProductFromCart}
       />
 
       {/* Background glow effects */}
@@ -855,155 +863,14 @@ export default function Home() {
           )}
         </div>
 
-        {/* Section À Propos & Showroom Physique (Point 3) */}
-        <section id="about" className="w-full max-w-6xl mx-auto my-20 pt-8 scroll-mt-28">
-          <div className="glass-panel p-8 sm:p-12 rounded-3xl border border-gold/25 relative overflow-hidden shadow-[0_0_50px_rgba(212,175,55,0.08)]">
-            {/* Décoration d'arrière-plan */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none"></div>
-            <Crown className="absolute -bottom-10 -left-10 w-44 h-44 text-gold opacity-5 pointer-events-none select-none" aria-hidden="true" />
-
-            <div className="relative z-10 text-center max-w-3xl mx-auto mb-12">
-              <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/10 text-gold text-xs font-bold tracking-widest uppercase mb-4">
-                Boutique & Showroom Physique
-              </div>
-              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-                L&apos;Expérience <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-yellow-600">PRINCE CFA</span> en Réel
-              </h2>
-              <p className="text-sm sm:text-base text-zinc-300 mt-4 leading-relaxed font-light">
-                Plus qu&apos;une simple boutique en ligne, venez découvrir, toucher et tester nos appareils dans un cadre haut de gamme pensé pour votre confort.
-              </p>
-            </div>
-
-            {/* 3 Cartes d'Informations */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-              
-              {/* Carte 1 : Localisation */}
-              <div className="p-6 rounded-2xl bg-black/40 border border-white/10 hover:border-gold/40 transition-all flex flex-col justify-between group">
-                <div>
-                  <div className="w-12 h-12 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform text-gold">
-                    <MapPin className="w-6 h-6 text-gold" aria-hidden="true" />
-                  </div>
-                  <h3 className="text-base font-bold text-white mb-2">Notre Showroom</h3>
-                  <p className="text-xs text-zinc-300 font-medium leading-relaxed mb-1">
-                    Ouagadougou, Burkina Faso
-                  </p>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed">
-                    Point GPS : 12°21&apos;46.8&quot;N 1°30&apos;59.2&quot;W<br/>
-                    (Accès direct & Parking sécurisé)
-                  </p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-[11px]">
-                  <span className="text-gold font-semibold flex items-center gap-1.5">
-                    <Store className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
-                    <span>Retrait sur place</span>
-                  </span>
-                  <a 
-                    href={SHOP_CONFIG.mapsUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-white hover:text-gold underline transition-colors flex items-center gap-1"
-                  >
-                    <span>Ouvrir Maps</span>
-                    <ArrowRight className="w-3 h-3" aria-hidden="true" />
-                  </a>
-                </div>
-              </div>
-
-              {/* Carte 2 : Horaires */}
-              <div className="p-6 rounded-2xl bg-black/40 border border-white/10 hover:border-gold/40 transition-all flex flex-col justify-between group">
-                <div>
-                  <div className="w-12 h-12 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform text-gold">
-                    <Clock className="w-6 h-6 text-gold" aria-hidden="true" />
-                  </div>
-                  <h3 className="text-base font-bold text-white mb-2">Horaires d&apos;Ouverture</h3>
-                  <div className="text-xs text-zinc-400 space-y-1.5 leading-relaxed">
-                    <p className="flex justify-between">
-                      <span className="text-zinc-500">Lun - Sam :</span>
-                      <strong className="text-white">08h30 - 20h00</strong>
-                    </p>
-                    <p className="flex justify-between">
-                      <span className="text-zinc-500">Dimanche :</span>
-                      <strong className="text-white">14h00 - 19h30</strong>
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-6 pt-4 border-t border-white/5 flex items-center text-[11px] text-green-400 font-semibold gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                  <span>Commandes WhatsApp 24h/24</span>
-                </div>
-              </div>
-
-              {/* Carte 3 : Services VIP en magasin */}
-              <div className="p-6 rounded-2xl bg-black/40 border border-white/10 hover:border-gold/40 transition-all flex flex-col justify-between group">
-                <div>
-                  <div className="w-12 h-12 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform text-gold">
-                    <Sparkles className="w-6 h-6 text-gold" aria-hidden="true" />
-                  </div>
-                  <h3 className="text-base font-bold text-white mb-2">Avantages Showroom</h3>
-                  <ul className="text-xs text-zinc-400 space-y-2 leading-relaxed">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
-                      <span>Déballage et test sur place</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
-                      <span>Transfert de vos données offert</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
-                      <span>Facture légale & Garantie certifiée</span>
-                    </li>
-                  </ul>
-                </div>
-                <div className="mt-6 pt-4 border-t border-white/5 flex items-center text-[11px] text-gold font-semibold gap-1.5">
-                  <Crown className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
-                  <span>Service client personnalisé</span>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Boutons d'Action Rapides */}
-            <div className="mt-10 pt-8 border-t border-white/10 flex flex-wrap items-center justify-center gap-4 relative z-10">
-              <a 
-                href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=Bonjour%20Prince%20CFA,%20je%20souhaite%20visiter%20votre%20boutique.`}
-                target="_blank"
-                rel="noreferrer"
-                className="px-6 py-3 rounded-xl border border-[#25D366]/40 bg-[#25D366]/10 text-[#25D366] text-xs font-bold uppercase tracking-wider hover:bg-[#25D366] hover:text-white transition-all flex items-center gap-2"
-              >
-                <WhatsAppIcon className="w-4 h-4" />
-                <span>WhatsApp Showroom ({SHOP_CONFIG.displayPhone})</span>
-              </a>
-
-              <a 
-                href={`tel:${SHOP_CONFIG.phone}`}
-                className="px-6 py-3 rounded-xl border border-gold/40 bg-gold/10 text-gold text-xs font-bold uppercase tracking-wider hover:bg-gold hover:text-black transition-all flex items-center gap-2"
-              >
-                <Phone className="w-4 h-4 text-gold" aria-hidden="true" />
-                <span>Appeler ({SHOP_CONFIG.phone})</span>
-              </a>
-
-              <a 
-                href={SHOP_CONFIG.mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 rounded-xl border border-white/20 bg-white/5 text-zinc-200 text-xs font-bold uppercase tracking-wider hover:bg-gold hover:text-black hover:border-gold hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all flex items-center gap-2"
-              >
-                <Compass className="w-4 h-4" aria-hidden="true" />
-                <span>Ouvrir l&apos;Itinéraire Google Maps</span>
-              </a>
-            </div>
-          </div>
-        </section>
-
       </main>
 
       {/* Footer Luxueux */}
-      <footer className="w-full border-t border-white/10 bg-[#08080a] relative z-20 mt-16 pt-16 pb-12 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
+      <footer id="about" className="w-full border-t border-white/10 bg-[#08080a] relative z-20 mt-16 pt-16 pb-12 px-4 sm:px-8 scroll-mt-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           
           {/* Col 1 : Marque */}
-          <div className="space-y-4 md:col-span-1">
+          <div className="space-y-4">
             <h3 className="text-xl font-black text-white tracking-widest flex items-center gap-2">
               PRINCE <span className="text-gold">CFA</span>
             </h3>
@@ -1021,7 +888,10 @@ export default function Home() {
             <h4 className="text-xs font-bold text-white uppercase tracking-widest text-gold">Nos Rayons</h4>
             <ul className="text-xs text-zinc-400 space-y-2">
               <li><button onClick={() => { handleSelectCategory('phones'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Smartphones & iPhones</button></li>
+              <li><button onClick={() => { handleSelectCategory('computers'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Ordinateurs & PC</button></li>
+              <li><button onClick={() => { handleSelectCategory('tablets'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Tablettes & iPads</button></li>
               <li><button onClick={() => { handleSelectCategory('tv'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Smart TV & Écrans</button></li>
+              <li><button onClick={() => { handleSelectCategory('appliances'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Électroménager & Maison</button></li>
               <li><button onClick={() => { handleSelectCategory('audio'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Boomers & Hi-Fi</button></li>
               <li><button onClick={() => { handleSelectCategory('mobility'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Motos Électriques</button></li>
               <li><button onClick={() => { handleSelectCategory('solar'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Énergie Solaire</button></li>
@@ -1049,6 +919,69 @@ export default function Home() {
                 <span>Facture légale certifiée</span>
               </li>
             </ul>
+          </div>
+
+          {/* Col 4 : NOUS JOINDRE */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-gold flex items-center gap-2">
+              <Phone className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
+              <span>NOUS JOINDRE</span>
+            </h4>
+            <div className="space-y-3 text-xs text-zinc-300">
+              <div className="space-y-1.5">
+                {(SHOP_CONFIG.phones || [
+                  { display: "+226 77 43 43 97", raw: "+22677434397", wa: "22677434397", isWhatsApp: true },
+                  { display: "+226 64 76 91 30", raw: "+22664769130" },
+                  { display: "+226 77 14 67 13", raw: "+22677146713" }
+                ]).map((item, idx) => {
+                  const isWa = item.isWhatsApp || idx === 0;
+                  return (
+                    <a 
+                      key={idx}
+                      href={isWa ? `https://wa.me/${item.wa || '22677434397'}?text=Bonjour%20Prince%20CFA` : `tel:${item.raw}`}
+                      target={isWa ? "_blank" : undefined}
+                      rel={isWa ? "noopener noreferrer" : undefined}
+                      className="flex items-center gap-2 hover:text-gold transition-colors group"
+                      title={isWa ? "Contacter sur WhatsApp" : "Appeler"}
+                    >
+                      {isWa ? (
+                        <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366] flex-shrink-0" />
+                      ) : (
+                        <Phone className="w-3 h-3 text-gold/80 group-hover:text-gold flex-shrink-0" aria-hidden="true" />
+                      )}
+                      <span className="font-semibold text-zinc-200 group-hover:text-gold">{item.display}</span>
+                    </a>
+                  );
+                })}
+              </div>
+
+              <div className="pt-2 border-t border-white/5 space-y-1.5">
+                <p className="flex items-center gap-2 text-zinc-300 font-medium">
+                  <MapPin className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
+                  <span>Koulouba, Ouagadougou</span>
+                </p>
+                <a 
+                  href={SHOP_CONFIG.directionsUrl || SHOP_CONFIG.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-gold hover:underline"
+                >
+                  <Compass className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
+                  <span>Itinéraire Google Maps</span>
+                </a>
+              </div>
+
+              <div className="pt-2 border-t border-white/5 text-[11px] text-zinc-400 space-y-1 leading-relaxed">
+                <p className="flex justify-between">
+                  <span className="text-zinc-500">Lundi – Samedi :</span>
+                  <span className="text-white font-medium">9 h – 19 h</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-zinc-500">Dimanche :</span>
+                  <span className="text-white font-medium">10 h – 16 h</span>
+                </p>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -1099,7 +1032,7 @@ export default function Home() {
           <span className="text-[10px] font-medium tracking-tight">Panier</span>
         </button>
 
-        {/* 3. Showroom */}
+        {/* 3. Boutique */}
         <button 
           onClick={() => {
             const elem = document.getElementById('about');
@@ -1110,7 +1043,7 @@ export default function Home() {
           <svg className="w-5 h-5 group-hover:text-gold transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
           </svg>
-          <span className="text-[10px] font-medium tracking-tight">Showroom</span>
+          <span className="text-[10px] font-medium tracking-tight">Boutique</span>
         </button>
       </nav>
 

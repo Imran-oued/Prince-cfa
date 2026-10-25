@@ -46,7 +46,8 @@ import {
   Tv,
   Speaker,
   Sun,
-  Layers
+  Layers,
+  Refrigerator
 } from "lucide-react";
 import { 
   PRODUCT_CATEGORIES, 
@@ -108,6 +109,9 @@ function getCategoryIcon(catId: string, className = "w-4 h-4") {
       return <Speaker className={className} aria-hidden="true" />;
     case "solar":
       return <Sun className={className} aria-hidden="true" />;
+    case "appliances":
+    case "electromenager":
+      return <Refrigerator className={className} aria-hidden="true" />;
     default:
       return <Package className={className} aria-hidden="true" />;
   }
@@ -292,7 +296,7 @@ export default function AdminPage() {
           const parsed = JSON.parse(saved);
           const migrated = parsed.map((p: AdminProduct) => {
             const defaultMatch = defaultProducts.find(dp => String(dp.id) === String(p.id));
-            if (defaultMatch && (String(p.id).startsWith('pcfa-17') || String(p.id).startsWith('pcfa-18'))) {
+            if (defaultMatch) {
               return {
                 ...p,
                 image: defaultMatch.image,
@@ -300,7 +304,8 @@ export default function AdminPage() {
                 colors: defaultMatch.colors,
                 specs: defaultMatch.specs,
                 desc: defaultMatch.desc,
-                storageOptions: defaultMatch.storageOptions
+                brand: defaultMatch.brand || p.brand,
+                storageOptions: defaultMatch.storageOptions || p.storageOptions
               };
             }
             return p;
@@ -308,6 +313,9 @@ export default function AdminPage() {
           const existingIds = new Set(migrated.map((p: AdminProduct) => String(p.id)));
           const newDefaults = defaultProducts.filter(dp => !existingIds.has(String(dp.id)));
           const combined = [...migrated, ...newDefaults];
+          try {
+            localStorage.setItem("prince_cfa_products", JSON.stringify(combined));
+          } catch {}
           setProductsList(combined);
         } catch {
           setProductsList(defaultProducts);
@@ -487,7 +495,7 @@ export default function AdminPage() {
       message = `👑 *PRINCE CFA - PAIEMENT CONFIRMÉ*\n\n` +
         `Bonjour *${order.customer.name}*,\n` +
         `Nous vous confirmons la bonne réception de votre paiement de *${order.pricing?.total?.toLocaleString('fr-FR')} FCFA* pour votre commande *${order.id}*. ✅\n\n` +
-        `Votre commande est désormais validée et en cours de préparation dans notre showroom !\n\n` +
+        `Votre commande est désormais validée et en cours de préparation dans notre boutique !\n\n` +
         `📦 *Suivez votre commande en direct :*\n${trackingUrl}\n\n` +
         `Merci pour votre confiance !\n` +
         `_L'équipe PRINCE CFA Ouagadougou_`;
@@ -499,9 +507,9 @@ export default function AdminPage() {
         `📦 *Suivi en temps réel :*\n${trackingUrl}\n\n` +
         `_PRINCE CFA Ouagadougou_`;
     } else if (type === "ready_pickup") {
-      message = `👑 *PRINCE CFA - APPAREIL PRÊT AU SHOWROOM*\n\n` +
+      message = `👑 *PRINCE CFA - APPAREIL PRÊT EN BOUTIQUE*\n\n` +
         `Bonjour *${order.customer.name}*,\n` +
-        `Votre commande *${order.id}* est prête et disponible dans notre Showroom à Ouagadougou ! 🏬\n\n` +
+        `Votre commande *${order.id}* est prête et disponible dans notre boutique à Koulouba, Ouagadougou ! 🏬\n\n` +
         `Vous pouvez passer la récupérer dès maintenant avec votre référence.\n\n` +
         `📦 *Détails de votre commande :*\n${trackingUrl}\n\n` +
         `_L'équipe PRINCE CFA_`;
@@ -1397,7 +1405,7 @@ export default function AdminPage() {
                     </span>
                   ) : order.payment?.method === "store_pickup" ? (
                     <span className="inline-flex items-center gap-1.5 text-gold">
-                      <Store className="w-3.5 h-3.5 text-gold" aria-hidden="true" /> Showroom
+                      <Store className="w-3.5 h-3.5 text-gold" aria-hidden="true" /> Boutique
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 text-orange-400">
@@ -1424,7 +1432,7 @@ export default function AdminPage() {
                         ) : (
                           <span className="text-gold inline-flex items-center gap-1.5">
                             <Store className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
-                            <span>Retrait Showroom</span>
+                            <span>Retrait en Boutique</span>
                           </span>
                         )}
                       </td>
@@ -1526,7 +1534,7 @@ export default function AdminPage() {
                   ) : (
                     <>
                       <Store className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
-                      <span>Retrait au Showroom</span>
+                      <span>Retrait en Boutique</span>
                     </>
                   )}
                 </span>
@@ -1746,7 +1754,7 @@ export default function AdminPage() {
                       className="py-1 px-2.5 rounded-lg bg-white/10 hover:bg-gold hover:text-black text-gold text-[11px] font-bold border border-gold/30 transition-all cursor-pointer flex items-center gap-1"
                     >
                       <Store className="w-3 h-3" aria-hidden="true" />
-                      <span>Prêt Showroom</span>
+                      <span>Prêt en Boutique</span>
                     </button>
                   )}
                   <button

@@ -31,19 +31,19 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 120000,
-    image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone11-black-select-2019?wid=940&hei=1112&fmt=png-alpha',
+    image: '/products/apple/iphone-11-black.png',
     rating: 4.8,
     colors: ['Noir', 'Blanc', 'Mauve', 'Vert', 'Jaune', 'Rouge'],
     storageOptions: [
       { capacity: '128 Go', price: 120000 }
     ],
     images: [
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone11-black-select-2019?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone11-white-select-2019?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone11-purple-select-2019?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone11-green-select-2019?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone11-yellow-select-2019?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone11-red-select-2019?wid=940&hei=1112&fmt=png-alpha'
+      '/products/apple/iphone-11-black.png',
+      '/products/apple/iphone-11-white.png',
+      '/products/apple/iphone-11-purple.png',
+      '/products/apple/iphone-11-green.png',
+      '/products/apple/iphone-11-yellow.png',
+      '/products/apple/iphone-11-red.png'
     ],
     specs: {
       screen: '6.1" Liquid Retina HD',
@@ -59,17 +59,17 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 150000,
-    image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-11-pro-space-select-2019?wid=940&hei=1112&fmt=png-alpha',
+    image: '/products/apple/iphone-11-pro-space.png',
     rating: 4.8,
     colors: ['Gris sidéral', 'Argent', 'Vert nuit', 'Or'],
     storageOptions: [
       { capacity: '256 Go', price: 150000 }
     ],
     images: [
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-11-pro-space-select-2019?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-11-pro-silver-select-2019?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-11-pro-midnight-green-select-2019?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-11-pro-gold-select-2019?wid=940&hei=1112&fmt=png-alpha'
+      '/products/apple/iphone-11-pro-space.png',
+      '/products/apple/iphone-11-pro-silver.png',
+      '/products/apple/iphone-11-pro-midnightgreen.png',
+      '/products/apple/iphone-11-pro-gold.png'
     ],
     specs: {
       screen: '5.8" Super Retina XDR OLED',
@@ -85,7 +85,7 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 130000,
-    image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-blue-select-2020?wid=940&hei=1112&fmt=png-alpha',
+    image: '/products/apple/iphone-12-blue.png',
     rating: 4.8,
     colors: ['Bleu', 'Noir', 'Blanc', 'Vert', 'Mauve'],
     storageOptions: [
@@ -93,11 +93,11 @@ export const products = [
       { capacity: '128 Go', price: 145000 }
     ],
     images: [
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-blue-select-2020?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-black-select-2020?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-white-select-2020?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-green-select-2020?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-purple-select-2021?wid=940&hei=1112&fmt=png-alpha'
+      '/products/apple/iphone-12-blue.png',
+      '/products/apple/iphone-12-black.png',
+      '/products/apple/iphone-12-white.png',
+      '/products/apple/iphone-12-green.png',
+      '/products/apple/iphone-12-purple.png'
     ],
     specs: {
       screen: '6.1" Super Retina XDR OLED',
@@ -140,17 +140,17 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 240000,
-    image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-blue-select?wid=940&hei=1112&fmt=png-alpha',
+    image: '/products/apple/iphone-13-pro-blue.png',
     rating: 4.9,
     colors: ['Bleu alpin', 'Graphite', 'Argent', 'Or'],
     storageOptions: [
       { capacity: '256 Go', price: 240000 }
     ],
     images: [
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-blue-select?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-graphite-select?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-silver-select?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-gold-select?wid=940&hei=1112&fmt=png-alpha'
+      '/products/apple/iphone-13-pro-blue.png',
+      '/products/apple/iphone-13-pro-graphite.png',
+      '/products/apple/iphone-13-pro-silver.png',
+      '/products/apple/iphone-13-pro-gold.png'
     ],
     specs: {
       screen: '6.1" ProMotion 120Hz Super Retina XDR',
@@ -166,7 +166,7 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 250000,
-    image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-max-blue-select?wid=940&hei=1112&fmt=png-alpha',
+    image: '/products/apple/iphone-13-promax-blue.png',
     rating: 4.9,
     colors: ['Bleu alpin', 'Graphite', 'Argent', 'Or'],
     storageOptions: [
@@ -174,10 +174,10 @@ export const products = [
       { capacity: '256 Go', price: 280000 }
     ],
     images: [
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-max-blue-select?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-max-graphite-select?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-max-silver-select?wid=940&hei=1112&fmt=png-alpha',
-      'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-max-gold-select?wid=940&hei=1112&fmt=png-alpha'
+      '/products/apple/iphone-13-promax-blue.png',
+      '/products/apple/iphone-13-promax-graphite.png',
+      '/products/apple/iphone-13-promax-silver.png',
+      '/products/apple/iphone-13-promax-gold.png'
     ],
     specs: {
       screen: '6.7" ProMotion 120Hz Super Retina XDR',
@@ -863,6 +863,45 @@ export const products = [
     desc: 'Une enceinte surpuissante aux finitions dorées, capable de sonoriser les soirées les plus prestigieuses avec des basses profondes.'
   },
   {
+    id: 'pcfa-honda-uvo-gt',
+    name: 'Scooter Électrique Honda U-VO GT Smart NFC (72V)',
+    category: 'mobility',
+    brand: 'Honda',
+    price: 925000,
+    salePrice: 890000,
+    image: '/products/mobility/honda-scooter-vert.jpg',
+    rating: 4.9,
+    colors: ['Vert Kaki Mat', 'Blanc Nacré', 'Gris Titane', 'Noir Phantom'],
+    images: [
+      '/products/mobility/honda-scooter-vert.jpg',
+      '/products/mobility/honda-scooter-blanc.jpg'
+    ],
+    warranty: 'Garantie 2 Ans Batterie & Moteur',
+    accessories: 'Chargeur rapide secteur 220V, 2 Cartes NFC sans contact, Télécommande alarme antivol, Rétroviseurs, Trousse outils, Casque homologué offert',
+    specs: {
+      model: 'Wuyang-Honda U-VO GT (Édition NFC)',
+      motor: '2100W Brushless Haute Performance (Pic 3200W)',
+      motorPower: 2100,
+      batteryCapacityWh: 2300,
+      batteryVoltage: 72,
+      range: '85 - 110 km',
+      rangeKm: 100,
+      max_speed: '70 km/h',
+      speed: '70 km/h',
+      maxSpeedKm: 70,
+      charge_time: '4 à 5 heures',
+      chargeTimeHours: 5,
+      batteryType: 'lithium_removable',
+      battery: '72V Lithium-Ion amovible haute densité',
+      transmission: 'Automatique avec marche arrière assistée',
+      brakes: 'Double frein à disque hydraulique avant / arrière',
+      display: 'Compteur numérique LCD couleur haute visibilité',
+      security: 'Démarrage sans clé NFC + Alarme antivol avec blocage moteur',
+      lighting: 'Optiques Full LED haute luminosité avec feux de jour DRL'
+    },
+    desc: 'Le scooter électrique Honda U-VO GT incarne l’excellence technologique pour la mobilité urbaine à Ouagadougou. Propulsé par un moteur brushless 72V puissant et silencieux, il offre jusqu’à 110 km d’autonomie sur une seule charge, éliminant vos dépenses d’essence et de vidange. Équipé d’un système de démarrage sans clé par badge NFC, d’un double frein à disque pour une sécurité maximale et de suspensions renforcées adaptées aux routes sahéliennes, c’est le choix ultime alliant prestige, économies et robustesse.'
+  },
+  {
     id: 'p-004',
     name: 'AeroBike E-Urban 2026',
     category: 'mobility',
@@ -906,5 +945,934 @@ export const products = [
       materials: 'Cuir véritable et Aluminium brossé'
     },
     desc: 'L’acoustique d’un studio d’enregistrement alliée au confort absolu, pour une écoute sans la moindre distraction.'
+  },
+
+  // --- ÉLECTROMÉNAGER ---
+  {
+    id: 'pcfa-app-fridge',
+    name: 'Réfrigérateur Multi-Portes No Frost Inverter 450L',
+    category: 'appliances',
+    brand: 'Samsung',
+    price: 420000,
+    image: 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=800&q=80',
+    rating: 4.9,
+    colors: ['Inox Brossé'],
+    images: [
+      'https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=800&q=80'
+    ],
+    specs: {
+      applianceType: 'Réfrigérateur / Congélateur',
+      capacity: '450 Litres',
+      energyClass: 'A+++',
+      power: 'Digital Inverter',
+      features: 'Froid ventilé No Frost, Distributeur d\'eau en façade'
+    },
+    desc: 'Réfrigérateur multi-portes haut de gamme avec compresseur Digital Inverter économe en énergie, technologie No Frost et double zone de fraîcheur.'
+  },
+  {
+    id: 'pcfa-app-split',
+    name: 'Climatiseur Split Smart Dual Inverter 1.5 CV',
+    category: 'appliances',
+    brand: 'LG',
+    price: 265000,
+    image: 'https://images.unsplash.com/photo-1614633833026-0e10b190f845?w=800&q=80',
+    rating: 4.8,
+    colors: ['Blanc Pur'],
+    images: [
+      'https://images.unsplash.com/photo-1614633833026-0e10b190f845?w=800&q=80'
+    ],
+    specs: {
+      applianceType: 'Climatiseur / Split',
+      capacity: '1.5 CV (12000 BTU)',
+      energyClass: 'A+++ Inverter',
+      power: 'Dual Inverter 70% économie',
+      features: 'Refroidissement ultra-rapide Jet Cool, Silencieux 19dB'
+    },
+    desc: 'Climatiseur split puissant et ultra-silencieux avec technologie Dual Inverter garantissant une consommation électrique réduite et un confort thermique maximal.'
+  },
+  {
+    id: 'pcfa-app-washer',
+    name: 'Machine à Laver Frontale Steam Direct Drive 9 kg',
+    category: 'appliances',
+    brand: 'Midea',
+    price: 295000,
+    image: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80',
+    rating: 4.9,
+    colors: ['Gris Anthracite'],
+    images: [
+      'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80'
+    ],
+    specs: {
+      applianceType: 'Machine à laver / Lave-linge',
+      capacity: '9 kg',
+      energyClass: 'A+++',
+      power: 'Moteur Inverter Direct Drive',
+      features: 'Programme vapeur anti-bactérien, Essorage 1400 tr/min'
+    },
+    desc: 'Lave-linge grande capacité 9 kg avec programme vapeur anti-allergène, essorage haute performance et moteur Inverter Direct Drive silencieux.'
+  },
+
+  // --- TABLETTES ---
+  {
+    id: 'pcfa-tab-enfant',
+    name: 'Tablette Enfant Éducative BTOUCH KT12 (8.68")',
+    category: 'tablets',
+    brand: 'BTOUCH',
+    price: 40000,
+    image: '/products/tablets/tablette-enfant-kt12.jpg',
+    rating: 4.9,
+    colors: ['Bleu & Rose (Duo)'],
+    storageOptions: [
+      { capacity: '64 Go', price: 40000 },
+      { capacity: '128 Go', price: 48000 }
+    ],
+    images: [
+      '/products/tablets/tablette-enfant-kt12.jpg'
+    ],
+    specs: {
+      model: 'BTOUCH KT12 Kids Early Education',
+      screenSize: '8.68 pouces HD',
+      screen: '8.68" HD Eye Protection',
+      storageSize: '64 Go',
+      ram: 4,
+      connectivity: 'wifi_cellular',
+      processor: 'Quad-Core Allwinner A133 Kids Boost',
+      batteryCapacity: 5000,
+      battery: '5000 mAh longue autonomie',
+      stylusSupport: 'Compatible stylet & tactile multipoint',
+      os: 'Android avec Contrôle Parental iWawa préinstallé'
+    },
+    desc: 'Tablette éducative 8.68 pouces spécialement conçue pour l\'apprentissage et le divertissement sécurisé des enfants. Livrée avec sa coque intégrale en silicone antichoc avec poignée/support pliable, filtre protecteur des yeux anti-lumière bleue, contrôle parental complet et dizaines de jeux et applications pédagogiques préinstallés.'
+  },
+  {
+    id: 'pcfa-tab-moto-pad60',
+    name: 'Tablette Moto Pad 60 Neo (avec Stylet Intelligent)',
+    category: 'tablets',
+    brand: 'Motorola',
+    price: 140000,
+    image: '/products/tablets/moto-pad-60-neo.jpg',
+    rating: 4.9,
+    colors: ['Gris Minéral'],
+    storageOptions: [
+      { capacity: '128 Go', price: 140000 },
+      { capacity: '256 Go', price: 165000 }
+    ],
+    images: [
+      '/products/tablets/moto-pad-60-neo.jpg'
+    ],
+    specs: {
+      model: 'Moto Pad 60 Neo',
+      screenSize: '11 pouces 2K (2000 x 1200) 90Hz',
+      screen: '11" 2K IPS 90Hz',
+      storageSize: '128 Go',
+      ram: 8,
+      connectivity: 'wifi_cellular',
+      processor: 'MediaTek Helio G99 Octa-Core 2.2 GHz',
+      batteryCapacity: 7700,
+      battery: '7700 mAh + Charge Rapide 20W',
+      stylusSupport: 'Stylet actif intelligent haute précision inclus',
+      audio: 'Quad Speakers 4 Haut-parleurs Dolby Atmos',
+      os: 'Android 14 pur avec mode bureau'
+    },
+    desc: 'Tablette premium Moto Pad 60 Neo avec châssis métallique monocoque ultra-fin, grand écran 11 pouces 2K 90Hz aux couleurs éclatantes et stylet intelligent inclus pour la prise de notes et le graphisme. Équipée d\'un processeur Octa-Core ultra-rapide, de 4 haut-parleurs Dolby Atmos et d\'une autonomie record de 7700 mAh.'
+  },
+  {
+    id: 'pcfa-tab-17-promax',
+    name: 'Tablette 17 Pro Max 5G (Design Prestige Orange)',
+    category: 'tablets',
+    brand: '17 Pro Max',
+    price: 75000,
+    image: '/products/tablets/tablette-17-pro-max.jpg',
+    rating: 4.8,
+    colors: ['Orange Impérial'],
+    storageOptions: [
+      { capacity: '128 Go', price: 75000 },
+      { capacity: '256 Go', price: 89000 }
+    ],
+    images: [
+      '/products/tablets/tablette-17-pro-max.jpg'
+    ],
+    specs: {
+      model: '17 Pro Max 5G',
+      screenSize: '10.1 pouces HD+ IPS',
+      screen: '10.1" HD+ IPS Grand Format',
+      storageSize: '128 Go',
+      ram: 6,
+      connectivity: 'wifi_cellular',
+      processor: 'Octa-Core High Performance 5G',
+      batteryCapacity: 6000,
+      battery: '6000 mAh autonomie toute la journée',
+      camera: 'Triple caméra arrière style Pro avec Flash LED',
+      stylusSupport: 'Compatible stylet universel & clavier Bluetooth',
+      os: 'Android 13 complet avec Google Play'
+    },
+    desc: 'Tablette grand format 10.1 pouces au style prestige inspiré des smartphones Pro, arborant un dos orange vibrant avec triple module photo. Connectivité cellulaire 4G/5G double SIM, 128 Go de stockage et 6 Go de RAM pour une utilisation multimédia fluide (YouTube, streaming, réseaux sociaux, télétravail et études).'
+  },
+
+  // --- SMARTPHONES (NOUVEAUTÉS) ---
+  {
+    id: 'pcfa-honor-x5c',
+    name: 'Honor X5c',
+    category: 'phones',
+    brand: 'Honor',
+    price: 75000,
+    image: '/products/phones/honor-x5c-front.jpg',
+    rating: 4.8,
+    colors: ['Cyan Émeraude'],
+    storageOptions: [
+      { capacity: '128 Go', price: 75000 },
+      { capacity: '256 Go', price: 95000 }
+    ],
+    images: [
+      '/products/phones/honor-x5c-front.jpg',
+      '/products/phones/honor-x5c-back.jpg',
+      '/products/phones/honor-x5c.jpg'
+    ],
+    specs: {
+      screen: '6.56" HD+ 90Hz Eye Comfort',
+      processor: 'MediaTek Helio G36 Octa-Core',
+      camera: 'Double Caméra 50MP AI avec Flash',
+      battery: '5200 mAh ultra longue autonomie',
+      ram: 4
+    },
+    desc: 'Smartphone Honor X5c élégant et autonome avec grand écran 6.56 pouces 90Hz, appareil photo 50 MP haute définition, batterie colossale 5200 mAh et mémoire extensible jusqu\'à 256 Go.'
+  },
+  {
+    id: 'pcfa-itel-a200',
+    name: 'Itel A200',
+    category: 'phones',
+    brand: 'Itel',
+    price: 65000,
+    image: '/products/phones/itel-a200-front.jpg',
+    rating: 4.7,
+    colors: ['Or Champagne'],
+    storageOptions: [
+      { capacity: '64 Go', price: 65000 },
+      { capacity: '128 Go', price: 72000 }
+    ],
+    images: [
+      '/products/phones/itel-a200-front.jpg',
+      '/products/phones/itel-a200-back.jpg',
+      '/products/phones/itel-a200.jpg'
+    ],
+    specs: {
+      screen: '6.6" HD+ Waterdrop Display',
+      processor: 'Octa-Core Unisoc T603',
+      camera: '13MP Dual AI Camera avec Flash',
+      battery: '5000 mAh avec charge Type-C',
+      ram: 4
+    },
+    desc: 'Smartphone Itel A200 au design moderne facetté or champagne avec écran panoramique 6.6 pouces, lecteur d\'empreintes digitale, 4 Go de RAM et batterie robuste de 5000 mAh.'
+  },
+  {
+    id: 'pcfa-samsung-a16',
+    name: 'Samsung Galaxy A16',
+    category: 'phones',
+    brand: 'Samsung',
+    price: 85000,
+    image: '/products/phones/samsung-a16-front.jpg',
+    rating: 4.8,
+    colors: ['Vert Clair'],
+    storageOptions: [
+      { capacity: '128 Go', price: 85000 },
+      { capacity: '256 Go', price: 98000 }
+    ],
+    images: [
+      '/products/phones/samsung-a16-front.jpg',
+      '/products/phones/samsung-a16-back.jpg',
+      '/products/phones/samsung-a16.jpg'
+    ],
+    specs: {
+      screen: '6.7" Super AMOLED 90Hz FHD+',
+      processor: 'MediaTek Helio G99 / Exynos 1330',
+      camera: 'Triple Capteur 50MP + 5MP Ultra-Large + 2MP',
+      battery: '5000 mAh + Charge Rapide 25W',
+      ram: 6
+    },
+    desc: 'Samsung Galaxy A16 avec écran immersif Super AMOLED 90Hz, triple capteur photo 50MP, design épuré Key Island et autonomie durable de 5000 mAh avec charge rapide 25W.'
+  },
+  {
+    id: 'pcfa-samsung-a17',
+    name: 'Samsung Galaxy A17 5G',
+    category: 'phones',
+    brand: 'Samsung',
+    price: 145000,
+    image: '/products/phones/samsung-a17-front.jpg',
+    rating: 4.9,
+    colors: ['Argent Lavande'],
+    storageOptions: [
+      { capacity: '128 Go', price: 145000 },
+      { capacity: '256 Go', price: 165000 }
+    ],
+    images: [
+      '/products/phones/samsung-a17-front.jpg',
+      '/products/phones/samsung-a17-back.jpg',
+      '/products/phones/samsung-a17.jpg'
+    ],
+    specs: {
+      screen: '6.7" Super AMOLED+ 120Hz Vision Booster',
+      processor: 'Exynos 1480 5G Octa-Core 4nm',
+      camera: '50MP OIS Stabilisé + 8MP Ultra Grand-Angle + 2MP Macro',
+      battery: '5000 mAh + Recharge Rapide 25W',
+      ram: 8
+    },
+    desc: 'Samsung Galaxy A17 5G nouvelle génération offrant un écran Super AMOLED+ 120Hz ultra-lumineux, capteur photo 50MP stabilisé OIS, connectivité 5G ultra-rapide et châssis fin haut de gamme.'
+  },
+  {
+    id: 'pcfa-huawei-y9',
+    name: 'Huawei Y9',
+    category: 'phones',
+    brand: 'Huawei',
+    price: 45000,
+    image: '/products/phones/huawei-y9-front.jpg',
+    rating: 4.7,
+    colors: ['Bleu Saphir'],
+    storageOptions: [
+      { capacity: '64 Go', price: 45000 },
+      { capacity: '128 Go', price: 55000 }
+    ],
+    images: [
+      '/products/phones/huawei-y9-front.jpg',
+      '/products/phones/huawei-y9-back.jpg',
+      '/products/phones/huawei-y9.jpg'
+    ],
+    specs: {
+      screen: '6.5" FullView FHD+ (2340 x 1080)',
+      processor: 'Kirin 710 Octa-Core avec GPU Turbo',
+      camera: 'Quadruple Caméra AI (16MP + 2MP Arrière / 13MP + 2MP Avant)',
+      battery: '4000 mAh longue autonomie',
+      ram: 4
+    },
+    desc: 'Huawei Y9 classique et ultra-fiable avec grand écran 6.5 pouces FullView haute résolution FHD+, 4 caméras IA avec mode portrait avant/arrière et processeur Kirin performant.'
+  },
+  {
+    id: 'pcfa-tecno-camon50-pro',
+    name: 'Tecno Camon 50 Pro 5G',
+    category: 'phones',
+    brand: 'Tecno',
+    price: 225000,
+    image: '/products/phones/tecno-camon-50-pro-front.jpg',
+    rating: 4.9,
+    colors: ['Or Sahara (Cuir Végétal)'],
+    storageOptions: [
+      { capacity: '256 Go', price: 225000 },
+      { capacity: '512 Go', price: 250000 }
+    ],
+    images: [
+      '/products/phones/tecno-camon-50-pro-front.jpg',
+      '/products/phones/tecno-camon-50-pro-back.jpg',
+      '/products/phones/tecno-camon-50-pro.jpg'
+    ],
+    specs: {
+      screen: '6.78" AMOLED Incurvé 144Hz 1.5K',
+      processor: 'MediaTek Dimensity 8200 Ultimate 5G',
+      camera: '50MP OIS Sony IMX + 50MP Téléobjectif Périscope + 50MP Selfie',
+      battery: '5000 mAh + Ultra Charge 70W',
+      ram: 12
+    },
+    desc: 'Le smartphone photophone d\'excellence Tecno Camon 50 Pro 5G : écran AMOLED incurvé 144Hz, dos bi-matière en cuir végétal doré, triple capteur Sony 50MP avec zoom périscopique et charge ultra-rapide 70W.'
+  },
+  {
+    id: 'pcfa-tecno-camon50-ultra',
+    name: 'Tecno Camon 50 Ultra 5G (Prestige Edition)',
+    category: 'phones',
+    brand: 'Tecno',
+    price: 310000,
+    image: '/products/phones/tecno-camon-50-ultra-front.jpg',
+    rating: 5.0,
+    colors: ['Noir Marbre Onyx & Or'],
+    storageOptions: [
+      { capacity: '256 Go', price: 310000 },
+      { capacity: '512 Go', price: 345000 }
+    ],
+    images: [
+      '/products/phones/tecno-camon-50-ultra-front.jpg',
+      '/products/phones/tecno-camon-50-ultra-back.jpg',
+      '/products/phones/tecno-camon-50-ultra.jpg'
+    ],
+    specs: {
+      screen: '6.82" Quad-Curved LTPO AMOLED 1-144Hz 2K',
+      processor: 'Dimensity 9300+ 5G (Flagship 4nm) 16 Go RAM',
+      camera: 'Système Quad Caméra 50MP OIS Capteur 1 pouce + Téléobjectif Macro',
+      battery: '5400 mAh + Charge Éclair 100W & Sans-fil 50W',
+      ram: 16
+    },
+    desc: 'Le fleuron ultime de la photographie mobile : Tecno Camon 50 Ultra avec châssis titane, dos en verre marbre noir et or veiné, capteur principal 1 pouce ultra-sensible et processeur surpuissant 16 Go RAM.'
+  },
+  {
+    id: 'pcfa-tecno-spark50',
+    name: 'Tecno Spark 50',
+    category: 'phones',
+    brand: 'Tecno',
+    price: 100000,
+    image: '/products/phones/tecno-spark-50-front.jpg',
+    rating: 4.8,
+    colors: ['Vert Aurore Cyber'],
+    storageOptions: [
+      { capacity: '128 Go', price: 100000 },
+      { capacity: '256 Go', price: 115000 }
+    ],
+    images: [
+      '/products/phones/tecno-spark-50-front.jpg',
+      '/products/phones/tecno-spark-50-back.jpg',
+      '/products/phones/tecno-spark-50.jpg'
+    ],
+    specs: {
+      screen: '6.78" FHD+ 120Hz Punch-Hole avec Dynamic Port',
+      processor: 'MediaTek Helio G99 Gaming Processor',
+      camera: '50MP Ultra Clear Dual Camera avec Aura Light',
+      battery: '5000 mAh + Charge Rapide 33W',
+      ram: 8
+    },
+    desc: 'Tecno Spark 50 au design holographique étincelant avec écran fluide 120Hz et Dynamic Port interactif, appareil photo 50MP avec flash annulaire Aura Light, processeur gaming Helio G99 et charge 33W.'
+  },
+  {
+    id: 'pcfa-redmi-a7',
+    name: 'Xiaomi Redmi A7',
+    category: 'phones',
+    brand: 'Redmi',
+    price: 65000,
+    image: '/products/phones/redmi-a7-front.jpg',
+    rating: 4.7,
+    colors: ['Vert Forêt (Finition Cuir)'],
+    storageOptions: [
+      { capacity: '64 Go', price: 65000 },
+      { capacity: '128 Go', price: 72000 }
+    ],
+    images: [
+      '/products/phones/redmi-a7-front.jpg',
+      '/products/phones/redmi-a7-back.jpg',
+      '/products/phones/redmi-a7.jpg'
+    ],
+    specs: {
+      screen: '6.71" HD+ 90Hz Corning Gorilla Glass',
+      processor: 'Octa-Core Helio G36',
+      camera: '50MP AI Dual Camera avec HDR',
+      battery: '5000 mAh longue autonomie',
+      ram: 4
+    },
+    desc: 'Xiaomi Redmi A7 combinant élégance et solidité avec son dos texturé effet cuir vert forêt, son grand écran 6.71 pouces 90Hz résistant Gorilla Glass et sa caméra 50MP avec intelligence artificielle.'
+  },
+  {
+    id: 'pcfa-redmi-a7-pro',
+    name: 'Xiaomi Redmi A7 Pro',
+    category: 'phones',
+    brand: 'Redmi',
+    price: 75000,
+    image: '/products/phones/redmi-a7-pro-front.jpg',
+    rating: 4.8,
+    colors: ['Bleu Glacier Givré'],
+    storageOptions: [
+      { capacity: '128 Go', price: 75000 },
+      { capacity: '256 Go', price: 89000 }
+    ],
+    images: [
+      '/products/phones/redmi-a7-pro-front.jpg',
+      '/products/phones/redmi-a7-pro-back.jpg',
+      '/products/phones/redmi-a7-pro.jpg'
+    ],
+    specs: {
+      screen: '6.74" 90Hz Écran Poinçonné Ultra-Fluide',
+      processor: 'MediaTek Helio G85 Haute Performance',
+      camera: '50MP Double Caméra avec Bague Dorée & Flash Ring',
+      battery: '5000 mAh + Recharge Rapide 18W Type-C',
+      ram: 6
+    },
+    desc: 'Version supérieure Redmi A7 Pro avec écran poinçonné 90Hz, processeur Helio G85 plus puissant, 128 Go de mémoire interne, finition dos en verre dépoli bleu glacier et module caméra cerclé d\'or.'
+  },
+  {
+    id: 'pcfa-infinix-smart20',
+    name: 'Infinix Smart 20',
+    category: 'phones',
+    brand: 'Infinix',
+    price: 65000,
+    image: '/products/phones/infinix-smart-20.jpg',
+    rating: 4.7,
+    colors: ['Vert Émeraude'],
+    storageOptions: [
+      { capacity: '64 Go', price: 65000 },
+      { capacity: '128 Go', price: 72000 }
+    ],
+    images: [
+      '/products/phones/infinix-smart-20.jpg'
+    ],
+    specs: {
+      screen: '6.6" 90Hz avec Magic Ring Interactif',
+      processor: 'Octa-Core Unisoc T606',
+      camera: '13MP Dual AI avec Flash Ring Annulaire',
+      battery: '5000 mAh autonomie 2 jours Type-C',
+      ram: 4
+    },
+    desc: 'Infinix Smart 20 équipé de l\'écran Magic Ring à encoche interactive avec notifications animées, affichage fluide 90Hz, son stéréo puissant 200% volume boost et batterie infatigable 5000 mAh.'
+  },
+  {
+    id: 'pcfa-infinix-hot70',
+    name: 'Infinix Hot 70 (256 Go)',
+    category: 'phones',
+    brand: 'Infinix',
+    price: 170000,
+    image: '/products/phones/infinix-hot-70.jpg',
+    rating: 4.9,
+    colors: ['Vert Horizon'],
+    storageOptions: [
+      { capacity: '256 Go', price: 170000 }
+    ],
+    images: [
+      '/products/phones/infinix-hot-70.jpg'
+    ],
+    specs: {
+      screen: '6.78" FHD+ 120Hz Écran Incurvé 3D',
+      processor: 'MediaTek Helio G99 Ultimate 6nm Gaming',
+      camera: '108MP Ultra-Précis + 32MP Caméra Selfie avec Double Flash',
+      battery: '5000 mAh + FastCharge 33W Multi-Vitesse',
+      ram: 8
+    },
+    desc: 'Infinix Hot 70 édition 256 Go : écran géant FHD+ 120Hz immersif, appareil photo révolutionnaire 108 mégapixels pour des clichés d\'une netteté exceptionnelle, processeur Helio G99 Ultimate avec 8 Go de RAM et 256 Go d\'espace de stockage.'
+  },
+  // --- NOUVEAUX SMARTPHONES & TÉLÉPHONES COMMERCIAUX ---
+  {
+    id: 'pcfa-redmi-17',
+    name: 'Xiaomi Redmi 17',
+    category: 'phones',
+    brand: 'Redmi',
+    price: 120000,
+    image: '/products/phones/redmi-17-blue.jpg',
+    rating: 4.8,
+    colors: ['Bleu Ciel', 'Rose Poudré', 'Or Sable', 'Noir Minuit'],
+    storageOptions: [
+      { capacity: '128 Go', price: 120000 },
+      { capacity: '256 Go', price: 135000 }
+    ],
+    images: [
+      '/products/phones/redmi-17-blue.jpg',
+      '/products/phones/redmi-17-pink.jpg',
+      '/products/phones/redmi-17-gold.jpg',
+      '/products/phones/redmi-17-black.jpg'
+    ],
+    specs: {
+      screen: '6.79" FHD+ 90Hz AdaptiveSync',
+      processor: 'MediaTek Helio G91-Ultra',
+      camera: '108MP Ultra-Clear + 2MP Macro',
+      battery: '5030 mAh + Charge Rapide 33W Type-C',
+      ram: 8
+    },
+    desc: 'Xiaomi Redmi 17 avec grand écran 6.79" 90Hz immersif, appareil photo principal de 108 mégapixels, dos en verre élégant et batterie haute capacité 5030 mAh.'
+  },
+  {
+    id: 'pcfa-redmi-note15-pro-plus',
+    name: 'Redmi Note 15 Pro +5G',
+    category: 'phones',
+    brand: 'Redmi',
+    price: 240000,
+    image: '/products/phones/redmi-note15pro-black.jpg',
+    rating: 4.9,
+    colors: ['Noir Minuit', 'Blanc Miroir', 'Violet Aurore'],
+    storageOptions: [
+      { capacity: '256 Go', price: 240000 },
+      { capacity: '512 Go', price: 270000 }
+    ],
+    images: [
+      '/products/phones/redmi-note15pro-black.jpg',
+      '/products/phones/redmi-note15pro-white.jpg',
+      '/products/phones/redmi-note15pro-purple.jpg'
+    ],
+    specs: {
+      screen: '6.67" CrystalRes 1.5K AMOLED 120Hz Incurvé 3D',
+      processor: 'MediaTek Dimensity 7200-Ultra 4nm 5G',
+      camera: '200MP OIS Stabilisé Super QPD + 8MP Grand-Angle',
+      battery: '5000 mAh + HyperCharge 120W (100% en 19 min)',
+      ram: 12
+    },
+    desc: 'Redmi Note 15 Pro+ 5G fleuron absolu : écran incurvé AMOLED 1.5K, monstrueux capteur 200MP avec stabilisation optique OIS, puce 5G 4nm et recharge ultra-rapide 120W.'
+  },
+  {
+    id: 'pcfa-redmi-15-pro',
+    name: 'Redmi 15 Pro',
+    category: 'phones',
+    brand: 'Redmi',
+    price: 180000,
+    image: '/products/phones/redmi-15pro-black.jpg',
+    rating: 4.8,
+    colors: ['Noir Stellaire', 'Bleu Océan', 'Violet Astral'],
+    storageOptions: [
+      { capacity: '128 Go', price: 180000 },
+      { capacity: '256 Go', price: 200000 }
+    ],
+    images: [
+      '/products/phones/redmi-15pro-black.jpg',
+      '/products/phones/redmi-15pro-blue.jpg',
+      '/products/phones/redmi-15pro-purple.jpg'
+    ],
+    specs: {
+      screen: '6.67" AMOLED 120Hz Ultra-lumineux 1800 nits',
+      processor: 'Snapdragon 7s Gen 2 Haute Vitesse',
+      camera: '200MP Capteur Ultra-précis + Flash Ring',
+      battery: '5100 mAh + Turbo Charge 67W',
+      ram: 8
+    },
+    desc: 'Xiaomi Redmi 15 Pro alliant puissance et élégance avec son écran AMOLED 120Hz, capteur 200MP et batterie 5100 mAh rechargeable à 67W.'
+  },
+  {
+    id: 'pcfa-infinix-note-edge',
+    name: 'Infinix Note Edge',
+    category: 'phones',
+    brand: 'Infinix',
+    price: 145600,
+    image: '/products/phones/infinix-note-edge-gold.jpg',
+    rating: 4.8,
+    colors: ['Or Solaire', 'Bleu Palmier', 'Vert Émeraude'],
+    storageOptions: [
+      { capacity: '256 Go', price: 145600 }
+    ],
+    images: [
+      '/products/phones/infinix-note-edge-gold.jpg',
+      '/products/phones/infinix-note-edge-blue.jpg',
+      '/products/phones/infinix-note-edge-green.jpg'
+    ],
+    specs: {
+      screen: '6.78" FHD+ 120Hz Écran Bord Incurvé 3D AMOLED',
+      processor: 'MediaTek Helio G99 Ultimate 6nm',
+      camera: '108MP Triple Caméra AI avec Flash Quad-LED',
+      battery: '5000 mAh + FastCharge 45W All-Round',
+      ram: 8
+    },
+    desc: 'Infinix Note Edge avec ses bords incurvés d\'une finesse incomparable, son superbe écran 120Hz immersif, triple capteur photo 108MP et charge 45W ultra-sécurisée.'
+  },
+  {
+    id: 'pcfa-tecno-p20',
+    name: 'TECNO P20',
+    category: 'phones',
+    brand: 'Tecno',
+    price: 75000,
+    image: '/products/phones/tecno-p20-grey.jpg',
+    rating: 4.8,
+    colors: ['Gris Météorite', 'Vert Comète'],
+    storageOptions: [
+      { capacity: '64 Go', price: 75000 },
+      { capacity: '128 Go', price: 85000 }
+    ],
+    images: [
+      '/products/phones/tecno-p20-grey.jpg',
+      '/products/phones/tecno-p20-green.jpg'
+    ],
+    specs: {
+      screen: '6.78" FHD+ 120Hz Mecha Design',
+      processor: 'MediaTek Helio G99 Gaming Turbo',
+      camera: '108MP Double Capteur AI avec LED Dynamic Light',
+      battery: '6000 mAh Mega Batterie + 70W Ultra Charge',
+      ram: 8
+    },
+    desc: 'TECNO P20 au look futuriste Cyber Mecha avec rétroéclairage LED dynamique, autonomie monstre de 6000 mAh et écran ultra-fluide 120Hz.'
+  },
+  {
+    id: 'pcfa-samsung-b310',
+    name: 'Samsung B310 (Guru Music 2)',
+    category: 'phones',
+    brand: 'Samsung',
+    price: 80000,
+    image: '/products/phones/samsung-b310-white.jpg',
+    rating: 4.9,
+    colors: ['Blanc Pur', 'Noir Minuit'],
+    storageOptions: [
+      { capacity: 'MicroSD Extensible', price: 80000 }
+    ],
+    images: [
+      '/products/phones/samsung-b310-white.jpg',
+      '/products/phones/samsung-b310-black.jpg'
+    ],
+    specs: {
+      screen: '2.0" QQVGA Écran Couleur Lumineux',
+      processor: 'Processeur Dédié Audio Dual SIM',
+      camera: 'Lecteur MP3 & Radio FM Stéréo avec Antenne Intégrée',
+      battery: '800 mAh Autonomie Jusqu\'à 11h d\'Appels'
+    },
+    desc: 'Le légendaire Samsung B310 Guru Music 2 : double carte SIM, son ultra-puissant pour la musique et les appels, radio FM sans écouteurs et autonomie record de plusieurs jours.'
+  },
+  {
+    id: 'pcfa-oale-pop10',
+    name: 'OALE PoP 10',
+    category: 'phones',
+    brand: 'OALE',
+    price: 50000,
+    image: '/products/phones/oale-pop10-black.jpg',
+    rating: 4.7,
+    colors: ['Noir Gravité', 'Blanc Mystique', 'Vert Magique'],
+    storageOptions: [
+      { capacity: '64 Go', price: 50000 }
+    ],
+    images: [
+      '/products/phones/oale-pop10-black.jpg',
+      '/products/phones/oale-pop10-white.jpg',
+      '/products/phones/oale-pop10-green.jpg'
+    ],
+    specs: {
+      screen: '6.6" HD+ 90Hz Dynamic Notch',
+      processor: 'Octa-Core 4G Haute Fluidité',
+      camera: '50MP Double Capteur Photo AI avec Double Flash',
+      battery: '5000 mAh + 18W Type-C',
+      ram: 4
+    },
+    desc: 'OALE PoP 10 offrant un grand écran 6.6" 90Hz avec encoche dynamique, appareil photo 50MP et batterie haute capacité 5000 mAh pour un rapport qualité-prix imbattable.'
+  },
+  {
+    id: 'pcfa-oale-pop20',
+    name: 'OALE PoP 20',
+    category: 'phones',
+    brand: 'OALE',
+    price: 50000,
+    image: '/products/phones/oale-pop20-black.jpg',
+    rating: 4.7,
+    colors: ['Noir Graphite', 'Blanc Givré', 'Bleu Océan'],
+    storageOptions: [
+      { capacity: '64 Go', price: 50000 }
+    ],
+    images: [
+      '/products/phones/oale-pop20-black.jpg',
+      '/products/phones/oale-pop20-white.jpg',
+      '/products/phones/oale-pop20-blue.jpg'
+    ],
+    specs: {
+      screen: '6.6" HD+ 90Hz Punch-Hole Immersif',
+      processor: 'MediaTek Helio G85 Haute Efficacité',
+      camera: '50MP Triple Capteur AI + 32MP Caméra Selfie Lumineuse',
+      battery: '5000 mAh Longue Durée Type-C',
+      ram: 6
+    },
+    desc: 'OALE PoP 20 nouvelle génération avec écran poinçonné 90Hz, haut-parleurs stéréo certifiés DTS, capteur d\'empreinte digitale et autonomie infatigable.'
+  },
+  {
+    id: 'pcfa-oale-camon30',
+    name: 'OALE Camon 30',
+    category: 'phones',
+    brand: 'OALE',
+    price: 55000,
+    image: '/products/phones/oale-camon30-black.jpg',
+    rating: 4.8,
+    colors: ['Noir Basalte', 'Blanc Sel d\'Uyuni', 'Argent Givré'],
+    storageOptions: [
+      { capacity: '64 Go', price: 50000 },
+      { capacity: '128 Go', price: 55000 }
+    ],
+    images: [
+      '/products/phones/oale-camon30-black.jpg',
+      '/products/phones/oale-camon30-white.jpg',
+      '/products/phones/oale-camon30-silver.jpg'
+    ],
+    specs: {
+      screen: '6.78" FHD+ 120Hz AMOLED Look',
+      processor: 'Octa-Core Helio G99 Performance',
+      camera: '64MP Capteur Professionnel avec Bague Lumineuse',
+      battery: '5000 mAh + Charge Rapide 33W',
+      ram: 6
+    },
+    desc: 'OALE Camon 30 au design prestige inspiré des appareils photo réflex, dos en cuir texturé ou verre marbré, grand écran 120Hz et caméra 64MP lumineuse.'
+  },
+  {
+    id: 'pcfa-oale-pop9',
+    name: 'OALE Pop 9',
+    category: 'phones',
+    brand: 'OALE',
+    price: 50000,
+    image: '/products/phones/oale-pop9-blue.jpg',
+    rating: 4.6,
+    colors: ['Bleu Aurore', 'Noir Nuit'],
+    storageOptions: [
+      { capacity: '64 Go', price: 50000 }
+    ],
+    images: [
+      '/products/phones/oale-pop9-blue.jpg',
+      '/products/phones/oale-pop9-black.jpg'
+    ],
+    specs: {
+      screen: '6.6" HD+ Waterdrop Confort Visuel',
+      processor: 'Quad-Core 4G Économe en Énergie',
+      camera: '13MP Double Capteur AI + Flash LED',
+      battery: '5000 mAh Autonomie 3 Jours',
+      ram: 4
+    },
+    desc: 'OALE Pop 9 ultra-endurant avec sa batterie 5000 mAh, écran lumineux 6.6 pouces, capteur d\'empreinte digitale dorsal et double carte SIM 4G.'
+  },
+  {
+    id: 'pcfa-oale-17-promax',
+    name: 'OALE 17 Pro Max (Copie Conforme)',
+    category: 'phones',
+    brand: 'OALE',
+    price: 60000,
+    image: '/products/phones/oale-17-promax-deepblue.jpg',
+    rating: 4.8,
+    colors: ['Titane Bleu Profond', 'Titane Argenté', 'Titane Orange Cosmique'],
+    storageOptions: [
+      { capacity: '128 Go', price: 60000 },
+      { capacity: '256 Go', price: 70000 }
+    ],
+    images: [
+      '/products/phones/oale-17-promax-deepblue.jpg',
+      '/products/phones/oale-17-promax-silver.jpg',
+      '/products/phones/oale-17-promax-orange.jpg'
+    ],
+    specs: {
+      screen: '6.7" Dynamic Island Écran Complet Sans Bordure',
+      processor: 'Octa-Core High-Speed avec Interface iOS Style',
+      camera: 'Triple Objectif Look Pro avec Flash Quad-LED',
+      battery: '4800 mAh + Recharge Rapide Type-C & MagSafe Look',
+      ram: 6
+    },
+    desc: 'OALE 17 Pro Max Copie Conforme : le style et la prestance du tout dernier fleuron avec contour en titane brossé, écran Dynamic Island immersif, triple objectif photo et port Type-C.'
+  },
+  {
+    id: 'pcfa-oale-hot70',
+    name: 'OALE Hot 70',
+    category: 'phones',
+    brand: 'OALE',
+    price: 50000,
+    image: '/products/phones/oale-hot70-green.jpg',
+    rating: 4.7,
+    colors: ['Vert Horizon', 'Bleu Électrique', 'Noir Obscur'],
+    storageOptions: [
+      { capacity: '64 Go', price: 50000 }
+    ],
+    images: [
+      '/products/phones/oale-hot70-green.jpg',
+      '/products/phones/oale-hot70-blue.jpg',
+      '/products/phones/oale-hot70-black.jpg'
+    ],
+    specs: {
+      screen: '6.78" 90Hz Grand Écran Punch-Hole',
+      processor: 'Octa-Core Gaming Engine',
+      camera: '50MP Triple Capteur AI avec Bague Lumineuse',
+      battery: '5000 mAh + 33W Fast Charge Type-C',
+      ram: 6
+    },
+    desc: 'OALE Hot 70 conçu pour les divertissements et les jeux : grand affichage 90Hz, son stéréo puissant, appareil photo 50MP et charge rapide 33W.'
+  },
+  {
+    id: 'pcfa-oale-spark30c',
+    name: 'OALE Spark 30 C',
+    category: 'phones',
+    brand: 'OALE',
+    price: 50000,
+    image: '/products/phones/oale-spark30c-white.jpg',
+    rating: 4.7,
+    colors: ['Blanc Magic', 'Noir Ébène'],
+    storageOptions: [
+      { capacity: '64 Go', price: 50000 }
+    ],
+    images: [
+      '/products/phones/oale-spark30c-white.jpg',
+      '/products/phones/oale-spark30c-black.jpg'
+    ],
+    specs: {
+      screen: '6.67" 120Hz Ultra-Fluide Protection Yeux',
+      processor: 'Octa-Core Haute Efficacité',
+      camera: '50MP Caméra Principale Sony Look + Double Flash',
+      battery: '5000 mAh + 18W Type-C',
+      ram: 4
+    },
+    desc: 'OALE Spark 30 C avec écran 120Hz d\'une fluidité remarquable, module photo circulaire symétrique moderne, double haut-parleur stéréo et batterie 5000 mAh.'
+  },
+  {
+    id: 'pcfa-oale-s25-ultra',
+    name: 'OALE S25 Ultra',
+    category: 'phones',
+    brand: 'OALE',
+    price: 60000,
+    image: '/products/phones/oale-s25-ultra-black.jpg',
+    rating: 4.8,
+    colors: ['Noir Titane', 'Gris Titane', 'Violet Titane', 'Jaune Titane'],
+    storageOptions: [
+      { capacity: '128 Go', price: 60000 },
+      { capacity: '256 Go', price: 70000 }
+    ],
+    images: [
+      '/products/phones/oale-s25-ultra-black.jpg',
+      '/products/phones/oale-s25-ultra-gray.jpg',
+      '/products/phones/oale-s25-ultra-violet.jpg',
+      '/products/phones/oale-s25-ultra-yellow.jpg'
+    ],
+    specs: {
+      screen: '6.8" Quad HD+ Look Écran Plat Angulaire',
+      processor: 'Octa-Core Haute Vitesse avec Stylet S-Pen Stylus',
+      camera: 'Quad Capteur Look Ultra avec Zoom Optique Simulé',
+      battery: '5000 mAh + Charge Rapide Type-C',
+      ram: 8
+    },
+    desc: 'OALE S25 Ultra réplique grandiose : lignes tendues en titane, écran géant 6.8 pouces sans bordure, quadruple optique photo arrière et stylet tactile intégré.'
+  },
+  {
+    id: 'pcfa-honor-x9b-5g',
+    name: 'Honor X9b 5G',
+    category: 'phones',
+    brand: 'Honor',
+    price: 100000,
+    image: '/products/phones/honor-x9b-orange.jpg',
+    rating: 4.9,
+    colors: ['Orange Sunrise (Cuir Végan)', 'Noir Minuit'],
+    storageOptions: [
+      { capacity: '256 Go', price: 100000 }
+    ],
+    images: [
+      '/products/phones/honor-x9b-orange.jpg',
+      '/products/phones/honor-x9b-black.jpg'
+    ],
+    specs: {
+      screen: '6.78" 1.5K AMOLED 120Hz Écran Anti-Chute Ultra-Bounce 360°',
+      processor: 'Qualcomm Snapdragon 6 Gen 1 4nm 5G',
+      camera: '108MP Motion Capture Ultra-Net + 5MP Grand-angle',
+      battery: '5800 mAh Monstre d\'Autonomie (3 Jours) + 35W SuperCharge',
+      ram: 12
+    },
+    desc: 'Honor X9b 5G incassable : écran certifié 5 étoiles SGS résistance aux chutes 360°, gigantesque batterie 5800 mAh dans un boîtier ultra-fin de 7.98mm et dos en cuir végan orange luxueux.'
+  },
+  {
+    id: 'pcfa-oale-smart20',
+    name: 'OALE Smart 20',
+    category: 'phones',
+    brand: 'OALE',
+    price: 50000,
+    image: '/products/phones/oale-smart20-green.jpg',
+    rating: 4.7,
+    colors: ['Vert Paon', 'Bleu Azur'],
+    storageOptions: [
+      { capacity: '64 Go', price: 50000 }
+    ],
+    images: [
+      '/products/phones/oale-smart20-green.jpg',
+      '/products/phones/oale-smart20-blue.jpg'
+    ],
+    specs: {
+      screen: '6.6" HD+ Affichage Solaire Antibactérien',
+      processor: 'Octa-Core Économe 4G',
+      camera: '13MP Double Caméra AI avec Double Flash Arrière',
+      battery: '5000 mAh Longue Endurance',
+      ram: 4
+    },
+    desc: 'OALE Smart 20 doté d\'une coque arrière texturée 3D antimicrobienne effet vagues d\'eau, grand écran HD+ lisible au soleil et autonomie de 2 jours.'
+  },
+  {
+    id: 'pcfa-itel-a06',
+    name: 'Itel A06',
+    category: 'phones',
+    brand: 'Itel',
+    price: 50000,
+    image: '/products/phones/itel-a06-black.jpg',
+    rating: 4.7,
+    colors: ['Noir Nébuleuse', 'Bleu Cristal'],
+    storageOptions: [
+      { capacity: '32 Go', price: 50000 },
+      { capacity: '64 Go', price: 56000 }
+    ],
+    images: [
+      '/products/phones/itel-a06-black.jpg',
+      '/products/phones/itel-a06-blue.jpg'
+    ],
+    specs: {
+      screen: '6.6" HD+ Drop Notch Immersif',
+      processor: 'Octa-Core 4G Haute Stabilité',
+      camera: 'Double Capteur AI avec Capteur d\'Empreinte Dorsal',
+      battery: '4000 mAh + Port Moderne Type-C',
+      ram: 4
+    },
+    desc: 'Itel A06 : smartphone accessible et élégant avec écran 6.6 pouces, capteur d\'empreinte digitale sécurisé, déverrouillage facial et batterie 4000 mAh.'
   }
 ];
+

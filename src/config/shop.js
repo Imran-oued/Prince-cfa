@@ -3,12 +3,29 @@
  */
 export const SHOP_CONFIG = {
   name: "PRINCE CFA",
-  phone: "07778740",
+  phone: "+226 77 43 43 97",
   // Format international WhatsApp pour les liens wa.me (Burkina Faso +226)
-  whatsappNumber: "22607778740",
-  displayPhone: "+226 07 77 87 40",
-  address: "Ouagadougou, Burkina Faso",
-  mapsUrl: "https://www.google.com/maps/place/12%C2%B021%2746.8%22N+1%C2%B030%2759.2%22W/@12.3630013,-1.5164472,17z/data=!4m4!3m3!8m2!3d12.3630013!4d-1.5164472?entry=mfs&utm_campaign=ml-le-16204870&coh=230964&g_st=ic",
+  whatsappNumber: "22677434397",
+  displayPhone: "+226 77 43 43 97",
+  address: "Koulouba, Ouagadougou",
+  fullAddress: "Koulouba, Ouagadougou, Burkina Faso",
+  
+  // Contacts officiels (section NOUS JOINDRE)
+  phones: [
+    { display: "+226 77 43 43 97", raw: "+22677434397", wa: "22677434397", isWhatsApp: true, isPrimary: true },
+    { display: "+226 64 76 91 30", raw: "+22664769130" },
+    { display: "+226 77 14 67 13", raw: "+22677146713" }
+  ],
+
+  // Horaires d'ouverture officiels
+  hours: {
+    weekdays: "Lundi – Samedi : 9 h – 19 h",
+    sunday: "Dimanche : 10 h – 16 h"
+  },
+
+  // Liens Google Maps & Itinéraire
+  mapsUrl: "https://www.google.com/maps/search/?api=1&query=Koulouba,+Ouagadougou,+Burkina+Faso",
+  directionsUrl: "https://www.google.com/maps/dir/?api=1&destination=Koulouba,+Ouagadougou,+Burkina+Faso",
   currency: "FCFA",
   
   // Frais de livraison standard (en FCFA)
@@ -42,10 +59,10 @@ export const SHOP_CONFIG = {
     },
     store_pickup: {
       id: "store_pickup",
-      name: "Paiement en Showroom",
-      shortName: "Showroom",
+      name: "Paiement en Boutique",
+      shortName: "Boutique",
       badge: "store",
-      instructions: "Réglez directement en espèces ou par Mobile Money lors du retrait de votre appareil dans notre boutique à Ouagadougou."
+      instructions: "Réglez directement en espèces ou par Mobile Money lors du retrait de votre appareil dans notre boutique à Koulouba, Ouagadougou."
     }
   }
 };

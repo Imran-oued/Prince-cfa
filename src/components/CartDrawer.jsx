@@ -51,7 +51,8 @@ export default function CartDrawer({
   cartItems, 
   updateQuantity, 
   removeItem,
-  onClearCart
+  onClearCart,
+  onViewProduct
 }) {
   // Animation d'entrée slide-over
   const [slideIn, setSlideIn] = useState(false);
@@ -174,11 +175,11 @@ export default function CartDrawer({
 
     const methodLabel = o.payment?.method === "wave" 
       ? "Wave" 
-      : (o.payment?.method === "store_pickup" ? "Showroom (Boutique)" : "Orange Money");
+      : (o.payment?.method === "store_pickup" ? "Paiement en Boutique" : "Orange Money");
 
     const deliveryLabel = o.customer.deliveryMethod === "delivery" 
       ? `Livraison (${o.customer.city || "Ouaga"} - ${o.customer.neighborhood || "Non précisé"})`
-      : "Retrait au Showroom";
+      : "Retrait en Boutique";
 
     let msg = `👑 *COMMANDE PRINCE CFA* 👑\n`;
     msg += `═══════════════════════════\n`;
@@ -354,7 +355,7 @@ export default function CartDrawer({
             </div>
             <div className="flex items-center justify-center gap-1.5 text-center">
               <Store className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
-              <span>Showroom Ouaga</span>
+              <span>Boutique Ouaga</span>
             </div>
           </div>
         )}
@@ -398,53 +399,91 @@ export default function CartDrawer({
                     {cartItems.map((item) => (
                       <div 
                         key={item.cartId || `${item.id}-${item.selectedColor}-${item.selectedCapacity}`}
-                        className="glass-panel p-3 rounded-2xl border border-white/10 flex gap-3 items-center relative group bg-white/[0.02]"
+                        className="glass-panel p-3 rounded-2xl border border-white/10 flex gap-3 items-center relative group bg-white/[0.02] hover:border-gold/30 hover:bg-white/[0.04] transition-all"
                       >
-                        <div className="w-14 h-14 rounded-xl bg-white p-1 flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden">
-                          <img 
-                            src={item.image} 
-                            alt={item.name} 
-                            className="max-w-full max-h-full object-contain"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-xs sm:text-sm font-bold text-white truncate">{item.name}</h4>
-                          <div className="flex flex-wrap gap-1.5 mt-0.5">
-                            {item.selectedCapacity && (
-                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-gold font-bold">
-                                {item.selectedCapacity}
-                              </span>
-                            )}
-                            {item.selectedColor && (
-                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">
-                                {item.selectedColor}
-                              </span>
-                            )}
+                        {/* Zone interactive produit cliquable pour voir les détails complets */}
+                        <div 
+                          onClick={() => onViewProduct && onViewProduct(item)}
+                          className="flex-1 flex gap-3 items-center min-w-0 cursor-pointer group/item select-none text-left"
+                          title="Appuyer pour voir les détails de cet article"
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              onViewProduct && onViewProduct(item);
+                            }
+                          }}
+                        >
+                          <div className="w-14 h-14 rounded-xl bg-white p-1 flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden border border-transparent group-hover/item:border-gold/50 group-hover/item:scale-105 transition-all">
+                            <img 
+                              src={item.image} 
+                              alt={item.name} 
+                              className="max-w-full max-h-full object-contain"
+                            />
                           </div>
-                          <div className="text-xs font-black text-gold mt-1">
-                            {item.price.toLocaleString('fr-FR')} FCFA
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <h4 className="text-xs sm:text-sm font-bold text-white truncate group-hover/item:text-gold transition-colors">
+                                {item.name}
+                              </h4>
+                              <ExternalLink className="w-3 h-3 text-zinc-500 opacity-0 group-hover/item:opacity-100 group-hover/item:text-gold transition-all flex-shrink-0" aria-hidden="true" />
+                            </div>
+                            <div className="flex flex-wrap gap-1.5 mt-0.5">
+                              {item.selectedCapacity && (
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-gold font-bold">
+                                  {item.selectedCapacity}
+                                </span>
+                              )}
+                              {item.selectedColor && (
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">
+                                  {item.selectedColor}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between mt-1">
+                              <div className="text-xs font-black text-gold">
+                                {item.price.toLocaleString('fr-FR')} FCFA
+                              </div>
+                              <span className="text-[10px] text-zinc-400 group-hover/item:text-gold font-medium flex items-center gap-0.5 transition-colors pr-2">
+                                Voir détails →
+                              </span>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                        {/* Actions : suppression et ajustement quantité */}
+                        <div className="flex flex-col items-end gap-1.5 flex-shrink-0 pl-1 border-l border-white/5">
                           <button 
-                            onClick={() => removeItem(item.cartId)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeItem(item.cartId);
+                            }}
                             className="text-zinc-500 hover:text-red-400 p-1 rounded transition-colors cursor-pointer touch-manipulation"
                             title="Supprimer"
                             aria-label="Supprimer"
                           >
                             <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                           </button>
-                          <div className="flex items-center gap-1 bg-black/60 border border-white/10 rounded-lg p-0.5">
+                          <div 
+                            className="flex items-center gap-1 bg-black/60 border border-white/10 rounded-lg p-0.5"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <button 
-                              onClick={() => updateQuantity(item.cartId, item.quantity - 1)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(item.cartId, item.quantity - 1);
+                              }}
                               className="w-5 h-5 flex items-center justify-center text-xs text-zinc-300 hover:text-white rounded cursor-pointer touch-manipulation"
                             >
                               -
                             </button>
                             <span className="text-xs font-bold w-4 text-center text-white">{item.quantity}</span>
                             <button 
-                              onClick={() => updateQuantity(item.cartId, item.quantity + 1)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(item.cartId, item.quantity + 1);
+                              }}
                               className="w-5 h-5 flex items-center justify-center text-xs text-zinc-300 hover:text-white rounded cursor-pointer touch-manipulation"
                             >
                               +
@@ -490,7 +529,7 @@ export default function CartDrawer({
                     </div>
                   </div>
 
-                  {/* Choix livraison à domicile ou retrait showroom */}
+                  {/* Choix livraison à domicile ou retrait en boutique */}
                   <div className="grid grid-cols-2 gap-2 pt-1">
                     <button
                       type="button"
@@ -519,7 +558,7 @@ export default function CartDrawer({
                     >
                       <Store className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
                       <div className="text-left">
-                        <span className="block text-xs leading-none">Retrait Showroom</span>
+                        <span className="block text-xs leading-none">Retrait en Boutique</span>
                         <span className="text-[9px] text-green-400 font-bold">Gratuit</span>
                       </div>
                     </button>
@@ -556,15 +595,15 @@ export default function CartDrawer({
                     </div>
                   )}
 
-                  {/* Info showroom si retrait */}
+                  {/* Info boutique si retrait */}
                   {customer.deliveryMethod === "pickup" && (
                     <div className="p-3 rounded-xl bg-gold/10 border border-gold/30 text-xs text-zinc-300 flex items-center justify-between gap-2 animate-in fade-in">
                       <div>
                         <span className="font-bold text-gold flex items-center gap-1.5 text-xs">
                           <MapPin className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
-                          Showroom Prince CFA
+                          Boutique Prince CFA (Koulouba)
                         </span>
-                        <p className="text-zinc-400 text-[10px] mt-0.5">Ouagadougou, Burkina Faso (12°21&apos;46.8&quot;N 1°30&apos;59.2&quot;W)</p>
+                        <p className="text-zinc-400 text-[10px] mt-0.5">Koulouba, Ouagadougou • Burkina Faso</p>
                       </div>
                       <a 
                         href={SHOP_CONFIG.mapsUrl} 
@@ -617,7 +656,7 @@ export default function CartDrawer({
                     </button>
                   </div>
 
-                  {/* Option Showroom si retrait */}
+                  {/* Option Boutique si retrait */}
                   {customer.deliveryMethod === "pickup" && (
                     <button
                       type="button"
@@ -629,7 +668,7 @@ export default function CartDrawer({
                       }`}
                     >
                       <Store className="w-4 h-4 text-gold flex-shrink-0" aria-hidden="true" />
-                      <span>Règlement sur place au Showroom (Espèces ou Mobile Money)</span>
+                      <span>Règlement sur place en Boutique (Espèces ou Mobile Money)</span>
                     </button>
                   )}
 
@@ -835,7 +874,7 @@ export default function CartDrawer({
                     </div>
                   )}
 
-                  {/* Encadré Showroom */}
+                  {/* Encadré Boutique */}
                   {customer.paymentMethod === "store_pickup" && (
                     <div className="rounded-2xl border border-gold/30 bg-gold/5 p-4 space-y-2 animate-in fade-in">
                       <div className="flex items-center gap-2">
@@ -845,7 +884,7 @@ export default function CartDrawer({
                         </h4>
                       </div>
                       <p className="text-xs text-zinc-300 leading-relaxed font-light">
-                        Votre appareil sera mis de côté pour vous. Vous pourrez régler en <strong>espèces</strong> ou par <strong>Orange Money / Wave</strong> sur place au Showroom.
+                        Votre appareil sera mis de côté pour vous. Vous pourrez régler en <strong>espèces</strong> ou par <strong>Orange Money / Wave</strong> sur place en Boutique.
                       </p>
                     </div>
                   )}
@@ -873,7 +912,7 @@ export default function CartDrawer({
                     <div>
                       <span className="text-zinc-400 uppercase tracking-widest text-[10px] font-semibold block">Total Net à régler</span>
                       <span className="text-[11px] text-zinc-500 font-normal">
-                        {customer.deliveryMethod === "delivery" ? "Livraison incluse" : "Retrait gratuit au showroom"}
+                        {customer.deliveryMethod === "delivery" ? "Livraison incluse" : "Retrait gratuit en boutique"}
                       </span>
                     </div>
                     <span className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-white">

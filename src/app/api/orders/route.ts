@@ -173,7 +173,7 @@ export async function POST(request: Request) {
         name: sanitizeText(customer.name, 100),
         phone: cleanPhone,
         deliveryMethod: isDelivery ? "delivery" : "pickup",
-        city: sanitizeText(customer.city || (isDelivery ? "Ouagadougou" : "Showroom"), 80),
+        city: sanitizeText(customer.city || (isDelivery ? "Ouagadougou" : "Boutique"), 80),
         neighborhood: sanitizeText(customer.neighborhood || "", 120),
         notes: sanitizeText(customer.notes || "", 300)
       },

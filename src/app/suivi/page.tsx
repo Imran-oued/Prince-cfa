@@ -403,7 +403,7 @@ function TrackingContent() {
                           {order.customer.deliveryMethod === "delivery" ? "Livrée" : "Remise"}
                         </span>
                         <span className="text-[9px] text-zinc-500 hidden sm:block">
-                          {order.customer.deliveryMethod === "delivery" ? "À destination" : "Au Showroom"}
+                          {order.customer.deliveryMethod === "delivery" ? "À destination" : "En Boutique"}
                         </span>
                       </div>
 
@@ -519,7 +519,7 @@ function TrackingContent() {
                       ) : (
                         <>
                           <Store className="w-4 h-4 text-gold" aria-hidden="true" />
-                          <span>Retrait au Showroom</span>
+                          <span>Retrait en Boutique</span>
                         </>
                       )}
                     </div>
