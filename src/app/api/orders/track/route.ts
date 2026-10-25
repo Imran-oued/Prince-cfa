@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getOrderById, getOrders } from "@/lib/firestore";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { getCachedOrders } from "@/lib/serverCache";
 
 /**
  * Assainit et filtre les données sensibles pour la consultation publique
@@ -136,7 +137,7 @@ export async function GET(request: Request) {
         );
       }
 
-      const allOrders = await getOrders();
+      const allOrders = await getCachedOrders();
       const matching = (allOrders || []).filter((o: any) => {
         const orderPhoneDigits = cleanDigits(o.customer?.phone || "");
         return orderPhoneDigits && (orderPhoneDigits.endsWith(searchDigits) || searchDigits.endsWith(orderPhoneDigits));

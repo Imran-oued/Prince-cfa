@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyAdminAuth } from "@/lib/auth";
 import { updateProduct, deleteProduct, getProduct } from "@/lib/firestore";
 import { validateAndCleanProduct } from "@/lib/productValidation";
+import { invalidateProductsCache } from "@/lib/serverCache";
 
 export async function PUT(
   request: Request,
@@ -50,6 +51,9 @@ export async function PUT(
       );
     }
 
+    // Invalider le cache mémoire catalogue
+    invalidateProductsCache();
+
     return NextResponse.json({
       success: true,
       product: cleaned,
@@ -92,6 +96,9 @@ export async function DELETE(
         { status: 500 }
       );
     }
+
+    // Invalider le cache mémoire catalogue
+    invalidateProductsCache();
 
     return NextResponse.json({ success: true, message: "Produit supprimé avec succès." });
 

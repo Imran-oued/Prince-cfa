@@ -3,6 +3,7 @@ import { SHOP_CONFIG } from "@/config/shop";
 import { createOrder, checkAndReserveStock, getProduct, getProducts } from "@/lib/firestore";
 import { products as defaultProducts } from "@/data/products";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { getCachedProducts, invalidateOrdersCache } from "@/lib/serverCache";
 
 interface OrderItemInput {
   productId?: string | number;
@@ -89,10 +90,10 @@ export async function POST(request: Request) {
     const validMethods = ["orange_money", "wave", "store_pickup"];
     const selectedMethod = validMethods.includes(paymentMethod) ? paymentMethod : "orange_money";
 
-    // 3. Récupération du catalogue de référence côté serveur pour vérification stricte des prix
+    // 3. Récupération du catalogue de référence avec cache mémoire serveur (zéro appel Firestore inutile)
     let cloudProducts: any[] | null = null;
     try {
-      cloudProducts = await getProducts();
+      cloudProducts = await getCachedProducts();
     } catch {
       // Repli sur le catalogue statique si indisponible
     }
@@ -202,6 +203,9 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    // Invalider le cache des commandes pour mise à jour instantanée du suivi
+    invalidateOrdersCache();
 
     return NextResponse.json(
       { 

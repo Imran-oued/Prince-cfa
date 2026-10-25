@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyAdminAuth } from "@/lib/auth";
 import { getProducts, addProduct } from "@/lib/firestore";
 import { validateAndCleanProduct } from "@/lib/productValidation";
+import { invalidateProductsCache } from "@/lib/serverCache";
 
 export async function GET(request: Request) {
   try {
@@ -52,6 +53,9 @@ export async function POST(request: Request) {
     // 2. Persistance sécurisée dans Firestore
     const cleaned = validation.cleanedProduct;
     const docId = await addProduct(cleaned);
+
+    // Invalider le cache mémoire catalogue
+    invalidateProductsCache();
 
     return NextResponse.json({
       success: true,

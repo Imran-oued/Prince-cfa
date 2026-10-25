@@ -54,6 +54,7 @@ const nextConfig = {
       },
     },
   },
+  compress: true,
   async headers() {
     return [
       {
@@ -74,6 +75,26 @@ const nextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+      {
+        // Cache pour les images du catalogue (1 jour en cache navigateur + révalidation en arrière-plan)
+        source: "/products/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        // Cache pour les icônes et logos
+        source: "/:file(favicon\\.ico|wave\\.png|orange-money\\.png)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
           },
         ],
       },

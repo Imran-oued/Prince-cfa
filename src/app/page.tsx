@@ -412,7 +412,22 @@ export default function Home() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        // 1. Essayer Firebase en priorité (données partagées entre tous les visiteurs)
+        // 1. Essayer l'API serveur optimisée avec cache mémoire (protection anti-épuisement des quotas Firestore)
+        const apiRes = await fetch("/api/products").catch(() => null);
+        if (apiRes && apiRes.ok) {
+          const apiData = await apiRes.json();
+          if (apiData?.success && Array.isArray(apiData.products) && apiData.products.length > 0) {
+            setLocalProducts(apiData.products);
+            try {
+              localStorage.setItem("prince_cfa_products", JSON.stringify(apiData.products));
+            } catch (e) {
+              console.warn("Storage warning:", e);
+            }
+            return;
+          }
+        }
+
+        // 2. Repli direct sur Firebase SDK si l'API est indisponible
         if (isFirebaseConfigured()) {
           const firebaseProducts = (await getProducts()) as Product[] | null;
           if (firebaseProducts && firebaseProducts.length > 0) {
