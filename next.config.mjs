@@ -98,6 +98,48 @@ const nextConfig = {
           },
         ],
       },
+      {
+        // Commandes et suivi public : INTERDICTION STRICTE DE MISE EN CACHE (Protection PII)
+        source: "/api/orders/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, must-revalidate",
+          },
+          {
+            key: "Pragma",
+            value: "no-cache",
+          },
+        ],
+      },
+      {
+        // API d'administration : INTERDICTION STRICTE DE MISE EN CACHE
+        source: "/api/admin/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, must-revalidate",
+          },
+          {
+            key: "Pragma",
+            value: "no-cache",
+          },
+        ],
+      },
+      {
+        // Interface d'administration : INTERDICTION STRICTE DE MISE EN CACHE
+        source: "/admin/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, must-revalidate",
+          },
+          {
+            key: "Pragma",
+            value: "no-cache",
+          },
+        ],
+      },
     ];
   },
 };

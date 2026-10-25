@@ -14,6 +14,9 @@ import { db, isFirebaseConfigured } from "./firebase.js";
 
 const PRODUCTS_COLLECTION = "products";
 
+// Mémoire tampon en environnement serveur/test lorsque Firebase n'est pas configuré
+const memoryOrders = new Map();
+
 /**
  * Récupérer tous les produits depuis Firestore
  * @returns {Promise<any[] | null>}
@@ -207,6 +210,9 @@ export async function createOrder(orderData) {
       await setDoc(doc(db, ORDERS_COLLECTION, orderId), orderPayload);
     }
 
+    // Sauvegarde en mémoire vive pour le serveur de test/développement
+    memoryOrders.set(orderId, orderPayload);
+
     // 2. Sauvegarde miroir dans localStorage pour résilience offline/client
     if (typeof window !== "undefined") {
       try {
@@ -263,6 +269,11 @@ export async function getOrders() {
       return [];
     }
   }
+
+  if (memoryOrders.size > 0) {
+    return Array.from(memoryOrders.values());
+  }
+
   return [];
 }
 
@@ -297,6 +308,10 @@ export async function getOrderById(orderId) {
     } catch {
       return null;
     }
+  }
+
+  if (memoryOrders.has(orderId)) {
+    return memoryOrders.get(orderId);
   }
 
   return null;
@@ -358,6 +373,8 @@ export async function confirmOrderPayment(orderId, { confirmedBy, transactionRef
     }
   }
 
+  memoryOrders.set(orderId, updatedOrder);
+
   return { success: true, order: updatedOrder };
 }
 
@@ -411,6 +428,8 @@ export async function updateOrderStatus(orderId, newStatus, adminUser, note = ""
     }
   }
 
+  memoryOrders.set(orderId, updatedOrder);
+
   return { success: true, order: updatedOrder };
 }
 
@@ -461,6 +480,8 @@ export async function updateOrderInternalTracking(orderId, trackingData = {}) {
     }
   }
 
+  memoryOrders.set(orderId, updatedOrder);
+
   return { success: true, order: updatedOrder };
 }
 
@@ -478,18 +499,26 @@ export async function checkAndReserveStock(items) {
       for (const item of items) {
         const prodId = String(item.productId);
         const prodDoc = await getProduct(prodId);
-        if (prodDoc && typeof prodDoc.stock === "number") {
-          if (prodDoc.stock < item.quantity) {
+        if (prodDoc) {
+          if (prodDoc.inStock === false) {
             return {
               success: false,
-              error: `Stock insuffisant pour "${item.name}". Disponible: ${prodDoc.stock}, demandé: ${item.quantity}.`
+              error: `Stock insuffisant : le produit "${item.name}" est en rupture de stock.`
             };
           }
-          // Décrémenter le stock
-          await updateDoc(doc(db, PRODUCTS_COLLECTION, prodId), {
-            stock: prodDoc.stock - item.quantity,
-            updatedAt: new Date().toISOString()
-          });
+          if (typeof prodDoc.stock === "number") {
+            if (prodDoc.stock < item.quantity) {
+              return {
+                success: false,
+                error: `Stock insuffisant pour "${item.name}". Disponible: ${prodDoc.stock}, demandé: ${item.quantity}.`
+              };
+            }
+            // Décrémenter le stock
+            await updateDoc(doc(db, PRODUCTS_COLLECTION, prodId), {
+              stock: prodDoc.stock - item.quantity,
+              updatedAt: new Date().toISOString()
+            });
+          }
         }
       }
     } catch (err) {

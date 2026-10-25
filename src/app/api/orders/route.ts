@@ -106,37 +106,76 @@ export async function POST(request: Request) {
       const rawProductId = String(item.productId || item.id || "");
       const qty = Math.max(1, Math.min(100, Math.floor(Number(item.quantity) || 1)));
 
-      // Recherche du produit officiel dans le catalogue serveur (Firestore puis catalogue par défaut)
+      // Recherche du produit officiel : vérification en temps réel contre Firestore pour garantir l'exactitude du prix et de la disponibilité
       let authenticProduct: any = null;
-      if (cloudProducts && cloudProducts.length > 0) {
+      if (rawProductId) {
+        try {
+          const liveDoc = await getProduct(rawProductId);
+          if (liveDoc) {
+            authenticProduct = liveDoc;
+          }
+        } catch {
+          // Repli sur le catalogue serveur en cas d'indisponibilité momentanée
+        }
+      }
+      if (!authenticProduct && cloudProducts && cloudProducts.length > 0) {
         authenticProduct = cloudProducts.find(p => String(p.id) === rawProductId);
       }
       if (!authenticProduct) {
         authenticProduct = defaultProducts.find(p => String(p.id) === rawProductId);
       }
 
-      let authenticUnitPrice = 0;
-      let authenticName = sanitizeText(item.name || "Article", 120);
-      let authenticImage = item.image || "https://placehold.co/600x600/121216/d4af37?text=PRINCE+CFA";
+      if (!authenticProduct) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: `Le produit "${sanitizeText(item.name || rawProductId, 60)}" n'existe pas dans le catalogue officiel.` 
+          },
+          { status: 400 }
+        );
+      }
 
-      if (authenticProduct) {
-        authenticName = authenticProduct.name;
-        authenticImage = authenticProduct.image || authenticImage;
-        authenticUnitPrice = Number(authenticProduct.salePrice || authenticProduct.price || 0);
+      // Contrôle de disponibilité immédiat
+      if (authenticProduct.inStock === false) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: `Le produit "${authenticProduct.name}" est actuellement en rupture de stock.` 
+          },
+          { status: 409 }
+        );
+      }
 
-        // Si le client a sélectionné une capacité spécifique (ex: 256 Go, 512 Go)
-        if (item.selectedCapacity && authenticProduct.storageOptions && Array.isArray(authenticProduct.storageOptions)) {
-          const matchedOpt = authenticProduct.storageOptions.find(
-            (opt: any) => opt.capacity?.trim().toLowerCase() === String(item.selectedCapacity).trim().toLowerCase()
+      if (typeof authenticProduct.stock === "number" && authenticProduct.stock < qty) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: `Stock insuffisant pour "${authenticProduct.name}". Quantité disponible : ${authenticProduct.stock}.` 
+          },
+          { status: 409 }
+        );
+      }
+
+      const authenticName = authenticProduct.name;
+      const authenticImage = authenticProduct.image || item.image || "https://placehold.co/600x600/121216/d4af37?text=PRINCE+CFA";
+      let authenticUnitPrice = Number(authenticProduct.salePrice || authenticProduct.price || 0);
+
+      // Si le client a sélectionné une capacité spécifique (ex: 256 Go, 512 Go)
+      if (item.selectedCapacity && authenticProduct.storageOptions && Array.isArray(authenticProduct.storageOptions)) {
+        const matchedOpt = authenticProduct.storageOptions.find(
+          (opt: any) => opt.capacity?.trim().toLowerCase() === String(item.selectedCapacity).trim().toLowerCase()
+        );
+        if (matchedOpt && Number(matchedOpt.price) > 0) {
+          authenticUnitPrice = Number(matchedOpt.price);
+        } else {
+          return NextResponse.json(
+            { 
+              success: false, 
+              error: `La variante de stockage "${sanitizeText(item.selectedCapacity, 20)}" n'est pas disponible pour "${authenticProduct.name}".` 
+            },
+            { status: 400 }
           );
-          if (matchedOpt && Number(matchedOpt.price) > 0) {
-            authenticUnitPrice = Number(matchedOpt.price);
-          }
         }
-      } else {
-        // Si le produit n'est pas trouvé dans le catalogue officiel (produit dynamique ou ancien),
-        // vérifier que le prix fourni est cohérent et positif
-        authenticUnitPrice = Math.max(0, Number(item.price) || 0);
       }
 
       subtotal += authenticUnitPrice * qty;

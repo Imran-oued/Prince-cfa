@@ -7,6 +7,7 @@ import {
   restoreStock,
   updateOrderInternalTracking
 } from "@/lib/firestore";
+import { invalidateOrdersCache } from "@/lib/serverCache";
 
 export async function PATCH(
   request: Request,
@@ -51,7 +52,13 @@ export async function PATCH(
         return NextResponse.json({ success: false, error: result.error }, { status: 400 });
       }
 
-      return NextResponse.json({ success: true, order: result.order });
+      // Invalider immédiatement le cache mémoire pour garantir un statut 100% à jour côté client
+      invalidateOrdersCache();
+
+      return NextResponse.json(
+        { success: true, order: result.order },
+        { headers: { "Cache-Control": "private, no-cache, no-store, must-revalidate" } }
+      );
     }
 
     if (action === "update_status") {
@@ -84,7 +91,13 @@ export async function PATCH(
         return NextResponse.json({ success: false, error: result.error }, { status: 400 });
       }
 
-      return NextResponse.json({ success: true, order: result.order });
+      // Invalider immédiatement le cache mémoire pour mise à jour instantanée du statut
+      invalidateOrdersCache();
+
+      return NextResponse.json(
+        { success: true, order: result.order },
+        { headers: { "Cache-Control": "private, no-cache, no-store, must-revalidate" } }
+      );
     }
 
     if (action === "update_internal_tracking") {
@@ -100,7 +113,13 @@ export async function PATCH(
         return NextResponse.json({ success: false, error: result.error }, { status: 400 });
       }
 
-      return NextResponse.json({ success: true, order: result.order });
+      // Invalider immédiatement le cache mémoire
+      invalidateOrdersCache();
+
+      return NextResponse.json(
+        { success: true, order: result.order },
+        { headers: { "Cache-Control": "private, no-cache, no-store, must-revalidate" } }
+      );
     }
 
     return NextResponse.json(

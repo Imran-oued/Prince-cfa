@@ -11,9 +11,10 @@ function sanitizePublicOrder(order: any, isPhoneVerified = false) {
   if (!order) return null;
 
   const rawPhone = order.customer?.phone || "";
+  const digits = cleanDigits(rawPhone);
   // Masquage du numéro : ex. 70 •••• 12
-  const phoneMasked = rawPhone.length >= 4 
-    ? rawPhone.replace(/(\d{2})(\d+)(\d{2})$/, "$1 •••• $3")
+  const phoneMasked = digits.length >= 4 
+    ? digits.replace(/(\d{2})(\d+)(\d{2})$/, "$1 •••• $3")
     : "••••••••";
 
   // Si le numéro a été vérifié par le demandeur, on peut afficher le prénom/nom,
@@ -68,6 +69,12 @@ function cleanDigits(val: string): string {
   return (val || "").replace(/\D+/g, "");
 }
 
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "private, no-cache, no-store, must-revalidate",
+  "Pragma": "no-cache",
+  "Expires": "0"
+};
+
 export async function GET(request: Request) {
   try {
     const clientIp = getClientIp(request);
@@ -84,7 +91,7 @@ export async function GET(request: Request) {
           success: false, 
           error: "Trop de requêtes de suivi. Veuillez patienter une minute avant de réessayer." 
         },
-        { status: 429 }
+        { status: 429, headers: NO_CACHE_HEADERS }
       );
     }
 
@@ -97,11 +104,11 @@ export async function GET(request: Request) {
     if (!term) {
       return NextResponse.json(
         { success: false, error: "Veuillez renseigner votre référence de commande ou numéro de téléphone." },
-        { status: 400 }
+        { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
 
-    // 2. Recherche directe par référence de commande (ex: CMD-20261023-XXXX)
+    // 2. Recherche directe par référence de commande (ex: CMD-20261023-XXXX) — Toujours frais en temps réel
     if (orderId && orderId.toUpperCase().startsWith("CMD")) {
       const order = await getOrderById(orderId);
       if (order) {
@@ -113,16 +120,19 @@ export async function GET(request: Request) {
             if (!orderDigits.endsWith(clientDigits) && !clientDigits.endsWith(orderDigits)) {
               return NextResponse.json(
                 { success: false, error: "Le numéro de téléphone ne correspond pas à cette référence de commande." },
-                { status: 403 }
+                { status: 403, headers: NO_CACHE_HEADERS }
               );
             }
             isPhoneVerified = true;
           }
         }
-        return NextResponse.json({ 
-          success: true, 
-          order: sanitizePublicOrder(order, isPhoneVerified) 
-        });
+        return NextResponse.json(
+          { 
+            success: true, 
+            order: sanitizePublicOrder(order, isPhoneVerified) 
+          },
+          { headers: NO_CACHE_HEADERS }
+        );
       }
     }
 
@@ -133,7 +143,7 @@ export async function GET(request: Request) {
       if (searchDigits.length < 8) {
         return NextResponse.json(
           { success: false, error: "Un numéro de téléphone complet d'au moins 8 chiffres est requis pour la recherche." },
-          { status: 400 }
+          { status: 400, headers: NO_CACHE_HEADERS }
         );
       }
 
@@ -146,41 +156,47 @@ export async function GET(request: Request) {
       if (matching.length === 0) {
         return NextResponse.json(
           { success: false, error: `Aucune commande trouvée pour le numéro indiqué. Vérifiez votre saisie.` },
-          { status: 404 }
+          { status: 404, headers: NO_CACHE_HEADERS }
         );
       }
 
       // Trier de la plus récente à la plus ancienne
       matching.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       
-      return NextResponse.json({
-        success: true,
-        order: sanitizePublicOrder(matching[0], true),
-        orders: matching.map((o: any) => sanitizePublicOrder(o, true)),
-        totalFound: matching.length
-      });
+      return NextResponse.json(
+        {
+          success: true,
+          order: sanitizePublicOrder(matching[0], true),
+          orders: matching.map((o: any) => sanitizePublicOrder(o, true)),
+          totalFound: matching.length
+        },
+        { headers: NO_CACHE_HEADERS }
+      );
     }
 
     // 4. Recherche par ID exact sans préfixe
     if (orderId) {
       const order = await getOrderById(orderId);
       if (order) {
-        return NextResponse.json({ 
-          success: true, 
-          order: sanitizePublicOrder(order, false) 
-        });
+        return NextResponse.json(
+          { 
+            success: true, 
+            order: sanitizePublicOrder(order, false) 
+          },
+          { headers: NO_CACHE_HEADERS }
+        );
       }
     }
 
     return NextResponse.json(
       { success: false, error: "Commande introuvable. Vérifiez votre référence ou votre numéro de téléphone." },
-      { status: 404 }
+      { status: 404, headers: NO_CACHE_HEADERS }
     );
   } catch (error: any) {
     console.error("Erreur API track order:", error);
     return NextResponse.json(
       { success: false, error: "Erreur serveur lors de la recherche de la commande." },
-      { status: 500 }
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }
