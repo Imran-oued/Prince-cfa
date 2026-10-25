@@ -874,7 +874,10 @@ export const products = [
     colors: ['Vert Kaki Mat', 'Blanc Nacré', 'Gris Titane', 'Noir Phantom'],
     images: [
       '/products/mobility/honda-scooter-vert.jpg',
-      '/products/mobility/honda-scooter-blanc.jpg'
+      '/products/mobility/honda-scooter-blanc.jpg',
+      '/products/mobility/honda-scooter-gris-side.jpg',
+      '/products/mobility/honda-scooter-noir-rear.jpg',
+      '/products/mobility/honda-scooter-face.jpg'
     ],
     warranty: 'Garantie 2 Ans Batterie & Moteur',
     accessories: 'Chargeur rapide secteur 220V, 2 Cartes NFC sans contact, Télécommande alarme antivol, Rétroviseurs, Trousse outils, Casque homologué offert',
