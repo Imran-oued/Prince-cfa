@@ -378,12 +378,9 @@ export default function ProductDrawer({
         aria-labelledby="product-drawer-title"
       >
         {/* Header du Drawer avec bouton retour / fermeture */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-[#09090b]/80 backdrop-blur-md relative z-20">
-          <div className="flex items-center gap-3">
-            <span className="text-[11px] font-bold text-gold uppercase tracking-[0.2em] bg-gold/10 border border-gold/20 px-3 py-1 rounded-full">
-              {currentProduct.category} {currentProduct.brand ? `• ${currentProduct.brand}` : ''}
-            </span>
-            <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+        <div className="flex items-center justify-between px-6 py-4 sm:py-5 border-b border-white/10 bg-[#09090b]/80 backdrop-blur-md relative z-20">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               En stock
             </span>
@@ -539,7 +536,9 @@ export default function ProductDrawer({
                 <span className="text-xs text-zinc-400">({currentProduct.rating || 5.0} / 5.0)</span>
               </div>
               */}
-              <span className="text-xs text-zinc-500 font-medium">Réf: PCFA-{String(currentProduct.id).padStart(3, '0')}</span>
+              <span className="text-xs text-zinc-500 font-medium">
+                Réf: {String(currentProduct.id).toLowerCase().startsWith('pcfa-') ? String(currentProduct.id).toUpperCase() : `PCFA-${String(currentProduct.id).padStart(3, '0')}`}
+              </span>
             </div>
 
             <h1 id="product-drawer-title" className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
