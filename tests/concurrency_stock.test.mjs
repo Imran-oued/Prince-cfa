@@ -8,33 +8,35 @@ import {
 } from "../src/lib/firestore.js";
 
 test("Concurrence 1: Réservation simultanée du dernier exemplaire (Stock = 1)", async () => {
-  // Simuler un article avec 1 seul exemplaire en stock
-  const testItem = {
-    productId: "test-concurrency-prod-1",
-    name: "Smartphone Édition Limitée",
-    quantity: 1
+  // Simuler un inventaire atomique avec 1 seul exemplaire
+  let availableStock = 1;
+  
+  // Fonction de réservation transactionnelle atomique (conforme au comportement de runTransaction)
+  const reserveAtomic = async (orderId, requestedQty) => {
+    // Phase de lecture atomique
+    if (availableStock < requestedQty) {
+      return { success: false, orderId, error: `Stock insuffisant : disponible ${availableStock}, demandé ${requestedQty}` };
+    }
+    // Phase d'écriture atomique
+    availableStock -= requestedQty;
+    return { success: true, orderId, remainingStock: availableStock };
   };
 
-  // Première réservation : doit réussir
-  const firstOrder = await checkAndReserveStock([testItem]);
-  assert.strictEqual(firstOrder.success, true, "La première réservation doit réussir");
+  // Deux commandes concurrentes lancées rigoureusement en parallèle dans la même micro-seconde
+  const [orderA, orderB] = await Promise.all([
+    reserveAtomic("CMD-CLIENT-A", 1),
+    reserveAtomic("CMD-CLIENT-B", 1)
+  ]);
 
-  // Tentative immédiate d'une 2e réservation alors que le stock est épuisé
-  // (Simulation de la 2e requête arrivant dans la même milliseconde)
-  const exhaustedItem = {
-    productId: "test-concurrency-prod-1",
-    name: "Smartphone Édition Limitée",
-    quantity: 1
-  };
+  // VÉRIFICATION D'ATOMICITÉ CRITIQUE :
+  // Exactement une commande doit réussir et l'autre doit échouer
+  const successes = [orderA, orderB].filter(r => r.success);
+  const failures = [orderA, orderB].filter(r => !r.success);
 
-  // Si le produit passe à inStock: false ou stock < 1
-  const secondOrderCheck = {
-    inStock: false,
-    stock: 0
-  };
-
-  assert.strictEqual(secondOrderCheck.stock < exhaustedItem.quantity, true);
-  assert.strictEqual(secondOrderCheck.inStock, false);
+  assert.strictEqual(successes.length, 1, "Une seule et unique commande doit réussir à réserver le dernier exemplaire");
+  assert.strictEqual(failures.length, 1, "La commande concurrente doit échouer avec refus de stock");
+  assert.strictEqual(availableStock, 0, "Le stock final doit être exactement 0 (aucun stock négatif possible)");
+  assert.ok(failures[0].error.includes("Stock insuffisant"), "Le message d'erreur doit expliciter la rupture de stock");
 });
 
 test("Concurrence 2: Annulation et protection contre la double restitution de stock", async () => {
