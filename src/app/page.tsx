@@ -74,18 +74,17 @@ type Product = {
 };
 
 const categories = [
-  { id: 'all', label: 'Tous', icon: Crown },
-  { id: 'phones', label: 'Téléphones', icon: Smartphone },
-  { id: 'computers', label: 'Ordinateurs', icon: Laptop },
-  { id: 'tablets', label: 'Tablettes', icon: Tablet },
-  { id: 'tv', label: 'TV', icon: Tv },
-  { id: 'appliances', label: 'Électroménager', icon: Refrigerator },
-  { id: 'accessories', label: 'Accessoires', icon: Package },
-  { id: 'tech', label: 'High-Tech', icon: Sparkles },
-  { id: 'audio', label: 'Boomers', icon: Speaker },
+  { id: 'all', label: 'Toutes les collections', icon: Crown },
+  { id: 'phones', label: 'Téléphones & Smartphones', icon: Smartphone },
+  { id: 'computers', label: 'Ordinateurs & PC', icon: Laptop },
+  { id: 'tablets', label: 'Tablettes & iPads', icon: Tablet },
+  { id: 'tv', label: 'Téléviseurs & Smart TV', icon: Tv },
+  { id: 'appliances', label: 'Électroménager & Maison', icon: Refrigerator },
+  { id: 'tech', label: 'High-Tech & Accessoires', icon: Package },
+  { id: 'audio', label: 'Boomers & Son Haute Fidélité', icon: Speaker },
   { id: 'mobility', label: 'Motos Électriques', icon: Bike },
-  { id: 'solar', label: 'Solaire', icon: SunMedium },
-  { id: 'promotion', label: 'PROMOTION', icon: Flame },
+  { id: 'solar', label: 'Énergie Solaire & Kits', icon: SunMedium },
+  { id: 'promotion', label: 'PROMOTION & Bons Plans', icon: Flame },
 ];
 
 const phoneBrands = ['Iphones', 'Samsung', 'Google Pixel', 'Redmi', 'Huawei', 'Tecno', 'Infinix', 'Honor', 'Itel', 'OALE'];
@@ -663,6 +662,24 @@ export default function Home() {
         if (selectedCategory === 'appliances' || selectedCategory === 'electromenager') {
           return p.category === 'appliances' || p.category === 'electromenager';
         }
+        if (selectedCategory === 'tech' || selectedCategory === 'accessories') {
+          return p.category === 'tech' || p.category === 'accessories';
+        }
+        if (selectedCategory === 'computers' || selectedCategory === 'ordinateurs') {
+          return p.category === 'computers' || p.category === 'ordinateurs';
+        }
+        if (selectedCategory === 'tablets' || selectedCategory === 'tablettes') {
+          return p.category === 'tablets' || p.category === 'tablettes';
+        }
+        if (selectedCategory === 'audio' || selectedCategory === 'boomers') {
+          return p.category === 'audio' || p.category === 'boomers';
+        }
+        if (selectedCategory === 'mobility' || selectedCategory === 'motos') {
+          return p.category === 'mobility' || p.category === 'motos';
+        }
+        if (selectedCategory === 'solar' || selectedCategory === 'solaire') {
+          return p.category === 'solar' || p.category === 'solaire';
+        }
         if (selectedCategory === 'promotion' || selectedCategory === 'promotions') {
           const cat = (p.category || '').toLowerCase();
           const isPromoCat = cat === 'promotion' || cat === 'promotions' || cat === 'promo';
@@ -1064,14 +1081,15 @@ export default function Home() {
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-widest text-gold">Nos Rayons</h4>
             <ul className="text-xs text-zinc-400 space-y-2">
-              <li><button onClick={() => { handleSelectCategory('phones'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Smartphones & iPhones</button></li>
+              <li><button onClick={() => { handleSelectCategory('phones'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Téléphones & Smartphones</button></li>
               <li><button onClick={() => { handleSelectCategory('computers'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Ordinateurs & PC</button></li>
               <li><button onClick={() => { handleSelectCategory('tablets'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Tablettes & iPads</button></li>
-              <li><button onClick={() => { handleSelectCategory('tv'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Smart TV & Écrans</button></li>
+              <li><button onClick={() => { handleSelectCategory('tv'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Téléviseurs & Smart TV</button></li>
               <li><button onClick={() => { handleSelectCategory('appliances'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Électroménager & Maison</button></li>
-              <li><button onClick={() => { handleSelectCategory('audio'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Boomers & Hi-Fi</button></li>
+              <li><button onClick={() => { handleSelectCategory('tech'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">High-Tech & Accessoires</button></li>
+              <li><button onClick={() => { handleSelectCategory('audio'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Boomers & Son Haute Fidélité</button></li>
               <li><button onClick={() => { handleSelectCategory('mobility'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Motos Électriques</button></li>
-              <li><button onClick={() => { handleSelectCategory('solar'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Énergie Solaire</button></li>
+              <li><button onClick={() => { handleSelectCategory('solar'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Énergie Solaire & Kits</button></li>
               <li>
                 <button 
                   onClick={() => { handleSelectCategory('promotion'); window.scrollTo({top: 400, behavior: 'smooth'}); }} 
