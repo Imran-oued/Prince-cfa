@@ -818,8 +818,8 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Bouton Découvrir nos produits */}
-          <div className="pt-2">
+          {/* Boutons d'action : Découvrir nos produits & Contactez-nous */}
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4">
             <a
               href="#produits"
               onClick={(e) => {
@@ -829,10 +829,25 @@ export default function Home() {
                   target.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black font-bold text-sm sm:text-base tracking-wider uppercase shadow-[0_4px_25px_rgba(212,175,55,0.35)] hover:shadow-[0_4px_35px_rgba(212,175,55,0.6)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer group"
+              className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black font-extrabold text-xs sm:text-sm tracking-wider uppercase shadow-[0_4px_25px_rgba(212,175,55,0.35)] hover:shadow-[0_4px_35px_rgba(212,175,55,0.6)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer group"
             >
               <span>Découvrir nos produits</span>
               <ArrowDown className="w-4 h-4 text-black group-hover:translate-y-1 transition-transform" />
+            </a>
+
+            <a
+              href="#contact"
+              onClick={(e) => {
+                e.preventDefault();
+                const target = document.getElementById('contact');
+                if (target) {
+                  target.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-white/[0.04] hover:bg-gold/10 text-white hover:text-gold border border-white/15 hover:border-gold/50 font-bold text-xs sm:text-sm tracking-wider uppercase backdrop-blur-md hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer group shadow-sm"
+            >
+              <Phone className="w-4 h-4 text-gold group-hover:rotate-12 transition-transform" aria-hidden="true" />
+              <span>Contactez-nous</span>
             </a>
           </div>
         </div>
@@ -1135,7 +1150,7 @@ export default function Home() {
           </div>
 
           {/* Col 4 : NOUS JOINDRE */}
-          <div className="space-y-3">
+          <div id="contact" className="space-y-3 scroll-mt-28">
             <h4 className="text-xs font-bold uppercase tracking-widest text-gold flex items-center gap-2">
               <Phone className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
               <span>NOUS JOINDRE</span>
