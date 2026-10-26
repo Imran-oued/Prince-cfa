@@ -358,6 +358,9 @@ export default function ProductDrawer({
   if (!currentProduct) return null;
   if (!isOpen && !slideIn) return null;
 
+  const activeImage = (productImages && productImages[activeImageIndex]) || currentProduct?.image || '';
+  const currentImgBg = getProductImageBg(currentProduct, activeImage);
+
   return (
     <>
       {/* Arrière-plan assombri et flouté (Backdrop) */}
@@ -406,7 +409,7 @@ export default function ProductDrawer({
           <div className="space-y-3">
             {/* Boîte photo épurée avec glissement tactile au doigt */}
             <div 
-              className={`relative w-full h-80 sm:h-96 md:h-[420px] rounded-3xl ${getProductImageBg(currentProduct, activeImage).containerClass} overflow-hidden shadow-sm select-none touch-pan-y flex items-center justify-center cursor-grab active:cursor-grabbing`}
+              className={`relative w-full h-80 sm:h-96 md:h-[420px] rounded-3xl ${currentImgBg.containerClass} overflow-hidden shadow-sm select-none touch-pan-y flex items-center justify-center cursor-grab active:cursor-grabbing`}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
@@ -469,7 +472,7 @@ export default function ProductDrawer({
                       className={`rounded-full transition-all duration-300 cursor-pointer ${
                         isActive 
                           ? 'w-4 h-2 bg-gold scale-105 shadow-[0_0_8px_rgba(212,175,55,0.8)]' 
-                          : getProductImageBg(currentProduct, activeImage).isBlack
+                          : currentImgBg.isBlack
                             ? 'w-2 h-2 bg-white/40 hover:bg-white/60'
                             : 'w-2 h-2 bg-zinc-300 dark:bg-zinc-600 hover:bg-zinc-400'
                       }`}
