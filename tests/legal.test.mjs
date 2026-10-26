@@ -45,26 +45,21 @@ test('3. Confidentialité redirect alias exists', () => {
   assert.match(content, /politique-de-confidentialite/, 'Must redirect to /politique-de-confidentialite');
 });
 
-test('4. Legal and privacy links are integrated into main page footer, suivi footer, MenuDrawer, and CartDrawer', () => {
-  // Main page
+test('4. Legal and privacy links are integrated into footers (homepage and suivi page) and kept out of MenuDrawer', () => {
+  // Main page footer
   const homeContent = fs.readFileSync(path.join(projectRoot, 'src', 'app', 'page.tsx'), 'utf8');
   assert.ok(homeContent.includes('/mentions-legales'), 'Homepage must link to /mentions-legales');
   assert.ok(homeContent.includes('/politique-de-confidentialite'), 'Homepage must link to /politique-de-confidentialite');
 
-  // Suivi page
+  // Suivi page footer
   const suiviContent = fs.readFileSync(path.join(projectRoot, 'src', 'app', 'suivi', 'page.tsx'), 'utf8');
   assert.ok(suiviContent.includes('/mentions-legales'), 'Suivi page must link to /mentions-legales');
   assert.ok(suiviContent.includes('/politique-de-confidentialite'), 'Suivi page must link to /politique-de-confidentialite');
 
-  // Menu Drawer
+  // Menu Drawer should NOT contain legal links per explicit user request
   const menuContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'MenuDrawer.jsx'), 'utf8');
-  assert.ok(menuContent.includes('/mentions-legales'), 'MenuDrawer must link to /mentions-legales');
-  assert.ok(menuContent.includes('/politique-de-confidentialite'), 'MenuDrawer must link to /politique-de-confidentialite');
-
-  // Cart Drawer
-  const cartContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'CartDrawer.jsx'), 'utf8');
-  assert.ok(cartContent.includes('/mentions-legales'), 'CartDrawer must link to /mentions-legales');
-  assert.ok(cartContent.includes('/politique-de-confidentialite'), 'CartDrawer must link to /politique-de-confidentialite');
+  assert.ok(!menuContent.includes('/mentions-legales'), 'MenuDrawer must not link to /mentions-legales');
+  assert.ok(!menuContent.includes('/politique-de-confidentialite'), 'MenuDrawer must not link to /politique-de-confidentialite');
 });
 
 test('5. A Propos page file exists, tells Prince CFA story, and is linked in MenuDrawer', () => {
