@@ -49,7 +49,8 @@ import {
   Speaker,
   Sun,
   Layers,
-  Refrigerator
+  Refrigerator,
+  Flame
 } from "lucide-react";
 import { 
   PRODUCT_CATEGORIES, 
@@ -114,6 +115,9 @@ function getCategoryIcon(catId: string, className = "w-4 h-4") {
     case "appliances":
     case "electromenager":
       return <Refrigerator className={className} aria-hidden="true" />;
+    case "promotion":
+    case "promotions":
+      return <Flame className={className} aria-hidden="true" />;
     default:
       return <Package className={className} aria-hidden="true" />;
   }

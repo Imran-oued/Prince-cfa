@@ -40,8 +40,15 @@ test("1. Category definitions are declarative, complete, and have units", () => 
   assert.equal(isStorageVariantCategory("phones"), true);
   assert.equal(isStorageVariantCategory("computers"), true);
   assert.equal(isStorageVariantCategory("tablets"), true);
+  assert.equal(isStorageVariantCategory("promotion"), true);
   assert.equal(isStorageVariantCategory("mobility"), false);
   assert.equal(isStorageVariantCategory("accessories"), false);
+
+  // Catégorie PROMOTION
+  const promoConfig = getCategoryConfig("promotion");
+  assert.ok(promoConfig, "Configuration promotion doit exister");
+  assert.equal(promoConfig.label, "PROMOTION");
+  assert.equal(getCategoryConfig("promotions").id, "promotion");
 });
 
 test("2. Slug generation is URL-safe and idempotent", () => {

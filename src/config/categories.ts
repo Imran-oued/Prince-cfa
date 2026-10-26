@@ -816,9 +816,45 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
       },
     ],
   },
+  promotion: {
+    id: "promotion",
+    label: "PROMOTION",
+    shortLabel: "Promos",
+    description: "Offres spéciales, remises exclusives et produits en promotion",
+    iconName: "Flame",
+    supportsStorageVariants: true,
+    popularBrands: ["Apple", "Samsung", "Xiaomi", "Tecno", "Infinix", "HP", "Dell", "Sony", "LG", "Honda"],
+    placeholderName: "Ex: Pack Promo Spéciale / Produit en réduction",
+    defaultWarranty: "Garantie 12 Mois Certifiée",
+    defaultAccessories: "Accessoires officiels + Cadeaux inclus",
+    fields: [
+      {
+        key: "discountText",
+        label: "Remise & Avantage",
+        type: "text",
+        placeholder: "Ex: -25% de réduction, Remise immédiate...",
+        required: false,
+      },
+      {
+        key: "promoEnd",
+        label: "Validité de l'offre",
+        type: "text",
+        placeholder: "Ex: Jusqu'à épuisement du stock, Ce week-end uniquement",
+        required: false,
+      },
+      {
+        key: "bonusIncluded",
+        label: "Cadeau / Bonus inclus",
+        type: "text",
+        placeholder: "Ex: Écouteurs sans fil offerts, Coque + Verre trempé",
+        required: false,
+      },
+    ],
+  },
 };
 
 const CATEGORY_CANONICAL_ORDER = [
+  "promotion",
   "phones",
   "computers",
   "tablets",
@@ -844,6 +880,10 @@ export const CATEGORIES_LIST = Object.values(PRODUCT_CATEGORIES)
  * Obtenir la configuration d'une catégorie donnée (avec repli sûr)
  */
 export function getCategoryConfig(categoryId: string): CategoryDefinition {
+  const normId = (categoryId || "").toLowerCase().trim();
+  if (normId === "promotion" || normId === "promotions" || normId === "promo") {
+    return PRODUCT_CATEGORIES["promotion"];
+  }
   return (
     PRODUCT_CATEGORIES[categoryId] || {
       id: categoryId || "other",

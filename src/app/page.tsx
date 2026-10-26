@@ -29,7 +29,8 @@ import {
   Compass, 
   CreditCard, 
   Smartphone, 
-  Receipt 
+  Receipt,
+  Flame 
 } from "lucide-react";
 
 function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -46,6 +47,7 @@ type Product = {
   category: string;
   desc: string;
   price: number;
+  salePrice?: number | null;
   image: string;
   rating: number;
   specs?: Record<string, string | number | boolean | undefined>;
@@ -61,6 +63,7 @@ type Product = {
 
 const categories = [
   { id: 'all', label: 'Tous' },
+  { id: 'promotion', label: 'PROMOTION' },
   { id: 'phones', label: 'Téléphones' },
   { id: 'computers', label: 'Ordinateurs' },
   { id: 'tablets', label: 'Tablettes' },
@@ -296,6 +299,14 @@ function ProductCardItem({
             {activeColorIdx + 1}/{images.length}
           </div>
         )}
+
+        {/* Badge PROMO si en promotion ou catégorie promotion */}
+        {(product.category === 'promotion' || (product.salePrice && product.salePrice < product.price)) && (
+          <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-gradient-to-r from-red-600 to-amber-600 text-[9px] font-black tracking-wider uppercase text-white shadow-md z-10 flex items-center gap-1 pointer-events-none animate-pulse">
+            <Flame className="w-3 h-3 text-yellow-200 fill-yellow-200" aria-hidden="true" />
+            <span>PROMO</span>
+          </div>
+        )}
       </div>
 
       {/* 2. Colonne DROITE : Caractéristiques & Infos Style Amazon */}
@@ -313,11 +324,25 @@ function ProductCardItem({
             </p>
           )}
 
-          {/* Prix FCFA en grand format doré */}
-          <div className="mt-2">
-            <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-white tracking-tight">
-              {product.price.toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
-            </span>
+          {/* Prix FCFA en grand format doré avec gestion promotionnelle */}
+          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+            {product.salePrice && product.salePrice < product.price ? (
+              <>
+                <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-amber-300 to-gold tracking-tight">
+                  {product.salePrice.toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
+                </span>
+                <span className="text-xs sm:text-sm text-zinc-500 line-through">
+                  {product.price.toLocaleString('fr-FR')} FCFA
+                </span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase bg-red-500/20 text-red-400 border border-red-500/30">
+                  PROMO
+                </span>
+              </>
+            ) : (
+              <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-white tracking-tight">
+                {product.price.toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
+              </span>
+            )}
           </div>
 
           {/* Mention Livraison & Retrait */}
@@ -556,6 +581,19 @@ export default function Home() {
         if (selectedCategory === 'appliances' || selectedCategory === 'electromenager') {
           return p.category === 'appliances' || p.category === 'electromenager';
         }
+        if (selectedCategory === 'promotion' || selectedCategory === 'promotions') {
+          const cat = (p.category || '').toLowerCase();
+          const isPromoCat = cat === 'promotion' || cat === 'promotions' || cat === 'promo';
+          const hasDiscount = Boolean(
+            (p.salePrice && p.price && p.salePrice < p.price) ||
+            (p.oldPrice && p.oldPrice > p.price) ||
+            (p as any).isPromo ||
+            (p as any).isPromotion ||
+            (p.desc && p.desc.toLowerCase().includes('promo')) ||
+            (p.name && p.name.toLowerCase().includes('promo'))
+          );
+          return isPromoCat || hasDiscount;
+        }
         return p.category === selectedCategory;
       });
     }
@@ -750,19 +788,25 @@ export default function Home() {
           {/* Catégories Principales */}
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             {selectedCategory === 'all' ? (
-              categories.map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => handleSelectCategory(cat.id)}
-                  className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold tracking-[0.15em] uppercase transition-all duration-300 active:scale-95 cursor-pointer ${
-                    selectedCategory === cat.id 
-                    ? 'bg-gradient-to-r from-gold to-yellow-600 text-black shadow-[0_0_20px_rgba(212,175,55,0.5)] scale-105' 
-                    : 'bg-black/60 text-zinc-400 border border-white/10 hover:border-gold/50 hover:text-gold hover:bg-gold/5'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))
+              categories.map(cat => {
+                const isPromo = cat.id === 'promotion';
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => handleSelectCategory(cat.id)}
+                    className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold tracking-[0.15em] uppercase transition-all duration-300 active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+                      selectedCategory === cat.id 
+                        ? 'bg-gradient-to-r from-gold to-yellow-600 text-black shadow-[0_0_20px_rgba(212,175,55,0.5)] scale-105' 
+                        : isPromo
+                          ? 'bg-red-500/10 text-red-400 border border-red-500/30 hover:border-red-400 hover:bg-red-500/20 shadow-[0_0_12px_rgba(239,68,68,0.2)]'
+                          : 'bg-black/60 text-zinc-400 border border-white/10 hover:border-gold/50 hover:text-gold hover:bg-gold/5'
+                    }`}
+                  >
+                    {isPromo && <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400 animate-pulse" aria-hidden="true" />}
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })
             ) : (
               <div className="flex items-center gap-3 sm:gap-4 animate-in zoom-in-95 duration-300">
                 <button
@@ -772,8 +816,13 @@ export default function Home() {
                   <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                   <span>Retour</span>
                 </button>
-                <div className="px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold tracking-[0.15em] uppercase bg-gradient-to-r from-gold to-yellow-600 text-black shadow-[0_0_20px_rgba(212,175,55,0.5)]">
-                  {categories.find(c => c.id === selectedCategory)?.label}
+                <div className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold tracking-[0.15em] uppercase flex items-center gap-1.5 ${
+                  selectedCategory === 'promotion'
+                    ? 'bg-gradient-to-r from-red-500 via-amber-500 to-gold text-black shadow-[0_0_25px_rgba(239,68,68,0.4)]'
+                    : 'bg-gradient-to-r from-gold to-yellow-600 text-black shadow-[0_0_20px_rgba(212,175,55,0.5)]'
+                }`}>
+                  {selectedCategory === 'promotion' && <Flame className="w-4 h-4 text-black fill-black" aria-hidden="true" />}
+                  <span>{categories.find(c => c.id === selectedCategory)?.label}</span>
                 </div>
               </div>
             )}
@@ -903,6 +952,15 @@ export default function Home() {
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-widest text-gold">Nos Rayons</h4>
             <ul className="text-xs text-zinc-400 space-y-2">
+              <li>
+                <button 
+                  onClick={() => { handleSelectCategory('promotion'); window.scrollTo({top: 400, behavior: 'smooth'}); }} 
+                  className="text-red-400 font-bold hover:text-gold transition-colors flex items-center gap-1.5"
+                >
+                  <Flame className="w-3.5 h-3.5 text-red-500 fill-red-500" aria-hidden="true" />
+                  <span>PROMOTION & Bons Plans</span>
+                </button>
+              </li>
               <li><button onClick={() => { handleSelectCategory('phones'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Smartphones & iPhones</button></li>
               <li><button onClick={() => { handleSelectCategory('computers'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Ordinateurs & PC</button></li>
               <li><button onClick={() => { handleSelectCategory('tablets'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Tablettes & iPads</button></li>

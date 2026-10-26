@@ -24,7 +24,8 @@ import {
   Refrigerator,
   Tablet,
   FileText,
-  Lock
+  Lock,
+  Flame
 } from 'lucide-react';
 
 function WhatsAppIcon({ className = "w-4 h-4" }) {
@@ -79,6 +80,7 @@ export default function MenuDrawer({
 
   const categories = [
     { id: 'all', label: 'Toutes les collections', icon: Crown },
+    { id: 'promotion', label: 'PROMOTION & Bons Plans', icon: Flame },
     { id: 'phones', label: 'Téléphones & Smartphones', icon: Smartphone },
     { id: 'computers', label: 'Ordinateurs & PC', icon: Laptop },
     { id: 'tablets', label: 'Tablettes & iPads', icon: Tablet },

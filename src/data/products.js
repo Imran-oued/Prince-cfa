@@ -1,4 +1,34 @@
 export const products = [
+  // --- VENTES FLASH & PROMOTIONS ---
+  {
+    id: 'pcfa-promo-vip-pack',
+    name: 'Pack VIP PROMO : iPhone 15 Pro Max 256 Go + AirPods Pro 2 Offerts',
+    category: 'promotion',
+    brand: 'Apple',
+    price: 490000,
+    salePrice: 420000,
+    image: '/products/apple/iphone-15-pro-naturaltitanium.png',
+    rating: 5.0,
+    colors: ['Titane Naturel', 'Titane Bleu', 'Titane Noir'],
+    storageOptions: [
+      { capacity: '256 Go', price: 420000 }
+    ],
+    images: [
+      '/products/apple/iphone-15-pro-naturaltitanium.png',
+      '/products/apple/iphone-15-pro-bluetitanium.png',
+      '/products/apple/iphone-15-pro-blacktitanium.png'
+    ],
+    specs: {
+      screen: '6.7" Titane Grade 5 Super Retina XDR ProMotion',
+      processor: 'A17 Pro 3nm haute vélocité',
+      camera: 'Triple optique pro 48MP & Zoom 5x',
+      battery: 'Recharge rapide USB-C',
+      discountText: '-70 000 FCFA + AirPods Pro 2 offerts',
+      promoEnd: 'Dans la limite du stock disponible',
+      bonusIncluded: 'AirPods Pro 2 + Coque antichoc offerte'
+    },
+    desc: 'Offre promotionnelle exclusive Prince CFA : iPhone 15 Pro Max 256 Go neuf scellé avec AirPods Pro 2 offerts et remise immédiate de 70 000 FCFA.'
+  },
   // --- IPHONES ---
   {
     id: 'pcfa-se3',
@@ -272,6 +302,7 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 400000,
+    salePrice: 375000,
     image: '/products/apple/iphone-15-pro-naturaltitanium.png',
     rating: 5.0,
     colors: ['Titane Naturel', 'Titane Bleu', 'Titane Blanc', 'Titane Noir'],
