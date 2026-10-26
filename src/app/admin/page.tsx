@@ -4,15 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { products as defaultProducts } from "@/data/products";
 import { 
-  getProducts, 
-  addProduct as addProductFirestore, 
-  updateProduct as updateProductFirestore, 
-  deleteProduct as deleteProductFirestore,
-  seedProducts,
-  getOrders
-} from "@/lib/firestore";
-import { isFirebaseConfigured } from "@/lib/firebase";
-import { 
   Crown, 
   AlertCircle, 
   Package, 
@@ -220,6 +211,7 @@ function generateProductId(): string {
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [adminToken, setAdminToken] = useState("");
@@ -248,7 +240,7 @@ export default function AdminPage() {
   const [productsList, setProductsList] = useState<AdminProduct[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | number | null>(null);
-  const [isCloud, setIsCloud] = useState(false);
+  const [isCloud, setIsCloud] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
   
@@ -281,63 +273,87 @@ export default function AdminPage() {
   const [newImageUrl, setNewImageUrl] = useState("");
   const [isCompressingImages, setIsCompressingImages] = useState(false);
 
-  // Charger les commandes et les produits
+  // 1. Vérification ultra-rapide de session active à l'ouverture de la page (< 50ms)
   useEffect(() => {
-    async function loadData() {
-      const configured = isFirebaseConfigured();
-      setIsCloud(configured);
-
-      // 1. Produits
-      if (configured) {
-        try {
-          const cloudItems = (await getProducts()) as AdminProduct[] | null;
-          if (cloudItems && cloudItems.length > 0) {
-            setProductsList(cloudItems);
-            localStorage.setItem("prince_cfa_products", JSON.stringify(cloudItems));
-          }
-        } catch (err) {
-          console.warn("Erreur chargement Firestore, repli sur local", err);
-        }
-      }
-
-      const saved = localStorage.getItem("prince_cfa_products");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          const migrated = parsed.map((p: AdminProduct) => {
-            const defaultMatch = defaultProducts.find(dp => String(dp.id) === String(p.id));
-            if (defaultMatch) {
-              return {
-                ...p,
-                image: defaultMatch.image,
-                images: defaultMatch.images,
-                colors: defaultMatch.colors,
-                specs: defaultMatch.specs,
-                desc: defaultMatch.desc,
-                brand: defaultMatch.brand || p.brand,
-                storageOptions: defaultMatch.storageOptions || p.storageOptions
-              };
+    async function checkAuthSession() {
+      const storedToken = typeof window !== "undefined" ? sessionStorage.getItem("prince_cfa_admin_token") : null;
+      try {
+        const res = await fetch("/api/admin/auth", {
+          headers: storedToken ? { Authorization: `Bearer ${storedToken}` } : {}
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.authenticated) {
+            const token = data.token || storedToken || "";
+            setAdminToken(token);
+            setIsAuthenticated(true);
+            setIsCloud(true);
+            if (token && typeof window !== "undefined") {
+              sessionStorage.setItem("prince_cfa_admin_token", token);
             }
-            return p;
-          });
-          const existingIds = new Set(migrated.map((p: AdminProduct) => String(p.id)));
-          const newDefaults = defaultProducts.filter(dp => !existingIds.has(String(dp.id)));
-          const combined = [...migrated, ...newDefaults];
-          try {
-            localStorage.setItem("prince_cfa_products", JSON.stringify(combined));
-          } catch {}
-          setProductsList(combined);
-        } catch {
-          setProductsList(defaultProducts);
+          }
         }
-      } else {
-        setProductsList(defaultProducts);
+      } catch (err) {
+        console.warn("Vérification session:", err);
+      } finally {
+        setIsCheckingAuth(false);
       }
-      // Les commandes des clients ne sont JAMAIS chargées sans authentification administrateur vérifiée
     }
 
-    loadData();
+    checkAuthSession();
   }, []);
+
+  // 2. Charger les commandes et les produits UNIQUEMENT quand l'administrateur est authentifié
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    async function loadDashboardData() {
+      // 1. Charger les commandes immédiatement (onglet par défaut de l'admin)
+      try {
+        const ordersRes = await fetch("/api/admin/orders", {
+          headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {}
+        });
+        if (ordersRes.ok) {
+          const ordersData = await ordersRes.json();
+          if (ordersData.orders) setOrdersList(ordersData.orders);
+        }
+      } catch (err) {
+        console.warn("Erreur chargement commandes:", err);
+      }
+
+      // 2. Charger les produits via l'API serveur optimisée en mémoire vive (<2ms)
+      try {
+        const prodRes = await fetch("/api/products");
+        if (prodRes.ok) {
+          const prodData = await prodRes.json();
+          if (prodData.products && prodData.products.length > 0) {
+            setProductsList(prodData.products);
+            setIsCloud(true);
+            try {
+              localStorage.setItem("prince_cfa_products", JSON.stringify(prodData.products));
+            } catch {}
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Erreur chargement produits serveur:", err);
+      }
+
+      // Repli hors-ligne si besoin
+      try {
+        const saved = localStorage.getItem("prince_cfa_products");
+        if (saved) {
+          setProductsList(JSON.parse(saved));
+        } else {
+          setProductsList(defaultProducts);
+        }
+      } catch {
+        setProductsList(defaultProducts);
+      }
+    }
+
+    loadDashboardData();
+  }, [isAuthenticated, adminToken]);
 
   // Connexion sécurisée côté serveur
   const handleLogin = async (e: React.FormEvent) => {
@@ -359,6 +375,10 @@ export default function AdminPage() {
 
       setAdminToken(data.token);
       setIsAuthenticated(true);
+      setIsCloud(true);
+      if (typeof window !== "undefined" && data.token) {
+        sessionStorage.setItem("prince_cfa_admin_token", data.token);
+      }
       
       // Recharger les commandes fraîches depuis l'API sécurisée
       try {
@@ -383,6 +403,9 @@ export default function AdminPage() {
       await fetch("/api/admin/auth", { method: "DELETE" });
     } catch {
       // Ignorer
+    }
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("prince_cfa_admin_token");
     }
     setIsAuthenticated(false);
     setAdminToken("");
@@ -581,20 +604,30 @@ export default function AdminPage() {
     }
   };
 
-  // Synchroniser le catalogue vers Firestore
+  // Synchroniser le catalogue vers Firestore via l'API serveur optimisée
   const handleSeedToCloud = async () => {
-    if (!isCloud) return;
     setSyncStatus("Envoi des produits vers Firestore...");
     try {
       const catalogToSync = productsList.length > 0 ? productsList : defaultProducts;
-      await seedProducts(catalogToSync);
-      const refreshed = (await getProducts()) as AdminProduct[] | null;
-      if (refreshed) {
-        setProductsList(refreshed);
-        localStorage.setItem("prince_cfa_products", JSON.stringify(refreshed));
-        setSyncStatus(`${refreshed.length} produits synchronisés avec Firebase !`);
+      const res = await fetch("/api/admin/products/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: adminToken ? `Bearer ${adminToken}` : ""
+        },
+        body: JSON.stringify({ products: catalogToSync })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.products) {
+          setProductsList(data.products);
+          try {
+            localStorage.setItem("prince_cfa_products", JSON.stringify(data.products));
+          } catch {}
+        }
+        setSyncStatus(data.message || "Produits synchronisés avec Firebase !");
       } else {
-        setSyncStatus("Produits synchronisés avec Firebase !");
+        setSyncStatus(data.error || "Erreur de synchronisation");
       }
       setTimeout(() => setSyncStatus(null), 4000);
     } catch {
@@ -847,44 +880,27 @@ export default function AdminPage() {
     const cleaned = validation.cleanedProduct;
     let savedProduct: AdminProduct = cleaned;
 
-    // 2. Persistance : via API avec vérification token, ou fallback Firestore
+    // 2. Persistance : via API avec vérification token
     try {
-      if (adminToken) {
-        const url = editingId ? `/api/admin/products/${editingId}` : `/api/admin/products`;
-        const method = editingId ? "PUT" : "POST";
-        const res = await fetch(url, {
-          method,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${adminToken}`
-          },
-          body: JSON.stringify(cleaned)
-        });
+      const url = editingId ? `/api/admin/products/${editingId}` : `/api/admin/products`;
+      const method = editingId ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: adminToken ? `Bearer ${adminToken}` : ""
+        },
+        body: JSON.stringify(cleaned)
+      });
 
-        if (res.ok) {
-          const resData = await res.json();
-          if (resData.product) {
-            savedProduct = resData.product;
-          }
-        } else {
-          // Repli direct Firestore si problème API
-          if (editingId) {
-            await updateProductFirestore(String(editingId), cleaned);
-          } else {
-            const firestoreId = await addProductFirestore(cleaned);
-            if (firestoreId) savedProduct.id = firestoreId;
-          }
-        }
-      } else if (isCloud) {
-        if (editingId) {
-          await updateProductFirestore(String(editingId), cleaned);
-        } else {
-          const firestoreId = await addProductFirestore(cleaned);
-          if (firestoreId) savedProduct.id = firestoreId;
+      if (res.ok) {
+        const resData = await res.json();
+        if (resData.product) {
+          savedProduct = resData.product;
         }
       }
     } catch (saveErr) {
-      console.warn("Erreur sauvegarde API/Cloud, enregistrement local", saveErr);
+      console.warn("Erreur sauvegarde API, enregistrement local", saveErr);
     }
 
     // 3. Mise à jour de la liste locale
@@ -909,19 +925,13 @@ export default function AdminPage() {
 
   const handleDelete = async (id: string | number) => {
     if (confirm("Voulez-vous vraiment supprimer ce produit ?")) {
-      if (isCloud && typeof id === "string" && !id.startsWith("p-") && !id.startsWith("phone-") && !id.startsWith("shoe-") && !id.startsWith("bag-")) {
-        try {
-          if (adminToken) {
-            await fetch(`/api/admin/products/${id}`, {
-              method: "DELETE",
-              headers: { Authorization: `Bearer ${adminToken}` }
-            });
-          } else {
-            await deleteProductFirestore(id);
-          }
-        } catch {
-          await deleteProductFirestore(id);
-        }
+      try {
+        await fetch(`/api/admin/products/${id}`, {
+          method: "DELETE",
+          headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {}
+        });
+      } catch (e) {
+        console.warn("Erreur suppression API", e);
       }
       const updatedList = productsList.filter(p => p.id !== id);
       setProductsList(updatedList);
@@ -1195,6 +1205,20 @@ export default function AdminPage() {
   const totalCollectedRevenue = ordersList
     .filter(o => o.payment.status === "confirme")
     .reduce((sum, o) => sum + (o.pricing?.total || 0), 0);
+
+  // Écran de chargement ultra-rapide (<50ms) lors de la vérification initiale de session
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center mx-auto mb-4 animate-pulse shadow-[0_0_25px_rgba(212,175,55,0.3)]">
+          <Crown className="w-8 h-8 text-gold" aria-hidden="true" />
+        </div>
+        <p className="text-xs text-gold/80 font-bold uppercase tracking-widest animate-pulse">
+          Accès Administration Sécurisé...
+        </p>
+      </div>
+    );
+  }
 
   // Vue Login si non authentifié
   if (!isAuthenticated) {

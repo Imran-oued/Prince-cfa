@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { generateAdminToken, verifyAdminPassword, ADMIN_COOKIE_NAME } from "@/lib/auth";
+import { generateAdminToken, verifyAdminPassword, verifyAdminAuth, ADMIN_COOKIE_NAME } from "@/lib/auth";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
@@ -64,6 +64,22 @@ export async function POST(request: Request) {
       { success: false, error: "Erreur lors de l'authentification." },
       { status: 500 }
     );
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const isAuthorized = await verifyAdminAuth(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ authenticated: false }, { status: 401 });
+    }
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value || "";
+    return NextResponse.json({ authenticated: true, token });
+  } catch (error) {
+    console.error("GET /api/admin/auth error:", error);
+    return NextResponse.json({ authenticated: false }, { status: 500 });
   }
 }
 

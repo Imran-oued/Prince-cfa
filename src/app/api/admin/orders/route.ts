@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyAdminAuth } from "@/lib/auth";
-import { getOrders } from "@/lib/firestore";
+import { getCachedOrders } from "@/lib/serverCache";
 
 export async function GET(request: Request) {
   try {
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const orders = await getOrders();
+    const orders = await getCachedOrders();
     return NextResponse.json({ success: true, orders });
   } catch (error) {
     console.error("GET /api/admin/orders error:", error);

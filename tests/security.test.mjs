@@ -138,3 +138,20 @@ test("7. Order creation input validation protects against malicious payloads", (
   // Commande valide acceptée
   assert.equal(validateOrderPayload({ name: "Jean Ouédraogo", phone: "70001122" }, [{ productId: "pcfa-se3" }]).valid, true);
 });
+
+test("8. Admin session token validation supports instant authentication checks", async () => {
+  const { verifyAdminAuth } = await import("../src/lib/auth.ts");
+  const validToken = generateAdminToken();
+
+  // Requête avec Bearer token valide
+  const reqWithBearer = new Request("http://localhost/api/admin/auth", {
+    headers: { Authorization: `Bearer ${validToken}` }
+  });
+  const authorized = await verifyAdminAuth(reqWithBearer);
+  assert.equal(authorized, true, "Bearer token must be authorized for instant session retrieval");
+
+  // Requête sans authentification
+  const reqUnauth = new Request("http://localhost/api/admin/auth");
+  const unauthorized = await verifyAdminAuth(reqUnauth);
+  assert.equal(unauthorized, false, "Request without token or cookie must be rejected");
+});
