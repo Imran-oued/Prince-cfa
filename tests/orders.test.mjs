@@ -11,7 +11,8 @@ test("1. generateOrderId generates compliant CMD-YYYYMMDD-XXXX format", () => {
 test("2. SHOP_CONFIG defines dedicated Orange Money and Wave payment methods", () => {
   assert.ok(SHOP_CONFIG.paymentMethods.orange_money, "Orange Money method exists");
   assert.equal(SHOP_CONFIG.paymentMethods.orange_money.name, "Orange Money");
-  assert.equal(SHOP_CONFIG.paymentMethods.orange_money.number, "07778740");
+  assert.equal(SHOP_CONFIG.paymentMethods.orange_money.number, "55443167");
+  assert.equal(SHOP_CONFIG.paymentMethods.orange_money.ussdCode, "*144*2*1*55443167*MONTANT#");
   assert.ok(SHOP_CONFIG.paymentMethods.orange_money.instructions.length > 10);
 
   assert.ok(SHOP_CONFIG.paymentMethods.wave, "Wave method exists");
@@ -162,5 +163,15 @@ test("8. Product tech specifications support category-specific attributes withou
   // Solaire possède panels/inverter mais pas d'appareil photo
   assert.ok(solarProduct.specs.panels && solarProduct.specs.inverter);
   assert.equal(solarProduct.specs.camera, undefined);
+});
+
+test("9. USSD Orange Money code formatting matches *144*2*1*55443167*montant#", () => {
+  const amount = 901500;
+  const orangeNumber = SHOP_CONFIG.paymentMethods.orange_money?.merchantCode || SHOP_CONFIG.paymentMethods.orange_money?.number || "55443167";
+  const ussdCodeString = `*144*2*1*${orangeNumber}*${amount}#`;
+  const telUssdUrl = `tel:*144*2*1*${orangeNumber}*${amount}%23`;
+
+  assert.equal(ussdCodeString, "*144*2*1*55443167*901500#");
+  assert.equal(telUssdUrl, "tel:*144*2*1*55443167*901500%23");
 });
 
