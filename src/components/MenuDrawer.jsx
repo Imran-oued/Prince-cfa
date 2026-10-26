@@ -80,7 +80,6 @@ export default function MenuDrawer({
 
   const categories = [
     { id: 'all', label: 'Toutes les collections', icon: Crown },
-    { id: 'promotion', label: 'PROMOTION & Bons Plans', icon: Flame },
     { id: 'phones', label: 'Téléphones & Smartphones', icon: Smartphone },
     { id: 'computers', label: 'Ordinateurs & PC', icon: Laptop },
     { id: 'tablets', label: 'Tablettes & iPads', icon: Tablet },
@@ -90,6 +89,7 @@ export default function MenuDrawer({
     { id: 'audio', label: 'Boomers & Son Haute Fidélité', icon: Speaker },
     { id: 'mobility', label: 'Motos Électriques', icon: Bike },
     { id: 'solar', label: 'Énergie Solaire & Kits', icon: SunMedium },
+    { id: 'promotion', label: 'PROMOTION & Bons Plans', icon: Flame },
   ];
 
   const phoneBrands = ['Iphones', 'Samsung', 'Redmi', 'Huawei', 'Tecno', 'Infinix', 'Honor', 'Itel', 'OALE'];

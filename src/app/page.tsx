@@ -66,7 +66,6 @@ type Product = {
 
 const categories = [
   { id: 'all', label: 'Tous' },
-  { id: 'promotion', label: 'PROMOTION' },
   { id: 'phones', label: 'Téléphones' },
   { id: 'computers', label: 'Ordinateurs' },
   { id: 'tablets', label: 'Tablettes' },
@@ -77,6 +76,7 @@ const categories = [
   { id: 'audio', label: 'Boomers' },
   { id: 'mobility', label: 'Motos Électriques' },
   { id: 'solar', label: 'Solaire' },
+  { id: 'promotion', label: 'PROMOTION' },
 ];
 
 const phoneBrands = ['Iphones', 'Samsung', 'Google Pixel', 'Redmi', 'Huawei', 'Tecno', 'Infinix', 'Honor', 'Itel', 'OALE'];
@@ -955,15 +955,6 @@ export default function Home() {
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-widest text-gold">Nos Rayons</h4>
             <ul className="text-xs text-zinc-400 space-y-2">
-              <li>
-                <button 
-                  onClick={() => { handleSelectCategory('promotion'); window.scrollTo({top: 400, behavior: 'smooth'}); }} 
-                  className="text-red-400 font-bold hover:text-gold transition-colors flex items-center gap-1.5"
-                >
-                  <Flame className="w-3.5 h-3.5 text-red-500 fill-red-500" aria-hidden="true" />
-                  <span>PROMOTION & Bons Plans</span>
-                </button>
-              </li>
               <li><button onClick={() => { handleSelectCategory('phones'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Smartphones & iPhones</button></li>
               <li><button onClick={() => { handleSelectCategory('computers'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Ordinateurs & PC</button></li>
               <li><button onClick={() => { handleSelectCategory('tablets'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Tablettes & iPads</button></li>
@@ -972,6 +963,15 @@ export default function Home() {
               <li><button onClick={() => { handleSelectCategory('audio'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Boomers & Hi-Fi</button></li>
               <li><button onClick={() => { handleSelectCategory('mobility'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Motos Électriques</button></li>
               <li><button onClick={() => { handleSelectCategory('solar'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Énergie Solaire</button></li>
+              <li>
+                <button 
+                  onClick={() => { handleSelectCategory('promotion'); window.scrollTo({top: 400, behavior: 'smooth'}); }} 
+                  className="text-red-400 font-bold hover:text-gold transition-colors flex items-center gap-1.5 pt-1"
+                >
+                  <Flame className="w-3.5 h-3.5 text-red-500 fill-red-500" aria-hidden="true" />
+                  <span>PROMOTION & Bons Plans</span>
+                </button>
+              </li>
             </ul>
           </div>
 

@@ -854,7 +854,6 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
 };
 
 const CATEGORY_CANONICAL_ORDER = [
-  "promotion",
   "phones",
   "computers",
   "tablets",
@@ -864,6 +863,7 @@ const CATEGORY_CANONICAL_ORDER = [
   "audio",
   "mobility",
   "solar",
+  "promotion",
 ];
 
 export const CATEGORIES_LIST = Object.values(PRODUCT_CATEGORIES)
