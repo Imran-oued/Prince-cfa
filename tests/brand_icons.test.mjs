@@ -48,3 +48,13 @@ test("Brand Icons 3: Le layout racine inclut les métadonnées et balises d'icô
   assert.ok(content.includes('/manifest.json'), "layout.tsx doit référencer le web manifest");
   assert.ok(content.includes('/favicon.ico'), "layout.tsx doit référencer le favicon officiel");
 });
+
+test("Brand Icons 4: Le admin-manifest.json est configuré pour l'installation autonome de /admin", () => {
+  const adminManifestPath = path.join(process.cwd(), "public", "admin-manifest.json");
+  assert.ok(fs.existsSync(adminManifestPath), "admin-manifest.json doit exister");
+  const content = JSON.parse(fs.readFileSync(adminManifestPath, "utf-8"));
+  assert.equal(content.short_name, "Prince CFA Admin");
+  assert.equal(content.start_url, "/admin");
+  assert.equal(content.scope, "/admin");
+});
+

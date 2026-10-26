@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Prince CFA Admin",
   description: "Panneau d'administration officiel Prince CFA Ouagadougou",
+  manifest: "/admin-manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
