@@ -99,20 +99,36 @@ export default function MenuDrawer({
       onSelectCategory(categoryId);
     }
     onClose();
-    const collectionElem = document.getElementById('collection');
-    if (collectionElem) {
-      collectionElem.scrollIntoView({ behavior: 'smooth' });
-    }
+    setTimeout(() => {
+      if (categoryId === 'phones') {
+        const subCatElem = document.getElementById('sous-categories-telephones');
+        if (subCatElem) {
+          subCatElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
+      }
+      const collectionElem = document.getElementById('collection');
+      if (collectionElem) {
+        collectionElem.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 120);
   };
 
   const handleBrandClick = (brand) => {
     if (onSelectCategory) onSelectCategory('phones');
     if (onSelectBrand) onSelectBrand(brand);
     onClose();
-    const collectionElem = document.getElementById('collection');
-    if (collectionElem) {
-      collectionElem.scrollIntoView({ behavior: 'smooth' });
-    }
+    setTimeout(() => {
+      const subCatElem = document.getElementById('sous-categories-telephones');
+      if (subCatElem) {
+        subCatElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      const collectionElem = document.getElementById('collection');
+      if (collectionElem) {
+        collectionElem.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 120);
   };
 
   const handleWhatsAppContact = () => {

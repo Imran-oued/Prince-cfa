@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { products as defaultProducts } from "@/data/products";
 import Navbar from "@/components/Navbar";
@@ -30,7 +30,17 @@ import {
   CreditCard, 
   Smartphone, 
   Receipt,
-  Flame 
+  Flame,
+  ChevronLeft,
+  ChevronRight,
+  Laptop,
+  Tablet,
+  Tv,
+  Refrigerator,
+  Package,
+  Speaker,
+  Bike,
+  SunMedium
 } from "lucide-react";
 
 function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -65,18 +75,18 @@ type Product = {
 };
 
 const categories = [
-  { id: 'all', label: 'Tous' },
-  { id: 'phones', label: 'Téléphones' },
-  { id: 'computers', label: 'Ordinateurs' },
-  { id: 'tablets', label: 'Tablettes' },
-  { id: 'tv', label: 'TV' },
-  { id: 'appliances', label: 'Électroménager' },
-  { id: 'accessories', label: 'Accessoires' },
-  { id: 'tech', label: 'High-Tech' },
-  { id: 'audio', label: 'Boomers' },
-  { id: 'mobility', label: 'Motos Électriques' },
-  { id: 'solar', label: 'Solaire' },
-  { id: 'promotion', label: 'PROMOTION' },
+  { id: 'all', label: 'Tous', icon: Crown },
+  { id: 'phones', label: 'Téléphones', icon: Smartphone },
+  { id: 'computers', label: 'Ordinateurs', icon: Laptop },
+  { id: 'tablets', label: 'Tablettes', icon: Tablet },
+  { id: 'tv', label: 'TV', icon: Tv },
+  { id: 'appliances', label: 'Électroménager', icon: Refrigerator },
+  { id: 'accessories', label: 'Accessoires', icon: Package },
+  { id: 'tech', label: 'High-Tech', icon: Sparkles },
+  { id: 'audio', label: 'Boomers', icon: Speaker },
+  { id: 'mobility', label: 'Motos Électriques', icon: Bike },
+  { id: 'solar', label: 'Solaire', icon: SunMedium },
+  { id: 'promotion', label: 'PROMOTION', icon: Flame },
 ];
 
 const phoneBrands = ['Iphones', 'Samsung', 'Google Pixel', 'Redmi', 'Huawei', 'Tecno', 'Infinix', 'Honor', 'Itel', 'OALE'];
@@ -524,10 +534,110 @@ export default function Home() {
     loadProducts();
   }, []);
 
-  // Gestionnaire de changement de catégorie avec réinitialisation de marque (sans effet en cascade)
+  // Défilement horizontal fluide des catégories (tactile + drag souris + boutons fléchés)
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const brandScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftPosRef = useRef(0);
+  const hasMovedRef = useRef(false);
+
+  const updateScrollButtons = useCallback(() => {
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollLeft(scrollLeft > 6);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 6);
+  }, []);
+
+  useEffect(() => {
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    updateScrollButtons();
+    el.addEventListener('scroll', updateScrollButtons, { passive: true });
+    window.addEventListener('resize', updateScrollButtons);
+    return () => {
+      el.removeEventListener('scroll', updateScrollButtons);
+      window.removeEventListener('resize', updateScrollButtons);
+    };
+  }, [updateScrollButtons]);
+
+  // Centrage automatique de la catégorie active
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const activeEl = categoryScrollRef.current?.querySelector(`[data-cat-id="${selectedCategory}"]`) as HTMLElement;
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+      updateScrollButtons();
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [selectedCategory, updateScrollButtons]);
+
+  // Centrage automatique de la marque active dans le ruban des marques
+  useEffect(() => {
+    if (selectedCategory === 'phones') {
+      const timer = setTimeout(() => {
+        const activeBrandEl = brandScrollRef.current?.querySelector(`[data-brand="${selectedBrand}"]`) as HTMLElement;
+        if (activeBrandEl) {
+          activeBrandEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedBrand, selectedCategory]);
+
+  const scrollCategories = (direction: 'left' | 'right') => {
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    const scrollAmount = Math.max(260, Math.floor(el.clientWidth * 0.7));
+    el.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    isDraggingRef.current = true;
+    startXRef.current = e.pageX - el.offsetLeft;
+    scrollLeftPosRef.current = el.scrollLeft;
+    hasMovedRef.current = false;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startXRef.current) * 1.3;
+    if (Math.abs(walk) > 4) {
+      hasMovedRef.current = true;
+    }
+    el.scrollLeft = scrollLeftPosRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isDraggingRef.current = false;
+  };
+
+  // Gestionnaire de changement de catégorie avec réinitialisation de marque et défilement direct vers les sous-catégories
   const handleSelectCategory = (catId: string) => {
     setSelectedCategory(catId);
     setSelectedBrand('all');
+
+    if (catId === 'phones') {
+      setTimeout(() => {
+        const subCatElem = document.getElementById('sous-categories-telephones');
+        if (subCatElem) {
+          subCatElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
   };
 
   const cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
@@ -786,77 +896,141 @@ export default function Home() {
         </div>
 
         {/* Barres de Filtres Dynamiques */}
-        <div id="produits" className="flex flex-col items-center w-full max-w-5xl mx-auto mt-8 mb-16 relative z-20 scroll-mt-28">
+        <div id="produits" className="flex flex-col items-center w-full max-w-6xl mx-auto mt-8 mb-14 relative z-20 scroll-mt-28 px-2 sm:px-4">
           
-          {/* Catégories Principales */}
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-            {selectedCategory === 'all' ? (
-              categories.map(cat => {
+          {/* Ruban Horizontal Défilable des Catégories */}
+          <div className="relative w-full group/cat">
+            {/* Dégradé & Bouton Défilement Gauche */}
+            <div 
+              className={`absolute left-0 top-0 bottom-0 z-20 flex items-center pr-8 bg-gradient-to-r from-[#09090b] via-[#09090b]/90 to-transparent pointer-events-none transition-opacity duration-300 ${
+                canScrollLeft ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => scrollCategories('left')}
+                disabled={!canScrollLeft}
+                aria-label="Défiler vers la gauche"
+                className="pointer-events-auto p-2 sm:p-2.5 rounded-full bg-black/90 hover:bg-gold/20 text-zinc-300 hover:text-gold border border-white/15 hover:border-gold/50 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.8)] transition-all duration-200 active:scale-90 cursor-pointer disabled:pointer-events-none"
+              >
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
+
+            {/* Piste de Défilement Horizontal */}
+            <div
+              ref={categoryScrollRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUpOrLeave}
+              onMouseLeave={handleMouseUpOrLeave}
+              className="flex items-center gap-2 sm:gap-3 overflow-x-auto scroll-smooth py-3 px-3 sm:px-6 no-scrollbar cursor-grab active:cursor-grabbing select-none"
+            >
+              {categories.map(cat => {
                 const isPromo = cat.id === 'promotion';
+                const isSelected = selectedCategory === cat.id;
+                const Icon = cat.icon;
+
                 return (
                   <button
                     key={cat.id}
-                    onClick={() => handleSelectCategory(cat.id)}
-                    className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold tracking-[0.15em] uppercase transition-all duration-300 active:scale-95 cursor-pointer flex items-center gap-1.5 ${
-                      selectedCategory === cat.id 
-                        ? 'bg-gradient-to-r from-gold to-yellow-600 text-black shadow-[0_0_20px_rgba(212,175,55,0.5)] scale-105' 
+                    data-cat-id={cat.id}
+                    onClick={(e) => {
+                      if (hasMovedRef.current) {
+                        e.preventDefault();
+                        return;
+                      }
+                      handleSelectCategory(cat.id);
+                    }}
+                    className={`shrink-0 flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase transition-all duration-300 active:scale-95 cursor-pointer whitespace-nowrap group ${
+                      isSelected
+                        ? isPromo
+                          ? 'bg-gradient-to-r from-red-600 via-rose-500 to-amber-500 text-white font-bold shadow-[0_0_25px_rgba(239,68,68,0.5)] border border-red-400/60 scale-[1.02]'
+                          : 'bg-gradient-to-r from-gold via-amber-400 to-yellow-500 text-black font-bold shadow-[0_0_24px_rgba(212,175,55,0.45)] border border-yellow-300/60 scale-[1.02]'
                         : isPromo
-                          ? 'bg-red-500/10 text-red-400 border border-red-500/30 hover:border-red-400 hover:bg-red-500/20 shadow-[0_0_12px_rgba(239,68,68,0.2)]'
-                          : 'bg-black/60 text-zinc-400 border border-white/10 hover:border-gold/50 hover:text-gold hover:bg-gold/5'
+                          ? 'bg-red-950/30 hover:bg-red-900/40 text-red-400 hover:text-red-300 border border-red-500/30 hover:border-red-400/60 shadow-[0_0_12px_rgba(239,68,68,0.15)]'
+                          : 'bg-zinc-900/80 hover:bg-zinc-800/90 text-zinc-300 hover:text-gold border border-white/10 hover:border-gold/40 shadow-sm backdrop-blur-sm'
                     }`}
                   >
-                    {isPromo && <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400 animate-pulse" aria-hidden="true" />}
+                    {Icon && (
+                      <Icon
+                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 transition-transform duration-300 ${
+                          isSelected
+                            ? isPromo
+                              ? 'text-white fill-white'
+                              : 'text-black fill-current'
+                            : isPromo
+                              ? 'text-red-400 group-hover:scale-110'
+                              : 'text-zinc-400 group-hover:text-gold group-hover:scale-110'
+                        }`}
+                        aria-hidden="true"
+                      />
+                    )}
                     <span>{cat.label}</span>
                   </button>
                 );
-              })
-            ) : (
-              <div className="flex items-center gap-3 sm:gap-4 animate-in zoom-in-95 duration-300">
-                <button
-                  onClick={() => handleSelectCategory('all')}
-                  className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold tracking-widest uppercase transition-all duration-300 bg-black/60 text-zinc-400 border border-white/10 hover:border-white/50 hover:text-white active:scale-95 flex items-center gap-2 cursor-pointer"
-                >
-                  <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-                  <span>Retour</span>
-                </button>
-                <div className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold tracking-[0.15em] uppercase flex items-center gap-1.5 ${
-                  selectedCategory === 'promotion'
-                    ? 'bg-gradient-to-r from-red-500 via-amber-500 to-gold text-black shadow-[0_0_25px_rgba(239,68,68,0.4)]'
-                    : 'bg-gradient-to-r from-gold to-yellow-600 text-black shadow-[0_0_20px_rgba(212,175,55,0.5)]'
-                }`}>
-                  {selectedCategory === 'promotion' && <Flame className="w-4 h-4 text-black fill-black" aria-hidden="true" />}
-                  <span>{categories.find(c => c.id === selectedCategory)?.label}</span>
-                </div>
-              </div>
-            )}
+              })}
+            </div>
+
+            {/* Dégradé & Bouton Défilement Droite */}
+            <div 
+              className={`absolute right-0 top-0 bottom-0 z-20 flex items-center pl-8 bg-gradient-to-l from-[#09090b] via-[#09090b]/90 to-transparent pointer-events-none transition-opacity duration-300 justify-end ${
+                canScrollRight ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => scrollCategories('right')}
+                disabled={!canScrollRight}
+                aria-label="Défiler vers la droite"
+                className="pointer-events-auto p-2 sm:p-2.5 rounded-full bg-black/90 hover:bg-gold/20 text-zinc-300 hover:text-gold border border-white/15 hover:border-gold/50 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.8)] transition-all duration-200 active:scale-90 cursor-pointer disabled:pointer-events-none"
+              >
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
           </div>
+
 
           {/* Sous-catégories Marques (Uniquement si Téléphones est sélectionné) */}
           {selectedCategory === 'phones' && (
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-6 animate-in slide-in-from-top-4 fade-in duration-300">
-              <button
-                onClick={() => setSelectedBrand('all')}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all active:scale-95 cursor-pointer ${
-                  selectedBrand === 'all'
-                    ? "bg-white/20 text-white border border-white/30"
-                    : "bg-transparent text-zinc-500 border border-white/5 hover:text-white"
-                }`}
+            <div 
+              id="sous-categories-telephones" 
+              className="w-full max-w-5xl mt-3 pt-3 border-t border-white/10 animate-in slide-in-from-top-2 fade-in duration-300 scroll-mt-24 sm:scroll-mt-28"
+            >
+              <div className="text-[11px] font-bold text-gold uppercase tracking-[0.2em] mb-2 px-2 flex items-center gap-1.5">
+                <Smartphone className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
+                <span>MARQUES</span>
+              </div>
+              <div 
+                ref={brandScrollRef}
+                className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto scroll-smooth py-2 px-3 sm:px-4 no-scrollbar justify-start"
               >
-                Toutes les marques
-              </button>
-              {phoneBrands.map(brand => (
                 <button
-                  key={brand}
-                  onClick={() => setSelectedBrand(brand)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all active:scale-95 cursor-pointer ${
-                    selectedBrand === brand
-                      ? "bg-white/20 text-white border border-white/30 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-                      : "bg-transparent text-zinc-500 border border-white/5 hover:border-white/20 hover:text-zinc-300"
+                  data-brand="all"
+                  onClick={() => setSelectedBrand('all')}
+                  className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer ${
+                    selectedBrand === 'all'
+                      ? "bg-gradient-to-r from-gold to-yellow-600 text-black font-extrabold shadow-[0_0_15px_rgba(212,175,55,0.4)] scale-105"
+                      : "bg-zinc-900/90 text-zinc-200 border border-white/20 hover:border-gold/50 hover:text-gold"
                   }`}
                 >
-                  {brand}
+                  Toutes les marques
                 </button>
-              ))}
+                {phoneBrands.map(brand => (
+                  <button
+                    key={brand}
+                    data-brand={brand}
+                    onClick={() => setSelectedBrand(brand)}
+                    className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer ${
+                      selectedBrand === brand
+                        ? "bg-gradient-to-r from-gold to-yellow-600 text-black font-extrabold shadow-[0_0_15px_rgba(212,175,55,0.4)] scale-105"
+                        : "bg-zinc-900/90 text-zinc-200 border border-white/20 hover:border-gold/50 hover:text-gold"
+                    }`}
+                  >
+                    {brand}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -116,4 +116,13 @@ textarea,
   animation: fadeIn 0.4s ease-out forwards;
 }
 
+/* Utilitaires de défilement horizontal sans barre visible */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 
