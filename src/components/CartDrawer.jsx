@@ -415,7 +415,7 @@ export default function CartDrawer({
                             }
                           }}
                         >
-                          <div className="w-14 h-14 rounded-xl bg-white p-1 flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden border border-transparent group-hover/item:border-gold/50 group-hover/item:scale-105 transition-all">
+                          <div className="w-14 h-14 rounded-xl bg-black border border-white/10 p-1 flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden group-hover/item:border-gold/50 group-hover/item:scale-105 transition-all">
                             <img 
                               src={item.image} 
                               alt={item.name} 

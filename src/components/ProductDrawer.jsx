@@ -405,7 +405,7 @@ export default function ProductDrawer({
           <div className="space-y-3">
             {/* Boîte photo épurée avec glissement tactile au doigt */}
             <div 
-              className="relative w-full h-80 sm:h-96 md:h-[420px] rounded-3xl bg-white overflow-hidden shadow-sm select-none touch-pan-y flex items-center justify-center cursor-grab active:cursor-grabbing"
+              className="relative w-full h-80 sm:h-96 md:h-[420px] rounded-3xl bg-black border border-white/10 overflow-hidden shadow-sm select-none touch-pan-y flex items-center justify-center cursor-grab active:cursor-grabbing"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
@@ -423,7 +423,7 @@ export default function ProductDrawer({
                   return (
                     <div 
                       key={idx}
-                      className="w-full h-full min-w-full flex-shrink-0 p-3 sm:p-6 flex items-center justify-center bg-white"
+                      className="w-full h-full min-w-full flex-shrink-0 p-3 sm:p-6 flex items-center justify-center bg-black"
                     >
                       {imgSrc?.length > 4 ? (
                         <img 
@@ -466,8 +466,8 @@ export default function ProductDrawer({
                       onClick={() => handleSelectImage(dotIdx)}
                       className={`rounded-full transition-all duration-300 cursor-pointer ${
                         isActive 
-                          ? 'w-4 h-2 bg-black dark:bg-white scale-105 shadow-sm' 
-                          : 'w-2 h-2 bg-zinc-300 dark:bg-zinc-600 hover:bg-zinc-400'
+                          ? 'w-4 h-2 bg-gold scale-105 shadow-[0_0_8px_rgba(212,175,55,0.8)]' 
+                          : 'w-2 h-2 bg-white/40 hover:bg-white/60'
                       }`}
                       aria-label={`Photo ${dotIdx + 1}`}
                     />
@@ -738,12 +738,12 @@ export default function ProductDrawer({
                       )}
                       
                       {/* Miniature du téléphone */}
-                      <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden mb-2 shadow-inner">
+                      <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-xl bg-black border border-white/10 p-1 flex items-center justify-center overflow-hidden mb-2 shadow-inner">
                         {variantImg?.length > 4 ? (
                           <img 
                             src={variantImg} 
                             alt={color} 
-                            className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform"
+                            className="w-full h-full object-contain group-hover:scale-105 transition-transform"
                           />
                         ) : (
                           <span className="text-2xl">{variantImg}</span>
