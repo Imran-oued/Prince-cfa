@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { 
   validateAndCleanProduct, 
   generateSlug, 
-  normalizeProductSpecs 
+  normalizeProductSpecs,
+  getProductImageBg
 } from "../src/lib/productValidation.ts";
 import { 
   PRODUCT_CATEGORIES, 
@@ -370,4 +371,33 @@ test("9. Backward compatibility: normalizeProductSpecs bridges legacy products s
   assert.equal(normMoto.specs.motor, "8000W Brushless");
   assert.equal(normMoto.specs.range, "150 km");
   assert.equal(normMoto.specs.speed, "110 km/h");
+});
+
+test("10. Image Framing: Catalog Apple products preserve white background; user-added photos get sleek black volume", () => {
+  // A. Produits catalogue Apple officiels -> fond blanc épuré comme Capture 2
+  const apple1 = getProductImageBg({ id: "pcfa-12", image: "/products/apple/iphone-12-blue.png" });
+  assert.equal(apple1.isBlack, false);
+  assert.equal(apple1.containerClass, "bg-white", "Les iPhones catalogue doivent rester sur fond blanc (Capture 2)");
+
+  const apple2 = getProductImageBg({ id: "pcfa-13", name: "iPhone 13" }, "/products/apple/iphone-13-black.png");
+  assert.equal(apple2.isBlack, false);
+  assert.equal(apple2.containerClass, "bg-white");
+
+  // B. Photos ajoutées par l'utilisateur / smartphone (moto, frigo, pc) -> fond noir pour cadrage optimal (Capture 1)
+  const moto = getProductImageBg({ id: "UOGdbGVosnh6CovWNOkD", name: "Moto Electrique" }, "/products/mobility/moto-electrique-1.jpg");
+  assert.equal(moto.isBlack, true);
+  assert.ok(moto.containerClass.includes("bg-black"), "La moto électrique ajoutée doit avoir un cadrage noir");
+
+  const customPhoto = getProductImageBg({ id: "p-custom-99", name: "Réfrigérateur" }, "data:image/jpeg;base64,/9j/4AAQSkZJRg==");
+  assert.equal(customPhoto.isBlack, true);
+  assert.ok(customPhoto.containerClass.includes("bg-black"), "Une photo personnalisée doit avoir un cadrage noir");
+
+  // C. Choix explicite par l'administrateur
+  const explicitWhite = getProductImageBg({ id: "custom-1", imageBg: "white" });
+  assert.equal(explicitWhite.isBlack, false);
+  assert.equal(explicitWhite.containerClass, "bg-white");
+
+  const explicitBlack = getProductImageBg({ id: "pcfa-se3", imageBg: "black" });
+  assert.equal(explicitBlack.isBlack, true);
+  assert.ok(explicitBlack.containerClass.includes("bg-black"));
 });

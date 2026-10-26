@@ -251,7 +251,21 @@ export default function AdminPage() {
   
   // Données dynamiques des produits selon la catégorie
   const [formCategory, setFormCategory] = useState<string>("phones");
-  const [commonFormData, setCommonFormData] = useState({
+  interface CommonFormData {
+    name: string;
+    brand: string;
+    price: string;
+    salePrice: string;
+    desc: string;
+    colors: string;
+    stock: string;
+    condition: string;
+    warranty: string;
+    accessories: string;
+    imageBg?: string;
+  }
+
+  const [commonFormData, setCommonFormData] = useState<CommonFormData>({
     name: "",
     brand: "",
     price: "",
@@ -262,6 +276,7 @@ export default function AdminPage() {
     condition: "neuf",
     warranty: "Garantie 12 Mois Certifiée",
     accessories: "",
+    imageBg: "black",
   });
   const [formSpecs, setFormSpecs] = useState<Record<string, any>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -939,6 +954,7 @@ export default function AdminPage() {
       colors: parsedColors,
       image: mainImage,
       images: allImages,
+      imageBg: commonFormData.imageBg || "black",
       storageOptions: parsedStorage.length > 0 ? parsedStorage : undefined,
       specs: formSpecs
     };
@@ -1133,7 +1149,8 @@ export default function AdminPage() {
       stock: (product.stock !== undefined ? product.stock : 10).toString(),
       condition: (product.condition as any) || "neuf",
       warranty: product.warranty || "Garantie 12 Mois Certifiée",
-      accessories: product.accessories || ""
+      accessories: product.accessories || "",
+      imageBg: (product as any).imageBg || (product.id && String(product.id).startsWith("pcfa-") ? "white" : "black"),
     });
 
     setIsModalOpen(true);
@@ -1163,6 +1180,7 @@ export default function AdminPage() {
       condition: "neuf",
       warranty: "Garantie 12 Mois Certifiée",
       accessories: "",
+      imageBg: "black",
     });
   };
 
@@ -1227,6 +1245,7 @@ export default function AdminPage() {
         condition: "neuf",
         warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
         accessories: phoneConfig.defaultAccessories || "",
+        imageBg: "black",
       });
     }
 
@@ -2408,6 +2427,7 @@ export default function AdminPage() {
                       condition: "neuf",
                       warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
                       accessories: phoneConfig.defaultAccessories || "",
+                      imageBg: "black",
                     });
                   }}
                   className="underline text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer ml-3 flex-shrink-0"
@@ -2996,6 +3016,40 @@ export default function AdminPage() {
                         Aucune photo sélectionnée. Cliquez sur <strong className="text-zinc-300">Choisir des fichiers</strong> ou ajoutez un lien ci-dessous.
                       </div>
                     )}
+
+                    {/* Sélecteur de couleur de fond pour le cadrage photo */}
+                    <div className="pt-2.5 pb-1 flex flex-wrap items-center justify-between gap-2 border-t border-white/5">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-semibold text-zinc-300">Fond du cadrage photo</span>
+                        <span className="text-[10px] text-zinc-500">Pour les photos de smartphone, le noir est recommandé pour éviter les bandes blanches</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10">
+                        <button
+                          type="button"
+                          onClick={() => setCommonFormData(prev => ({ ...prev, imageBg: "black" }))}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            (commonFormData.imageBg || "black") === "black"
+                              ? "bg-gold text-black shadow-sm"
+                              : "text-zinc-400 hover:text-white"
+                          }`}
+                        >
+                          <span>⬛</span>
+                          <span>Noir (Optimal)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCommonFormData(prev => ({ ...prev, imageBg: "white" }))}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            commonFormData.imageBg === "white"
+                              ? "bg-gold text-black shadow-sm"
+                              : "text-zinc-400 hover:text-white"
+                          }`}
+                        >
+                          <span>⬜</span>
+                          <span>Blanc (Style Apple)</span>
+                        </button>
+                      </div>
+                    </div>
 
                     {/* Ajout par URL */}
                     <div className="flex items-center gap-2 pt-2 border-t border-white/5">

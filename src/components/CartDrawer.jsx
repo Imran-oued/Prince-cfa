@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { SHOP_CONFIG } from "@/config/shop";
+import { getProductImageBg } from "@/lib/productValidation";
 import { 
   X, 
   Crown, 
@@ -415,11 +416,11 @@ export default function CartDrawer({
                             }
                           }}
                         >
-                          <div className="w-14 h-14 rounded-xl bg-black border border-white/10 p-1 flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden group-hover/item:border-gold/50 group-hover/item:scale-105 transition-all">
+                          <div className={`w-14 h-14 rounded-xl ${getProductImageBg(item, item.image).containerClass} p-1 flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden border border-transparent group-hover/item:border-gold/50 group-hover/item:scale-105 transition-all`}>
                             <img 
                               src={item.image} 
                               alt={item.name} 
-                              className="max-w-full max-h-full object-contain"
+                              className={`max-w-full max-h-full object-contain ${getProductImageBg(item, item.image).isBlack ? '' : 'mix-blend-multiply'}`}
                             />
                           </div>
                           <div className="flex-1 min-w-0">

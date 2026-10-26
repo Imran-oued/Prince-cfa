@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { SHOP_CONFIG } from '@/config/shop';
 import { X, Star, HardDrive, Check, Zap, Laptop, Refrigerator, Tablet, ShoppingBag } from 'lucide-react';
 import { getCategoryConfig, isStorageVariantCategory } from '@/config/categories';
+import { getProductImageBg } from '@/lib/productValidation';
 
 const SPEC_LABELS = {
   screen: 'Écran',
@@ -405,7 +406,7 @@ export default function ProductDrawer({
           <div className="space-y-3">
             {/* Boîte photo épurée avec glissement tactile au doigt */}
             <div 
-              className="relative w-full h-80 sm:h-96 md:h-[420px] rounded-3xl bg-black border border-white/10 overflow-hidden shadow-sm select-none touch-pan-y flex items-center justify-center cursor-grab active:cursor-grabbing"
+              className={`relative w-full h-80 sm:h-96 md:h-[420px] rounded-3xl ${getProductImageBg(currentProduct, activeImage).containerClass} overflow-hidden shadow-sm select-none touch-pan-y flex items-center justify-center cursor-grab active:cursor-grabbing`}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
@@ -420,10 +421,11 @@ export default function ProductDrawer({
               >
                 {productImages.map((imgSrc, idx) => {
                   const isCurrent = idx === activeImageIndex;
+                  const slideBg = getProductImageBg(currentProduct, imgSrc);
                   return (
                     <div 
                       key={idx}
-                      className="w-full h-full min-w-full flex-shrink-0 p-3 sm:p-6 flex items-center justify-center bg-black"
+                      className={`w-full h-full min-w-full flex-shrink-0 p-3 sm:p-6 flex items-center justify-center ${slideBg.isBlack ? 'bg-black' : 'bg-white'}`}
                     >
                       {imgSrc?.length > 4 ? (
                         <img 
@@ -467,7 +469,9 @@ export default function ProductDrawer({
                       className={`rounded-full transition-all duration-300 cursor-pointer ${
                         isActive 
                           ? 'w-4 h-2 bg-gold scale-105 shadow-[0_0_8px_rgba(212,175,55,0.8)]' 
-                          : 'w-2 h-2 bg-white/40 hover:bg-white/60'
+                          : getProductImageBg(currentProduct, activeImage).isBlack
+                            ? 'w-2 h-2 bg-white/40 hover:bg-white/60'
+                            : 'w-2 h-2 bg-zinc-300 dark:bg-zinc-600 hover:bg-zinc-400'
                       }`}
                       aria-label={`Photo ${dotIdx + 1}`}
                     />
@@ -738,12 +742,12 @@ export default function ProductDrawer({
                       )}
                       
                       {/* Miniature du téléphone */}
-                      <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-xl bg-black border border-white/10 p-1 flex items-center justify-center overflow-hidden mb-2 shadow-inner">
+                      <div className={`w-16 h-16 sm:w-18 sm:h-18 rounded-xl ${getProductImageBg(currentProduct, variantImg).containerClass} p-1 flex items-center justify-center overflow-hidden mb-2 shadow-inner`}>
                         {variantImg?.length > 4 ? (
                           <img 
                             src={variantImg} 
                             alt={color} 
-                            className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                            className={`w-full h-full object-contain ${getProductImageBg(currentProduct, variantImg).isBlack ? '' : 'mix-blend-multiply'} group-hover:scale-105 transition-transform`}
                           />
                         ) : (
                           <span className="text-2xl">{variantImg}</span>

@@ -8,6 +8,7 @@ import CartDrawer from "@/components/CartDrawer";
 import ProductDrawer from "@/components/ProductDrawer";
 import { getProducts } from "@/lib/firestore";
 import { isFirebaseConfigured } from "@/lib/firebase";
+import { getProductImageBg } from "@/lib/productValidation";
 import { SHOP_CONFIG } from "@/config/shop";
 import { 
   Star, 
@@ -193,6 +194,7 @@ function ProductCardItem({
   const activeImage = images[activeColorIdx] || product.image;
   const activeColor = product.colors?.[activeColorIdx] || product.colors?.[0] || '';
   const specsSnippet = getProductSummarySnippet(product);
+  const imgBg = getProductImageBg(product, activeImage);
 
   // Glissement tactile au doigt directement sur la carte (Amazon / AliExpress Style)
   const [touchStartX, setTouchStartX] = useState(0);
@@ -249,7 +251,7 @@ function ProductCardItem({
       <div 
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className="w-[38%] min-w-[130px] sm:w-48 md:w-52 flex-shrink-0 rounded-xl sm:rounded-2xl bg-black border border-white/10 overflow-hidden flex items-center justify-center p-1.5 sm:p-2.5 relative shadow-md group/img select-none"
+        className={`w-[38%] min-w-[130px] sm:w-48 md:w-52 flex-shrink-0 rounded-xl sm:rounded-2xl ${imgBg.containerClass} overflow-hidden flex items-center justify-center p-1.5 sm:p-2.5 relative shadow-md group/img select-none`}
       >
         {activeImage?.length > 4 ? (
           <img 
@@ -297,7 +299,9 @@ function ProductCardItem({
                 className={`transition-all duration-200 rounded-full ${
                   activeColorIdx === i 
                     ? 'w-2 h-2 bg-gold shadow-[0_0_6px_rgba(212,175,55,0.8)] scale-110' 
-                    : 'w-1.5 h-1.5 bg-white/40 border border-white/20'
+                    : imgBg.isBlack
+                      ? 'w-1.5 h-1.5 bg-white/40 border border-white/20'
+                      : 'w-1.5 h-1.5 bg-black/30 border border-white/40'
                 }`} 
               />
             ))}
