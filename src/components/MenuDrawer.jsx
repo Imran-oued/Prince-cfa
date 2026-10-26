@@ -22,7 +22,9 @@ import {
   Clock,
   Compass,
   Refrigerator,
-  Tablet
+  Tablet,
+  FileText,
+  Lock
 } from 'lucide-react';
 
 function WhatsAppIcon({ className = "w-4 h-4" }) {
@@ -265,6 +267,27 @@ export default function MenuDrawer({
                 </div>
                 <span className="text-xs text-zinc-500 group-hover:text-gold group-hover:translate-x-1 transition-all">→</span>
               </Link>
+
+              {/* Liens Juridiques & Confidentialité */}
+              <div className="pt-2 border-t border-white/5 grid grid-cols-2 gap-2">
+                <Link
+                  href="/mentions-legales"
+                  onClick={onClose}
+                  className="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-gold/30 hover:bg-gold/5 text-zinc-400 hover:text-gold transition-colors text-[11px] font-medium"
+                >
+                  <FileText className="w-3.5 h-3.5 text-gold flex-shrink-0" />
+                  <span>Mentions Légales</span>
+                </Link>
+
+                <Link
+                  href="/politique-de-confidentialite"
+                  onClick={onClose}
+                  className="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-gold/30 hover:bg-gold/5 text-zinc-400 hover:text-gold transition-colors text-[11px] font-medium"
+                >
+                  <Lock className="w-3.5 h-3.5 text-gold flex-shrink-0" />
+                  <span>Confidentialité</span>
+                </Link>
+              </div>
             </div>
           </div>
 

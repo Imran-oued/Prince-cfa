@@ -935,6 +935,13 @@ export default function CartDrawer({
                       </>
                     )}
                   </button>
+
+                  <p className="text-[10px] text-center text-zinc-500 leading-tight">
+                    En validant, vous acceptez nos{" "}
+                    <a href="/mentions-legales" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-gold underline">mentions légales</a>
+                    {" "}et notre{" "}
+                    <a href="/politique-de-confidentialite" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-gold underline">politique de confidentialité</a>.
+                  </p>
                 </div>
               </>
             )}

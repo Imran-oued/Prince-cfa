@@ -591,9 +591,16 @@ function TrackingContent() {
 
       </main>
 
-      {/* Footer minimaliste */}
-      <footer className="border-t border-white/10 py-6 text-center text-xs text-zinc-500">
+      {/* Footer minimaliste avec liens légaux */}
+      <footer className="border-t border-white/10 py-6 px-4 text-center text-xs text-zinc-500 space-y-2">
         <p>© {new Date().getFullYear()} PRINCE CFA. Boutique Premium Ouagadougou. Tous droits réservés.</p>
+        <div className="flex flex-wrap items-center justify-center gap-3 text-zinc-400 text-[11px]">
+          <Link href="/mentions-legales" className="hover:text-gold transition-colors">Mentions Légales</Link>
+          <span>•</span>
+          <Link href="/politique-de-confidentialite" className="hover:text-gold transition-colors">Politique de Confidentialité</Link>
+          <span>•</span>
+          <Link href="/" className="hover:text-gold transition-colors">Accueil Boutique</Link>
+        </div>
       </footer>
     </div>
   );

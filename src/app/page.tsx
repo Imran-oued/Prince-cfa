@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { products as defaultProducts } from "@/data/products";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
@@ -933,6 +934,15 @@ export default function Home() {
                 <Receipt className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
                 <span>Facture légale certifiée</span>
               </li>
+              <li className="pt-2 border-t border-white/5 flex items-center gap-2.5 text-[11px] text-zinc-400">
+                <Link href="/mentions-legales" className="hover:text-gold transition-colors">
+                  Mentions Légales
+                </Link>
+                <span>•</span>
+                <Link href="/politique-de-confidentialite" className="hover:text-gold transition-colors">
+                  Confidentialité
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -1001,9 +1011,21 @@ export default function Home() {
 
         </div>
 
-        {/* Ligne Copyright */}
+        {/* Ligne Copyright & Liens Légaux */}
         <div className="max-w-7xl mx-auto pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
-          <p>© 2026 PRINCE CFA. Tous droits réservés.</p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+            <p>© 2026 PRINCE CFA. Tous droits réservés.</p>
+            <span className="hidden sm:inline text-zinc-700">|</span>
+            <div className="flex items-center gap-3">
+              <Link href="/mentions-legales" className="hover:text-gold transition-colors">
+                Mentions Légales
+              </Link>
+              <span>•</span>
+              <Link href="/politique-de-confidentialite" className="hover:text-gold transition-colors">
+                Politique de Confidentialité
+              </Link>
+            </div>
+          </div>
           <p className="flex items-center gap-3">
             <span>Sécurisé par Firebase Cloud</span>
             <span>•</span>
