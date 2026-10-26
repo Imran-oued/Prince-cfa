@@ -338,15 +338,15 @@ function ProductCardItem({
             </p>
           )}
 
-          {/* Prix FCFA en grand format doré avec gestion promotionnelle */}
+          {/* Prix FCFA en grand format doré avec gestion promotionnelle sécurisée */}
           <div className="mt-2 flex items-baseline gap-2 flex-wrap">
-            {product.salePrice && product.salePrice < product.price ? (
+            {product.salePrice && product.price && Number(product.salePrice) < Number(product.price) ? (
               <>
                 <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-amber-300 to-gold tracking-tight">
-                  {product.salePrice.toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
+                  {(Number(product.salePrice) || 0).toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
                 </span>
                 <span className="text-xs sm:text-sm text-zinc-500 line-through">
-                  {product.price.toLocaleString('fr-FR')} FCFA
+                  {(Number(product.price) || 0).toLocaleString('fr-FR')} FCFA
                 </span>
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase bg-red-500/20 text-red-400 border border-red-500/30">
                   PROMO
@@ -354,7 +354,7 @@ function ProductCardItem({
               </>
             ) : (
               <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-white tracking-tight">
-                {product.price.toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
+                {(Number(product.price) || 0).toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
               </span>
             )}
           </div>
@@ -448,7 +448,7 @@ export default function Home() {
   
   const [localProducts, setLocalProducts] = useState<Product[]>(defaultProducts);
 
-  // Charger les produits : Firebase d'abord, mais TOUJOURS fusionner les nouveaux produits par défaut
+  // Charger les produits : API en priorité, Firebase en repli, et fallback localStorage 100% sécurisé
   useEffect(() => {
     async function loadProducts() {
       try {
@@ -467,9 +467,12 @@ export default function Home() {
           }
         }
 
-        // 2. Repli direct sur Firebase SDK si l'API est indisponible
+        // 2. Repli direct sur Firebase SDK si l'API est indisponible (avec timeout de sécurité de 3 secondes)
         if (isFirebaseConfigured()) {
-          const firebaseProducts = (await getProducts()) as Product[] | null;
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Timeout Firestore")), 3000)
+          );
+          const firebaseProducts = (await Promise.race([getProducts(), timeoutPromise])) as Product[] | null;
           if (firebaseProducts && firebaseProducts.length > 0) {
             // Fusionner Firebase avec les nouveaux produits par défaut non présents dans Firebase
             const existingIds = new Set(firebaseProducts.map((p: Product) => String(p.id)));
@@ -485,52 +488,61 @@ export default function Home() {
           }
         }
       } catch (err) {
-        console.warn("Firebase non disponible, utilisation du fallback local.", err);
+        console.warn("API/Firebase non disponible, utilisation du fallback local:", err);
       }
 
-      // 2. Fallback : localStorage + produits par défaut
-      const saved = localStorage.getItem("prince_cfa_products");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const migrated = parsed.map((p: Product) => {
-          const defaultMatch = defaultProducts.find(dp => dp.id === p.id);
-          const updatedProduct = { ...p };
-          if (defaultMatch) {
-            updatedProduct.image = defaultMatch.image;
-            updatedProduct.images = defaultMatch.images;
-            updatedProduct.colors = defaultMatch.colors;
-            updatedProduct.specs = defaultMatch.specs;
-            updatedProduct.desc = defaultMatch.desc;
-            if (defaultMatch.brand) updatedProduct.brand = defaultMatch.brand;
-            if (defaultMatch.storageOptions && (!p.storageOptions || p.storageOptions.length <= 1)) {
-              updatedProduct.storageOptions = defaultMatch.storageOptions;
+      // 3. Fallback sécurisé : localStorage + produits par défaut (protégé contre corruptions de cache)
+      try {
+        const saved = typeof window !== "undefined" ? localStorage.getItem("prince_cfa_products") : null;
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const migrated = parsed.map((p: Product) => {
+              if (!p || typeof p !== "object") return null;
+              const defaultMatch = defaultProducts.find(dp => dp.id === p.id);
+              const updatedProduct = { ...p };
+              if (defaultMatch) {
+                updatedProduct.image = defaultMatch.image;
+                updatedProduct.images = defaultMatch.images;
+                updatedProduct.colors = defaultMatch.colors;
+                updatedProduct.specs = defaultMatch.specs;
+                updatedProduct.desc = defaultMatch.desc;
+                if (defaultMatch.brand) updatedProduct.brand = defaultMatch.brand;
+                if (defaultMatch.storageOptions && (!p.storageOptions || p.storageOptions.length <= 1)) {
+                  updatedProduct.storageOptions = defaultMatch.storageOptions;
+                }
+              }
+              if (updatedProduct.category === 'phones' && !updatedProduct.brand && updatedProduct.name) {
+                const nameLower = String(updatedProduct.name).toLowerCase();
+                if (nameLower.includes('iphone') || nameLower.includes('se 128')) updatedProduct.brand = 'Iphones';
+                else if (nameLower.includes('samsung') || nameLower.includes('fold')) updatedProduct.brand = 'Samsung';
+                else if (nameLower.includes('pixel')) updatedProduct.brand = 'Google Pixel';
+                else if (nameLower.includes('redmi')) updatedProduct.brand = 'Redmi';
+                else if (nameLower.includes('huawei')) updatedProduct.brand = 'Huawei';
+                else if (nameLower.includes('tecno')) updatedProduct.brand = 'Tecno';
+                else if (nameLower.includes('infinix')) updatedProduct.brand = 'Infinix';
+                else if (nameLower.includes('honor')) updatedProduct.brand = 'Honor';
+                else if (nameLower.includes('itel')) updatedProduct.brand = 'Itel';
+                else if (nameLower.includes('oale')) updatedProduct.brand = 'OALE';
+              }
+              return updatedProduct;
+            }).filter(Boolean) as Product[];
+
+            if (migrated.length > 0) {
+              const existingIds = new Set(migrated.map((p: Product) => String(p.id)));
+              const newDefaults = defaultProducts.filter(dp => !existingIds.has(String(dp.id)));
+              const combined = [...migrated, ...newDefaults];
+              setLocalProducts(combined);
+              return;
             }
           }
-          if (updatedProduct.category === 'phones' && !updatedProduct.brand) {
-            const nameLower = updatedProduct.name.toLowerCase();
-            if (nameLower.includes('iphone') || nameLower.includes('se 128')) updatedProduct.brand = 'Iphones';
-            else if (nameLower.includes('samsung') || nameLower.includes('fold')) updatedProduct.brand = 'Samsung';
-            else if (nameLower.includes('pixel')) updatedProduct.brand = 'Google Pixel';
-            else if (nameLower.includes('redmi')) updatedProduct.brand = 'Redmi';
-            else if (nameLower.includes('huawei')) updatedProduct.brand = 'Huawei';
-            else if (nameLower.includes('tecno')) updatedProduct.brand = 'Tecno';
-            else if (nameLower.includes('infinix')) updatedProduct.brand = 'Infinix';
-            else if (nameLower.includes('honor')) updatedProduct.brand = 'Honor';
-            else if (nameLower.includes('itel')) updatedProduct.brand = 'Itel';
-            else if (nameLower.includes('oale')) updatedProduct.brand = 'OALE';
-          }
-          return updatedProduct;
-        });
-        const existingIds = new Set(migrated.map((p: Product) => String(p.id)));
-        const newDefaults = defaultProducts.filter(dp => !existingIds.has(String(dp.id)));
-        const combined = [...migrated, ...newDefaults];
-        try {
-          localStorage.setItem("prince_cfa_products", JSON.stringify(combined));
-        } catch {}
-        setLocalProducts(combined);
-      } else {
-        setLocalProducts(defaultProducts);
+        }
+      } catch (err) {
+        console.warn("Erreur fallback localStorage:", err);
       }
+
+      // 4. Fallback final infaillible : catalogue par défaut
+      setLocalProducts(defaultProducts);
     }
     loadProducts();
   }, []);
@@ -700,9 +712,12 @@ export default function Home() {
     // 1.5 Filtre par marque (si catégorie Téléphones)
     if (selectedCategory === 'phones' && selectedBrand !== 'all') {
       filtered = filtered.filter(p => {
-        const matchBrand = p.brand?.toLowerCase() === selectedBrand.toLowerCase();
-        const matchName = p.name.toLowerCase().includes(selectedBrand.toLowerCase()) || 
-                          (selectedBrand === 'Iphones' && p.name.toLowerCase().includes('iphone'));
+        const pBrand = (p.brand || '').toLowerCase();
+        const pName = (p.name || '').toLowerCase();
+        const selBrand = (selectedBrand || '').toLowerCase();
+        const matchBrand = pBrand === selBrand;
+        const matchName = pName.includes(selBrand) || 
+                          (selBrand === 'iphones' && pName.includes('iphone'));
         return matchBrand || matchName;
       });
     }

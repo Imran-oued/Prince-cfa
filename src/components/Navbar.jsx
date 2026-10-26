@@ -225,7 +225,7 @@ export default function Navbar({
                           </div>
                           <div className="text-right flex-shrink-0">
                             <span className="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-gold to-yellow-500">
-                              {product.price.toLocaleString('fr-FR')} F
+                              {(Number(product.price) || 0).toLocaleString('fr-FR')} F
                             </span>
                           </div>
                         </button>
