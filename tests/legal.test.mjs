@@ -66,3 +66,17 @@ test('4. Legal and privacy links are integrated into main page footer, suivi foo
   assert.ok(cartContent.includes('/mentions-legales'), 'CartDrawer must link to /mentions-legales');
   assert.ok(cartContent.includes('/politique-de-confidentialite'), 'CartDrawer must link to /politique-de-confidentialite');
 });
+
+test('5. A Propos page file exists, tells Prince CFA story, and is linked in MenuDrawer', () => {
+  const filePath = path.join(projectRoot, 'src', 'app', 'a-propos', 'page.tsx');
+  assert.ok(fs.existsSync(filePath), 'src/app/a-propos/page.tsx must exist');
+
+  const content = fs.readFileSync(filePath, 'utf8');
+  assert.match(content, /PRINCE\s+CFA/, 'A Propos must mention PRINCE CFA');
+  assert.match(content, /Koulouba/, 'A Propos must mention Koulouba');
+  assert.match(content, /Ouagadougou/, 'A Propos must mention Ouagadougou');
+  assert.match(content, /Histoire|Origine/i, 'A Propos must tell the story');
+
+  const menuContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'MenuDrawer.jsx'), 'utf8');
+  assert.ok(menuContent.includes('/a-propos'), 'MenuDrawer must link to /a-propos');
+});

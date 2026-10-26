@@ -224,6 +224,18 @@ export default function MenuDrawer({
             </h3>
 
             <div className="grid grid-cols-1 gap-2.5">
+              <Link
+                href="/a-propos"
+                onClick={onClose}
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-gold/40 hover:bg-gold/5 text-zinc-200 hover:text-gold transition-all duration-200 text-xs font-bold uppercase tracking-wider group"
+              >
+                <div className="flex items-center gap-3">
+                  <Crown className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
+                  <span>À PROPOS • L&apos;Histoire Prince CFA</span>
+                </div>
+                <span className="text-xs text-zinc-500 group-hover:text-gold group-hover:translate-x-1 transition-all">→</span>
+              </Link>
+
               <button
                 onClick={() => {
                   onClose();
@@ -233,7 +245,7 @@ export default function MenuDrawer({
                 className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-gold/40 hover:bg-gold/5 text-zinc-300 hover:text-gold transition-all duration-200 text-xs font-bold uppercase tracking-wider group cursor-pointer"
               >
                 <Store className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-                <span>Notre Boutique</span>
+                <span>Showroom & Horaires</span>
               </button>
 
               <Link

@@ -1078,6 +1078,10 @@ export default function Home() {
             <p>© 2026 PRINCE CFA. Tous droits réservés.</p>
             <span className="hidden sm:inline text-zinc-700">|</span>
             <div className="flex items-center gap-3">
+              <Link href="/a-propos" className="hover:text-gold transition-colors">
+                À Propos
+              </Link>
+              <span>•</span>
               <Link href="/mentions-legales" className="hover:text-gold transition-colors">
                 Mentions Légales
               </Link>
