@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { SHOP_CONFIG } from "@/config/shop";
-import { createOrder, checkAndReserveStock, getProduct, getProducts } from "@/lib/firestore";
+import { createOrder, checkStockAvailability, getProduct, getProducts } from "@/lib/firestore";
 import { products as defaultProducts } from "@/data/products";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 import { getCachedProducts, invalidateOrdersCache } from "@/lib/serverCache";
@@ -198,8 +198,9 @@ export async function POST(request: Request) {
     const deliveryFee = isDelivery ? SHOP_CONFIG.deliveryFee : 0;
     const total = subtotal + deliveryFee;
 
-    // 5. Contrôle & réservation du stock
-    const stockResult = await checkAndReserveStock(sanitizedItems);
+    // 5. Contrôle de la disponibilité sans débit immédiat du stock
+    // RÈGLE ABSOLUE : Le débit effectif du stock s'effectue EXCLUSIVEMENT lorsque l'admin confirme le paiement
+    const stockResult = await checkStockAvailability(sanitizedItems);
     if (!stockResult.success) {
       return NextResponse.json(
         { success: false, error: stockResult.error || "Stock insuffisant." },
@@ -221,6 +222,7 @@ export async function POST(request: Request) {
         notes: sanitizeText(customer.notes || "", 300)
       },
       items: sanitizedItems,
+      stockDebited: false, // Débité uniquement lors de la confirmation manuelle du paiement
       pricing: {
         subtotal,
         deliveryFee,

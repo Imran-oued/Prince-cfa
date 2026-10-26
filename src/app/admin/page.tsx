@@ -26,6 +26,7 @@ import {
   CloudUpload, 
   Pencil, 
   Trash2, 
+  RotateCcw,
   Camera, 
   Upload,
   HardDrive,
@@ -463,10 +464,81 @@ export default function AdminPage() {
       setSelectedOrder(data.order);
       setConfirmTxRef("");
       setConfirmNote("");
-      alert("Paiement vérifié et confirmé manuellement avec succès !");
+      alert("Paiement vérifié et confirmé manuellement avec succès ! Le stock a été débité.");
     } catch (err) {
       console.error(err);
       alert("Erreur réseau lors de la confirmation.");
+    } finally {
+      setIsUpdatingOrder(false);
+    }
+  };
+
+  // Annuler la validation d'un paiement (Restitue automatiquement le stock en magasin)
+  const handleCancelPaymentConfirmation = async (orderId: string) => {
+    if (!confirm("Voulez-vous vraiment annuler la validation de ce paiement ?\n\n- Le statut repassera à 'En attente de paiement'.\n- Le stock réservé pour cette commande sera automatiquement RESTITUÉ en rayon.")) {
+      return;
+    }
+
+    setIsUpdatingOrder(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({
+          action: "cancel_payment_confirmation",
+          adminUser: verifierName || "Admin Prince CFA"
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.error || "Erreur lors de l'annulation du paiement.");
+        return;
+      }
+
+      setOrdersList(prev => prev.map(o => o.id === orderId ? data.order : o));
+      setSelectedOrder(data.order);
+      alert("Validation de paiement annulée. Le stock a été restitué avec succès en rayon !");
+    } catch (err) {
+      console.error(err);
+      alert("Erreur réseau lors de l'annulation.");
+    } finally {
+      setIsUpdatingOrder(false);
+    }
+  };
+
+  // Supprimer définitivement une commande (ex: commande non payée, fausse commande)
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT la commande ${orderId} ?\n\nCette action est irréversible. Si du stock avait été débité, il sera automatiquement restitué.`)) {
+      return;
+    }
+
+    setIsUpdatingOrder(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.error || "Erreur lors de la suppression de la commande.");
+        return;
+      }
+
+      setOrdersList(prev => prev.filter(o => o.id !== orderId));
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder(null);
+      }
+      alert(`Commande ${orderId} supprimée définitivement avec succès.`);
+    } catch (err) {
+      console.error(err);
+      alert("Erreur réseau lors de la suppression.");
     } finally {
       setIsUpdatingOrder(false);
     }
@@ -1498,15 +1570,21 @@ export default function AdminPage() {
                       <td className="p-4 font-semibold">{methodBadge}</td>
                       <td className="p-4">
                         {isPaid ? (
-                          <span className="px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
-                            <Check className="w-3 h-3 stroke-[2.5]" aria-hidden="true" />
-                            <span>Confirmé</span>
-                          </span>
+                          <div className="space-y-0.5">
+                            <span className="px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
+                              <Check className="w-3 h-3 stroke-[2.5]" aria-hidden="true" />
+                              <span>Confirmé</span>
+                            </span>
+                            <div className="text-[10px] text-green-400 font-medium">Stock débité</div>
+                          </div>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
-                            <Clock className="w-3 h-3" aria-hidden="true" />
-                            <span>En attente</span>
-                          </span>
+                          <div className="space-y-0.5">
+                            <span className="px-2.5 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
+                              <Clock className="w-3 h-3" aria-hidden="true" />
+                              <span>En attente</span>
+                            </span>
+                            <div className="text-[10px] text-zinc-500 font-medium">Stock intact</div>
+                          </div>
                         )}
                       </td>
                       <td className="p-4">
@@ -1534,6 +1612,15 @@ export default function AdminPage() {
                             className="px-3 py-1.5 rounded-lg bg-gold/15 hover:bg-gold text-gold hover:text-black font-bold text-xs transition-all border border-gold/30 cursor-pointer whitespace-nowrap"
                           >
                             Détails & Validation
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteOrder(order.id)}
+                            title="Supprimer définitivement la commande"
+                            aria-label="Supprimer la commande"
+                            className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 border border-white/10 hover:border-red-500/30 text-xs transition-all cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                           </button>
                         </div>
                       </td>
@@ -1686,6 +1773,16 @@ export default function AdminPage() {
                       <Eye className="w-3.5 h-3.5" aria-hidden="true" />
                       <span>Voir page de suivi client</span>
                     </a>
+                    <button
+                      type="button"
+                      onClick={() => handleCancelPaymentConfirmation(selectedOrder.id)}
+                      disabled={isUpdatingOrder}
+                      className="py-2 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/30 text-red-300 hover:text-red-200 text-xs font-bold border border-red-500/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                      title="Annule la validation et restitue immédiatement le stock en rayon"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-red-400" aria-hidden="true" />
+                      <span>Annuler le paiement (Restituer le stock)</span>
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -1895,6 +1992,23 @@ export default function AdminPage() {
                   <span>Enregistrer le suivi IMEI / Série interne</span>
                 </button>
               </div>
+            </div>
+
+            {/* ZONE DE SUPPRESSION DÉFINITIVE DE COMMANDE */}
+            <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-xs text-zinc-400">
+                <span className="font-bold text-zinc-300 block">Commande sans paiement ou erronée ?</span>
+                <span className="text-[11px] text-zinc-500">Supprime définitivement cette commande. Si du stock avait été débité, il sera automatiquement restitué.</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleDeleteOrder(selectedOrder.id)}
+                disabled={isUpdatingOrder}
+                className="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-600 hover:text-white text-red-400 text-xs font-bold border border-red-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" aria-hidden="true" />
+                <span>Supprimer cette commande</span>
+              </button>
             </div>
           </div>
         </div>

@@ -186,6 +186,7 @@ export async function createOrder(orderData) {
       id: orderId,
       createdAt,
       updatedAt: createdAt,
+      stockDebited: Boolean(orderData.stockDebited), // false par défaut tant que le paiement n'est pas confirmé
       payment: {
         method: orderData.payment?.method || "orange_money",
         expectedAmount: Number(orderData.payment?.expectedAmount || orderData.pricing?.total || 0),
@@ -331,9 +332,21 @@ export async function confirmOrderPayment(orderId, { confirmedBy, transactionRef
   const existing = await getOrderById(orderId);
   if (!existing) return { success: false, error: "Commande introuvable." };
 
+  // DÉBIT DU STOCK : Le stock est décrété et réservé UNIQUEMENT quand l'administrateur valide le paiement
+  if (!existing.stockDebited && existing.items && existing.items.length > 0) {
+    const stockRes = await checkAndReserveStock(existing.items);
+    if (!stockRes.success) {
+      return {
+        success: false,
+        error: `Impossible de confirmer le paiement : ${stockRes.error || "Stock insuffisant en magasin."}`
+      };
+    }
+  }
+
   const now = new Date().toISOString();
   const updatedOrder = {
     ...existing,
+    stockDebited: true,
     updatedAt: now,
     payment: {
       ...existing.payment,
@@ -349,7 +362,7 @@ export async function confirmOrderPayment(orderId, { confirmedBy, transactionRef
         status: "paiement_confirme",
         timestamp: now,
         updatedBy: confirmedBy,
-        note: note || `Paiement vérifié et confirmé manuellement par ${confirmedBy}${transactionRef ? ` (Réf: ${transactionRef})` : ""}`
+        note: note || `Paiement vérifié et confirmé manuellement par ${confirmedBy}${transactionRef ? ` (Réf: ${transactionRef})` : ""}. Stock débité avec succès.`
       }
     ]
   };
@@ -380,6 +393,116 @@ export async function confirmOrderPayment(orderId, { confirmedBy, transactionRef
 }
 
 /**
+ * Annuler la confirmation d'un paiement précédemment validé.
+ * Restitue immédiatement le stock réservé et replace la commande en attente.
+ * @param {string} orderId
+ * @param {{ adminUser?: string, note?: string }} [options]
+ * @returns {Promise<{ success: boolean, order?: any, error?: string }>}
+ */
+export async function cancelOrderPaymentConfirmation(orderId, { adminUser = "Admin Prince CFA", note = "" } = {}) {
+  if (!orderId) return { success: false, error: "Identifiant de commande manquant." };
+
+  const existing = await getOrderById(orderId);
+  if (!existing) return { success: false, error: "Commande introuvable." };
+
+  // Restitution immédiate du stock si celui-ci avait été débité
+  if (existing.stockDebited && existing.items && existing.items.length > 0) {
+    await restoreStock(existing.items);
+  }
+
+  const now = new Date().toISOString();
+  const updatedOrder = {
+    ...existing,
+    stockDebited: false,
+    updatedAt: now,
+    payment: {
+      ...existing.payment,
+      status: "en_attente",
+      confirmedAt: null,
+      confirmedBy: null,
+    },
+    orderStatus: "en_attente_paiement",
+    statusHistory: [
+      ...(existing.statusHistory || []),
+      {
+        status: "confirmation_paiement_annulee",
+        timestamp: now,
+        updatedBy: adminUser,
+        note: note || `Confirmation de paiement annulée par l'administrateur (${adminUser}). Stock restitué.`
+      }
+    ]
+  };
+
+  if (isFirebaseConfigured()) {
+    try {
+      await setDoc(doc(db, ORDERS_COLLECTION, orderId), updatedOrder, { merge: true });
+    } catch (err) {
+      console.error("Erreur Firestore cancelOrderPaymentConfirmation:", err);
+      return { success: false, error: "Échec de sauvegarde Firestore." };
+    }
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      const saved = localStorage.getItem("prince_cfa_orders");
+      const list = saved ? JSON.parse(saved) : [];
+      const updatedList = list.map(o => o.id === orderId ? updatedOrder : o);
+      localStorage.setItem("prince_cfa_orders", JSON.stringify(updatedList));
+    } catch (e) {
+      console.warn("Storage warning:", e);
+    }
+  }
+
+  memoryOrders.set(orderId, updatedOrder);
+
+  return { success: true, order: updatedOrder };
+}
+
+/**
+ * Supprimer définitivement une commande (ex: fausse commande, commande sans paiement).
+ * Si le stock avait été débité, il est automatiquement restitué en rayon.
+ * @param {string} orderId
+ * @returns {Promise<{ success: boolean, error?: string }>}
+ */
+export async function deleteOrder(orderId) {
+  if (!orderId) return { success: false, error: "Identifiant de commande manquant." };
+
+  const existing = await getOrderById(orderId);
+  if (existing) {
+    if (existing.stockDebited && existing.items && existing.items.length > 0) {
+      await restoreStock(existing.items);
+    }
+  }
+
+  if (isFirebaseConfigured()) {
+    try {
+      const docRef = doc(db, ORDERS_COLLECTION, orderId);
+      await deleteDoc(docRef);
+    } catch (err) {
+      console.error("Erreur Firestore deleteOrder:", err);
+      return { success: false, error: "Échec de suppression Firestore." };
+    }
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      const saved = localStorage.getItem("prince_cfa_orders");
+      if (saved) {
+        const list = JSON.parse(saved);
+        const filtered = list.filter(o => o.id !== orderId);
+        localStorage.setItem("prince_cfa_orders", JSON.stringify(filtered));
+      }
+    } catch (e) {
+      console.warn("Storage warning deleteOrder:", e);
+    }
+  }
+
+  memoryOrders.delete(orderId);
+
+  return { success: true };
+}
+
+/**
  * Mettre à jour le statut d'avancement d'une commande
  * @param {string} orderId
  * @param {'en_attente_paiement' | 'paye_en_preparation' | 'en_livraison' | 'livre' | 'annule'} newStatus
@@ -393,9 +516,19 @@ export async function updateOrderStatus(orderId, newStatus, adminUser, note = ""
   const existing = await getOrderById(orderId);
   if (!existing) return { success: false, error: "Commande introuvable." };
 
+  // Si annulation et que le stock avait été débité, le restituer
+  let shouldUnsetStock = false;
+  if (newStatus === "annule" && existing.stockDebited) {
+    if (existing.items && existing.items.length > 0) {
+      await restoreStock(existing.items);
+    }
+    shouldUnsetStock = true;
+  }
+
   const now = new Date().toISOString();
   const updatedOrder = {
     ...existing,
+    ...(shouldUnsetStock ? { stockDebited: false } : {}),
     orderStatus: newStatus,
     updatedAt: now,
     statusHistory: [
@@ -563,4 +696,42 @@ export async function restoreStock(items) {
   } catch (err) {
     console.warn("Erreur restitution de stock:", err);
   }
+}
+
+/**
+ * Contrôler la disponibilité du stock à l'initiation de commande SANS débiter.
+ * Vérifie simplement qu'un article n'est pas en rupture officielle.
+ * Le débit effectif est réservé à la validation manuelle de l'admin.
+ * @param {Array<{ productId: string|number, quantity: number, name: string }>} items
+ * @returns {Promise<{ success: boolean, error?: string }>}
+ */
+export async function checkStockAvailability(items) {
+  if (!items || !items.length) return { success: true };
+
+  if (isFirebaseConfigured()) {
+    try {
+      for (const item of items) {
+        const prodId = String(item.productId);
+        const prodDoc = await getProduct(prodId);
+        if (prodDoc) {
+          if (prodDoc.inStock === false) {
+            return {
+              success: false,
+              error: `Le produit "${item.name}" est actuellement en rupture de stock.`
+            };
+          }
+          if (typeof prodDoc.stock === "number" && prodDoc.stock <= 0) {
+            return {
+              success: false,
+              error: `Le produit "${item.name}" est en rupture de stock.`
+            };
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Avertissement contrôle disponibilité:", err);
+    }
+  }
+
+  return { success: true };
 }
