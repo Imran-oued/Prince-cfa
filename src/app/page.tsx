@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { products as defaultProducts } from "@/data/products";
 import Navbar from "@/components/Navbar";
@@ -31,8 +31,6 @@ import {
   Smartphone, 
   Receipt,
   Flame,
-  ChevronLeft,
-  ChevronRight,
   Laptop,
   Tablet,
   Tv,
@@ -534,35 +532,13 @@ export default function Home() {
     loadProducts();
   }, []);
 
-  // Défilement horizontal fluide des catégories (tactile + drag souris + boutons fléchés)
+  // Défilement horizontal naturel des catégories et marques
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const brandScrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
   const scrollLeftPosRef = useRef(0);
   const hasMovedRef = useRef(false);
-
-  const updateScrollButtons = useCallback(() => {
-    const el = categoryScrollRef.current;
-    if (!el) return;
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    setCanScrollLeft(scrollLeft > 6);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 6);
-  }, []);
-
-  useEffect(() => {
-    const el = categoryScrollRef.current;
-    if (!el) return;
-    updateScrollButtons();
-    el.addEventListener('scroll', updateScrollButtons, { passive: true });
-    window.addEventListener('resize', updateScrollButtons);
-    return () => {
-      el.removeEventListener('scroll', updateScrollButtons);
-      window.removeEventListener('resize', updateScrollButtons);
-    };
-  }, [updateScrollButtons]);
 
   // Centrage automatique de la catégorie active
   useEffect(() => {
@@ -571,10 +547,9 @@ export default function Home() {
       if (activeEl) {
         activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       }
-      updateScrollButtons();
     }, 60);
     return () => clearTimeout(timer);
-  }, [selectedCategory, updateScrollButtons]);
+  }, [selectedCategory]);
 
   // Centrage automatique de la marque active dans le ruban des marques
   useEffect(() => {
@@ -588,16 +563,6 @@ export default function Home() {
       return () => clearTimeout(timer);
     }
   }, [selectedBrand, selectedCategory]);
-
-  const scrollCategories = (direction: 'left' | 'right') => {
-    const el = categoryScrollRef.current;
-    if (!el) return;
-    const scrollAmount = Math.max(260, Math.floor(el.clientWidth * 0.7));
-    el.scrollBy({
-      left: direction === 'left' ? -scrollAmount : scrollAmount,
-      behavior: 'smooth'
-    });
-  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const el = categoryScrollRef.current;
@@ -898,25 +863,8 @@ export default function Home() {
         {/* Barres de Filtres Dynamiques */}
         <div id="produits" className="flex flex-col items-center w-full max-w-6xl mx-auto mt-8 mb-14 relative z-20 scroll-mt-28 px-2 sm:px-4">
           
-          {/* Ruban Horizontal Défilable des Catégories */}
-          <div className="relative w-full group/cat">
-            {/* Dégradé & Bouton Défilement Gauche */}
-            <div 
-              className={`absolute left-0 top-0 bottom-0 z-20 flex items-center pr-8 bg-gradient-to-r from-[#09090b] via-[#09090b]/90 to-transparent pointer-events-none transition-opacity duration-300 ${
-                canScrollLeft ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => scrollCategories('left')}
-                disabled={!canScrollLeft}
-                aria-label="Défiler vers la gauche"
-                className="pointer-events-auto p-2 sm:p-2.5 rounded-full bg-black/90 hover:bg-gold/20 text-zinc-300 hover:text-gold border border-white/15 hover:border-gold/50 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.8)] transition-all duration-200 active:scale-90 cursor-pointer disabled:pointer-events-none"
-              >
-                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </div>
-
+          {/* Ruban Horizontal Défilable des Catégories (Défilement naturel) */}
+          <div className="w-full">
             {/* Piste de Défilement Horizontal */}
             <div
               ref={categoryScrollRef}
@@ -970,23 +918,6 @@ export default function Home() {
                   </button>
                 );
               })}
-            </div>
-
-            {/* Dégradé & Bouton Défilement Droite */}
-            <div 
-              className={`absolute right-0 top-0 bottom-0 z-20 flex items-center pl-8 bg-gradient-to-l from-[#09090b] via-[#09090b]/90 to-transparent pointer-events-none transition-opacity duration-300 justify-end ${
-                canScrollRight ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => scrollCategories('right')}
-                disabled={!canScrollRight}
-                aria-label="Défiler vers la droite"
-                className="pointer-events-auto p-2 sm:p-2.5 rounded-full bg-black/90 hover:bg-gold/20 text-zinc-300 hover:text-gold border border-white/15 hover:border-gold/50 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.8)] transition-all duration-200 active:scale-90 cursor-pointer disabled:pointer-events-none"
-              >
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
             </div>
           </div>
 

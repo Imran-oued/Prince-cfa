@@ -5,7 +5,7 @@ import path from 'node:path';
 
 const projectRoot = process.cwd();
 
-test('1. Category horizontal scroll container exists in page.tsx without wrapping', () => {
+test('1. Category horizontal scroll container exists in page.tsx with natural scroll', () => {
   const pagePath = path.join(projectRoot, 'src', 'app', 'page.tsx');
   assert.ok(fs.existsSync(pagePath), 'page.tsx must exist');
 
@@ -15,9 +15,6 @@ test('1. Category horizontal scroll container exists in page.tsx without wrappin
   assert.match(content, /overflow-x-auto/, 'Must use overflow-x-auto for horizontal scrolling');
   assert.match(content, /whitespace-nowrap/, 'Categories must not wrap to new lines');
   assert.match(content, /no-scrollbar/, 'Must hide ugly scrollbars');
-  assert.match(content, /ChevronLeft/, 'Must provide left scroll navigation button');
-  assert.match(content, /ChevronRight/, 'Must provide right scroll navigation button');
-  assert.match(content, /scrollCategories/, 'Must have scroll helper functions');
   assert.match(content, /handleMouseDown/, 'Must support drag-to-scroll on desktop');
 });
 
