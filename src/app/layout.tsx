@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Prince CFA",
+    title: "Prince CFA Mall",
   },
 };
 
@@ -57,8 +57,8 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="shortcut icon" href="/favicon.ico" />
-        <meta name="apple-mobile-web-app-title" content="Prince CFA" />
-        <meta name="application-name" content="Prince CFA" />
+        <meta name="apple-mobile-web-app-title" content="Prince CFA Mall" />
+        <meta name="application-name" content="Prince CFA Mall" />
       </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground">
         {children}

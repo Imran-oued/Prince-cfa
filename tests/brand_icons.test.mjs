@@ -33,7 +33,7 @@ test("Brand Icons 2: Le manifest.json est valide et intègre les icônes de la m
   const manifestPath = path.join(process.cwd(), "public", "manifest.json");
   const content = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
 
-  assert.equal(content.short_name, "Prince CFA");
+  assert.equal(content.short_name, "Prince CFA Mall");
   assert.ok(Array.isArray(content.icons) && content.icons.length >= 3);
   assert.ok(content.icons.some(i => i.src === "/apple-touch-icon.png"));
   assert.ok(content.icons.some(i => i.src === "/icon-192.png"));
