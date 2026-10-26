@@ -276,6 +276,10 @@ export default function AdminPage() {
 
   // 1. Vérification ultra-rapide de session active à l'ouverture de la page (< 50ms)
   useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.title = "Prince CFA Admin";
+    }
+
     async function checkAuthSession() {
       const storedToken = typeof window !== "undefined" ? sessionStorage.getItem("prince_cfa_admin_token") : null;
       try {
