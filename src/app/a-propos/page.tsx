@@ -1,27 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { 
-  Crown, 
-  Sparkles, 
-  ShieldCheck, 
-  HeartHandshake, 
-  MapPin, 
-  Phone, 
-  ArrowLeft, 
-  Zap, 
-  Store, 
-  Award, 
-  Truck, 
-  CheckCircle2, 
-  ArrowRight,
-  ExternalLink
-} from "lucide-react";
+import { Crown, ArrowLeft, ArrowRight, Store, Clock } from "lucide-react";
 import { SHOP_CONFIG } from "@/config/shop";
 
 export const metadata: Metadata = {
-  title: "À Propos & Notre Histoire | PRINCE CFA",
-  description: "Découvrez l'histoire, la vision et les engagements de la Maison PRINCE CFA, référence de la téléphonie et du high-tech de prestige à Ouagadougou, Burkina Faso.",
+  title: "À Propos & L'Histoire | PRINCE CFA",
+  description: "À Propos et l'histoire de la Maison PRINCE CFA à Ouagadougou, Burkina Faso.",
 };
 
 function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -69,7 +54,7 @@ export default function AProposPage() {
             </Link>
 
             <a
-              href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=Bonjour%20Prince%20CFA,%20je%20souhaite%20en%20savoir%20plus%20sur%20votre%20maison`}
+              href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=Bonjour%20Prince%20CFA`}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:flex text-xs px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 font-semibold items-center gap-1.5 transition-colors"
@@ -81,188 +66,60 @@ export default function AProposPage() {
         </div>
       </header>
 
-      {/* Contenu Principal */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-8 py-10 sm:py-16 space-y-16">
+      {/* Contenu Principal Épuré (En attente de la rédaction ultérieure) */}
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-8 py-16 sm:py-24 flex flex-col items-center justify-center text-center space-y-8">
         
-        {/* Section 1 : Hero Présentation */}
-        <div className="text-center space-y-5 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-bold uppercase tracking-widest">
-            <Crown className="w-4 h-4 text-gold" aria-hidden="true" />
-            <span>L&apos;Histoire d&apos;une Passion</span>
-          </div>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-bold uppercase tracking-widest">
+          <Crown className="w-4 h-4 text-gold" aria-hidden="true" />
+          <span>Maison PRINCE CFA • Koulouba, Ouagadougou</span>
+        </div>
+
+        <div className="space-y-4 max-w-2xl">
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            L&apos;Esprit <span className="text-gold">PRINCE CFA</span>
+            À Propos • <span className="text-gold">L&apos;Histoire PRINCE CFA</span>
           </h1>
-          <p className="text-sm sm:text-base text-zinc-300 leading-relaxed font-light">
-            L&apos;alliance entre l&apos;excellence technologique mondiale et la fierté ouest-africaine. Découvrez comment une vision d&apos;authenticité sans compromis est devenue la référence du smartphone haut de gamme à Ouagadougou.
+          <p className="text-sm sm:text-base text-zinc-400 font-light leading-relaxed">
+            Cette section est actuellement réservée. L&apos;histoire officielle et la présentation détaillée de notre Maison à Ouagadougou seront publiées ici lors d&apos;une prochaine mise à jour.
           </p>
         </div>
 
-        {/* Section 2 : Le Récit des Origines */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <div className="space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed">
-            <div className="inline-flex items-center gap-2 text-gold font-bold text-xs uppercase tracking-wider">
-              <Sparkles className="w-4 h-4" />
-              <span>Pourquoi &laquo; PRINCE CFA &raquo; ?</span>
-            </div>
-            <h2 className="text-2xl font-black text-white">
-              Un Nom Royal, Ancré dans Nos Terres
-            </h2>
-            <p>
-              Le nom <strong>PRINCE CFA</strong> est né d&apos;une conviction forte : celle que chaque client burkinabè et ouest-africain mérite d&apos;être accueilli et servi comme un prince. Longtemps, acquérir un smartphone haut de gamme relevait du parcours du combattant, entre appareils d&apos;origine douteuse, prix imprévisibles et absence totale de garantie réelle.
-            </p>
-            <p>
-              Le <strong>CFA</strong> symbolise notre attachement profond à notre monnaie, à notre jeunesse et au dynamisme économique de notre région. Chez nous, la technologie de pointe mondiale (Apple, Samsung, Google, etc.) se négocie et s&apos;achète en toute transparence en Francs CFA, avec des solutions de paiement adaptées à notre quotidien (Orange Money, Wave, retrait en boutique).
-            </p>
+        <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/10 max-w-md w-full space-y-4 text-xs text-zinc-400">
+          <div className="flex items-center justify-center gap-2 text-gold font-bold uppercase tracking-wider text-[11px]">
+            <Store className="w-4 h-4" />
+            <span>Showroom Ouagadougou</span>
           </div>
-
-          <div className="p-8 rounded-3xl bg-gradient-to-br from-gold/15 via-white/[0.03] to-transparent border border-gold/30 relative overflow-hidden space-y-4 shadow-[0_0_35px_rgba(212,175,55,0.15)]">
-            <div className="w-14 h-14 rounded-2xl bg-gold/20 border border-gold/40 flex items-center justify-center text-gold mb-2">
-              <Award className="w-7 h-7" aria-hidden="true" />
-            </div>
-            <h3 className="text-lg font-bold text-white">Notre Devise Fondatrice</h3>
-            <p className="text-xs text-zinc-300 italic leading-relaxed">
-              &laquo; Nous ne vendons pas seulement des téléphones, nous bâtissons une relation de confiance sacrée avec des appareils authentiques certifiés et un service après-vente digne de ce nom. &raquo;
-            </p>
-            <div className="pt-3 border-t border-white/10 flex items-center gap-3 text-xs text-zinc-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-gold animate-ping" />
-              <span>Boutique Officielle • Koulouba, Ouagadougou</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 3 : Les 4 Piliers Inébranlables */}
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-xl sm:text-2xl font-black text-white">
-              Les Engagements de Notre Maison
-            </h2>
-            <p className="text-xs text-zinc-400">Ce qui fait la différence PRINCE CFA au quotidien</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3 hover:border-gold/30 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
-                <ShieldCheck className="w-5 h-5" aria-hidden="true" />
-              </div>
-              <h3 className="text-sm font-bold text-white">100% Neuf & Authentique</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Appareils sous scellé constructeur d&apos;origine ou reconditionnés avec pièces officielles certifiées. Jamais de contrefaçon.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3 hover:border-gold/30 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                <HeartHandshake className="w-5 h-5" aria-hidden="true" />
-              </div>
-              <h3 className="text-sm font-bold text-white">SAV & Garantie Réels</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Notre boutique physique à Koulouba assure un suivi complet : conseils, configuration sur mesure et prise en charge rapide.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3 hover:border-gold/30 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-                <Zap className="w-5 h-5" aria-hidden="true" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Mobile Money & Cash</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Orange Money et Wave acceptés directement, sans frais imprévus, ou règlement en espèces lors du retrait au magasin.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3 hover:border-gold/30 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                <Truck className="w-5 h-5" aria-hidden="true" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Livraison Express VIP</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Expédition sécurisée en main propre dans tous les quartiers de Ouagadougou et expédition suivie en province.
-              </p>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Section 4 : Le Sanctuaire de Koulouba */}
-        <div className="p-8 sm:p-10 rounded-3xl bg-black/60 border border-white/10 space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold text-gold uppercase tracking-widest flex items-center gap-1.5">
-                <Store className="w-4 h-4" />
-                <span>Showroom & Retrait</span>
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black text-white">
-                Venez nous rencontrer à Koulouba
-              </h2>
-            </div>
-            <a
-              href={SHOP_CONFIG.directionsUrl || SHOP_CONFIG.mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gold text-black font-extrabold text-xs uppercase tracking-wider hover:bg-gold-hover transition-all"
-            >
-              <MapPin className="w-4 h-4" />
-              <span>Itinéraire Google Maps</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-
-          <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-            Située au cœur de Ouagadougou dans le quartier de Koulouba, notre boutique vous accueille du <strong>Lundi au Samedi (9h - 19h)</strong> et le <strong>Dimanche (10h - 16h)</strong>. Venez essayer nos smartphones, découvrir nos gammes d&apos;ordinateurs et échanger avec nos conseillers autour de vos besoins.
+          <p className="leading-relaxed">
+            Notre showroom physique reste ouvert à Koulouba pour vous accueillir, découvrir nos collections et essayer nos équipements.
           </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs text-zinc-300 border-t border-white/10">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-gold flex-shrink-0" />
-              <span>Démonstration & Test sur place</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-gold flex-shrink-0" />
-              <span>Transfert de données offert</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-gold flex-shrink-0" />
-              <span>Pose offerte de verre trempé</span>
-            </div>
+          <div className="pt-3 border-t border-white/10 flex items-center justify-center gap-2 text-[11px] text-zinc-500">
+            <Clock className="w-3.5 h-3.5 text-gold" />
+            <span>Du Lundi au Samedi (9h - 19h) • Dimanche (10h - 16h)</span>
           </div>
         </div>
 
-        {/* Section 5 : Appel à l'action */}
-        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-gold/15 via-gold/5 to-transparent border border-gold/30 flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
-          <div className="space-y-1">
-            <h3 className="text-xl font-black text-white">
-              Prêt à vivre l&apos;expérience PRINCE CFA ?
-            </h3>
-            <p className="text-xs text-zinc-400 max-w-md">
-              Parcourez nos rayons ou contactez notre conciergerie WhatsApp pour bénéficier d&apos;une recommandation sur mesure.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/"
-              className="px-6 py-3 rounded-xl bg-gold text-black font-extrabold text-xs uppercase tracking-wider hover:bg-gold-hover transition-all shadow-md inline-flex items-center gap-2"
-            >
-              <span>Voir la Collection</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <a
-              href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=Bonjour%20Prince%20CFA`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider border border-white/15 transition-all inline-flex items-center gap-2"
-            >
-              <WhatsAppIcon className="w-4 h-4 text-emerald-400" />
-              <span>WhatsApp VIP</span>
-            </a>
-          </div>
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
+          <Link
+            href="/"
+            className="px-6 py-3 rounded-xl bg-gold text-black font-extrabold text-xs uppercase tracking-wider hover:bg-gold-hover transition-all shadow-md inline-flex items-center gap-2"
+          >
+            <span>Retour à la Boutique</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+          <a
+            href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=Bonjour%20Prince%20CFA`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider border border-white/15 transition-all inline-flex items-center gap-2"
+          >
+            <WhatsAppIcon className="w-4 h-4 text-emerald-400" />
+            <span>Contact Conciergerie</span>
+          </a>
         </div>
 
       </main>
 
       {/* Footer Minimaliste & Épuré */}
-      <footer className="border-t border-white/10 bg-[#060608] py-8 px-4 sm:px-8 mt-12">
+      <footer className="border-t border-white/10 bg-[#060608] py-8 px-4 sm:px-8 mt-auto">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <p>© 2026 PRINCE CFA. Koulouba, Ouagadougou. Tous droits réservés.</p>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-zinc-400">

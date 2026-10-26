@@ -223,7 +223,7 @@ export default function MenuDrawer({
           {/* Espace VIP & Liens Utiles */}
           <div className="space-y-3 pt-4 border-t border-white/10">
             <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
-              Services & Espace Pro
+              Services & Informations
             </h3>
 
             <div className="grid grid-cols-1 gap-2.5">
@@ -255,16 +255,6 @@ export default function MenuDrawer({
               >
                 <Package className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
                 <span>Suivre ma Commande</span>
-              </Link>
-
-
-              <Link
-                href="/admin"
-                onClick={onClose}
-                className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-gold/40 hover:bg-gold/5 text-zinc-300 hover:text-gold transition-all duration-200 text-xs font-bold uppercase tracking-wider group"
-              >
-                <ShieldCheck className="w-5 h-5 text-zinc-400 group-hover:text-gold flex-shrink-0 transition-colors" aria-hidden="true" />
-                <span>Panneau d&apos;Administration</span>
               </Link>
             </div>
           </div>
