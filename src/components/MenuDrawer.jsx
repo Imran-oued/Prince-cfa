@@ -165,9 +165,6 @@ export default function MenuDrawer({
             <span className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-yellow-600 tracking-wider">
               PRINCE CFA
             </span>
-            <span className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] bg-gold/10 border border-gold/20 px-2.5 py-0.5 rounded-full">
-              Menu VIP
-            </span>
           </div>
 
           <button 
@@ -196,15 +193,12 @@ export default function MenuDrawer({
                   <button
                     key={cat.id}
                     onClick={() => handleCategoryClick(cat.id)}
-                    className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-gold/40 hover:bg-gold/5 text-left transition-all duration-200 group cursor-pointer"
+                    className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-gold/40 hover:bg-gold/5 text-left transition-all duration-200 group cursor-pointer"
                   >
-                    <div className="flex items-center gap-3">
-                      <IconComponent className="w-5 h-5 text-gold flex-shrink-0 group-hover:scale-110 transition-transform duration-200" aria-hidden="true" />
-                      <span className="text-sm font-semibold text-zinc-200 group-hover:text-gold transition-colors">
-                        {cat.label}
-                      </span>
-                    </div>
-                    <span className="text-xs text-zinc-500 group-hover:text-gold group-hover:translate-x-1 transition-all">→</span>
+                    <IconComponent className="w-5 h-5 text-gold flex-shrink-0 group-hover:scale-110 transition-transform duration-200" aria-hidden="true" />
+                    <span className="text-sm font-semibold text-zinc-200 group-hover:text-gold transition-colors">
+                      {cat.label}
+                    </span>
                   </button>
                 );
               })}
@@ -243,13 +237,10 @@ export default function MenuDrawer({
               <Link
                 href="/a-propos"
                 onClick={onClose}
-                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-gold/40 hover:bg-gold/5 text-zinc-200 hover:text-gold transition-all duration-200 text-xs font-bold uppercase tracking-wider group"
+                className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-gold/40 hover:bg-gold/5 text-zinc-200 hover:text-gold transition-all duration-200 text-xs font-bold uppercase tracking-wider group"
               >
-                <div className="flex items-center gap-3">
-                  <Crown className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-                  <span>À PROPOS • L&apos;Histoire Prince CFA</span>
-                </div>
-                <span className="text-xs text-zinc-500 group-hover:text-gold group-hover:translate-x-1 transition-all">→</span>
+                <Crown className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
+                <span>À PROPOS • L&apos;Histoire Prince CFA</span>
               </Link>
 
               <button
@@ -267,13 +258,10 @@ export default function MenuDrawer({
               <Link
                 href="/suivi"
                 onClick={onClose}
-                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-gold/10 border border-gold/30 hover:bg-gold/20 text-gold transition-all duration-200 text-xs font-bold uppercase tracking-wider group"
+                className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-gold/10 border border-gold/30 hover:bg-gold/20 text-gold transition-all duration-200 text-xs font-bold uppercase tracking-wider group"
               >
-                <div className="flex items-center gap-3">
-                  <Package className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-                  <span>Suivre ma Commande</span>
-                </div>
-                <span className="text-xs text-gold group-hover:translate-x-1 transition-all font-bold">→</span>
+                <Package className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
+                <span>Suivre ma Commande</span>
               </Link>
 
               <button
@@ -289,13 +277,10 @@ export default function MenuDrawer({
               <Link
                 href="/admin"
                 onClick={onClose}
-                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-gold/40 hover:bg-gold/5 text-zinc-300 hover:text-gold transition-all duration-200 text-xs font-bold uppercase tracking-wider group"
+                className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-gold/40 hover:bg-gold/5 text-zinc-300 hover:text-gold transition-all duration-200 text-xs font-bold uppercase tracking-wider group"
               >
-                <div className="flex items-center gap-3">
-                  <ShieldCheck className="w-5 h-5 text-zinc-400 group-hover:text-gold flex-shrink-0 transition-colors" aria-hidden="true" />
-                  <span>Panneau d&apos;Administration</span>
-                </div>
-                <span className="text-xs text-zinc-500 group-hover:text-gold group-hover:translate-x-1 transition-all">→</span>
+                <ShieldCheck className="w-5 h-5 text-zinc-400 group-hover:text-gold flex-shrink-0 transition-colors" aria-hidden="true" />
+                <span>Panneau d&apos;Administration</span>
               </Link>
 
               {/* Liens Juridiques & Confidentialité */}
