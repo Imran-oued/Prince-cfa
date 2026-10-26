@@ -297,7 +297,7 @@ export default function MentionsLegalesPage() {
       {/* Footer Minimaliste & Épuré */}
       <footer className="border-t border-white/10 bg-[#060608] py-8 px-4 sm:px-8 mt-12">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
-          <p>© {new Date().getFullYear()} PRINCE CFA. Koulouba, Ouagadougou. Tous droits réservés.</p>
+          <p>© 2026 PRINCE CFA. Koulouba, Ouagadougou. Tous droits réservés.</p>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-zinc-400">
             <Link href="/" className="hover:text-gold transition-colors">Accueil</Link>
             <span>•</span>

@@ -48,6 +48,9 @@ type Product = {
   desc: string;
   price: number;
   salePrice?: number | null;
+  oldPrice?: number | null;
+  isPromo?: boolean;
+  isPromotion?: boolean;
   image: string;
   rating: number;
   specs?: Record<string, string | number | boolean | undefined>;
