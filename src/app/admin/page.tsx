@@ -849,6 +849,17 @@ export default function AdminPage() {
     setStorageItems(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Génération automatique des 4 paliers standards pour smartphones
+  const handleGenerateStandardTiers = () => {
+    const base = Number(commonFormData.price) || 0;
+    setStorageItems([
+      { capacity: "128 Go", price: base > 0 ? String(base) : "" },
+      { capacity: "256 Go", price: base > 0 ? String(base + 60000) : "" },
+      { capacity: "512 Go", price: base > 0 ? String(base + 140000) : "" },
+      { capacity: "1 To", price: base > 0 ? String(base + 240000) : "" },
+    ]);
+  };
+
   // Application du changement de catégorie avec gestion des variantes et suggestions
   const applyCategorySwitch = (newCategory: string, preserveCompatible = false) => {
     const newConfig = getCategoryConfig(newCategory);
@@ -3103,6 +3114,43 @@ export default function AdminPage() {
                               )}
                             </label>
 
+                            {/* Raccourcis rapides de stockage pour téléphones */}
+                            {field.key === "storage" && (
+                              <div className="space-y-1.5 mb-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] text-zinc-400 font-bold uppercase">Choix rapide 1-clic :</span>
+                                  {val && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setFormSpecs({ ...formSpecs, [field.key]: "" })}
+                                      className="text-[10px] text-zinc-500 hover:text-red-400 underline cursor-pointer"
+                                    >
+                                      Effacer
+                                    </button>
+                                  )}
+                                </div>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {["64 Go", "128 Go", "256 Go", "512 Go", "1 To"].map((cap) => {
+                                    const isSelected = String(val).trim().toLowerCase() === cap.toLowerCase();
+                                    return (
+                                      <button
+                                        key={cap}
+                                        type="button"
+                                        onClick={() => setFormSpecs({ ...formSpecs, [field.key]: cap })}
+                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                                          isSelected
+                                            ? "bg-gold text-black border-gold shadow-[0_0_12px_rgba(212,175,55,0.4)] scale-105"
+                                            : "bg-black/50 text-zinc-300 border-white/10 hover:border-gold/50 hover:text-white"
+                                        }`}
+                                      >
+                                        {isSelected ? `✓ ${cap}` : cap}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
                             {field.type === "select" ? (
                               <select
                                 value={val}
@@ -3179,7 +3227,7 @@ export default function AdminPage() {
                         {/* Raccourcis d'ajout rapide */}
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span className="text-[10px] text-zinc-500 uppercase font-bold mr-1">Raccourcis :</span>
-                          {["128 Go", "256 Go", "512 Go", "1 To", "2 To"].map((cap) => (
+                          {["64 Go", "128 Go", "256 Go", "512 Go", "1 To", "2 To"].map((cap) => (
                             <button
                               key={cap}
                               type="button"
@@ -3189,6 +3237,15 @@ export default function AdminPage() {
                               + {cap}
                             </button>
                           ))}
+                          <button
+                            type="button"
+                            onClick={handleGenerateStandardTiers}
+                            className="px-2.5 py-1 rounded-lg bg-gold/15 hover:bg-gold text-gold hover:text-black text-[10px] font-bold border border-gold/30 transition-all cursor-pointer flex items-center gap-1"
+                            title="Générer automatiquement les 4 paliers standards (128G, 256G, 512G, 1T)"
+                          >
+                            <span>⚡</span>
+                            <span>Paliers automatiques</span>
+                          </button>
                         </div>
                       </div>
 

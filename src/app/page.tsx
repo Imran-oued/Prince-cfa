@@ -155,6 +155,7 @@ function getProductSummarySnippet(product: Product): string {
 
   if (cat === 'phones' || cat === 'smartphones') {
     const parts = [
+      specs.storage ? String(specs.storage) : null,
       specs.screen,
       specs.processor,
       specs.ram ? `${specs.ram} Go RAM` : null

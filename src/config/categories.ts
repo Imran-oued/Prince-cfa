@@ -51,6 +51,23 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         required: true,
       },
       {
+        key: "storage",
+        label: "Capacité de stockage",
+        type: "select",
+        options: [
+          { label: "64 Go", value: "64 Go" },
+          { label: "128 Go", value: "128 Go" },
+          { label: "256 Go", value: "256 Go" },
+          { label: "512 Go", value: "512 Go" },
+          { label: "1 To (1024 Go)", value: "1 To" },
+          { label: "2 To", value: "2 To" },
+          { label: "32 Go", value: "32 Go" },
+        ],
+        required: false,
+        placeholder: "Sélectionnez la capacité de stockage",
+        helpText: "Capacité interne de stockage (64 Go, 128 Go, 256 Go, 512 Go, 1 To)",
+      },
+      {
         key: "ram",
         label: "Mémoire RAM",
         type: "select",

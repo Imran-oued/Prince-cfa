@@ -47,17 +47,17 @@ export default function ProductDrawer({
     const supportsStorage = isStorageVariantCategory(p.category) || p.category === 'phones';
     if (!supportsStorage) return '';
 
-    const caps = (p.storageOptions && p.storageOptions.length > 0)
-      ? p.storageOptions
-      : (p.category === 'phones'
-          ? [
-              { capacity: '128 Go', price: Number(p.price) || 0 },
-              { capacity: '256 Go', price: (Number(p.price) || 0) + 60000 },
-              { capacity: '512 Go', price: (Number(p.price) || 0) + 140000 },
-              { capacity: '1 To (Tera)', price: (Number(p.price) || 0) + 240000 },
-            ]
-          : []);
-    return caps.length > 0 ? caps[0].capacity : '';
+    if (p.storageOptions && p.storageOptions.length > 0) {
+      return p.storageOptions[0].capacity;
+    }
+    const singleCap = p.specs?.storage || p.specs?.storageSize || p.storage;
+    if (singleCap) {
+      return String(singleCap);
+    }
+    if (p.category === 'phones') {
+      return '128 Go';
+    }
+    return '';
   };
 
   const getInitialColor = (p) => {
@@ -278,6 +278,10 @@ export default function ProductDrawer({
 
     if (currentProduct.storageOptions && Array.isArray(currentProduct.storageOptions) && currentProduct.storageOptions.length > 0) {
       return currentProduct.storageOptions;
+    }
+    const singleCap = currentProduct.specs?.storage || currentProduct.specs?.storageSize || currentProduct.storage;
+    if (singleCap) {
+      return [{ capacity: String(singleCap), price: Number(currentProduct.price) || 0 }];
     }
     // Génération automatique pour tous les téléphones sans options explicites
     if (currentProduct.category === 'phones') {

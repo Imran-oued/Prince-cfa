@@ -401,3 +401,37 @@ test("10. Image Framing: Catalog Apple products and user-added photos get sleek 
   assert.equal(explicitBlack.isBlack, true);
   assert.ok(explicitBlack.containerClass.includes("bg-black"));
 });
+
+test("11. Phone Storage: Quick storage selector is configured and validates cleanly without forcing manual variants", () => {
+  const phoneCat = getCategoryConfig("phones");
+  
+  // A. Le champ de stockage existe dans la configuration déclarative
+  const storageField = phoneCat.fields.find(f => f.key === "storage");
+  assert.ok(storageField, "Le champ 'storage' doit exister pour la catégorie téléphones");
+  assert.ok(storageField.options && storageField.options.length >= 5, "Le champ storage doit proposer les capacités clés");
+  
+  const optionsValues = storageField.options.map(o => o.value);
+  assert.ok(optionsValues.includes("64 Go"));
+  assert.ok(optionsValues.includes("128 Go"));
+  assert.ok(optionsValues.includes("256 Go"));
+  assert.ok(optionsValues.includes("512 Go"));
+  assert.ok(optionsValues.includes("1 To"));
+
+  // B. Validation d'un téléphone avec stockage unique sélectionné sans créer de variantes manuelles
+  const singleStoragePhone = {
+    name: "iPhone 14 Plus 256 Go",
+    category: "phones",
+    brand: "Apple",
+    price: 495000,
+    desc: "iPhone grand format avec autonomie exceptionnelle.",
+    specs: {
+      storage: "256 Go",
+      ram: 6,
+      battery: 4323
+    }
+  };
+
+  const validated = validateAndCleanProduct(singleStoragePhone);
+  assert.equal(validated.isValid, true, "Doit être validé avec succès");
+  assert.equal(validated.cleanedProduct.specs.storage, "256 Go", "Le stockage 256 Go doit être conservé dans les specs");
+});
