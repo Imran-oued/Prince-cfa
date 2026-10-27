@@ -70,7 +70,9 @@ type Product = {
   cartId?: string;
   selectedColor?: string;
   selectedCapacity?: string;
+  selectedSimType?: string;
   storageOptions?: { capacity: string; price: number }[];
+  simPricing?: Record<string, { enabled: boolean; delta: number; label: string }>;
 };
 
 const categories = [
@@ -750,13 +752,15 @@ export default function Home() {
     product: Product, 
     color?: string, 
     capacity?: string, 
-    customPrice?: number
+    customPrice?: number,
+    simType?: string
   ) => {
     const chosenColor = color || product.colors?.[0] || '';
     const chosenCapacity = capacity || product.selectedCapacity || '';
+    const chosenSimType = simType || product.selectedSimType || '';
     const finalPrice = customPrice !== undefined ? customPrice : product.price;
     
-    const cartId = [product.id, chosenColor, chosenCapacity].filter(Boolean).join('-');
+    const cartId = [product.id, chosenColor, chosenCapacity, chosenSimType].filter(Boolean).join('-');
     
     setCartItems(prev => {
       const existing = prev.find(item => item.cartId === cartId);
@@ -769,6 +773,7 @@ export default function Home() {
         quantity: 1, 
         selectedColor: chosenColor, 
         selectedCapacity: chosenCapacity,
+        selectedSimType: chosenSimType,
         cartId 
       }];
     });

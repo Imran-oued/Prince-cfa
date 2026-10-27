@@ -68,8 +68,22 @@ export default function ProductDrawer({
     return p.colors?.[0] || '';
   };
 
+  const getInitialSimType = (p) => {
+    if (!p) return '';
+    if (p.selectedSimType) return p.selectedSimType;
+    if (p.category === 'phones') {
+      if (p.simPricing && typeof p.simPricing === 'object') {
+        const first = Object.entries(p.simPricing).find(([_, conf]) => conf?.enabled !== false);
+        if (first && first[1]?.label) return first[1].label;
+      }
+      return 'e-sim + sim physique';
+    }
+    return '';
+  };
+
   const [activeColor, setActiveColor] = useState(() => getInitialColor(product));
   const [selectedCapacity, setSelectedCapacity] = useState(() => product?.selectedCapacity || getInitialCapacity(product));
+  const [selectedSimType, setSelectedSimType] = useState(() => getInitialSimType(product));
   const [activeImageIndex, setActiveImageIndex] = useState(() => {
     const initCol = getInitialColor(product);
     const idx = product?.colors?.indexOf(initCol);
@@ -85,6 +99,7 @@ export default function ProductDrawer({
     const newColor = getInitialColor(product);
     setActiveColor(newColor);
     setSelectedCapacity(product.selectedCapacity || getInitialCapacity(product));
+    setSelectedSimType(getInitialSimType(product));
     const newIdx = product.colors?.indexOf(newColor);
     setActiveImageIndex(newIdx !== -1 && newIdx !== undefined ? newIdx : 0);
     setIsLiked(false);
@@ -296,15 +311,48 @@ export default function ProductDrawer({
     return [];
   }, [currentProduct]);
 
-  // Calcul du prix dynamique en fonction de la capacité choisie
+  // Formats SIM disponibles pour téléphones (E-sim, e-sim + sim physique, 2 sim physique)
+  const availableSimTypes = useMemo(() => {
+    if (!currentProduct || currentProduct.category !== 'phones') return [];
+    if (currentProduct.simPricing && typeof currentProduct.simPricing === 'object') {
+      const entries = Object.entries(currentProduct.simPricing)
+        .filter(([_, conf]) => conf && conf.enabled !== false)
+        .map(([key, conf]) => ({
+          id: key,
+          label: conf.label || (key === 'sim_and_esim' ? 'e-sim + sim physique' : key === 'dual_sim_physical' ? '2 sim physique' : 'E-sim'),
+          delta: typeof conf.delta === 'number' ? conf.delta : 0,
+          subtitle: key === 'dual_sim_physical' ? 'Double Nano-SIM physique' : key === 'esim_only' ? '100% eSIM sans tiroir' : 'Standard international'
+        }));
+      if (entries.length > 0) return entries;
+    }
+    return [
+      { id: 'sim_and_esim', label: 'e-sim + sim physique', delta: 0, subtitle: 'Standard international' },
+      { id: 'dual_sim_physical', label: '2 sim physique', delta: 30000, subtitle: 'Double Nano-SIM physique' },
+      { id: 'esim_only', label: 'E-sim', delta: -20000, subtitle: '100% eSIM sans tiroir' },
+    ];
+  }, [currentProduct]);
+
+  // Delta actif selon le type de SIM choisi
+  const currentSimDelta = useMemo(() => {
+    if (availableSimTypes.length === 0 || !selectedSimType) return 0;
+    const match = availableSimTypes.find(
+      s => s.label.toLowerCase() === selectedSimType.toLowerCase() || s.id === selectedSimType
+    );
+    return (match && typeof match.delta === 'number') ? match.delta : 0;
+  }, [availableSimTypes, selectedSimType]);
+
+  // Calcul du prix dynamique en fonction de la capacité et du type de SIM choisi
   const currentPrice = useMemo(() => {
     if (!currentProduct) return 0;
+    let basePrice = Number(currentProduct.price) || 0;
     if (availableCapacities.length > 0 && selectedCapacity) {
       const match = availableCapacities.find(c => c.capacity === selectedCapacity);
-      if (match) return match.price;
+      if (match) basePrice = match.price;
     }
-    return Number(currentProduct.price) || 0;
-  }, [currentProduct, availableCapacities, selectedCapacity]);
+
+    // Intégration de la surcote / remise du type de SIM
+    return Math.max(0, basePrice + currentSimDelta);
+  }, [currentProduct, availableCapacities, selectedCapacity, currentSimDelta]);
 
   // Fermeture avec la touche Échap
   useEffect(() => {
@@ -340,12 +388,15 @@ export default function ProductDrawer({
     }
   }, [isOpen]);
 
-  // Commande directe par WhatsApp avec détails de capacité et couleur
+  // Commande directe par WhatsApp avec détails de SIM, capacité et couleur
   const handleDirectWhatsApp = () => {
     if (!currentProduct) return;
     const phoneNumber = SHOP_CONFIG.whatsappNumber;
     let message = "👑 *COMMANDE EXPRESS - PRINCE CFA* 👑\n\n";
     message += `▪ *Produit* : ${currentProduct.name}\n`;
+    if (selectedSimType) {
+      message += `▪ *Format SIM* : ${selectedSimType}\n`;
+    }
     if (selectedCapacity) {
       message += `▪ *Capacité* : ${selectedCapacity}\n`;
     }
@@ -760,7 +811,64 @@ export default function ProductDrawer({
             </div>
           )}
 
-          {/* Sélecteur de Capacité / Taille style Amazon (Image 1) */}
+          {/* Sélecteur Format de SIM (E-sim, e-sim + sim physique, 2 sim physique) */}
+          {availableSimTypes.length > 0 && (
+            <div className="space-y-3 pt-3 border-t border-zinc-200">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-zinc-600 uppercase tracking-wider font-semibold">
+                  Format SIM : <strong className="text-zinc-950 normal-case font-bold text-sm ml-1.5">{selectedSimType}</strong>
+                </span>
+                <span className="text-[11px] text-zinc-500 font-medium">{availableSimTypes.length} formats</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {availableSimTypes.map((sim) => {
+                  const isSelected = selectedSimType?.toLowerCase() === sim.label.toLowerCase();
+                  return (
+                    <button
+                      key={sim.id || sim.label}
+                      type="button"
+                      onClick={() => setSelectedSimType(sim.label)}
+                      className={`relative p-3 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer ${
+                        isSelected 
+                          ? 'border-gold bg-gold/15 shadow-[0_0_20px_rgba(212,175,55,0.25)] scale-[1.02]' 
+                          : 'border-zinc-200 bg-zinc-50 hover:border-gold/40 hover:bg-zinc-100/70 text-zinc-600'
+                      }`}
+                    >
+                      {isSelected && (
+                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-gold text-black flex items-center justify-center shadow-md">
+                          <Check className="w-2.5 h-2.5 text-black stroke-[3]" aria-hidden="true" />
+                        </span>
+                      )}
+                      <span className={`text-xs font-extrabold tracking-wide ${isSelected ? 'text-zinc-950' : 'text-zinc-800'}`}>
+                        {sim.label}
+                      </span>
+                      {sim.delta !== 0 ? (
+                        <span className={`text-[11px] font-bold mt-1 px-2 py-0.5 rounded-full ${
+                          sim.delta > 0 
+                            ? 'bg-amber-500/15 text-amber-700' 
+                            : 'bg-blue-500/15 text-blue-700'
+                        }`}>
+                          {sim.delta > 0 ? `+${sim.delta.toLocaleString('fr-FR')} F` : `${sim.delta.toLocaleString('fr-FR')} F`}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-zinc-500 font-semibold mt-1">
+                          Standard
+                        </span>
+                      )}
+                      {sim.subtitle && (
+                        <span className="text-[9px] text-zinc-400 mt-0.5 line-clamp-1">
+                          {sim.subtitle}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Sélecteur de Capacité / Taille style Amazon */}
           {availableCapacities.length > 0 && (
             <div className="space-y-3 pt-3 border-t border-zinc-200">
               <div className="flex items-center justify-between">
@@ -773,6 +881,7 @@ export default function ProductDrawer({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {availableCapacities.map((item) => {
                   const isSelected = selectedCapacity === item.capacity;
+                  const itemWithSimPrice = item.price + currentSimDelta;
                   const diff = item.price - (Number(currentProduct.price) || 0);
 
                   return (
@@ -794,7 +903,7 @@ export default function ProductDrawer({
                         {item.capacity}
                       </span>
                       <span className={`text-xs font-bold mt-1 ${isSelected ? 'text-gold' : 'text-zinc-500'}`}>
-                        {item.price.toLocaleString('fr-FR')} F
+                        {itemWithSimPrice.toLocaleString('fr-FR')} F
                       </span>
                       {diff > 0 ? (
                         <span className="text-[9px] text-emerald-600 font-medium mt-0.5">
@@ -956,7 +1065,7 @@ export default function ProductDrawer({
         <div className="p-4 sm:p-5 border-t border-zinc-200 bg-white/95 backdrop-blur-md flex items-center justify-between gap-4 relative z-20">
           <div className="flex flex-col pr-2">
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-medium">
-              Total {selectedCapacity ? `(${selectedCapacity})` : ''}
+              Total {[selectedCapacity, selectedSimType].filter(Boolean).join(' · ')}
             </span>
             <span className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-600 to-amber-700 whitespace-nowrap">
               {currentPrice.toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
@@ -966,7 +1075,7 @@ export default function ProductDrawer({
           {/* Bouton Unique Ultra-Prestige : Ajouter au Panier */}
           <button 
             onClick={() => {
-              onAddToCart(currentProduct, activeColor, selectedCapacity, currentPrice);
+              onAddToCart(currentProduct, activeColor, selectedCapacity, currentPrice, selectedSimType);
               onClose();
             }}
             className="flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border border-gold/40 bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black font-extrabold uppercase tracking-widest text-xs sm:text-sm hover:shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:brightness-105 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer shadow-md"

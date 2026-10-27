@@ -924,3 +924,56 @@ export function getCategoryConfig(categoryId: string): CategoryDefinition {
 export function isStorageVariantCategory(categoryId: string): boolean {
   return Boolean(getCategoryConfig(categoryId).supportsStorageVariants);
 }
+
+/**
+ * Types de SIM officiels pour iPhones sur le marché africain et international
+ */
+export const IPHONE_SIM_TYPES = [
+  { 
+    id: "sim_and_esim", 
+    label: "e-sim + sim physique", 
+    shortLabel: "1 SIM + eSIM",
+    description: "Standard international (1 Nano SIM + eSIM)",
+    defaultDelta: 0,
+    badge: "Standard" 
+  },
+  { 
+    id: "dual_sim_physical", 
+    label: "2 sim physique", 
+    shortLabel: "2 SIM Physiques",
+    description: "Double Nano-SIM physique (Asie / Dubaï)",
+    defaultDelta: 30000,
+    badge: "Recommandé" 
+  },
+  { 
+    id: "esim_only", 
+    label: "E-sim", 
+    shortLabel: "100% E-Sim",
+    description: "Entièrement dématérialisée (Modèle US)",
+    defaultDelta: -20000,
+    badge: "Économique" 
+  },
+] as const;
+
+/**
+ * Palette des coloris officiels Apple pour iPhones (sélection en 1 clic)
+ */
+export const IPHONE_OFFICIAL_COLORS = [
+  { name: "Titane Naturel", hex: "#9a958e", border: "#7a756e" },
+  { name: "Titane Noir", hex: "#3b3a36", border: "#252422" },
+  { name: "Titane Blanc", hex: "#e4e5e7", border: "#c5c6c8" },
+  { name: "Titane Bleu", hex: "#3b4452", border: "#28303c" },
+  { name: "Titane Sable / Désert", hex: "#c4a683", border: "#a58866" },
+  { name: "Noir Sidéral", hex: "#1f2024", border: "#111214" },
+  { name: "Argent", hex: "#e3e4e5", border: "#c1c2c4" },
+  { name: "Or", hex: "#fae7cf", border: "#d8c4ad" },
+  { name: "Minuit", hex: "#19212c", border: "#0d131b" },
+  { name: "Lumière Stellaire", hex: "#faf6f2", border: "#dcd6cf" },
+  { name: "Bleu Pacifique", hex: "#2d4e60", border: "#1b3442" },
+  { name: "Bleu Sierra", hex: "#9bb5ce", border: "#7b94ad" },
+  { name: "Vert Alpin", hex: "#505e4d", border: "#384435" },
+  { name: "Violet Intense", hex: "#594f63", border: "#3e3646" },
+  { name: "Rose", hex: "#fed0d3", border: "#dbadb0" },
+  { name: "Rouge (PRODUCT RED)", hex: "#ba0c2f", border: "#8a0620" },
+  { name: "Jaune", hex: "#fde87e", border: "#dbc55e" },
+];

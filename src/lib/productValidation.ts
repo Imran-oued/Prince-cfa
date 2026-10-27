@@ -249,6 +249,22 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
       .filter(opt => opt.capacity !== "" && opt.price >= 0);
   }
 
+  // 4. Traitement de la tarification par type de SIM (iPhones)
+  let cleanedSimPricing: Record<string, { enabled: boolean; delta: number; label: string }> | undefined = undefined;
+  if (raw.simPricing && typeof raw.simPricing === "object") {
+    cleanedSimPricing = {};
+    for (const [key, val] of Object.entries(raw.simPricing)) {
+      if (val && typeof val === "object") {
+        const v = val as any;
+        cleanedSimPricing[key] = {
+          enabled: Boolean(v.enabled),
+          delta: Number(v.delta) || 0,
+          label: String(v.label || key).trim()
+        };
+      }
+    }
+  }
+
   const isValid = Object.keys(errors).length === 0;
 
   // Si des erreurs existent, renvoyer les détails
@@ -281,6 +297,7 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
     specs: cleanedSpecs,
     ...(raw.imageBg ? { imageBg: raw.imageBg } : {}),
     ...(cleanedStorageOptions.length > 0 ? { storageOptions: cleanedStorageOptions } : {}),
+    ...(cleanedSimPricing ? { simPricing: cleanedSimPricing } : {}),
     updatedAt: new Date().toISOString(),
     ...(raw.createdAt ? { createdAt: raw.createdAt } : { createdAt: new Date().toISOString() }),
   };

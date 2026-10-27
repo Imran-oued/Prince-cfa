@@ -194,7 +194,7 @@ export default function CartDrawer({
     msg += `\n📦 *ARTICLES COMMANDÉS :*\n`;
 
     o.items.forEach((item, idx) => {
-      const details = [item.selectedCapacity, item.selectedColor].filter(Boolean).join(" | ");
+      const details = [item.selectedCapacity, item.selectedSimType, item.selectedColor].filter(Boolean).join(" | ");
       msg += `${idx + 1}. *${item.name}* ${details ? `(${details})` : ""}\n`;
       msg += `   ↳ Qté : ${item.quantity} × ${item.unitPrice.toLocaleString('fr-FR')} FCFA\n`;
     });
@@ -258,6 +258,7 @@ export default function CartDrawer({
             price: item.price,
             quantity: item.quantity,
             selectedCapacity: item.selectedCapacity || null,
+            selectedSimType: item.selectedSimType || null,
             selectedColor: item.selectedColor || null,
             image: item.image || ""
           })),
@@ -434,6 +435,11 @@ export default function CartDrawer({
                               {item.selectedCapacity && (
                                 <span className="text-[9px] px-1.5 py-0.5 rounded bg-gold/15 text-gold font-bold">
                                   {item.selectedCapacity}
+                                </span>
+                              )}
+                              {item.selectedSimType && (
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold">
+                                  {item.selectedSimType}
                                 </span>
                               )}
                               {item.selectedColor && (

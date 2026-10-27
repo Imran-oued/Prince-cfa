@@ -49,7 +49,9 @@ import {
   CATEGORIES_LIST, 
   getCategoryConfig, 
   CategoryDefinition, 
-  SpecFieldDefinition 
+  SpecFieldDefinition,
+  IPHONE_SIM_TYPES,
+  IPHONE_OFFICIAL_COLORS
 } from "@/config/categories";
 import { 
   validateAndCleanProduct, 
@@ -139,6 +141,7 @@ interface AdminProduct {
   colors?: string[];
   images?: string[];
   storageOptions?: StorageOption[];
+  simPricing?: Record<string, { enabled: boolean; delta: number; label: string }>;
   specs?: Record<string, any>;
   stock?: number;
   condition?: "neuf" | "occasion" | "reconditionne" | string;
@@ -288,6 +291,41 @@ export default function AdminPage() {
   const [imageList, setImageList] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState("");
   const [isCompressingImages, setIsCompressingImages] = useState(false);
+
+  // Configuration professionnelle des variantes SIM pour téléphones (notamment iPhones)
+  const DEFAULT_SIM_PRICING: Record<string, { enabled: boolean; delta: number; label: string }> = {
+    sim_and_esim: { enabled: true, delta: 0, label: "e-sim + sim physique" },
+    dual_sim_physical: { enabled: true, delta: 30000, label: "2 sim physique" },
+    esim_only: { enabled: true, delta: -20000, label: "E-sim" },
+  };
+
+  const [simPricing, setSimPricing] = useState<Record<string, { enabled: boolean; delta: number; label: string }>>(DEFAULT_SIM_PRICING);
+
+  // Basculer l'état ou le delta d'un type de SIM
+  const handleUpdateSimType = (key: string, updates: Partial<{ enabled: boolean; delta: number; label: string }>) => {
+    setSimPricing(prev => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        ...updates
+      }
+    }));
+  };
+
+  // Basculer la présence d'une couleur officielle Apple dans la liste
+  const toggleOfficialColor = (colorName: string) => {
+    const current = commonFormData.colors
+      ? commonFormData.colors.split(",").map(c => c.trim()).filter(Boolean)
+      : [];
+    const exists = current.some(c => c.toLowerCase() === colorName.toLowerCase());
+    let next: string[];
+    if (exists) {
+      next = current.filter(c => c.toLowerCase() !== colorName.toLowerCase());
+    } else {
+      next = [...current, colorName];
+    }
+    setCommonFormData(prev => ({ ...prev, colors: next.join(", ") }));
+  };
 
   // 1. Vérification ultra-rapide de session active à l'ouverture de la page (< 50ms)
   useEffect(() => {
@@ -967,6 +1005,7 @@ export default function AdminPage() {
       images: allImages,
       imageBg: commonFormData.imageBg || "white",
       storageOptions: parsedStorage.length > 0 ? parsedStorage : undefined,
+      simPricing: formCategory === "phones" ? simPricing : undefined,
       specs: formSpecs
     };
 
@@ -1071,6 +1110,7 @@ export default function AdminPage() {
           commonFormData,
           formSpecs,
           storageItems,
+          simPricing,
           imageList,
           savedAt: Date.now()
         };
@@ -1079,7 +1119,7 @@ export default function AdminPage() {
         console.warn("Erreur sauvegarde brouillon:", e);
       }
     }
-  }, [isModalOpen, editingId, isFormDirty, formCategory, commonFormData, formSpecs, storageItems, imageList]);
+  }, [isModalOpen, editingId, isFormDirty, formCategory, commonFormData, formSpecs, storageItems, simPricing, imageList]);
 
   // Nettoyage du brouillon une fois le produit sauvegardé ou si l'utilisateur annule explicitement
   const clearDraft = () => {
@@ -1150,6 +1190,16 @@ export default function AdminPage() {
     setStorageItems(initialStorage);
     setNewImageUrl("");
 
+    if (product.simPricing && typeof product.simPricing === "object") {
+      setSimPricing({
+        sim_and_esim: product.simPricing.sim_and_esim ? { ...product.simPricing.sim_and_esim } : { enabled: true, delta: 0, label: "e-sim + sim physique" },
+        dual_sim_physical: product.simPricing.dual_sim_physical ? { ...product.simPricing.dual_sim_physical } : { enabled: true, delta: 30000, label: "2 sim physique" },
+        esim_only: product.simPricing.esim_only ? { ...product.simPricing.esim_only } : { enabled: true, delta: -20000, label: "E-sim" },
+      });
+    } else {
+      setSimPricing(DEFAULT_SIM_PRICING);
+    }
+
     setCommonFormData({
       name: product.name || "",
       brand: product.brand || "",
@@ -1177,6 +1227,7 @@ export default function AdminPage() {
     setFormCategory("phones");
     setFormSpecs({});
     setFormErrors({});
+    setSimPricing(DEFAULT_SIM_PRICING);
     setModalViewMode("form");
     setCategorySwitchPending(null);
     setDraftRestored(false);
@@ -1226,6 +1277,11 @@ export default function AdminPage() {
             setCommonFormData(parsed.commonFormData);
             setFormSpecs(parsed.formSpecs || {});
             setStorageItems(parsed.storageItems || []);
+            if (parsed.simPricing && typeof parsed.simPricing === "object") {
+              setSimPricing(parsed.simPricing);
+            } else {
+              setSimPricing(DEFAULT_SIM_PRICING);
+            }
             setImageList(parsed.imageList || []);
             setNewImageUrl("");
             setDraftRestored(true);
@@ -1243,6 +1299,7 @@ export default function AdminPage() {
       setNewImageUrl("");
       setFormCategory("phones");
       setFormSpecs({});
+      setSimPricing(DEFAULT_SIM_PRICING);
       setDraftRestored(false);
       const phoneConfig = getCategoryConfig("phones");
       setCommonFormData({
@@ -2857,18 +2914,71 @@ export default function AdminPage() {
                         />
                       </div>
 
-                      {/* Couleurs disponibles */}
-                      <div>
-                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
-                          Couleurs (séparées par une virgule)
-                        </label>
+                      {/* Couleurs disponibles avec Nuancier Officiel Apple & Universel */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[11px] text-zinc-400 uppercase font-bold block">
+                            Couleurs disponibles
+                          </label>
+                          {commonFormData.colors && (
+                            <button
+                              type="button"
+                              onClick={() => setCommonFormData(prev => ({ ...prev, colors: "" }))}
+                              className="text-[10px] text-zinc-500 hover:text-red-400 underline cursor-pointer"
+                            >
+                              Tout effacer
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Palette interactive 1-clic des teintes Apple */}
+                        <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2">
+                          <span className="text-[10px] text-gold font-bold uppercase tracking-wider block">
+                            Palette officielle Apple (Cliquez pour ajouter / retirer en 1 clic) :
+                          </span>
+                          <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scrollbar p-1">
+                            {IPHONE_OFFICIAL_COLORS.map(c => {
+                              const activeColors = commonFormData.colors
+                                ? commonFormData.colors.split(",").map(x => x.trim().toLowerCase())
+                                : [];
+                              const isSelected = activeColors.includes(c.name.toLowerCase());
+                              return (
+                                <button
+                                  key={c.name}
+                                  type="button"
+                                  onClick={() => toggleOfficialColor(c.name)}
+                                  className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-all cursor-pointer ${
+                                    isSelected
+                                      ? "bg-gold/20 border-gold text-white shadow-[0_0_10px_rgba(212,175,55,0.3)] scale-[1.02]"
+                                      : "bg-white/5 border-white/10 text-zinc-300 hover:border-white/30 hover:text-white"
+                                  }`}
+                                >
+                                  <span 
+                                    className="w-3.5 h-3.5 rounded-full flex-shrink-0 border shadow-sm"
+                                    style={{ 
+                                      backgroundColor: c.hex, 
+                                      borderColor: c.border || "rgba(255,255,255,0.25)" 
+                                    }}
+                                  />
+                                  <span>{c.name}</span>
+                                  {isSelected && <span className="text-gold font-bold text-[10px]">✓</span>}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Champ texte direct modifiable */}
                         <input 
                           type="text" 
                           value={commonFormData.colors} 
                           onChange={e => setCommonFormData({ ...commonFormData, colors: e.target.value })} 
-                          placeholder="Ex: Noir Titane, Blanc, Or, Bleu" 
-                          className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
+                          placeholder="Ex: Titane Naturel, Titane Noir, Blanc, Or" 
+                          className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold font-medium"
                         />
+                        <p className="text-[10px] text-zinc-500">
+                          Sélectionnez les teintes ci-dessus ou saisissez vos couleurs personnalisées séparées par une virgule.
+                        </p>
                       </div>
 
                       {/* Garantie vendeur */}
@@ -3313,6 +3423,142 @@ export default function AdminPage() {
                         <span>+</span>
                         <span>Ajouter une option de stockage personnalisée</span>
                       </button>
+                    </div>
+                  )}
+
+                  {/* 6. CONFIGURATEUR TYPES DE SIM & DIFFÉRENCIATION DE PRIX (POUR IPHONE / SMARTPHONES) */}
+                  {formCategory === "phones" && (
+                    <div className="p-4 rounded-2xl bg-amber-500/[0.04] border border-amber-500/30 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Smartphone className="w-4 h-4 text-amber-400" aria-hidden="true" />
+                            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                              6. Types de SIM & Différenciation des Prix (E-sim / Double SIM)
+                            </h4>
+                          </div>
+                          <p className="text-[11px] text-zinc-400 mt-1">
+                            Ajustez le prix de vente en fonction du type de carte SIM (Standard, 2 SIM physiques, E-sim seule).
+                          </p>
+                        </div>
+
+                        <span className="text-[10px] px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 font-bold self-start sm:self-auto">
+                          Spécifique Marché iPhones
+                        </span>
+                      </div>
+
+                      {/* Grille des 3 types de SIM */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                        {IPHONE_SIM_TYPES.map((simMeta) => {
+                          const currentConfig = simPricing[simMeta.id] || { 
+                            enabled: true, 
+                            delta: simMeta.defaultDelta, 
+                            label: simMeta.label 
+                          };
+                          const isEnabled = currentConfig.enabled !== false;
+                          const delta = typeof currentConfig.delta === "number" ? currentConfig.delta : 0;
+                          
+                          // Calcul du prix simulé avec le prix de base
+                          const basePrice = Number(commonFormData.price) || 0;
+                          const simulatedPrice = Math.max(0, basePrice + delta);
+
+                          return (
+                            <div 
+                              key={simMeta.id}
+                              className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
+                                isEnabled 
+                                  ? "bg-black/50 border-amber-500/40 shadow-sm" 
+                                  : "bg-black/20 border-white/5 opacity-50"
+                              }`}
+                            >
+                              <div className="space-y-2">
+                                {/* Header type de sim + interrupteur actif */}
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-xs font-black text-white">
+                                    {simMeta.label}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUpdateSimType(simMeta.id, { enabled: !isEnabled })}
+                                    className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-all cursor-pointer ${
+                                      isEnabled 
+                                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" 
+                                        : "bg-zinc-800 text-zinc-500 border border-zinc-700"
+                                    }`}
+                                  >
+                                    {isEnabled ? "Actif" : "Désactivé"}
+                                  </button>
+                                </div>
+
+                                <p className="text-[10px] text-zinc-400 leading-snug">
+                                  {simMeta.description}
+                                </p>
+
+                                <div className="text-[10px] text-zinc-500 font-mono">
+                                  Badge : <strong className="text-zinc-300">{simMeta.badge}</strong>
+                                </div>
+                              </div>
+
+                              {/* Réglage du Delta de prix (surcoût / remise) */}
+                              <div className="mt-3 pt-3 border-t border-white/10 space-y-2">
+                                <label className="text-[10px] text-zinc-400 uppercase font-bold flex items-center justify-between">
+                                  <span>Ajustement de Prix :</span>
+                                  <span className={`font-mono font-bold ${
+                                    delta > 0 ? "text-amber-400" : delta < 0 ? "text-cyan-400" : "text-zinc-400"
+                                  }`}>
+                                    {delta > 0 ? `+${delta.toLocaleString("fr-FR")} F` : `${delta.toLocaleString("fr-FR")} F`}
+                                  </span>
+                                </label>
+
+                                <div className="relative">
+                                  <input 
+                                    type="number"
+                                    step="1000"
+                                    disabled={!isEnabled}
+                                    value={delta}
+                                    onChange={(e) => handleUpdateSimType(simMeta.id, { delta: Number(e.target.value) || 0 })}
+                                    placeholder="Ex: 30000 ou -20000"
+                                    className="w-full bg-black/60 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none focus:border-amber-400 disabled:opacity-40"
+                                  />
+                                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-500 font-bold pointer-events-none">
+                                    FCFA
+                                  </span>
+                                </div>
+
+                                {/* Raccourcis rapides de surcoût */}
+                                {isEnabled && (
+                                  <div className="flex flex-wrap gap-1 pt-1">
+                                    {[0, 15000, 25000, 30000, 50000, -15000, -20000].map((quickDelta) => (
+                                      <button
+                                        key={quickDelta}
+                                        type="button"
+                                        onClick={() => handleUpdateSimType(simMeta.id, { delta: quickDelta })}
+                                        className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border transition-all cursor-pointer ${
+                                          delta === quickDelta
+                                            ? "bg-amber-400 text-black border-amber-400"
+                                            : "bg-white/5 text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
+                                        }`}
+                                      >
+                                        {quickDelta > 0 ? `+${quickDelta / 1000}k` : quickDelta < 0 ? `${quickDelta / 1000}k` : "0F"}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {/* Simulation visuelle du prix final */}
+                                {isEnabled && basePrice > 0 && (
+                                  <div className="p-2 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between text-[11px] mt-2">
+                                    <span className="text-zinc-400">Prix résultant :</span>
+                                    <span className="font-extrabold text-gold font-mono">
+                                      {simulatedPrice.toLocaleString("fr-FR")} FCFA
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
 

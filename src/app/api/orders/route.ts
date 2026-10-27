@@ -12,6 +12,7 @@ interface OrderItemInput {
   price?: number;
   quantity?: number;
   selectedCapacity?: string | null;
+  selectedSimType?: string | null;
   selectedColor?: string | null;
   image?: string;
 }
@@ -181,6 +182,17 @@ export async function POST(request: Request) {
         }
       }
 
+      // Si le client a sélectionné un type de SIM spécifique (iPhones)
+      if (item.selectedSimType && authenticProduct.simPricing) {
+        const simKey = Object.keys(authenticProduct.simPricing).find(
+          k => authenticProduct.simPricing[k]?.label?.toLowerCase() === String(item.selectedSimType).trim().toLowerCase() ||
+               k.toLowerCase() === String(item.selectedSimType).trim().toLowerCase()
+        );
+        if (simKey && authenticProduct.simPricing[simKey]?.enabled) {
+          authenticUnitPrice += Number(authenticProduct.simPricing[simKey]?.delta || 0);
+        }
+      }
+
       subtotal += authenticUnitPrice * qty;
 
       sanitizedItems.push({
@@ -189,6 +201,7 @@ export async function POST(request: Request) {
         unitPrice: authenticUnitPrice,
         quantity: qty,
         selectedCapacity: item.selectedCapacity ? sanitizeText(item.selectedCapacity, 30) : null,
+        selectedSimType: item.selectedSimType ? sanitizeText(item.selectedSimType, 40) : null,
         selectedColor: item.selectedColor ? sanitizeText(item.selectedColor, 40) : null,
         image: authenticImage
       });

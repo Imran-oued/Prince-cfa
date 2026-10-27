@@ -9,7 +9,9 @@ import {
 import { 
   PRODUCT_CATEGORIES, 
   getCategoryConfig, 
-  isStorageVariantCategory 
+  isStorageVariantCategory,
+  IPHONE_SIM_TYPES,
+  IPHONE_OFFICIAL_COLORS
 } from "../src/config/categories.ts";
 
 test("1. Category definitions are declarative, complete, and have units", () => {
@@ -434,4 +436,51 @@ test("11. Phone Storage: Quick storage selector is configured and validates clea
   const validated = validateAndCleanProduct(singleStoragePhone);
   assert.equal(validated.isValid, true, "Doit être validé avec succès");
   assert.equal(validated.cleanedProduct.specs.storage, "256 Go", "Le stockage 256 Go doit être conservé dans les specs");
+});
+
+test("12. iPhone SIM Types & Official Colors: Config and validation adhere to professional market standard", () => {
+  // A. Types de SIM officiels déclarés
+  assert.equal(IPHONE_SIM_TYPES.length, 3, "Il doit y avoir exactement 3 types de SIM pour iPhone");
+  const simIds = IPHONE_SIM_TYPES.map(s => s.id);
+  assert.ok(simIds.includes("sim_and_esim"), "Standard e-sim + sim physique");
+  assert.ok(simIds.includes("dual_sim_physical"), "2 sim physique");
+  assert.ok(simIds.includes("esim_only"), "E-sim seule");
+
+  // B. Nuancier officiel Apple déclaré avec codes hex
+  assert.ok(IPHONE_OFFICIAL_COLORS.length >= 10, "Au moins 10 finitions officielles Apple déclarées");
+  const titaneNaturel = IPHONE_OFFICIAL_COLORS.find(c => c.name.toLowerCase().includes("naturel"));
+  assert.ok(titaneNaturel, "Titane Naturel doit être présent");
+  assert.ok(titaneNaturel.hex.startsWith("#"), "Code hex valide");
+
+  // C. Validation d'un produit avec simPricing personnalisé
+  const rawIphone = {
+    name: "iPhone 16 Pro Max",
+    category: "phones",
+    brand: "Apple",
+    price: 850000,
+    colors: ["Titane Naturel", "Titane Noir"],
+    desc: "Le summum de la technologie Apple.",
+    storageOptions: [
+      { capacity: "256 Go", price: 850000 },
+      { capacity: "512 Go", price: 950000 },
+      { capacity: "1 To", price: 1090000 }
+    ],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: "e-sim + sim physique" },
+      dual_sim_physical: { enabled: true, delta: 35000, label: "2 sim physique" },
+      esim_only: { enabled: true, delta: -25000, label: "E-sim" }
+    },
+    specs: {
+      storage: "256 Go",
+      ram: 8,
+      screen: "6.9 Super Retina XDR"
+    }
+  };
+
+  const validated = validateAndCleanProduct(rawIphone);
+  assert.equal(validated.isValid, true, "Doit être validé avec succès");
+  assert.ok(validated.cleanedProduct.simPricing, "simPricing doit être préservé");
+  assert.equal(validated.cleanedProduct.simPricing.dual_sim_physical.delta, 35000);
+  assert.equal(validated.cleanedProduct.simPricing.esim_only.delta, -25000);
+  assert.equal(validated.cleanedProduct.colors.length, 2);
 });
