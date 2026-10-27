@@ -374,7 +374,7 @@ export default function ProductDrawer({
 
       {/* Volet Latéral / Slide-Over Drawer depuis le côté droit */}
       <aside 
-        className={`fixed top-0 right-0 h-full w-full sm:w-[540px] md:w-[620px] lg:w-[680px] bg-[#09090b] border-l border-gold/25 shadow-[-20px_0_50px_rgba(0,0,0,0.85),-5px_0_20px_rgba(212,175,55,0.15)] z-[150] transition-transform duration-300 ease-out flex flex-col overflow-hidden will-change-transform ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-[540px] md:w-[620px] lg:w-[680px] bg-white border-l border-zinc-200 shadow-[-20px_0_50px_rgba(0,0,0,0.15),-5px_0_20px_rgba(212,175,55,0.1)] z-[150] transition-transform duration-300 ease-out flex flex-col overflow-hidden will-change-transform ${
           slideIn && isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'
         }`}
         role="dialog"
@@ -382,10 +382,10 @@ export default function ProductDrawer({
         aria-labelledby="product-drawer-title"
       >
         {/* Header du Drawer avec bouton retour / fermeture */}
-        <div className="flex items-center justify-between px-6 py-4 sm:py-5 border-b border-white/10 bg-[#09090b]/80 backdrop-blur-md relative z-20">
+        <div className="flex items-center justify-between px-6 py-4 sm:py-5 border-b border-zinc-200 bg-white/95 backdrop-blur-md relative z-20">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               En stock
             </span>
           </div>
@@ -393,7 +393,7 @@ export default function ProductDrawer({
           <div className="flex items-center gap-2">
             <button 
               onClick={onClose}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-zinc-400 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all duration-200 group"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-zinc-100 border border-zinc-200 text-zinc-600 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all duration-200 group"
               title="Fermer la fiche produit (Échap)"
               aria-label="Fermer la fiche produit"
             >
@@ -427,7 +427,7 @@ export default function ProductDrawer({
                   const slideBg = getProductImageBg(currentProduct, imgSrc);
                   return (
                     <div 
-                      key={idx}
+                      key={idx} 
                       className={`w-full h-full min-w-full flex-shrink-0 p-3 sm:p-6 flex items-center justify-center ${slideBg.isBlack ? 'bg-black' : 'bg-white'}`}
                     >
                       {imgSrc?.length > 4 ? (
@@ -474,7 +474,7 @@ export default function ProductDrawer({
                           ? 'w-4 h-2 bg-gold scale-105 shadow-[0_0_8px_rgba(212,175,55,0.8)]' 
                           : currentImgBg.isBlack
                             ? 'w-2 h-2 bg-white/40 hover:bg-white/60'
-                            : 'w-2 h-2 bg-zinc-300 dark:bg-zinc-600 hover:bg-zinc-400'
+                            : 'w-2 h-2 bg-zinc-300 hover:bg-zinc-400'
                       }`}
                       aria-label={`Photo ${dotIdx + 1}`}
                     />
@@ -482,12 +482,12 @@ export default function ProductDrawer({
                 })}
               </div>
 
-              {/* Actions Favoris ♡ et Partage ↗ (comme sur la capture) */}
-              <div className="w-16 flex items-center justify-end gap-3 text-zinc-400">
+              {/* Actions Favoris ♡ et Partage ↗ */}
+              <div className="w-16 flex items-center justify-end gap-3 text-zinc-500">
                 <button 
                   type="button" 
                   onClick={() => setIsLiked(!isLiked)}
-                  className={`p-1.5 transition-colors cursor-pointer ${isLiked ? 'text-red-500' : 'hover:text-red-400'}`}
+                  className={`p-1.5 transition-colors cursor-pointer ${isLiked ? 'text-red-500' : 'hover:text-red-500'}`}
                   title={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
                   aria-label="Favoris"
                 >
@@ -518,7 +518,7 @@ export default function ProductDrawer({
                       }
                     }
                   }}
-                  className="p-1.5 hover:text-white transition-colors cursor-pointer"
+                  className="p-1.5 hover:text-zinc-900 transition-colors cursor-pointer"
                   title="Partager ce produit"
                   aria-label="Partager"
                 >
@@ -533,31 +533,21 @@ export default function ProductDrawer({
           {/* En-tête du produit (Titre, Note & Prix) */}
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              {/* Note masquée pour le moment (conservée pour mise à jour ultérieure) :
-              <div className="flex items-center gap-1.5">
-                <div className="flex items-center gap-0.5 text-gold" aria-label={`Note de ${currentProduct.rating || 5.0} sur 5`}>
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" aria-hidden="true" />
-                  ))}
-                </div>
-                <span className="text-xs text-zinc-400">({currentProduct.rating || 5.0} / 5.0)</span>
-              </div>
-              */}
               <span className="text-xs text-zinc-500 font-medium">
                 Réf: {String(currentProduct.id).toLowerCase().startsWith('pcfa-') ? String(currentProduct.id).toUpperCase() : `PCFA-${String(currentProduct.id).padStart(3, '0')}`}
               </span>
             </div>
 
-            <h1 id="product-drawer-title" className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
+            <h1 id="product-drawer-title" className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight leading-snug">
               {currentProduct.name}
             </h1>
 
             <div className="flex flex-wrap items-baseline gap-3 pt-1">
-              <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-yellow-600">
+              <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-600 to-amber-700">
                 {currentPrice.toLocaleString('fr-FR')} FCFA
               </span>
               {availableCapacities.length > 0 && selectedCapacity && (
-                <span className="text-xs text-gold/90 bg-gold/10 border border-gold/30 px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5">
+                <span className="text-xs text-gold bg-gold/10 border border-gold/30 px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5">
                   <HardDrive className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
                   <span>{selectedCapacity}</span>
                 </span>
@@ -574,30 +564,30 @@ export default function ProductDrawer({
                   <Zap className="w-4 h-4 text-gold" aria-hidden="true" />
                   <span>Performances Moto Électrique</span>
                 </span>
-                <span className="text-[10px] text-zinc-400">Écologique · 0% Carburant</span>
+                <span className="text-[10px] text-zinc-500">Écologique · 0% Carburant</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Moteur</span>
-                  <span className="text-sm font-black text-white">
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Moteur</span>
+                  <span className="text-sm font-black text-zinc-900">
                     {currentProduct.specs.motorPower ? `${currentProduct.specs.motorPower} W` : "—"}
                   </span>
                 </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Autonomie</span>
-                  <span className="text-sm font-black text-emerald-400">
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Autonomie</span>
+                  <span className="text-sm font-black text-emerald-600">
                     {currentProduct.specs.rangeKm ? `${currentProduct.specs.rangeKm} km` : "—"}
                   </span>
                 </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Vitesse</span>
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Vitesse</span>
                   <span className="text-sm font-black text-gold">
                     {currentProduct.specs.maxSpeedKm ? `${currentProduct.specs.maxSpeedKm} km/h` : "—"}
                   </span>
                 </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Batterie</span>
-                  <span className="text-sm font-black text-white">
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Batterie</span>
+                  <span className="text-sm font-black text-zinc-900">
                     {currentProduct.specs.batteryCapacityWh ? `${currentProduct.specs.batteryCapacityWh} Wh` : (currentProduct.specs.batteryVoltage ? `${currentProduct.specs.batteryVoltage}V` : "—")}
                   </span>
                 </div>
@@ -608,29 +598,29 @@ export default function ProductDrawer({
           {/* Badge de Spécifications Clés pour Ordinateurs */}
           {currentProduct.category === 'computers' && currentProduct.specs && (
             <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 space-y-2">
-              <div className="flex items-center justify-between text-blue-400 text-xs font-bold uppercase tracking-wider">
+              <div className="flex items-center justify-between text-blue-600 text-xs font-bold uppercase tracking-wider">
                 <span className="flex items-center gap-1.5">
-                  <Laptop className="w-4 h-4 text-blue-400" aria-hidden="true" />
+                  <Laptop className="w-4 h-4 text-blue-600" aria-hidden="true" />
                   <span>Configuration Clé — Ordinateur</span>
                 </span>
-                <span className="text-[10px] text-zinc-400 font-mono">{currentProduct.specs.os || "OS"}</span>
+                <span className="text-[10px] text-zinc-500 font-mono">{currentProduct.specs.os || "OS"}</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">CPU</span>
-                  <span className="text-xs font-black text-white line-clamp-1">{currentProduct.specs.processor || "—"}</span>
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">CPU</span>
+                  <span className="text-xs font-black text-zinc-900 line-clamp-1">{currentProduct.specs.processor || "—"}</span>
                 </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">RAM</span>
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">RAM</span>
                   <span className="text-sm font-black text-gold">{currentProduct.specs.ram ? `${currentProduct.specs.ram} Go` : "—"}</span>
                 </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Stockage</span>
-                  <span className="text-xs font-black text-emerald-400">{currentProduct.specs.storageSize || "—"}</span>
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Stockage</span>
+                  <span className="text-xs font-black text-emerald-600">{currentProduct.specs.storageSize || "—"}</span>
                 </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Écran</span>
-                  <span className="text-xs font-black text-white">{currentProduct.specs.screenSize ? `${currentProduct.specs.screenSize}"` : "—"}</span>
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Écran</span>
+                  <span className="text-xs font-black text-zinc-900">{currentProduct.specs.screenSize ? `${currentProduct.specs.screenSize}"` : "—"}</span>
                 </div>
               </div>
             </div>
@@ -639,31 +629,31 @@ export default function ProductDrawer({
           {/* Badge de Spécifications Clés pour Tablettes */}
           {(currentProduct.category === 'tablets' || currentProduct.category === 'tablettes') && currentProduct.specs && (
             <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
-              <div className="flex items-center justify-between text-amber-400 text-xs font-bold uppercase tracking-wider">
+              <div className="flex items-center justify-between text-amber-600 text-xs font-bold uppercase tracking-wider">
                 <span className="flex items-center gap-1.5">
-                  <Tablet className="w-4 h-4 text-amber-400" aria-hidden="true" />
+                  <Tablet className="w-4 h-4 text-amber-600" aria-hidden="true" />
                   <span>Fiche Tablette Officielle</span>
                 </span>
-                <span className="text-[10px] text-zinc-400 font-mono">
+                <span className="text-[10px] text-zinc-500 font-mono">
                   {currentProduct.specs.connectivity === 'wifi_cellular' ? '4G/5G + Wi-Fi' : 'Wi-Fi'}
                 </span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Écran</span>
-                  <span className="text-xs font-black text-white">{currentProduct.specs.screenSize || currentProduct.specs.screen || "—"}</span>
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Écran</span>
+                  <span className="text-xs font-black text-zinc-900">{currentProduct.specs.screenSize || currentProduct.specs.screen || "—"}</span>
                 </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">RAM</span>
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">RAM</span>
                   <span className="text-sm font-black text-gold">{currentProduct.specs.ram ? `${currentProduct.specs.ram} Go` : "—"}</span>
                 </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Stockage</span>
-                  <span className="text-xs font-black text-emerald-400">{currentProduct.specs.storageSize || "—"}</span>
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Stockage</span>
+                  <span className="text-xs font-black text-emerald-600">{currentProduct.specs.storageSize || "—"}</span>
                 </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                  <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Batterie</span>
-                  <span className="text-xs font-black text-white">
+                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Batterie</span>
+                  <span className="text-xs font-black text-zinc-900">
                     {currentProduct.specs.batteryCapacity ? `${currentProduct.specs.batteryCapacity} mAh` : (currentProduct.specs.battery || "—")}
                   </span>
                 </div>
@@ -674,48 +664,46 @@ export default function ProductDrawer({
           {/* Badge de Spécifications Clés pour Électroménager */}
           {(currentProduct.category === 'appliances' || currentProduct.category === 'electromenager') && currentProduct.specs && (
             <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 space-y-2">
-              <div className="flex items-center justify-between text-cyan-400 text-xs font-bold uppercase tracking-wider">
+              <div className="flex items-center justify-between text-cyan-600 text-xs font-bold uppercase tracking-wider">
                 <span className="flex items-center gap-1.5">
-                  <Refrigerator className="w-4 h-4 text-cyan-400" aria-hidden="true" />
+                  <Refrigerator className="w-4 h-4 text-cyan-600" aria-hidden="true" />
                   <span>Fiche Électroménager Officielle</span>
                 </span>
                 {currentProduct.specs.energyClass && (
-                  <span className="text-[10px] bg-cyan-400/20 text-cyan-300 px-2 py-0.5 rounded-full font-mono font-bold">
+                  <span className="text-[10px] bg-cyan-500/15 text-cyan-700 px-2 py-0.5 rounded-full font-mono font-bold">
                     {currentProduct.specs.energyClass}
                   </span>
                 )}
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
                 {currentProduct.specs.capacity && (
-                  <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                    <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Capacité</span>
-                    <span className="text-xs font-black text-white">{currentProduct.specs.capacity}</span>
+                  <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                    <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Capacité</span>
+                    <span className="text-xs font-black text-zinc-900">{currentProduct.specs.capacity}</span>
                   </div>
                 )}
                 {currentProduct.specs.power && (
-                  <div className="p-2 rounded-xl bg-black/50 border border-white/5">
-                    <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Technologie</span>
+                  <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+                    <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Technologie</span>
                     <span className="text-xs font-black text-gold">{currentProduct.specs.power}</span>
                   </div>
                 )}
                 {currentProduct.specs.applianceType && (
-                  <div className="p-2 rounded-xl bg-black/50 border border-white/5 col-span-2 sm:col-span-1">
-                    <span className="text-[9px] text-zinc-400 uppercase font-semibold block">Type</span>
-                    <span className="text-xs font-black text-emerald-400">{currentProduct.specs.applianceType}</span>
+                  <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200 col-span-2 sm:col-span-1">
+                    <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Type</span>
+                    <span className="text-xs font-black text-emerald-600">{currentProduct.specs.applianceType}</span>
                   </div>
                 )}
               </div>
             </div>
           )}
 
-
-
           {/* Sélecteur de Couleurs interactif style Amazon (Image 1) */}
           {currentProduct.colors && currentProduct.colors.length > 0 && (
-            <div className="space-y-3 pt-3 border-t border-white/10">
+            <div className="space-y-3 pt-3 border-t border-zinc-200">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-300 uppercase tracking-wider font-semibold">
-                  Couleur : <strong className="text-white normal-case font-bold text-sm ml-1.5">{activeColor}</strong>
+                <span className="text-xs text-zinc-600 uppercase tracking-wider font-semibold">
+                  Couleur : <strong className="text-zinc-950 normal-case font-bold text-sm ml-1.5">{activeColor}</strong>
                 </span>
                 <span className="text-[11px] text-zinc-500 font-medium">
                   {currentProduct.colors.length} {currentProduct.colors.length > 1 ? 'finitions' : 'finition'}
@@ -732,10 +720,10 @@ export default function ProductDrawer({
                     <button
                       key={color}
                       onClick={() => handleColorChange(color, idx)}
-                      className={`relative min-w-[90px] sm:min-w-[100px] p-2 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center text-center group flex-shrink-0 ${
+                      className={`relative min-w-[90px] sm:min-w-[100px] p-2 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center text-center group flex-shrink-0 cursor-pointer ${
                         isSelected 
-                          ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(212,175,55,0.3)] scale-[1.03]' 
-                          : 'border-white/10 bg-white/[0.03] hover:border-white/30 hover:bg-white/[0.06]'
+                          ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(212,175,55,0.25)] scale-[1.03]' 
+                          : 'border-zinc-200 bg-zinc-50 hover:border-gold/40 hover:bg-zinc-100/70'
                       }`}
                     >
                       {isSelected && (
@@ -758,7 +746,7 @@ export default function ProductDrawer({
                       </div>
 
                       {/* Nom de la couleur sous l'image */}
-                      <span className={`text-[11px] font-bold line-clamp-1 leading-tight ${isSelected ? 'text-gold' : 'text-zinc-300'}`}>
+                      <span className={`text-[11px] font-bold line-clamp-1 leading-tight ${isSelected ? 'text-gold' : 'text-zinc-700'}`}>
                         {color}
                       </span>
                     </button>
@@ -770,10 +758,10 @@ export default function ProductDrawer({
 
           {/* Sélecteur de Capacité / Taille style Amazon (Image 1) */}
           {availableCapacities.length > 0 && (
-            <div className="space-y-3 pt-3 border-t border-white/10">
+            <div className="space-y-3 pt-3 border-t border-zinc-200">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-300 uppercase tracking-wider font-semibold">
-                  Capacité : <strong className="text-white normal-case font-bold text-sm ml-1.5">{selectedCapacity}</strong>
+                <span className="text-xs text-zinc-600 uppercase tracking-wider font-semibold">
+                  Capacité : <strong className="text-zinc-950 normal-case font-bold text-sm ml-1.5">{selectedCapacity}</strong>
                 </span>
                 <span className="text-[11px] text-zinc-500 font-medium">{availableCapacities.length} options</span>
               </div>
@@ -787,10 +775,10 @@ export default function ProductDrawer({
                     <button
                       key={item.capacity}
                       onClick={() => setSelectedCapacity(item.capacity)}
-                      className={`relative p-3 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-center text-center ${
+                      className={`relative p-3 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer ${
                         isSelected 
-                           ? 'border-gold bg-gold/15 shadow-[0_0_20px_rgba(212,175,55,0.3)] scale-[1.02]' 
-                          : 'border-white/10 bg-white/[0.03] hover:border-gold/30 hover:bg-white/[0.06] text-zinc-400'
+                           ? 'border-gold bg-gold/15 shadow-[0_0_20px_rgba(212,175,55,0.25)] scale-[1.02]' 
+                          : 'border-zinc-200 bg-zinc-50 hover:border-gold/40 hover:bg-zinc-100/70 text-zinc-600'
                       }`}
                     >
                       {isSelected && (
@@ -798,14 +786,14 @@ export default function ProductDrawer({
                           <Check className="w-2.5 h-2.5 text-black stroke-[3]" aria-hidden="true" />
                         </span>
                       )}
-                      <span className={`text-sm font-extrabold tracking-wide ${isSelected ? 'text-white' : 'text-zinc-200'}`}>
+                      <span className={`text-sm font-extrabold tracking-wide ${isSelected ? 'text-zinc-950' : 'text-zinc-800'}`}>
                         {item.capacity}
                       </span>
-                      <span className={`text-xs font-bold mt-1 ${isSelected ? 'text-gold' : 'text-zinc-400'}`}>
+                      <span className={`text-xs font-bold mt-1 ${isSelected ? 'text-gold' : 'text-zinc-500'}`}>
                         {item.price.toLocaleString('fr-FR')} F
                       </span>
                       {diff > 0 ? (
-                        <span className="text-[9px] text-emerald-400 font-medium mt-0.5">
+                        <span className="text-[9px] text-emerald-600 font-medium mt-0.5">
                           +{diff.toLocaleString('fr-FR')} F
                         </span>
                       ) : (
@@ -822,11 +810,11 @@ export default function ProductDrawer({
 
           {/* Fiche Technique & Détails (Style Amazon épuré sans aucun emoji) */}
           {technicalDetails.length > 0 && (
-            <div className="space-y-4 pt-4 border-t border-white/10">
+            <div className="space-y-4 pt-4 border-t border-zinc-200">
 
               {/* Titre Détails */}
               <div className="pt-1">
-                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                <h3 className="text-base sm:text-lg font-bold text-zinc-950 tracking-tight">
                   Détails
                 </h3>
               </div>
@@ -838,10 +826,10 @@ export default function ProductDrawer({
                     key={idx} 
                     className="grid grid-cols-[145px_1fr] sm:grid-cols-[185px_1fr] gap-x-4 items-baseline"
                   >
-                    <span className="font-bold text-zinc-200 leading-snug">
+                    <span className="font-bold text-zinc-900 leading-snug">
                       {item.label}
                     </span>
-                    <span className="text-zinc-300 font-normal leading-relaxed break-words">
+                    <span className="text-zinc-600 font-normal leading-relaxed break-words">
                       {item.value}
                     </span>
                   </div>
@@ -853,7 +841,7 @@ export default function ProductDrawer({
                 <button
                   type="button"
                   onClick={() => setShowAllSpecs(!showAllSpecs)}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-gold hover:text-amber-400 transition-colors pt-1 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-gold hover:text-amber-600 transition-colors pt-1 cursor-pointer"
                 >
                   <svg
                     className={`w-3.5 h-3.5 transition-transform duration-200 ${showAllSpecs ? 'rotate-180' : ''}`}
@@ -870,57 +858,57 @@ export default function ProductDrawer({
           )}
 
           {/* Description du produit */}
-          <div className="space-y-2 pt-2 border-t border-white/10">
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Description</h3>
-            <p className="text-zinc-300 text-sm sm:text-base leading-relaxed border-l-2 border-gold/40 pl-4 py-1 bg-white/[0.02] rounded-r-xl">
+          <div className="space-y-2 pt-2 border-t border-zinc-200">
+            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Description</h3>
+            <p className="text-zinc-700 text-sm sm:text-base leading-relaxed border-l-2 border-gold/50 pl-4 py-1 bg-zinc-50/80 rounded-r-xl">
               {currentProduct.desc}
             </p>
           </div>
 
           {/* État de l'appareil, Garantie & Contenu du Coffret */}
-          <div className="space-y-2.5 pt-3 border-t border-white/10">
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">État, Garantie & Coffret</h3>
+          <div className="space-y-2.5 pt-3 border-t border-zinc-200">
+            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">État, Garantie & Coffret</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-2.5">
+              <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center gap-2.5">
                 <svg className="w-5 h-5 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
                 <div>
-                  <div className="text-[10px] text-zinc-400 uppercase font-semibold">État de l&apos;Appareil</div>
-                  <div className="font-bold text-white">
+                  <div className="text-[10px] text-zinc-500 uppercase font-semibold">État de l&apos;Appareil</div>
+                  <div className="font-bold text-zinc-900">
                     {currentProduct.condition === 'occasion' ? "Occasion Certifiée A+" : "Neuf sous blister scellé"}
                   </div>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-2.5">
-                <svg className="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center gap-2.5">
+                <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                  <div className="text-[10px] text-zinc-400 uppercase font-semibold">Garantie Vendeur</div>
-                  <div className="font-bold text-white">{currentProduct.warranty || "Garantie 12 Mois Certifiée"}</div>
+                  <div className="text-[10px] text-zinc-500 uppercase font-semibold">Garantie Vendeur</div>
+                  <div className="font-bold text-zinc-900">{currentProduct.warranty || "Garantie 12 Mois Certifiée"}</div>
                 </div>
               </div>
 
               {currentProduct.accessories ? (
-                <div className="col-span-1 sm:col-span-2 p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-start gap-2.5">
-                  <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="col-span-1 sm:col-span-2 p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start gap-2.5">
+                  <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                   <div>
-                    <div className="text-[10px] text-zinc-400 uppercase font-semibold">Accessoires Inclus dans le Coffret</div>
-                    <div className="font-medium text-zinc-200 mt-0.5">{currentProduct.accessories}</div>
+                    <div className="text-[10px] text-zinc-500 uppercase font-semibold">Accessoires Inclus dans le Coffret</div>
+                    <div className="font-medium text-zinc-800 mt-0.5">{currentProduct.accessories}</div>
                   </div>
                 </div>
               ) : (
-                <div className="col-span-1 sm:col-span-2 p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-2.5">
-                  <svg className="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="col-span-1 sm:col-span-2 p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center gap-2.5">
+                  <svg className="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                   <div>
-                    <div className="text-[10px] text-zinc-400 uppercase font-semibold">Coffret</div>
-                    <div className="font-medium text-zinc-300">Câble de charge d&apos;origine & documentation inclus</div>
+                    <div className="text-[10px] text-zinc-500 uppercase font-semibold">Coffret</div>
+                    <div className="font-medium text-zinc-700">Câble de charge d&apos;origine & documentation inclus</div>
                   </div>
                 </div>
               )}
@@ -928,45 +916,45 @@ export default function ProductDrawer({
           </div>
 
           {/* Avantages & Garanties Boutique VIP */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-white/10">
-            <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 flex flex-col gap-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-zinc-200">
+            <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-gold font-bold text-xs">
                 <svg className="w-4 h-4 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 <span>Expédition 24/48h</span>
               </div>
-              <span className="text-[11px] text-zinc-400">Livraison rapide et sécurisée</span>
+              <span className="text-[11px] text-zinc-500">Livraison rapide et sécurisée</span>
             </div>
-            <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 flex flex-col gap-1">
+            <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-gold font-bold text-xs">
                 <svg className="w-4 h-4 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
                 <span>Garantie Authentique</span>
               </div>
-              <span className="text-[11px] text-zinc-400">100% Produit certifié d&apos;origine</span>
+              <span className="text-[11px] text-zinc-500">100% Produit certifié d&apos;origine</span>
             </div>
-            <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 flex flex-col gap-1">
+            <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-gold font-bold text-xs">
                 <svg className="w-4 h-4 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 <span>Service VIP WhatsApp</span>
               </div>
-              <span className="text-[11px] text-zinc-400">Assistance directe 7j/7</span>
+              <span className="text-[11px] text-zinc-500">Assistance directe 7j/7</span>
             </div>
           </div>
 
         </div>
 
         {/* Barre d'Action Inférieure Fixée (Sticky Bottom Bar) */}
-        <div className="p-4 sm:p-5 border-t border-white/10 bg-[#09090b]/95 backdrop-blur-md flex items-center justify-between gap-4 relative z-20">
+        <div className="p-4 sm:p-5 border-t border-zinc-200 bg-white/95 backdrop-blur-md flex items-center justify-between gap-4 relative z-20">
           <div className="flex flex-col pr-2">
-            <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">
+            <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-medium">
               Total {selectedCapacity ? `(${selectedCapacity})` : ''}
             </span>
-            <span className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-white whitespace-nowrap">
+            <span className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-600 to-amber-700 whitespace-nowrap">
               {currentPrice.toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
             </span>
           </div>
@@ -977,7 +965,7 @@ export default function ProductDrawer({
               onAddToCart(currentProduct, activeColor, selectedCapacity, currentPrice);
               onClose();
             }}
-            className="flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border border-gold/40 bg-gradient-to-r from-gold via-yellow-400 to-yellow-600 text-black font-extrabold uppercase tracking-widest text-xs sm:text-sm hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] hover:brightness-110 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer shadow-lg"
+            className="flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border border-gold/40 bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black font-extrabold uppercase tracking-widest text-xs sm:text-sm hover:shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:brightness-105 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer shadow-md"
           >
             <ShoppingBag className="w-4 h-4 text-black stroke-[2.5]" aria-hidden="true" />
             <span>Ajouter au panier</span>

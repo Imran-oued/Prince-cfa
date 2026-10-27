@@ -19,9 +19,9 @@ function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 export default function AProposPage() {
   return (
-    <div className="min-h-screen bg-[#08080a] text-zinc-100 flex flex-col selection:bg-gold selection:text-black">
+    <div className="min-h-screen bg-background text-zinc-950 flex flex-col selection:bg-gold selection:text-black">
       {/* Header Sticky Haut de Gamme */}
-      <header className="sticky top-0 z-40 glass-panel border-b border-gold/15 px-4 py-3 sm:px-8">
+      <header className="sticky top-0 z-40 glass-panel border-b border-zinc-200 bg-white/85 px-4 py-3 sm:px-8 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-12 h-12 sm:w-14 sm:h-14 group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_12px_rgba(212,175,55,0.3)]">
@@ -35,10 +35,10 @@ export default function AProposPage() {
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-base sm:text-lg tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-200 to-yellow-500">
-                PRINCE <span className="text-white">CFA</span>
+              <span className="font-black text-base sm:text-lg tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-600 to-yellow-600">
+                PRINCE <span className="text-zinc-900">CFA</span>
               </span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 group-hover:text-gold transition-colors">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 group-hover:text-gold transition-colors">
                 Maison de Prestige
               </span>
             </div>
@@ -47,7 +47,7 @@ export default function AProposPage() {
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/"
-              className="text-xs px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-200 hover:text-white border border-white/10 transition-colors flex items-center gap-2 font-medium"
+              className="text-xs px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900 border border-zinc-200 transition-colors flex items-center gap-2 font-medium"
             >
               <ArrowLeft className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
               <span>Boutique</span>
@@ -57,7 +57,7 @@ export default function AProposPage() {
               href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=Bonjour%20Prince%20CFA`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex text-xs px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 font-semibold items-center gap-1.5 transition-colors"
+              className="hidden sm:flex text-xs px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold items-center gap-1.5 transition-colors"
             >
               <WhatsAppIcon className="w-4 h-4" />
               <span>Assistance VIP</span>
@@ -75,15 +75,15 @@ export default function AProposPage() {
         </div>
 
         <div className="space-y-4 max-w-2xl">
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-tight leading-tight">
             À Propos • <span className="text-gold">L&apos;Histoire PRINCE CFA</span>
           </h1>
-          <p className="text-sm sm:text-base text-zinc-400 font-light leading-relaxed">
+          <p className="text-sm sm:text-base text-zinc-600 font-normal leading-relaxed">
             Cette section est actuellement réservée. L&apos;histoire officielle et la présentation détaillée de notre Maison à Ouagadougou seront publiées ici lors d&apos;une prochaine mise à jour.
           </p>
         </div>
 
-        <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/10 max-w-md w-full space-y-4 text-xs text-zinc-400">
+        <div className="p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm max-w-md w-full space-y-4 text-xs text-zinc-600">
           <div className="flex items-center justify-center gap-2 text-gold font-bold uppercase tracking-wider text-[11px]">
             <Store className="w-4 h-4" />
             <span>Showroom Ouagadougou</span>
@@ -91,7 +91,7 @@ export default function AProposPage() {
           <p className="leading-relaxed">
             Notre showroom physique reste ouvert à Koulouba pour vous accueillir, découvrir nos collections et essayer nos équipements.
           </p>
-          <div className="pt-3 border-t border-white/10 flex items-center justify-center gap-2 text-[11px] text-zinc-500">
+          <div className="pt-3 border-t border-zinc-100 flex items-center justify-center gap-2 text-[11px] text-zinc-500">
             <Clock className="w-3.5 h-3.5 text-gold" />
             <span>Du Lundi au Samedi (9h - 19h) • Dimanche (10h - 16h)</span>
           </div>
@@ -109,9 +109,9 @@ export default function AProposPage() {
             href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=Bonjour%20Prince%20CFA`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider border border-white/15 transition-all inline-flex items-center gap-2"
+            className="px-5 py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-xs uppercase tracking-wider border border-zinc-200 transition-all inline-flex items-center gap-2"
           >
-            <WhatsAppIcon className="w-4 h-4 text-emerald-400" />
+            <WhatsAppIcon className="w-4 h-4 text-emerald-600" />
             <span>Contact Conciergerie</span>
           </a>
         </div>
@@ -119,10 +119,10 @@ export default function AProposPage() {
       </main>
 
       {/* Footer Minimaliste & Épuré */}
-      <footer className="border-t border-white/10 bg-[#060608] py-8 px-4 sm:px-8 mt-auto">
+      <footer className="border-t border-zinc-200 bg-zinc-50 py-8 px-4 sm:px-8 mt-auto">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <p>© 2026 PRINCE CFA. Koulouba, Ouagadougou. Tous droits réservés.</p>
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-zinc-400">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-zinc-600">
             <Link href="/" className="hover:text-gold transition-colors">Accueil</Link>
             <span>•</span>
             <Link href="/a-propos" className="text-gold font-semibold hover:underline">À Propos</Link>

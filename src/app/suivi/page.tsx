@@ -192,17 +192,17 @@ function TrackingContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white flex flex-col selection:bg-gold selection:text-black">
+    <div className="min-h-screen bg-background text-zinc-950 flex flex-col selection:bg-gold selection:text-black">
       {/* En-tête de la page */}
-      <header className="border-b border-white/10 bg-black/60 backdrop-blur-xl sticky top-0 z-30">
+      <header className="border-b border-zinc-200 bg-white/85 backdrop-blur-xl sticky top-0 z-30 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <Crown className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
             <div className="flex flex-col">
-              <span className="font-black text-sm tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-200 to-yellow-500">
+              <span className="font-black text-sm tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-600 to-yellow-600">
                 PRINCE CFA
               </span>
-              <span className="text-[9px] uppercase tracking-[0.2em] text-zinc-400 group-hover:text-gold transition-colors">
+              <span className="text-[9px] uppercase tracking-[0.2em] text-zinc-500 group-hover:text-gold transition-colors">
                 Boutique Officielle
               </span>
             </div>
@@ -211,7 +211,7 @@ function TrackingContent() {
           <div className="flex items-center gap-2">
             <Link
               href="/"
-              className="text-xs px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors flex items-center gap-1.5"
+              className="text-xs px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900 border border-zinc-200 transition-colors flex items-center gap-1.5"
             >
               <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Retour boutique</span>
@@ -220,7 +220,7 @@ function TrackingContent() {
               href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex text-xs px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 font-semibold items-center gap-1.5 transition-colors"
+              className="hidden sm:flex text-xs px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold items-center gap-1.5 transition-colors"
             >
               <WhatsAppIcon className="w-4 h-4" />
               <span>WhatsApp</span>
@@ -238,11 +238,11 @@ function TrackingContent() {
             <Package className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
             <span>Portail Suivi de Commande</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-            Suivez votre appareil <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-yellow-400">en direct</span>
+          <h1 className="text-2xl sm:text-4xl font-black text-zinc-950 tracking-tight">
+            Suivez votre appareil <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-yellow-600">en direct</span>
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400 max-w-lg mx-auto font-light">
-            Entrez votre numéro de commande (ex: <code className="text-gold font-mono">CMD-20261021-XXXX</code>) ou le numéro de téléphone utilisé lors de votre achat.
+          <p className="text-xs sm:text-sm text-zinc-600 max-w-lg mx-auto font-normal">
+            Entrez votre numéro de commande (ex: <code className="text-gold font-mono font-bold">CMD-20261021-XXXX</code>) ou le numéro de téléphone utilisé lors de votre achat.
           </p>
 
           {/* Formulaire de recherche */}
@@ -253,13 +253,13 @@ function TrackingContent() {
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
                 placeholder="Référence (CMD-...) ou Téléphone"
-                className="w-full py-3.5 px-4 rounded-2xl bg-black/70 border border-white/15 focus:border-gold text-sm text-white placeholder:text-zinc-500 focus:outline-none transition-all font-mono"
+                className="w-full py-3.5 px-4 rounded-2xl bg-white border border-zinc-200 focus:border-gold text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition-all font-mono shadow-sm"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="py-3.5 px-6 rounded-2xl bg-gradient-to-r from-gold to-yellow-500 text-black font-extrabold text-xs uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+              className="py-3.5 px-6 rounded-2xl bg-gradient-to-r from-gold to-yellow-500 text-black font-extrabold text-xs uppercase tracking-widest hover:brightness-105 active:scale-95 transition-all shadow-md disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
             >
               {loading ? (
                 <span>Recherche...</span>
@@ -273,17 +273,17 @@ function TrackingContent() {
           </form>
 
           {error && (
-            <div className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs max-w-xl mx-auto animate-in fade-in flex items-center justify-center gap-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+            <div className="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-xs max-w-xl mx-auto animate-in fade-in flex items-center justify-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" aria-hidden="true" />
               <span>{error}</span>
             </div>
           )}
 
           {multipleOrders.length > 1 && (
-            <div className="p-4 rounded-2xl bg-white/5 border border-gold/30 max-w-xl mx-auto space-y-2.5 animate-in fade-in text-left">
-              <div className="flex items-center justify-between text-xs text-zinc-300">
+            <div className="p-4 rounded-2xl bg-white border border-gold/30 max-w-xl mx-auto space-y-2.5 animate-in fade-in text-left shadow-sm">
+              <div className="flex items-center justify-between text-xs text-zinc-700">
                 <span className="font-semibold text-gold">Plusieurs commandes associées ({multipleOrders.length})</span>
-                <span className="text-[10px] text-zinc-400">Cliquez pour basculer</span>
+                <span className="text-[10px] text-zinc-500">Cliquez pour basculer</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {multipleOrders.map((ord) => (
@@ -293,8 +293,8 @@ function TrackingContent() {
                     onClick={() => setOrder(ord)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                       order?.id === ord.id
-                        ? "bg-gold text-black shadow-[0_0_12px_rgba(212,175,55,0.4)]"
-                        : "bg-white/10 text-white hover:bg-white/20"
+                        ? "bg-gold text-black shadow-sm"
+                        : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
                     }`}
                   >
                     {ord.id}
@@ -310,17 +310,17 @@ function TrackingContent() {
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
             
             {/* Carte En-tête Statut */}
-            <div className="p-6 rounded-3xl bg-gradient-to-b from-[#141418] via-[#0c0c0e] to-black border border-gold/30 shadow-[0_0_30px_rgba(212,175,55,0.15)] space-y-6">
+            <div className="p-6 rounded-3xl bg-white border border-gold/30 shadow-md space-y-6">
               
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/10">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-zinc-200">
                 <div>
-                  <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-semibold block">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold block">
                     Référence Officielle PRINCE CFA
                   </span>
                   <div className="text-xl sm:text-2xl font-black text-gold font-mono tracking-wider">
                     {order.id}
                   </div>
-                  <span className="text-xs text-zinc-400 block mt-1">
+                  <span className="text-xs text-zinc-500 block mt-1">
                     Passée le {new Date(order.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
@@ -338,10 +338,10 @@ function TrackingContent() {
                 <div className="pt-2">
                   <div className="relative">
                     {/* Barre de fond */}
-                    <div className="absolute top-5 left-6 right-6 h-1 bg-white/10 rounded-full -z-0">
+                    <div className="absolute top-5 left-6 right-6 h-1 bg-zinc-200 rounded-full -z-0">
                       {/* Remplissage actif */}
                       <div
-                        className="h-full bg-gradient-to-r from-gold via-yellow-400 to-emerald-400 rounded-full transition-all duration-700"
+                        className="h-full bg-gradient-to-r from-gold via-amber-500 to-emerald-500 rounded-full transition-all duration-700"
                         style={{
                           width: currentStep <= 1 ? "15%" : currentStep === 2 ? "50%" : currentStep === 3 ? "80%" : "100%"
                         }}
@@ -354,7 +354,7 @@ function TrackingContent() {
                       {/* Étape 1 */}
                       <div className="flex flex-col items-center">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md ${
-                          currentStep >= 1 ? "bg-gold text-black border-2 border-white" : "bg-zinc-800 text-zinc-400 border border-white/10"
+                          currentStep >= 1 ? "bg-gold text-black border-2 border-white" : "bg-zinc-100 text-zinc-400 border border-zinc-200"
                         }`}>
                           {currentStep >= 1 ? <Check className="w-5 h-5 text-black stroke-[3]" aria-hidden="true" /> : "1"}
                         </div>
@@ -367,11 +367,11 @@ function TrackingContent() {
                       {/* Étape 2 */}
                       <div className="flex flex-col items-center">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md ${
-                          currentStep >= 2 ? "bg-emerald-500 text-black border-2 border-white" : currentStep === 1 ? "bg-amber-500/20 text-amber-300 border-2 border-amber-500 animate-pulse" : "bg-zinc-800 text-zinc-400 border border-white/10"
+                          currentStep >= 2 ? "bg-emerald-500 text-white border-2 border-white" : currentStep === 1 ? "bg-amber-100 text-amber-700 border-2 border-amber-400 animate-pulse" : "bg-zinc-100 text-zinc-400 border border-zinc-200"
                         }`}>
-                          {currentStep >= 2 ? <Check className="w-5 h-5 text-black stroke-[3]" aria-hidden="true" /> : "2"}
+                          {currentStep >= 2 ? <Check className="w-5 h-5 text-white stroke-[3]" aria-hidden="true" /> : "2"}
                         </div>
-                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 2 ? "text-emerald-400" : currentStep === 1 ? "text-amber-300" : "text-zinc-500"}`}>
+                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 2 ? "text-emerald-600" : currentStep === 1 ? "text-amber-600" : "text-zinc-500"}`}>
                           Paiement
                         </span>
                         <span className="text-[9px] text-zinc-500 hidden sm:block">
@@ -382,11 +382,11 @@ function TrackingContent() {
                       {/* Étape 3 */}
                       <div className="flex flex-col items-center">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md ${
-                          currentStep >= 3 ? "bg-cyan-500 text-black border-2 border-white" : currentStep === 2 ? "bg-cyan-500/20 text-cyan-300 border-2 border-cyan-400" : "bg-zinc-800 text-zinc-400 border border-white/10"
+                          currentStep >= 3 ? "bg-cyan-600 text-white border-2 border-white" : currentStep === 2 ? "bg-cyan-100 text-cyan-700 border-2 border-cyan-400" : "bg-zinc-100 text-zinc-400 border border-zinc-200"
                         }`}>
-                          {currentStep >= 3 ? <Check className="w-5 h-5 text-black stroke-[3]" aria-hidden="true" /> : "3"}
+                          {currentStep >= 3 ? <Check className="w-5 h-5 text-white stroke-[3]" aria-hidden="true" /> : "3"}
                         </div>
-                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 3 ? "text-cyan-400" : currentStep === 2 ? "text-cyan-300" : "text-zinc-500"}`}>
+                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 3 ? "text-cyan-600" : currentStep === 2 ? "text-cyan-700" : "text-zinc-500"}`}>
                           Préparation
                         </span>
                         <span className="text-[9px] text-zinc-500 hidden sm:block">Colis scellé</span>
@@ -395,11 +395,11 @@ function TrackingContent() {
                       {/* Étape 4 */}
                       <div className="flex flex-col items-center">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md ${
-                          currentStep >= 4 ? "bg-emerald-400 text-black border-2 border-white" : "bg-zinc-800 text-zinc-400 border border-white/10"
+                          currentStep >= 4 ? "bg-emerald-600 text-white border-2 border-white" : "bg-zinc-100 text-zinc-400 border border-zinc-200"
                         }`}>
-                          {currentStep >= 4 ? <Check className="w-5 h-5 text-black stroke-[3]" aria-hidden="true" /> : "4"}
+                          {currentStep >= 4 ? <Check className="w-5 h-5 text-white stroke-[3]" aria-hidden="true" /> : "4"}
                         </div>
-                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 4 ? "text-emerald-400" : "text-zinc-500"}`}>
+                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 4 ? "text-emerald-600" : "text-zinc-500"}`}>
                           {order.customer.deliveryMethod === "delivery" ? "Livrée" : "Remise"}
                         </span>
                         <span className="text-[9px] text-zinc-500 hidden sm:block">
@@ -413,34 +413,34 @@ function TrackingContent() {
               )}
 
               {/* Message d'explication selon le statut */}
-              <div className="p-4 rounded-2xl bg-black/50 border border-white/10">
+              <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200">
                 {order.payment.status === "confirme" ? (
                   <div className="space-y-1 text-xs">
-                    <div className="text-emerald-400 font-bold flex items-center gap-1.5">
-                      <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" aria-hidden="true" />
+                    <div className="text-emerald-600 font-bold flex items-center gap-1.5">
+                      <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" aria-hidden="true" />
                       <span>Paiement reçu et vérifié par l&apos;équipe PRINCE CFA</span>
                     </div>
-                    <p className="text-zinc-300 font-light leading-relaxed">
+                    <p className="text-zinc-700 font-normal leading-relaxed">
                       Votre appareil a été réservé et votre paiement a été validé le{" "}
                       <strong>{order.payment.confirmedAt ? new Date(order.payment.confirmedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : "récemment"}</strong>.
                       {order.payment.transactionRef && (
-                        <span> (Réf. transaction : <code className="text-gold font-mono">{order.payment.transactionRef}</code>)</span>
+                        <span> (Réf. transaction : <code className="text-gold font-mono font-bold">{order.payment.transactionRef}</code>)</span>
                       )}
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-2 text-xs">
-                    <div className="text-amber-400 font-bold flex items-center gap-1.5">
-                      <Clock className="w-4 h-4 text-amber-400 flex-shrink-0" aria-hidden="true" />
+                    <div className="text-amber-600 font-bold flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" aria-hidden="true" />
                       <span>Paiement en attente de validation</span>
                     </div>
-                    <p className="text-zinc-300 font-light leading-relaxed">
+                    <p className="text-zinc-700 font-normal leading-relaxed">
                       Si vous avez déjà envoyé votre transfert {order.payment.method === "wave" ? "Wave" : "Orange Money"}, nous vérifions actuellement votre SMS de débit sur notre téléphone marchand.
                     </p>
                     <button
                       type="button"
                       onClick={() => handleWhatsAppContact(`Bonjour PRINCE CFA, voici la preuve de mon paiement pour la commande ${order.id}. Pouvez-vous vérifier ?`)}
-                      className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 font-bold text-xs inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <WhatsAppIcon className="w-3.5 h-3.5" />
                       <span>Envoyer la capture du SMS sur WhatsApp</span>
@@ -455,45 +455,45 @@ function TrackingContent() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               
               {/* Colonne 1 & 2 : Liste des articles */}
-              <div className="md:col-span-2 p-5 rounded-3xl bg-white/[0.02] border border-white/10 space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-zinc-300 flex items-center gap-2">
+              <div className="md:col-span-2 p-5 rounded-3xl bg-white border border-zinc-200 shadow-sm space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-wider text-zinc-800 flex items-center gap-2">
                   <Smartphone className="w-4 h-4 text-gold" aria-hidden="true" />
                   <span>Articles commandés ({order.items.reduce((s, i) => s + i.quantity, 0)})</span>
                 </h3>
 
-                <div className="divide-y divide-white/5">
+                <div className="divide-y divide-zinc-100">
                   {order.items.map((item, idx) => (
                     <div key={idx} className="py-3 flex items-center justify-between gap-3 text-xs">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-black/60 border border-white/10 p-1 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-200 p-1 flex items-center justify-center flex-shrink-0 overflow-hidden">
                           <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
                         </div>
                         <div>
-                          <div className="font-bold text-white text-sm">{item.name}</div>
-                          <div className="text-[11px] text-zinc-400 mt-0.5">
+                          <div className="font-bold text-zinc-950 text-sm">{item.name}</div>
+                          <div className="text-[11px] text-zinc-500 mt-0.5">
                             {[item.selectedCapacity, item.selectedColor].filter(Boolean).join(" • ")}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-zinc-400 text-[11px]">{item.quantity} × {item.unitPrice.toLocaleString("fr-FR")} F</div>
+                        <div className="text-zinc-500 text-[11px]">{item.quantity} × {item.unitPrice.toLocaleString("fr-FR")} F</div>
                         <div className="font-black text-gold text-sm">{(item.quantity * item.unitPrice).toLocaleString("fr-FR")} FCFA</div>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="pt-3 border-t border-white/10 space-y-1.5 text-xs">
-                  <div className="flex justify-between text-zinc-400">
+                <div className="pt-3 border-t border-zinc-200 space-y-1.5 text-xs">
+                  <div className="flex justify-between text-zinc-500">
                     <span>Sous-total</span>
                     <span>{order.pricing.subtotal.toLocaleString("fr-FR")} FCFA</span>
                   </div>
-                  <div className="flex justify-between text-zinc-400">
+                  <div className="flex justify-between text-zinc-500">
                     <span>Frais de réception ({order.customer.deliveryMethod === "delivery" ? "Livraison" : "Retrait"})</span>
                     <span>{order.pricing.deliveryFee === 0 ? "Gratuit" : `${order.pricing.deliveryFee.toLocaleString("fr-FR")} FCFA`}</span>
                   </div>
-                  <div className="pt-2 border-t border-white/10 flex justify-between font-black text-sm">
-                    <span className="text-white">Total réglé / attendu</span>
+                  <div className="pt-2 border-t border-zinc-200 flex justify-between font-black text-sm">
+                    <span className="text-zinc-950">Total réglé / attendu</span>
                     <span className="text-gold text-base">{order.pricing.total.toLocaleString("fr-FR")} FCFA</span>
                   </div>
                 </div>
@@ -503,14 +503,14 @@ function TrackingContent() {
               <div className="space-y-4">
                 
                 {/* Mode de réception */}
-                <div className="p-5 rounded-3xl bg-white/[0.02] border border-white/10 space-y-3 text-xs">
-                  <h4 className="font-black uppercase tracking-wider text-zinc-300 flex items-center gap-2">
+                <div className="p-5 rounded-3xl bg-white border border-zinc-200 shadow-sm space-y-3 text-xs">
+                  <h4 className="font-black uppercase tracking-wider text-zinc-800 flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-gold" aria-hidden="true" />
                     <span>Mode de Réception</span>
                   </h4>
 
-                  <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-                    <div className="font-bold text-white flex items-center gap-1.5">
+                  <div className="p-3 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1">
+                    <div className="font-bold text-zinc-950 flex items-center gap-1.5">
                       {order.customer.deliveryMethod === "delivery" ? (
                         <>
                           <Truck className="w-4 h-4 text-gold" aria-hidden="true" />
@@ -524,18 +524,18 @@ function TrackingContent() {
                       )}
                     </div>
                     {order.customer.deliveryMethod === "delivery" ? (
-                      <div className="text-zinc-400 leading-relaxed text-[11px]">
+                      <div className="text-zinc-600 leading-relaxed text-[11px]">
                         {order.customer.neighborhood ? `${order.customer.neighborhood}, ` : ""}{order.customer.city}
                       </div>
                     ) : (
-                      <div className="text-zinc-400 text-[11px] leading-relaxed">
+                      <div className="text-zinc-600 text-[11px] leading-relaxed">
                         Boutique officielle PRINCE CFA à Ouagadougou.
                       </div>
                     )}
                   </div>
 
-                  <div className="text-[11px] text-zinc-400">
-                    Client : <strong className="text-white">{order.customer.name}</strong>
+                  <div className="text-[11px] text-zinc-600">
+                    Client : <strong className="text-zinc-950">{order.customer.name}</strong>
                     {order.customer.phoneMasked && (
                       <span className="block font-mono text-[10px] text-zinc-500 mt-0.5">{order.customer.phoneMasked}</span>
                     )}
@@ -543,13 +543,13 @@ function TrackingContent() {
                 </div>
 
                 {/* Bouton Contact WhatsApp Direct */}
-                <div className="p-5 rounded-3xl bg-emerald-950/20 border border-emerald-500/30 space-y-3 text-center">
+                <div className="p-5 rounded-3xl bg-emerald-50/50 border border-emerald-200 space-y-3 text-center shadow-sm">
                   <Crown className="w-8 h-8 text-gold mx-auto" aria-hidden="true" />
                   <div>
-                    <h4 className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                    <h4 className="text-xs font-black uppercase tracking-wider text-emerald-800">
                       Service Client VIP
                     </h4>
-                    <p className="text-[11px] text-zinc-400 mt-1 font-light">
+                    <p className="text-[11px] text-zinc-600 mt-1 font-normal">
                       Une question ou besoin de contacter le livreur ?
                     </p>
                   </div>
@@ -557,7 +557,7 @@ function TrackingContent() {
                   <button
                     type="button"
                     onClick={() => handleWhatsAppContact()}
-                    className="w-full py-3 px-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3 px-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <WhatsAppIcon className="w-4 h-4" />
                     <span>Discuter sur WhatsApp</span>
@@ -565,7 +565,7 @@ function TrackingContent() {
 
                   <a
                     href={`tel:${SHOP_CONFIG.phone}`}
-                    className="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-semibold border border-white/10 flex items-center justify-center gap-2 transition-colors block"
+                    className="w-full py-2 px-3 rounded-xl bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold border border-zinc-200 flex items-center justify-center gap-2 transition-colors block"
                   >
                     <Phone className="w-4 h-4 text-gold" aria-hidden="true" />
                     <span>Appeler {SHOP_CONFIG.displayPhone}</span>
@@ -576,7 +576,7 @@ function TrackingContent() {
                 <button
                   type="button"
                   onClick={() => fetchOrder(order.id, phone)}
-                  className="w-full py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/10 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="w-full py-2.5 px-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border border-zinc-200 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Actualiser le statut</span>
@@ -592,9 +592,9 @@ function TrackingContent() {
       </main>
 
       {/* Footer minimaliste avec liens légaux */}
-      <footer className="border-t border-white/10 py-6 px-4 text-center text-xs text-zinc-500 space-y-2">
+      <footer className="border-t border-zinc-200 bg-zinc-50 py-6 px-4 text-center text-xs text-zinc-500 space-y-2">
         <p>© {new Date().getFullYear()} PRINCE CFA. Boutique Premium Ouagadougou. Tous droits réservés.</p>
-        <div className="flex flex-wrap items-center justify-center gap-3 text-zinc-400 text-[11px]">
+        <div className="flex flex-wrap items-center justify-center gap-3 text-zinc-600 text-[11px]">
           <Link href="/a-propos" className="hover:text-gold transition-colors">À Propos</Link>
           <span>•</span>
           <Link href="/mentions-legales" className="hover:text-gold transition-colors">Mentions Légales</Link>
@@ -611,7 +611,7 @@ function TrackingContent() {
 export default function TrackingPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#070709] flex items-center justify-center text-gold font-bold">
+      <div className="min-h-screen bg-background flex items-center justify-center text-gold font-bold">
         Chargement du suivi de commande...
       </div>
     }>

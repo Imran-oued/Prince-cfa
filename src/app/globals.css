@@ -11,6 +11,14 @@
 }
 
 :root {
+  --background: #fbfbfc;
+  --foreground: #09090b;
+  --card: #ffffff;
+  --gold: #b8860b;
+  --gold-hover: #996515;
+}
+
+.dark {
   --background: #09090b;
   --foreground: #ffffff;
   --card: #121216;
@@ -26,7 +34,7 @@ body {
 
 ::selection {
   background-color: var(--gold);
-  color: var(--background);
+  color: #ffffff;
 }
 
 /* Base high-tech & luxury utilities */
@@ -68,9 +76,19 @@ textarea,
 }
 
 .glass-panel {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(184, 134, 11, 0.18);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+}
+
+.dark .glass-panel {
   background: rgba(18, 18, 22, 0.7);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(212, 175, 55, 0.1);
+  box-shadow: none;
 }
 
 /* Animations d'apparition et d'effets slide */

@@ -244,7 +244,7 @@ function ProductCardItem({
           onOpen(product);
         }
       }}
-      className="glass-panel p-3 sm:p-4 rounded-2xl sm:rounded-3xl flex flex-row items-stretch transition-all duration-300 hover:shadow-[0_12px_32px_rgba(212,175,55,0.18)] hover:border-gold/40 hover:-translate-y-0.5 active:scale-[0.99] group relative overflow-hidden bg-black/40 border border-white/10 gap-3 sm:gap-4 cursor-pointer"
+      className="glass-panel p-3 sm:p-4 rounded-2xl sm:rounded-3xl flex flex-row items-stretch transition-all duration-300 hover:shadow-lg hover:border-gold/50 hover:-translate-y-0.5 active:scale-[0.99] group relative overflow-hidden bg-white border border-zinc-200/90 shadow-sm gap-3 sm:gap-4 cursor-pointer"
     >
       {/* 1. Colonne GAUCHE : Image Grande & Immersive Style Amazon avec glissement tactile */}
       <div 
@@ -327,13 +327,13 @@ function ProductCardItem({
       <div className="flex-1 flex flex-col justify-between min-w-0">
         <div>
           {/* Titre Produit */}
-          <h3 className="text-sm sm:text-base font-bold text-white line-clamp-2 group-hover:text-gold transition-colors leading-snug">
+          <h3 className="text-sm sm:text-base font-bold text-zinc-950 line-clamp-2 group-hover:text-gold transition-colors leading-snug">
             {product.name}
           </h3>
 
           {/* Sous-titre / Spécifications courtes */}
           {specsSnippet && (
-            <p className="text-[11px] sm:text-xs text-zinc-400 line-clamp-1 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-zinc-500 line-clamp-1 mt-0.5">
               {specsSnippet}
             </p>
           )}
@@ -342,31 +342,31 @@ function ProductCardItem({
           <div className="mt-2 flex items-baseline gap-2 flex-wrap">
             {product.salePrice && product.price && Number(product.salePrice) < Number(product.price) ? (
               <>
-                <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-amber-300 to-gold tracking-tight">
+                <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-amber-600 to-gold tracking-tight">
                   {(Number(product.salePrice) || 0).toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
                 </span>
-                <span className="text-xs sm:text-sm text-zinc-500 line-through">
+                <span className="text-xs sm:text-sm text-zinc-400 line-through">
                   {(Number(product.price) || 0).toLocaleString('fr-FR')} FCFA
                 </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase bg-red-500/20 text-red-400 border border-red-500/30">
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase bg-red-100 text-red-600 border border-red-200">
                   PROMO
                 </span>
               </>
             ) : (
-              <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-400 to-white tracking-tight">
+              <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-600 to-yellow-600 tracking-tight">
                 {(Number(product.price) || 0).toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
               </span>
             )}
           </div>
 
           {/* Mention Livraison & Retrait */}
-          <p className="text-[10px] sm:text-[11px] text-zinc-400 font-medium mt-1 flex items-center gap-2 flex-wrap">
-            <span className="text-zinc-300 flex items-center gap-1">
-              <Truck className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
+          <p className="text-[10px] sm:text-[11px] text-zinc-500 font-medium mt-1 flex items-center gap-2 flex-wrap">
+            <span className="text-zinc-700 flex items-center gap-1">
+              <Truck className="w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
               <span>Livraison Express</span>
             </span>
-            <span className="text-zinc-600">•</span>
-            <span className="text-gold flex items-center gap-1">
+            <span className="text-zinc-300">•</span>
+            <span className="text-gold font-semibold flex items-center gap-1">
               <Store className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
               <span>Retrait en Boutique</span>
             </span>
@@ -374,9 +374,9 @@ function ProductCardItem({
 
           {/* Pastilles de couleurs interactives style Amazon */}
           {product.colors && product.colors.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-white/5">
-              <div className="text-[10px] sm:text-[11px] text-zinc-400 mb-1">
-                Couleur : <strong className="text-white font-semibold">{activeColor}</strong>
+            <div className="mt-2 pt-2 border-t border-zinc-100">
+              <div className="text-[10px] sm:text-[11px] text-zinc-500 mb-1">
+                Couleur : <strong className="text-zinc-900 font-semibold">{activeColor}</strong>
               </div>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {product.colors.map((colorName, idx) => {
@@ -393,8 +393,8 @@ function ProductCardItem({
                       }}
                       className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full transition-all relative flex items-center justify-center flex-shrink-0 cursor-pointer ${
                         isCurrent 
-                          ? 'ring-2 ring-gold ring-offset-2 ring-offset-black scale-110 shadow-sm' 
-                          : 'border border-white/30 opacity-70 hover:opacity-100 hover:scale-105'
+                          ? 'ring-2 ring-gold ring-offset-2 ring-offset-white scale-110 shadow-sm' 
+                          : 'border border-zinc-300 opacity-80 hover:opacity-100 hover:scale-105'
                       }`}
                       style={{ backgroundColor: bgHex }}
                     />
@@ -405,7 +405,7 @@ function ProductCardItem({
           )}
 
           {/* Boutons d'action optimisés pour mobile & desktop */}
-          <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center gap-2">
+          <div className="mt-3 pt-2.5 border-t border-zinc-100 flex items-center gap-2">
             <button
               type="button"
               onClick={(e) => {
@@ -423,7 +423,7 @@ function ProductCardItem({
                 e.stopPropagation();
                 onAddToCart(product, activeColor);
               }}
-              className="py-2 px-3.5 rounded-xl bg-gradient-to-r from-gold to-yellow-600 text-black text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-[0_0_12px_rgba(212,175,55,0.3)] hover:brightness-110 transition-all active:scale-95 cursor-pointer"
+              className="py-2 px-3.5 rounded-xl bg-gradient-to-r from-gold to-yellow-600 text-black text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm hover:brightness-105 transition-all active:scale-95 cursor-pointer"
               title="Ajouter directement au panier"
               aria-label="Ajouter directement au panier"
             >
@@ -825,10 +825,10 @@ export default function Home() {
           </h1>
           
           <div className="space-y-3">
-            <p className="text-xl sm:text-2xl lg:text-3xl font-medium text-white tracking-wide">
+            <p className="text-xl sm:text-2xl lg:text-3xl font-semibold text-zinc-950 tracking-wide">
               Bienvenue dans l&apos;univers de la technologie.
             </p>
-            <p className="text-sm sm:text-base lg:text-lg text-zinc-300 max-w-2xl mx-auto font-light leading-relaxed">
+            <p className="text-sm sm:text-base lg:text-lg text-zinc-600 max-w-2xl mx-auto font-normal leading-relaxed">
               Smartphones, ordinateurs et accessoires technologiques : trouvez ce qu&apos;il vous faut au meilleur prix.
             </p>
           </div>
@@ -844,7 +844,7 @@ export default function Home() {
                   target.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black font-extrabold text-xs sm:text-sm tracking-wider uppercase shadow-[0_4px_25px_rgba(212,175,55,0.35)] hover:shadow-[0_4px_35px_rgba(212,175,55,0.6)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer group"
+              className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black font-extrabold text-xs sm:text-sm tracking-wider uppercase shadow-md hover:brightness-105 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer group"
             >
               <span>Découvrir nos produits</span>
               <ArrowDown className="w-4 h-4 text-black group-hover:translate-y-1 transition-transform" />
@@ -859,7 +859,7 @@ export default function Home() {
                   target.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-white/[0.04] hover:bg-gold/10 text-white hover:text-gold border border-white/15 hover:border-gold/50 font-bold text-xs sm:text-sm tracking-wider uppercase backdrop-blur-md hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer group shadow-sm"
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-white hover:bg-gold/10 text-zinc-800 hover:text-gold border border-zinc-200 hover:border-gold/50 font-bold text-xs sm:text-sm tracking-wider uppercase backdrop-blur-md hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer group shadow-sm"
             >
               <Phone className="w-4 h-4 text-gold group-hover:rotate-12 transition-transform" aria-hidden="true" />
               <span>Contactez-nous</span>
@@ -869,44 +869,44 @@ export default function Home() {
 
         {/* Badges de Réassurance Prestige (Point 4) */}
         <div className="w-full max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4 my-4 z-20">
-          <div className="p-4 rounded-2xl glass-panel border border-white/10 hover:border-gold/40 hover:bg-gold/[0.03] transition-all duration-300 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 group">
+          <div className="p-4 rounded-2xl glass-panel border border-zinc-200/80 bg-white hover:border-gold/40 hover:bg-gold/[0.03] shadow-sm transition-all duration-300 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 group">
             <div className="w-11 h-11 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform text-gold">
               <ShieldCheck className="w-6 h-6 text-gold" aria-hidden="true" />
             </div>
             <div>
-              <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-gold transition-colors">100% Authentique</h4>
-              <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5 leading-snug">Produits certifiés d&apos;origine sous garantie.</p>
+              <h4 className="text-xs sm:text-sm font-bold text-zinc-950 group-hover:text-gold transition-colors">100% Authentique</h4>
+              <p className="text-[11px] sm:text-xs text-zinc-500 mt-0.5 leading-snug">Produits certifiés d&apos;origine sous garantie.</p>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl glass-panel border border-white/10 hover:border-gold/40 hover:bg-gold/[0.03] transition-all duration-300 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 group">
-            <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center gap-1 p-1 flex-shrink-0 group-hover:scale-110 transition-transform shadow-inner">
+          <div className="p-4 rounded-2xl glass-panel border border-zinc-200/80 bg-white hover:border-gold/40 hover:bg-gold/[0.03] shadow-sm transition-all duration-300 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 group">
+            <div className="w-11 h-11 rounded-xl bg-zinc-100 border border-zinc-200 flex items-center justify-center gap-1 p-1 flex-shrink-0 group-hover:scale-110 transition-transform shadow-inner">
               <img src="/orange-money.png" alt="Orange Money" className="w-4 h-4 rounded object-contain" />
               <img src="/wave.png" alt="Wave" className="w-4 h-4 rounded-full object-cover" />
             </div>
             <div>
-              <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-gold transition-colors">Orange Money & Wave</h4>
-              <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5 leading-snug">Dépôt Orange Money ou Wave, ou règlement direct en boutique physique.</p>
+              <h4 className="text-xs sm:text-sm font-bold text-zinc-950 group-hover:text-gold transition-colors">Orange Money & Wave</h4>
+              <p className="text-[11px] sm:text-xs text-zinc-500 mt-0.5 leading-snug">Dépôt Orange Money ou Wave, ou règlement direct en boutique physique.</p>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl glass-panel border border-white/10 hover:border-gold/40 hover:bg-gold/[0.03] transition-all duration-300 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 group">
+          <div className="p-4 rounded-2xl glass-panel border border-zinc-200/80 bg-white hover:border-gold/40 hover:bg-gold/[0.03] shadow-sm transition-all duration-300 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 group">
             <div className="w-11 h-11 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform text-gold">
               <Truck className="w-6 h-6 text-gold" aria-hidden="true" />
             </div>
             <div>
-              <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-gold transition-colors">Livraison Express</h4>
-              <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5 leading-snug">Expédition rapide et sécurisée à votre porte.</p>
+              <h4 className="text-xs sm:text-sm font-bold text-zinc-950 group-hover:text-gold transition-colors">Livraison Express</h4>
+              <p className="text-[11px] sm:text-xs text-zinc-500 mt-0.5 leading-snug">Expédition rapide et sécurisée à votre porte.</p>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl glass-panel border border-white/10 hover:border-gold/40 hover:bg-gold/[0.03] transition-all duration-300 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 group">
+          <div className="p-4 rounded-2xl glass-panel border border-zinc-200/80 bg-white hover:border-gold/40 hover:bg-gold/[0.03] shadow-sm transition-all duration-300 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 group">
             <div className="w-11 h-11 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform text-gold">
               <Crown className="w-6 h-6 text-gold" aria-hidden="true" />
             </div>
             <div>
-              <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-gold transition-colors">Service VIP 7j/7</h4>
-              <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5 leading-snug">Assistance et conseils personnalisés sur WhatsApp.</p>
+              <h4 className="text-xs sm:text-sm font-bold text-zinc-950 group-hover:text-gold transition-colors">Service VIP 7j/7</h4>
+              <p className="text-[11px] sm:text-xs text-zinc-500 mt-0.5 leading-snug">Assistance et conseils personnalisés sur WhatsApp.</p>
             </div>
           </div>
         </div>
@@ -944,11 +944,11 @@ export default function Home() {
                     className={`shrink-0 flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase transition-all duration-300 active:scale-95 cursor-pointer whitespace-nowrap group ${
                       isSelected
                         ? isPromo
-                          ? 'bg-gradient-to-r from-red-600 via-rose-500 to-amber-500 text-white font-bold shadow-[0_0_25px_rgba(239,68,68,0.5)] border border-red-400/60 scale-[1.02]'
-                          : 'bg-gradient-to-r from-gold via-amber-400 to-yellow-500 text-black font-bold shadow-[0_0_24px_rgba(212,175,55,0.45)] border border-yellow-300/60 scale-[1.02]'
+                          ? 'bg-gradient-to-r from-red-600 via-rose-500 to-amber-500 text-white font-bold shadow-md border border-red-400/60 scale-[1.02]'
+                          : 'bg-gradient-to-r from-gold via-amber-400 to-yellow-500 text-black font-bold shadow-md border border-yellow-400 scale-[1.02]'
                         : isPromo
-                          ? 'bg-red-950/30 hover:bg-red-900/40 text-red-400 hover:text-red-300 border border-red-500/30 hover:border-red-400/60 shadow-[0_0_12px_rgba(239,68,68,0.15)]'
-                          : 'bg-zinc-900/80 hover:bg-zinc-800/90 text-zinc-300 hover:text-gold border border-white/10 hover:border-gold/40 shadow-sm backdrop-blur-sm'
+                          ? 'bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 shadow-sm'
+                          : 'bg-white hover:bg-zinc-50 text-zinc-700 hover:text-gold border border-zinc-200 hover:border-gold/40 shadow-sm backdrop-blur-sm'
                     }`}
                   >
                     {Icon && (
@@ -959,8 +959,8 @@ export default function Home() {
                               ? 'text-white fill-white'
                               : 'text-black fill-current'
                             : isPromo
-                              ? 'text-red-400 group-hover:scale-110'
-                              : 'text-zinc-400 group-hover:text-gold group-hover:scale-110'
+                              ? 'text-red-500 group-hover:scale-110'
+                              : 'text-zinc-500 group-hover:text-gold group-hover:scale-110'
                         }`}
                         aria-hidden="true"
                       />
@@ -977,7 +977,7 @@ export default function Home() {
           {selectedCategory === 'phones' && (
             <div 
               id="sous-categories-telephones" 
-              className="w-full max-w-5xl mt-3 pt-3 border-t border-white/10 animate-in slide-in-from-top-2 fade-in duration-300 scroll-mt-24 sm:scroll-mt-28"
+              className="w-full max-w-5xl mt-3 pt-3 border-t border-zinc-200 animate-in slide-in-from-top-2 fade-in duration-300 scroll-mt-24 sm:scroll-mt-28"
             >
               <div className="text-[11px] font-bold text-gold uppercase tracking-[0.2em] mb-2 px-2 flex items-center gap-1.5">
                 <Smartphone className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
@@ -992,8 +992,8 @@ export default function Home() {
                   onClick={() => setSelectedBrand('all')}
                   className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer ${
                     selectedBrand === 'all'
-                      ? "bg-gradient-to-r from-gold to-yellow-600 text-black font-extrabold shadow-[0_0_15px_rgba(212,175,55,0.4)] scale-105"
-                      : "bg-zinc-900/90 text-zinc-200 border border-white/20 hover:border-gold/50 hover:text-gold"
+                      ? "bg-gradient-to-r from-gold to-yellow-600 text-black font-extrabold shadow-sm scale-105"
+                      : "bg-white text-zinc-700 border border-zinc-200 hover:border-gold/50 hover:text-gold shadow-sm"
                   }`}
                 >
                   Toutes les marques
@@ -1005,8 +1005,8 @@ export default function Home() {
                     onClick={() => setSelectedBrand(brand)}
                     className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer ${
                       selectedBrand === brand
-                        ? "bg-gradient-to-r from-gold to-yellow-600 text-black font-extrabold shadow-[0_0_15px_rgba(212,175,55,0.4)] scale-105"
-                        : "bg-zinc-900/90 text-zinc-200 border border-white/20 hover:border-gold/50 hover:text-gold"
+                        ? "bg-gradient-to-r from-gold to-yellow-600 text-black font-extrabold shadow-sm scale-105"
+                        : "bg-white text-zinc-700 border border-zinc-200 hover:border-gold/50 hover:text-gold shadow-sm"
                     }`}
                   >
                     {brand}
@@ -1022,16 +1022,16 @@ export default function Home() {
           
           {/* Bandeau d'état de recherche active */}
           {searchQuery.trim() && (
-            <div className="w-full max-w-4xl mx-auto mb-8 p-4 sm:p-5 rounded-2xl glass-panel border border-gold/40 bg-gold/5 flex flex-wrap items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-300 shadow-[0_0_25px_rgba(212,175,55,0.1)]">
+            <div className="w-full max-w-4xl mx-auto mb-8 p-4 sm:p-5 rounded-2xl glass-panel border border-gold/30 bg-gold/5 flex flex-wrap items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-300 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gold/15 border border-gold/30 flex items-center justify-center text-gold flex-shrink-0">
                   <Search className="w-5 h-5 text-gold" aria-hidden="true" />
                 </div>
                 <div>
-                  <div className="text-xs uppercase tracking-wider text-zinc-400 font-semibold">Résultats de votre recherche</div>
-                  <div className="text-base sm:text-lg font-bold text-white mt-0.5">
+                  <div className="text-xs uppercase tracking-wider text-zinc-500 font-semibold">Résultats de votre recherche</div>
+                  <div className="text-base sm:text-lg font-bold text-zinc-950 mt-0.5">
                     &quot;<span className="text-gold">{searchQuery}</span>&quot;
-                    <span className="text-xs font-normal text-zinc-400 ml-2">
+                    <span className="text-xs font-normal text-zinc-500 ml-2">
                       ({filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''} trouvé{filteredProducts.length > 1 ? 's' : ''})
                     </span>
                   </div>
@@ -1040,7 +1040,7 @@ export default function Home() {
 
               <button
                 onClick={() => setSearchQuery('')}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold text-xs font-bold text-zinc-200 border border-white/15 transition-all flex items-center gap-2 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-white hover:bg-gold/20 hover:text-gold text-xs font-bold text-zinc-700 border border-zinc-200 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
               >
                 <X className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Effacer la recherche</span>
@@ -1053,10 +1053,10 @@ export default function Home() {
               <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-4 text-gold">
                 <Search className="w-8 h-8 text-gold" aria-hidden="true" />
               </div>
-              <p className="text-xl text-white font-semibold">
+              <p className="text-xl text-zinc-950 font-bold">
                 {searchQuery.trim() ? `Aucun produit ne correspond à "${searchQuery}"` : "Aucun produit ne correspond à votre sélection."}
               </p>
-              <p className="text-sm text-zinc-400 mt-2 max-w-md mx-auto font-light">
+              <p className="text-sm text-zinc-500 mt-2 max-w-md mx-auto font-normal">
                 {searchQuery.trim() 
                   ? "Vérifiez l'orthographe ou essayez un mot-clé plus simple (ex: iPhone, Samsung, AirPods, 128 Go)." 
                   : "Veuillez choisir une autre catégorie ou marque."}
@@ -1067,7 +1067,7 @@ export default function Home() {
                     setSearchQuery('');
                     handleSelectCategory('all');
                   }}
-                  className="mt-6 px-6 py-2.5 rounded-full bg-gold text-black font-bold text-xs uppercase tracking-wider hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(212,175,55,0.25)] cursor-pointer"
+                  className="mt-6 px-6 py-2.5 rounded-full bg-gold text-black font-bold text-xs uppercase tracking-wider hover:bg-yellow-400 transition-all shadow-md cursor-pointer"
                 >
                   Afficher tout le catalogue
                 </button>
@@ -1090,15 +1090,15 @@ export default function Home() {
       </main>
 
       {/* Footer Luxueux */}
-      <footer id="about" className="w-full border-t border-white/10 bg-[#08080a] relative z-20 mt-16 pt-16 pb-12 px-4 sm:px-8 scroll-mt-8">
+      <footer id="about" className="w-full border-t border-zinc-200 bg-zinc-100/90 relative z-20 mt-16 pt-16 pb-12 px-4 sm:px-8 scroll-mt-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           
           {/* Col 1 : Marque */}
           <div className="space-y-4">
-            <h3 className="text-xl font-black text-white tracking-widest flex items-center gap-2">
+            <h3 className="text-xl font-black text-zinc-950 tracking-widest flex items-center gap-2">
               PRINCE <span className="text-gold">CFA</span>
             </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <p className="text-xs text-zinc-600 leading-relaxed">
               Maison de référence pour les smartphones haut de gamme, l&apos;électronique de prestige et le high-tech en Afrique de l&apos;Ouest.
             </p>
             <div className="flex items-center gap-2 text-xs text-zinc-500">
@@ -1109,8 +1109,8 @@ export default function Home() {
 
           {/* Col 2 : Rayons */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-widest text-gold">Nos Rayons</h4>
-            <ul className="text-xs text-zinc-400 space-y-2">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-gold">Nos Rayons</h4>
+            <ul className="text-xs text-zinc-600 space-y-2">
               <li><button onClick={() => { handleSelectCategory('phones'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Téléphones & Smartphones</button></li>
               <li><button onClick={() => { handleSelectCategory('computers'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Ordinateurs & PC</button></li>
               <li><button onClick={() => { handleSelectCategory('tablets'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Tablettes & iPads</button></li>
@@ -1123,7 +1123,7 @@ export default function Home() {
               <li>
                 <button 
                   onClick={() => { handleSelectCategory('promotion'); window.scrollTo({top: 400, behavior: 'smooth'}); }} 
-                  className="text-red-400 font-bold hover:text-gold transition-colors flex items-center gap-1.5 pt-1"
+                  className="text-red-600 font-bold hover:text-gold transition-colors flex items-center gap-1.5 pt-1"
                 >
                   <Flame className="w-3.5 h-3.5 text-red-500 fill-red-500" aria-hidden="true" />
                   <span>PROMOTION & Bons Plans</span>
@@ -1134,8 +1134,8 @@ export default function Home() {
 
           {/* Col 3 : Sécurité & Engagements */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-widest text-gold">Engagements</h4>
-            <ul className="text-xs text-zinc-400 space-y-2">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-gold">Engagements</h4>
+            <ul className="text-xs text-zinc-600 space-y-2">
               <li className="flex items-center gap-2">
                 <ShieldCheck className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
                 <span>Garantie 100% Produit Neuf</span>
@@ -1152,7 +1152,7 @@ export default function Home() {
                 <Receipt className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
                 <span>Facture légale certifiée</span>
               </li>
-              <li className="pt-2 border-t border-white/5 flex items-center gap-2.5 text-[11px] text-zinc-400">
+              <li className="pt-2 border-t border-zinc-200 flex items-center gap-2.5 text-[11px] text-zinc-500">
                 <Link href="/mentions-legales" className="hover:text-gold transition-colors">
                   Mentions Légales
                 </Link>
@@ -1170,7 +1170,7 @@ export default function Home() {
               <Phone className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
               <span>NOUS JOINDRE</span>
             </h4>
-            <div className="space-y-3 text-xs text-zinc-300">
+            <div className="space-y-3 text-xs text-zinc-700">
               <div className="space-y-1.5">
                 {(SHOP_CONFIG.phones || [
                   { display: "+226 77 43 43 97", raw: "+22677434397", wa: "22677434397", isWhatsApp: true },
@@ -1192,14 +1192,14 @@ export default function Home() {
                       ) : (
                         <Phone className="w-3 h-3 text-gold/80 group-hover:text-gold flex-shrink-0" aria-hidden="true" />
                       )}
-                      <span className="font-semibold text-zinc-200 group-hover:text-gold">{item.display}</span>
+                      <span className="font-semibold text-zinc-800 group-hover:text-gold">{item.display}</span>
                     </a>
                   );
                 })}
               </div>
 
-              <div className="pt-2 border-t border-white/5 space-y-1.5">
-                <p className="flex items-center gap-2 text-zinc-300 font-medium">
+              <div className="pt-2 border-t border-zinc-200 space-y-1.5">
+                <p className="flex items-center gap-2 text-zinc-700 font-medium">
                   <MapPin className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
                   <span>Koulouba, Ouagadougou</span>
                 </p>
@@ -1214,14 +1214,14 @@ export default function Home() {
                 </a>
               </div>
 
-              <div className="pt-2 border-t border-white/5 text-[11px] text-zinc-400 space-y-1 leading-relaxed">
+              <div className="pt-2 border-t border-zinc-200 text-[11px] text-zinc-500 space-y-1 leading-relaxed">
                 <p className="flex justify-between">
                   <span className="text-zinc-500">Lundi – Samedi :</span>
-                  <span className="text-white font-medium">9 h – 19 h</span>
+                  <span className="text-zinc-900 font-medium">9 h – 19 h</span>
                 </p>
                 <p className="flex justify-between">
                   <span className="text-zinc-500">Dimanche :</span>
-                  <span className="text-white font-medium">10 h – 16 h</span>
+                  <span className="text-zinc-900 font-medium">10 h – 16 h</span>
                 </p>
               </div>
             </div>
@@ -1230,10 +1230,10 @@ export default function Home() {
         </div>
 
         {/* Ligne Copyright & Liens Légaux */}
-        <div className="max-w-7xl mx-auto pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
+        <div className="max-w-7xl mx-auto pt-8 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
             <p>© 2026 PRINCE CFA. Tous droits réservés.</p>
-            <span className="hidden sm:inline text-zinc-700">|</span>
+            <span className="hidden sm:inline text-zinc-400">|</span>
             <div className="flex items-center gap-3">
               <Link href="/a-propos" className="hover:text-gold transition-colors">
                 À Propos
@@ -1251,7 +1251,7 @@ export default function Home() {
           <p className="flex items-center gap-3">
             <span>Sécurisé par Firebase Cloud</span>
             <span>•</span>
-            <span className="text-gold">Excellence & Prestige</span>
+            <span className="text-gold font-medium">Excellence & Prestige</span>
           </p>
         </div>
       </footer>
@@ -1259,12 +1259,12 @@ export default function Home() {
       {/* Barre de Navigation Mobile Inférieure : Style Amazon (Épurée, Tailles Identiques, Minimaliste) */}
       <nav 
         aria-label="Navigation mobile" 
-        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#09090b]/95 backdrop-blur-md border-t border-white/10 grid grid-cols-3 items-center py-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] shadow-[0_-8px_20px_rgba(0,0,0,0.8)]"
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-zinc-200 grid grid-cols-3 items-center py-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]"
       >
         {/* 1. Accueil */}
         <button 
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex flex-col items-center justify-center py-1.5 text-zinc-400 hover:text-gold active:text-gold active:scale-95 transition-all gap-1 cursor-pointer touch-manipulation select-none group"
+          className="flex flex-col items-center justify-center py-1.5 text-zinc-500 hover:text-gold active:text-gold active:scale-95 transition-all gap-1 cursor-pointer touch-manipulation select-none group"
         >
           <svg className="w-5 h-5 group-hover:text-gold transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -1275,7 +1275,7 @@ export default function Home() {
         {/* 2. Panier (Même taille, badge épuré style Amazon) */}
         <button 
           onClick={() => setIsCartOpen(true)}
-          className="flex flex-col items-center justify-center py-1.5 text-zinc-400 hover:text-gold active:text-gold active:scale-95 transition-all gap-1 cursor-pointer touch-manipulation select-none group"
+          className="flex flex-col items-center justify-center py-1.5 text-zinc-500 hover:text-gold active:text-gold active:scale-95 transition-all gap-1 cursor-pointer touch-manipulation select-none group"
           title="Mon Panier"
         >
           <div className="relative flex items-center justify-center">
@@ -1297,7 +1297,7 @@ export default function Home() {
             const elem = document.getElementById('about');
             if (elem) elem.scrollIntoView({ behavior: 'smooth' });
           }}
-          className="flex flex-col items-center justify-center py-1.5 text-zinc-400 hover:text-gold active:text-gold active:scale-95 transition-all gap-1 cursor-pointer touch-manipulation select-none group"
+          className="flex flex-col items-center justify-center py-1.5 text-zinc-500 hover:text-gold active:text-gold active:scale-95 transition-all gap-1 cursor-pointer touch-manipulation select-none group"
         >
           <svg className="w-5 h-5 group-hover:text-gold transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
