@@ -357,36 +357,20 @@ export function normalizeProductSpecs(product: any): any {
 
 /**
  * Détermine le style de fond du conteneur d'image :
- * - Fond blanc pour les visuels catalogue Apple d'origine (Capture 2)
- * - Fond noir pour les photos ajoutées par l'utilisateur / smartphone afin que le cadrage restant soit noir et élégant (Capture 1)
+ * - Fond blanc épuré par défaut pour tous les produits (catalogue officiel Apple et photos réelles ajoutées),
+ *   assurant un cadrage net, lumineux et professionnel en harmonie avec le thème blanc du site.
+ * - Le choix explicite 'black' reste honoré si expressément sélectionné par l'administrateur.
  */
 export function getProductImageBg(product?: any, imageSrc?: string): {
   containerClass: string;
   isBlack: boolean;
 } {
-  // 1. Choix explicite enregistré sur le produit
+  // 1. Choix explicite 'black' si expressément spécifié
   if (product?.imageBg === 'black' || product?.bgBlack === true) {
     return { containerClass: 'bg-black border border-white/10', isBlack: true };
   }
-  if (product?.imageBg === 'white') {
-    return { containerClass: 'bg-white', isBlack: false };
-  }
 
-  // 2. Vérification de la source de l'image
-  const src = typeof imageSrc === 'string' 
-    ? imageSrc 
-    : (typeof product?.image === 'string' ? product.image : '');
-
-  // Les images officielles Apple du catalogue ont un fond blanc d'origine
-  const isAppleCatalog = 
-    src.startsWith('/products/apple/') || 
-    (product?.id && String(product.id).startsWith('pcfa-') && !src.startsWith('data:image/'));
-
-  if (isAppleCatalog) {
-    return { containerClass: 'bg-white', isBlack: false };
-  }
-
-  // 3. Toutes les photos ajoutées par l'utilisateur (photos réelles smartphone, uploads base64, mobilité, etc.)
-  // -> Fond noir pour que le volume restant autour de la photo soit en noir uni
-  return { containerClass: 'bg-black border border-white/10', isBlack: true };
+  // 2. Par défaut pour tous les produits (catalogue officiel Apple, smartphone, uploads réels, moto, réfrigérateur, etc.)
+  // -> Fond blanc pur pour un rendu professionnel, épuré et parfaitement optimisé
+  return { containerClass: 'bg-white', isBlack: false };
 }

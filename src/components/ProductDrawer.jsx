@@ -409,7 +409,7 @@ export default function ProductDrawer({
           <div className="space-y-3">
             {/* Boîte photo épurée avec glissement tactile au doigt */}
             <div 
-              className={`relative w-full h-80 sm:h-96 md:h-[420px] rounded-3xl ${currentImgBg.containerClass} overflow-hidden shadow-sm select-none touch-pan-y flex items-center justify-center cursor-grab active:cursor-grabbing`}
+              className={`relative w-full h-80 sm:h-96 md:h-[420px] rounded-3xl ${currentImgBg.containerClass} ${currentImgBg.isBlack ? '' : 'border border-zinc-200/80'} overflow-hidden shadow-sm select-none touch-pan-y flex items-center justify-center cursor-grab active:cursor-grabbing`}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}

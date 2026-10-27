@@ -420,7 +420,7 @@ export default function CartDrawer({
                             <img 
                               src={item.image} 
                               alt={item.name} 
-                              className={`max-w-full max-h-full object-contain ${getProductImageBg(item, item.image).isBlack ? '' : 'mix-blend-multiply'}`}
+                              className="max-w-full max-h-full object-contain"
                             />
                           </div>
                           <div className="flex-1 min-w-0">

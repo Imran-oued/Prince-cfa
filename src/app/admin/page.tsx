@@ -276,7 +276,7 @@ export default function AdminPage() {
     condition: "neuf",
     warranty: "Garantie 12 Mois Certifiée",
     accessories: "",
-    imageBg: "black",
+    imageBg: "white",
   });
   const [formSpecs, setFormSpecs] = useState<Record<string, any>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -954,7 +954,7 @@ export default function AdminPage() {
       colors: parsedColors,
       image: mainImage,
       images: allImages,
-      imageBg: commonFormData.imageBg || "black",
+      imageBg: commonFormData.imageBg || "white",
       storageOptions: parsedStorage.length > 0 ? parsedStorage : undefined,
       specs: formSpecs
     };
@@ -1150,7 +1150,7 @@ export default function AdminPage() {
       condition: (product.condition as any) || "neuf",
       warranty: product.warranty || "Garantie 12 Mois Certifiée",
       accessories: product.accessories || "",
-      imageBg: (product as any).imageBg || (product.id && String(product.id).startsWith("pcfa-") ? "white" : "black"),
+      imageBg: (product as any).imageBg || "white",
     });
 
     setIsModalOpen(true);
@@ -1180,7 +1180,7 @@ export default function AdminPage() {
       condition: "neuf",
       warranty: "Garantie 12 Mois Certifiée",
       accessories: "",
-      imageBg: "black",
+      imageBg: "white",
     });
   };
 
@@ -1245,7 +1245,7 @@ export default function AdminPage() {
         condition: "neuf",
         warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
         accessories: phoneConfig.defaultAccessories || "",
-        imageBg: "black",
+        imageBg: "white",
       });
     }
 
@@ -2427,7 +2427,7 @@ export default function AdminPage() {
                       condition: "neuf",
                       warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
                       accessories: phoneConfig.defaultAccessories || "",
-                      imageBg: "black",
+                      imageBg: "white",
                     });
                   }}
                   className="underline text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer ml-3 flex-shrink-0"
@@ -3021,32 +3021,32 @@ export default function AdminPage() {
                     <div className="pt-2.5 pb-1 flex flex-wrap items-center justify-between gap-2 border-t border-white/5">
                       <div className="flex flex-col">
                         <span className="text-xs font-semibold text-zinc-300">Fond du cadrage photo</span>
-                        <span className="text-[10px] text-zinc-500">Pour les photos de smartphone, le noir est recommandé pour éviter les bandes blanches</span>
+                        <span className="text-[10px] text-zinc-500">Fond blanc pur recommandé pour harmoniser avec le site clair</span>
                       </div>
                       <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10">
                         <button
                           type="button"
-                          onClick={() => setCommonFormData(prev => ({ ...prev, imageBg: "black" }))}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                            (commonFormData.imageBg || "black") === "black"
-                              ? "bg-gold text-black shadow-sm"
-                              : "text-zinc-400 hover:text-white"
-                          }`}
-                        >
-                          <span>⬛</span>
-                          <span>Noir (Optimal)</span>
-                        </button>
-                        <button
-                          type="button"
                           onClick={() => setCommonFormData(prev => ({ ...prev, imageBg: "white" }))}
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                            commonFormData.imageBg === "white"
+                            (commonFormData.imageBg || "white") === "white"
                               ? "bg-gold text-black shadow-sm"
                               : "text-zinc-400 hover:text-white"
                           }`}
                         >
                           <span>⬜</span>
-                          <span>Blanc (Style Apple)</span>
+                          <span>Blanc (Recommandé)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCommonFormData(prev => ({ ...prev, imageBg: "black" }))}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            commonFormData.imageBg === "black"
+                              ? "bg-gold text-black shadow-sm"
+                              : "text-zinc-400 hover:text-white"
+                          }`}
+                        >
+                          <span>⬛</span>
+                          <span>Noir</span>
                         </button>
                       </div>
                     </div>

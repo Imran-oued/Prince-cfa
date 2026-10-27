@@ -250,7 +250,7 @@ function ProductCardItem({
       <div 
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className={`w-[38%] min-w-[130px] sm:w-48 md:w-52 flex-shrink-0 rounded-xl sm:rounded-2xl ${imgBg.containerClass} overflow-hidden flex items-center justify-center p-1.5 sm:p-2.5 relative shadow-md group/img select-none`}
+        className={`w-[38%] min-w-[130px] sm:w-48 md:w-52 flex-shrink-0 rounded-xl sm:rounded-2xl ${imgBg.containerClass} ${imgBg.isBlack ? '' : 'border border-zinc-200/80'} overflow-hidden flex items-center justify-center p-1.5 sm:p-2.5 relative shadow-sm group/img select-none`}
       >
         {activeImage?.length > 4 ? (
           <img 
@@ -300,7 +300,7 @@ function ProductCardItem({
                     ? 'w-2 h-2 bg-gold shadow-[0_0_6px_rgba(212,175,55,0.8)] scale-110' 
                     : imgBg.isBlack
                       ? 'w-1.5 h-1.5 bg-white/40 border border-white/20'
-                      : 'w-1.5 h-1.5 bg-black/30 border border-white/40'
+                      : 'w-1.5 h-1.5 bg-zinc-300 border border-zinc-200'
                 }`} 
               />
             ))}

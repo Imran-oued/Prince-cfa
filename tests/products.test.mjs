@@ -373,24 +373,24 @@ test("9. Backward compatibility: normalizeProductSpecs bridges legacy products s
   assert.equal(normMoto.specs.speed, "110 km/h");
 });
 
-test("10. Image Framing: Catalog Apple products preserve white background; user-added photos get sleek black volume", () => {
-  // A. Produits catalogue Apple officiels -> fond blanc épuré comme Capture 2
+test("10. Image Framing: Catalog Apple products and user-added photos get sleek white framing for optimal light theme display", () => {
+  // A. Produits catalogue Apple officiels -> fond blanc épuré
   const apple1 = getProductImageBg({ id: "pcfa-12", image: "/products/apple/iphone-12-blue.png" });
   assert.equal(apple1.isBlack, false);
-  assert.equal(apple1.containerClass, "bg-white", "Les iPhones catalogue doivent rester sur fond blanc (Capture 2)");
+  assert.equal(apple1.containerClass, "bg-white", "Les iPhones catalogue doivent rester sur fond blanc");
 
   const apple2 = getProductImageBg({ id: "pcfa-13", name: "iPhone 13" }, "/products/apple/iphone-13-black.png");
   assert.equal(apple2.isBlack, false);
   assert.equal(apple2.containerClass, "bg-white");
 
-  // B. Photos ajoutées par l'utilisateur / smartphone (moto, frigo, pc) -> fond noir pour cadrage optimal (Capture 1)
+  // B. Photos ajoutées par l'utilisateur / smartphone (moto, frigo, pc) -> fond blanc professionnel en harmonie avec le site clair
   const moto = getProductImageBg({ id: "UOGdbGVosnh6CovWNOkD", name: "Moto Electrique" }, "/products/mobility/moto-electrique-1.jpg");
-  assert.equal(moto.isBlack, true);
-  assert.ok(moto.containerClass.includes("bg-black"), "La moto électrique ajoutée doit avoir un cadrage noir");
+  assert.equal(moto.isBlack, false);
+  assert.equal(moto.containerClass, "bg-white", "La moto électrique ajoutée doit avoir un cadrage blanc");
 
   const customPhoto = getProductImageBg({ id: "p-custom-99", name: "Réfrigérateur" }, "data:image/jpeg;base64,/9j/4AAQSkZJRg==");
-  assert.equal(customPhoto.isBlack, true);
-  assert.ok(customPhoto.containerClass.includes("bg-black"), "Une photo personnalisée doit avoir un cadrage noir");
+  assert.equal(customPhoto.isBlack, false);
+  assert.equal(customPhoto.containerClass, "bg-white", "Une photo personnalisée doit avoir un cadrage blanc");
 
   // C. Choix explicite par l'administrateur
   const explicitWhite = getProductImageBg({ id: "custom-1", imageBg: "white" });
