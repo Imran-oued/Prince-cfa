@@ -164,10 +164,14 @@ export async function POST(request: Request) {
         : rawImage;
       let authenticUnitPrice = Number(authenticProduct.salePrice || authenticProduct.price || 0);
 
-      // Si le client a sélectionné une capacité spécifique (ex: 256 Go, 512 Go)
+      // Si le client a sélectionné une capacité spécifique (ex: 256 Go, 512 Go ou 128 Go / 8 Go RAM)
       if (item.selectedCapacity && authenticProduct.storageOptions && Array.isArray(authenticProduct.storageOptions)) {
+        const itemCapStr = String(item.selectedCapacity).trim().toLowerCase();
         const matchedOpt = authenticProduct.storageOptions.find(
-          (opt: any) => opt.capacity?.trim().toLowerCase() === String(item.selectedCapacity).trim().toLowerCase()
+          (opt: any) => 
+            opt.capacity?.trim().toLowerCase() === itemCapStr ||
+            (opt.label && String(opt.label).trim().toLowerCase() === itemCapStr) ||
+            (opt.storage && String(opt.storage).trim().toLowerCase() === itemCapStr)
         );
         if (matchedOpt && Number(matchedOpt.price) > 0) {
           authenticUnitPrice = Number(matchedOpt.price);

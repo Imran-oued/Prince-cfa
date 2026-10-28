@@ -607,3 +607,56 @@ test("14. Stock Availability: 'En stock' (continu sans limite) vs 'Bientôt disp
   assert.equal(isProductComingSoon({ isComingSoon: true }), true);
 });
 
+test("15. Android Phone Storage & RAM Multi-Price Variants", () => {
+  const androidPhoneData = {
+    name: "Samsung Galaxy S24 Ultra",
+    category: "phones",
+    brand: "Samsung",
+    price: 650000,
+    desc: "Smartphone flagship Samsung Galaxy S24 Ultra avec Snapdragon 8 Gen 3.",
+    storageOptions: [
+      {
+        capacity: "256 Go / 12 Go RAM",
+        storage: "256 Go",
+        ram: 12,
+        price: 650000
+      },
+      {
+        capacity: "512 Go / 12 Go RAM",
+        storage: "512 Go",
+        ram: 12,
+        price: 740000
+      },
+      {
+        capacity: "1 To / 16 Go RAM",
+        storage: "1 To",
+        ram: 16,
+        price: 890000
+      }
+    ],
+    specs: {
+      storage: "256 Go",
+      ram: 12
+    }
+  };
+
+  const res = validateAndCleanProduct(androidPhoneData);
+  assert.equal(res.isValid, true, "Le produit Android avec multi-prix RAM/stockage doit être valide");
+  assert.equal(res.cleanedProduct.storageOptions.length, 3);
+  assert.equal(res.cleanedProduct.storageOptions[0].capacity, "256 Go / 12 Go RAM");
+  assert.equal(res.cleanedProduct.storageOptions[0].storage, "256 Go");
+  assert.equal(res.cleanedProduct.storageOptions[0].ram, 12);
+  assert.equal(res.cleanedProduct.storageOptions[0].price, 650000);
+
+  assert.equal(res.cleanedProduct.storageOptions[1].capacity, "512 Go / 12 Go RAM");
+  assert.equal(res.cleanedProduct.storageOptions[1].storage, "512 Go");
+  assert.equal(res.cleanedProduct.storageOptions[1].ram, 12);
+  assert.equal(res.cleanedProduct.storageOptions[1].price, 740000);
+
+  assert.equal(res.cleanedProduct.storageOptions[2].capacity, "1 To / 16 Go RAM");
+  assert.equal(res.cleanedProduct.storageOptions[2].storage, "1 To");
+  assert.equal(res.cleanedProduct.storageOptions[2].ram, 16);
+  assert.equal(res.cleanedProduct.storageOptions[2].price, 890000);
+});
+
+

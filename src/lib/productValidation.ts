@@ -8,6 +8,8 @@ import { PRODUCT_CATEGORIES, getCategoryConfig } from "../config/categories.ts";
 export interface StorageOptionInput {
   capacity: string;
   price: number | string;
+  storage?: string;
+  ram?: number | string;
 }
 
 export interface ProductInput {
@@ -267,13 +269,15 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
     cleanedSpecs.battery = cleanedSpecs.batteryCapacity;
   }
 
-  // 3. Traitement des variantes de stockage (ex: iPhones, tablettes)
-  let cleanedStorageOptions: Array<{ capacity: string; price: number }> = [];
+  // 3. Traitement des variantes de stockage (ex: iPhones, smartphones Android, tablettes)
+  let cleanedStorageOptions: Array<{ capacity: string; price: number; storage?: string; ram?: number | string }> = [];
   if (catConfig.supportsStorageVariants && Array.isArray(raw.storageOptions)) {
     cleanedStorageOptions = raw.storageOptions
       .map(opt => ({
         capacity: (opt.capacity || "").trim(),
         price: Number(opt.price) || (priceCheck.value || 0),
+        ...(opt.storage ? { storage: String(opt.storage).trim() } : {}),
+        ...(opt.ram !== undefined && opt.ram !== null && opt.ram !== "" ? { ram: opt.ram } : {})
       }))
       .filter(opt => opt.capacity !== "" && opt.price >= 0);
   }

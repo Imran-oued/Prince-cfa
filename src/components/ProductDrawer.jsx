@@ -1342,7 +1342,7 @@ export default function ProductDrawer({
                       htmlFor="user-capacity-select" 
                       className="text-xs text-zinc-600 uppercase tracking-wider font-bold"
                     >
-                      Capacité : <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">{selectedCapacity}</span>
+                      {selectedCapacity && selectedCapacity.includes('RAM') ? 'Configuration (Stockage & RAM) :' : 'Capacité :'} <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">{selectedCapacity}</span>
                     </label>
                     <span className="text-[11px] text-zinc-400 font-medium">{availableCapacities.length} options</span>
                   </div>

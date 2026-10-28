@@ -127,6 +127,15 @@ function getCategoryIcon(catId: string, className = "w-4 h-4") {
 interface StorageOption {
   capacity: string;
   price: number;
+  storage?: string;
+  ram?: number | string;
+}
+
+export interface AndroidPhoneVariant {
+  id: string;
+  storage: string;
+  ram: number | string;
+  price: string;
 }
 
 interface StorageEntry {
@@ -415,6 +424,10 @@ export default function AdminPage() {
 
   // Gestion dynamique des options de stockage (cases successives) et des photos multiples
   const [storageItems, setStorageItems] = useState<StorageEntry[]>([]);
+  // Déclinaisons de Stockage & RAM avec prix spécifiques pour smartphones Android
+  const [androidVariants, setAndroidVariants] = useState<AndroidPhoneVariant[]>([
+    { id: "var-android-1", storage: "128 Go", ram: 8, price: "" }
+  ]);
   const [imageList, setImageList] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState("");
   const [isCompressingImages, setIsCompressingImages] = useState(false);
@@ -470,6 +483,9 @@ export default function AdminPage() {
       setAppleVariants([]); // Suppression de la matrice croisée
       setStorageItems([]);
       setSimPricing(DEFAULT_SIM_PRICING);
+      setAndroidVariants(prev => prev.length > 0 ? prev : [
+        { id: "var-android-1", storage: "128 Go", ram: 8, price: commonFormData.price || "" }
+      ]);
       // Nettoyer formSpecs pour ne conserver QUE le stockage et la RAM
       setFormSpecs(prev => ({
         storage: prev.storage || "128 Go",
@@ -1525,6 +1541,45 @@ export default function AdminPage() {
     setStorageItems(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Gestion des déclinaisons Android (Stockage + RAM + Prix spécifique)
+  const handleAddAndroidVariant = () => {
+    const last = androidVariants[androidVariants.length - 1];
+    const allStorages = ["64 Go", "128 Go", "256 Go", "512 Go", "1 To", "2 To"];
+    const currentIdx = last ? allStorages.indexOf(last.storage) : 1;
+    const nextStorage = (currentIdx !== -1 && currentIdx < allStorages.length - 1) 
+      ? allStorages[currentIdx + 1] 
+      : (last ? last.storage : "256 Go");
+    const nextRam = last ? last.ram : 8;
+    const nextPrice = last && Number(last.price) 
+      ? String(Number(last.price) + 60000) 
+      : (commonFormData.price || "");
+
+    setAndroidVariants(prev => [
+      ...prev,
+      {
+        id: `var-android-${Date.now()}`,
+        storage: nextStorage,
+        ram: nextRam,
+        price: nextPrice
+      }
+    ]);
+  };
+
+  const handleUpdateAndroidVariant = (index: number, field: keyof AndroidPhoneVariant, value: any) => {
+    setAndroidVariants(prev => {
+      const updated = prev.map((item, i) => i === index ? { ...item, [field]: value } : item);
+      if (index === 0 && field === "price") {
+        setCommonFormData(p => ({ ...p, price: value }));
+      }
+      return updated;
+    });
+  };
+
+  const handleRemoveAndroidVariant = (index: number) => {
+    if (androidVariants.length <= 1) return;
+    setAndroidVariants(prev => prev.filter((_, i) => i !== index));
+  };
+
   // Génération automatique des 4 paliers standards pour smartphones
   const handleGenerateStandardTiers = () => {
     const base = Number(commonFormData.price) || 0;
@@ -1677,7 +1732,27 @@ export default function AdminPage() {
       });
 
       allIPhoneColors = Array.from(colorsSet);
-    } else if (!isOtherPhone && getCategoryConfig(formCategory).supportsStorageVariants) {
+    } else if (isOtherPhone) {
+      finalStorageOptions = androidVariants
+        .filter(v => v.storage && v.storage.trim() !== "")
+        .map(v => {
+          const ramLabel = typeof v.ram === "number" ? `${v.ram} Go RAM` : (String(v.ram).includes("RAM") ? String(v.ram) : `${v.ram} Go RAM`);
+          const fullLabel = `${v.storage} / ${ramLabel}`;
+          return {
+            capacity: fullLabel,
+            storage: v.storage,
+            ram: v.ram,
+            price: Number(v.price) || Number(commonFormData.price) || 0
+          };
+        });
+
+      // Synchroniser le prix de base si vide
+      if (!commonFormData.price || Number(commonFormData.price) <= 0) {
+        if (finalStorageOptions.length > 0) {
+          commonFormData.price = String(finalStorageOptions[0].price);
+        }
+      }
+    } else if (getCategoryConfig(formCategory).supportsStorageVariants) {
       finalStorageOptions = parsedStorage.length > 0 ? parsedStorage : undefined;
     }
 
@@ -1689,10 +1764,11 @@ export default function AdminPage() {
         storage: (appleVariants[0]?.storage || selectedCapacities[0] || "128 Go")
       };
     } else if (isOtherPhone) {
+      const primaryVariant = androidVariants[0];
       finalSpecs = {
         model: commonFormData.name,
-        storage: formSpecs.storage || "128 Go",
-        ram: formSpecs.ram ? (Number(formSpecs.ram) || formSpecs.ram) : undefined
+        storage: primaryVariant ? primaryVariant.storage : (formSpecs.storage || "128 Go"),
+        ram: primaryVariant ? (Number(primaryVariant.ram) || primaryVariant.ram) : (formSpecs.ram ? (Number(formSpecs.ram) || formSpecs.ram) : undefined)
       };
     }
 
@@ -1713,12 +1789,14 @@ export default function AdminPage() {
       accessories: commonFormData.accessories,
       price: isApple && finalAppleVariants.length > 0 && (!commonFormData.price || Number(commonFormData.price) <= 0)
         ? Math.min(...finalAppleVariants.map(v => v.price))
+        : isOtherPhone && androidVariants.length > 0 && (!commonFormData.price || Number(commonFormData.price) <= 0)
+        ? (Number(androidVariants[0].price) || Number(commonFormData.price) || 0)
         : commonFormData.price,
       colors: isApple && allIPhoneColors.length > 0 ? allIPhoneColors : parsedColors,
       image: mainImage,
       images: allImages,
       imageBg: commonFormData.imageBg || "white",
-      storageOptions: finalStorageOptions,
+      storageOptions: finalStorageOptions && finalStorageOptions.length > 0 ? finalStorageOptions : undefined,
       simPricing: isApple ? finalSimPricing : undefined,
       variants: isApple && finalAppleVariants.length > 0 ? finalAppleVariants : undefined,
       otherFeatures: isApple && otherFeatures.length > 0 ? otherFeatures : undefined,
@@ -1861,6 +1939,7 @@ export default function AdminPage() {
     commonFormData.desc.trim() ||
     imageList.length > 0 ||
     storageItems.length > 0 ||
+    androidVariants.some(v => v.price && v.price.trim() !== "") ||
     Object.values(formSpecs).some(v => v !== undefined && v !== null && String(v).trim() !== "")
   );
 
@@ -1878,6 +1957,7 @@ export default function AdminPage() {
           commonFormData,
           formSpecs,
           storageItems,
+          androidVariants,
           simPricing,
           imageList,
           savedAt: Date.now()
@@ -1887,7 +1967,7 @@ export default function AdminPage() {
         console.warn("Erreur sauvegarde brouillon:", e);
       }
     }
-  }, [isModalOpen, editingId, isFormDirty, formCategory, commonFormData, formSpecs, storageItems, simPricing, imageList]);
+  }, [isModalOpen, editingId, isFormDirty, formCategory, commonFormData, formSpecs, storageItems, androidVariants, simPricing, imageList]);
 
   // Nettoyage du brouillon une fois le produit sauvegardé ou si l'utilisateur annule explicitement
   const clearDraft = () => {
@@ -2058,6 +2138,54 @@ export default function AdminPage() {
       setSelectedSims(["sim_and_esim", "dual_sim_physical", "esim_only"]);
       setSelectedCapacities(["128 Go", "256 Go", "512 Go", "1 To"]);
       setSelectedColors(["Titane Naturel", "Titane Noir"]);
+
+      const isOtherPhone = (product.category || "phones") === "phones" && !isAppleBrand(product.brand);
+      if (isOtherPhone) {
+        let loadedVariants: AndroidPhoneVariant[] = [];
+        if (product.storageOptions && Array.isArray(product.storageOptions) && product.storageOptions.length > 0) {
+          loadedVariants = product.storageOptions.map((opt: any, idx) => {
+            let storageVal = opt.storage || "";
+            let ramVal: any = opt.ram !== undefined ? opt.ram : "";
+
+            if (!storageVal && opt.capacity) {
+              if (opt.capacity.includes("/")) {
+                const parts = opt.capacity.split("/").map((s: string) => s.trim());
+                storageVal = parts[0];
+                const ramPart = parts[1];
+                const matchNum = ramPart?.match(/(\d+)/);
+                ramVal = matchNum ? parseInt(matchNum[1], 10) : ramPart;
+              } else {
+                storageVal = opt.capacity;
+              }
+            }
+
+            if (!storageVal) storageVal = normalized.specs?.storage || "128 Go";
+            if (!ramVal) ramVal = normalized.specs?.ram || 8;
+
+            return {
+              id: `var-android-${idx}-${Date.now()}`,
+              storage: storageVal,
+              ram: typeof ramVal === "string" && !isNaN(Number(ramVal)) ? Number(ramVal) : ramVal,
+              price: opt.price !== undefined && opt.price !== null ? String(opt.price) : String(product.price || "")
+            };
+          });
+        }
+
+        if (loadedVariants.length === 0) {
+          loadedVariants = [{
+            id: "var-android-1",
+            storage: normalized.specs?.storage || "128 Go",
+            ram: normalized.specs?.ram || 8,
+            price: product.price ? String(product.price) : ""
+          }];
+        }
+
+        setAndroidVariants(loadedVariants);
+      } else {
+        setAndroidVariants([
+          { id: "var-android-1", storage: "128 Go", ram: 8, price: product.price ? String(product.price) : "" }
+        ]);
+      }
     }
     setCustomFeatureInput("");
 
@@ -2089,6 +2217,9 @@ export default function AdminPage() {
     setImageList([]);
     setStorageItems([]);
     setAppleVariants([]);
+    setAndroidVariants([
+      { id: "var-android-1", storage: "128 Go", ram: 8, price: "" }
+    ]);
     setOtherFeatures([]);
     setCustomFeatureInput("");
     setSelectedSims(["sim_and_esim", "dual_sim_physical", "esim_only"]);
@@ -2163,6 +2294,11 @@ export default function AdminPage() {
             setCommonFormData(parsed.commonFormData);
             setFormSpecs(parsed.formSpecs || {});
             setStorageItems(parsed.storageItems || []);
+            if (parsed.androidVariants && Array.isArray(parsed.androidVariants)) {
+              setAndroidVariants(parsed.androidVariants);
+            } else {
+              setAndroidVariants([{ id: "var-android-1", storage: "128 Go", ram: 8, price: parsed.commonFormData?.price || "" }]);
+            }
             if (parsed.appleVariants && Array.isArray(parsed.appleVariants)) {
               setAppleVariants(parsed.appleVariants);
             }
@@ -2189,6 +2325,9 @@ export default function AdminPage() {
       setImageList([]);
       setStorageItems([]);
       setAppleVariants([]);
+      setAndroidVariants([
+        { id: "var-android-1", storage: "128 Go", ram: 8, price: "" }
+      ]);
       setNewImageUrl("");
       setFormCategory("phones");
       setFormSpecs({});
@@ -4897,10 +5036,10 @@ export default function AdminPage() {
                                 )}
                               </div>
 
-                              {/* Prix unique */}
+                              {/* Prix unique ou Prix de base */}
                               <div>
                                 <label className="text-[11px] text-zinc-300 uppercase font-bold block mb-1">
-                                  Prix de Vente (FCFA) <span className="text-red-400">*</span>
+                                  {androidVariants.length > 1 ? "Prix de base (Option 1) (FCFA)" : "Prix de Vente (FCFA)"} <span className="text-red-400">*</span>
                                 </label>
                                 <div className="relative">
                                   <input
@@ -4909,7 +5048,11 @@ export default function AdminPage() {
                                     min="0"
                                     step="5000"
                                     value={commonFormData.price}
-                                    onChange={(e) => setCommonFormData({ ...commonFormData, price: e.target.value })}
+                                    onChange={(e) => {
+                                      const newPrice = e.target.value;
+                                      setCommonFormData({ ...commonFormData, price: newPrice });
+                                      setAndroidVariants(prev => prev.map((v, i) => i === 0 ? { ...v, price: newPrice } : v));
+                                    }}
                                     placeholder="Ex: 450000"
                                     className={`w-full bg-black/60 border rounded-xl p-3 pr-16 text-blue-400 font-mono font-bold text-sm outline-none focus:border-blue-400 ${
                                       formErrors.price ? "border-red-500" : "border-blue-500/40"
@@ -4926,56 +5069,133 @@ export default function AdminPage() {
                             </div>
                           </div>
 
-                          {/* 2. FICHE ESSENTIELLE : CAPACITÉ DE STOCKAGE & RAM */}
+                          {/* 2. DÉCLINAISONS DE PRIX : CAPACITÉ DE STOCKAGE & MÉMOIRE RAM */}
                           <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-4">
-                            <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-                              <Sparkles className="w-4 h-4 text-blue-400" aria-hidden="true" />
-                              <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
-                                2. Capacité & Mémoire RAM
-                              </h4>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                              <div className="flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-blue-400" aria-hidden="true" />
+                                <div>
+                                  <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                                    2. Déclinaisons de Prix (Stockage & RAM)
+                                  </h4>
+                                  <p className="text-[11px] text-zinc-400">
+                                    Configurez les combinaisons de Stockage et RAM avec leur prix spécifique en FCFA.
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={handleAddAndroidVariant}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-bold transition-all cursor-pointer self-start sm:self-auto"
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                                <span>Ajouter une déclinaison</span>
+                              </button>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              {/* Capacité de stockage (Liste déroulante sans bulle) */}
-                              <div className="space-y-1.5">
-                                <label className="text-[11px] text-zinc-300 uppercase font-bold block">
-                                  Capacité de Stockage <span className="text-red-400">*</span>
-                                </label>
-                                <select
-                                  value={formSpecs.storage || "128 Go"}
-                                  onChange={(e) => setFormSpecs({ ...formSpecs, storage: e.target.value })}
-                                  className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-blue-400 cursor-pointer"
+                            <div className="space-y-3">
+                              {androidVariants.map((variant, index) => (
+                                <div
+                                  key={variant.id || `var-${index}`}
+                                  className="p-3.5 rounded-xl bg-black/40 border border-white/10 hover:border-blue-500/30 transition-all space-y-3"
                                 >
-                                  <option value="32 Go">32 Go</option>
-                                  <option value="64 Go">64 Go</option>
-                                  <option value="128 Go">128 Go</option>
-                                  <option value="256 Go">256 Go</option>
-                                  <option value="512 Go">512 Go</option>
-                                  <option value="1 To">1 To</option>
-                                </select>
-                              </div>
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-blue-500/15 text-blue-400 text-[10px] font-bold uppercase tracking-wider border border-blue-500/30">
+                                        Configuration #{index + 1}
+                                        {index === 0 && " — Principale"}
+                                      </span>
+                                      <span className="text-[11px] text-zinc-400 font-mono">
+                                        {variant.storage} / {variant.ram} Go RAM
+                                      </span>
+                                    </div>
+                                    {androidVariants.length > 1 && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveAndroidVariant(index)}
+                                        className="text-zinc-500 hover:text-red-400 p-1 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
+                                        title="Supprimer cette déclinaison"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    )}
+                                  </div>
 
-                              {/* Mémoire RAM (Liste déroulante sans bulle) */}
-                              <div className="space-y-1.5">
-                                <label className="text-[11px] text-zinc-300 uppercase font-bold block">
-                                  Mémoire RAM <span className="text-red-400">*</span>
-                                </label>
-                                <select
-                                  value={formSpecs.ram || 8}
-                                  onChange={(e) => setFormSpecs({ ...formSpecs, ram: Number(e.target.value) || e.target.value })}
-                                  className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-blue-400 cursor-pointer"
-                                >
-                                  <option value={2}>2 Go</option>
-                                  <option value={3}>3 Go</option>
-                                  <option value={4}>4 Go</option>
-                                  <option value={6}>6 Go</option>
-                                  <option value={8}>8 Go</option>
-                                  <option value={12}>12 Go</option>
-                                  <option value={16}>16 Go</option>
-                                  <option value={24}>24 Go</option>
-                                </select>
-                              </div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    {/* Capacité de stockage */}
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] text-zinc-300 uppercase font-bold block">
+                                        Capacité de Stockage <span className="text-red-400">*</span>
+                                      </label>
+                                      <select
+                                        value={variant.storage}
+                                        onChange={(e) => handleUpdateAndroidVariant(index, "storage", e.target.value)}
+                                        className="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white text-xs outline-none focus:border-blue-400 cursor-pointer"
+                                      >
+                                        <option value="32 Go">32 Go</option>
+                                        <option value="64 Go">64 Go</option>
+                                        <option value="128 Go">128 Go</option>
+                                        <option value="256 Go">256 Go</option>
+                                        <option value="512 Go">512 Go</option>
+                                        <option value="1 To">1 To</option>
+                                        <option value="2 To">2 To</option>
+                                      </select>
+                                    </div>
+
+                                    {/* Mémoire RAM */}
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] text-zinc-300 uppercase font-bold block">
+                                        Mémoire RAM <span className="text-red-400">*</span>
+                                      </label>
+                                      <select
+                                        value={variant.ram}
+                                        onChange={(e) => handleUpdateAndroidVariant(index, "ram", Number(e.target.value) || e.target.value)}
+                                        className="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white text-xs outline-none focus:border-blue-400 cursor-pointer"
+                                      >
+                                        <option value={2}>2 Go RAM</option>
+                                        <option value={3}>3 Go RAM</option>
+                                        <option value={4}>4 Go RAM</option>
+                                        <option value={6}>6 Go RAM</option>
+                                        <option value={8}>8 Go RAM</option>
+                                        <option value={12}>12 Go RAM</option>
+                                        <option value={16}>16 Go RAM</option>
+                                        <option value={24}>24 Go RAM</option>
+                                      </select>
+                                    </div>
+
+                                    {/* Prix spécifique en FCFA */}
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] text-zinc-300 uppercase font-bold block">
+                                        Prix de cette Option (FCFA) <span className="text-red-400">*</span>
+                                      </label>
+                                      <div className="relative">
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          step="5000"
+                                          value={variant.price}
+                                          onChange={(e) => handleUpdateAndroidVariant(index, "price", e.target.value)}
+                                          placeholder={index === 0 ? (commonFormData.price || "Ex: 450000") : (commonFormData.price || "Ex: 500000")}
+                                          className="w-full bg-black/60 border border-blue-500/40 rounded-xl p-2.5 pr-14 text-blue-400 font-mono font-bold text-xs outline-none focus:border-blue-400"
+                                        />
+                                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-zinc-400 pointer-events-none">
+                                          FCFA
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
+
+                            <button
+                              type="button"
+                              onClick={handleAddAndroidVariant}
+                              className="w-full py-2.5 px-4 rounded-xl border border-dashed border-blue-500/40 hover:border-blue-400 bg-blue-500/5 hover:bg-blue-500/10 text-blue-400 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+                            >
+                              <Plus className="w-4 h-4" />
+                              <span>Ajouter une autre déclinaison (Stockage & RAM)</span>
+                            </button>
                           </div>
 
                           {/* 3. LONGUE DESCRIPTION SEULEMENT */}
