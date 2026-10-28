@@ -118,17 +118,17 @@ export default function Navbar({
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-gold/15 px-4 py-3 sm:px-8 sm:py-4 transition-all">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-gold/15 px-3 py-2.5 sm:px-8 sm:py-4 transition-all w-full max-w-full box-border">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2.5 sm:gap-4">
 
           {/* Vrai Logo */}
           <Link href="/" className="flex items-center gap-2 group cursor-pointer flex-shrink-0">
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+            <div className="relative w-14 h-14 sm:w-20 sm:h-20 group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">
               <Image
                 src="/logo.jpeg"
                 alt="Logo Prince CFA"
                 fill
-                sizes="(max-width: 640px) 64px, 80px"
+                sizes="(max-width: 640px) 56px, 80px"
                 className="object-contain"
                 priority
               />
@@ -136,14 +136,14 @@ export default function Navbar({
           </Link>
 
           {/* Search Bar & Actions (Panier + Hamburger Menu) */}
-          <div className="flex items-center gap-3 sm:gap-4 flex-1 justify-end">
+          <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-end min-w-0">
 
             {/* Barre de recherche interactive avec autocomplétion rapide */}
-            <div ref={searchContainerRef} className="relative w-full max-w-[240px] sm:max-w-[260px] md:max-w-sm flex-1">
+            <div ref={searchContainerRef} className="relative w-full max-w-[200px] sm:max-w-[260px] md:max-w-sm flex-1 min-w-0">
               <form onSubmit={handleSubmit} className="relative" suppressHydrationWarning>
                 <input
                   type="text"
-                  placeholder="Rechercher (ex: iPhone 13)..."
+                  placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={handleSearchChange}
                   suppressHydrationWarning
@@ -152,7 +152,7 @@ export default function Navbar({
                       setIsDropdownOpen(true);
                     }
                   }}
-                  className="w-full bg-zinc-100/90 border border-zinc-200 rounded-full py-2.5 pl-4 pr-16 text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all shadow-inner"
+                  className="w-full bg-zinc-100/90 border border-zinc-200 rounded-full py-2 sm:py-2.5 pl-3.5 sm:pl-4 pr-12 sm:pr-16 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all shadow-inner"
                 />
 
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
