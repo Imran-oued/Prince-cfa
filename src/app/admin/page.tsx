@@ -1038,13 +1038,16 @@ export default function AdminPage() {
         const prodRes = await fetch("/api/products", { cache: "no-store" });
         if (prodRes.ok) {
           const prodData = await prodRes.json();
-          if (prodData.products && prodData.products.length > 0) {
-            setProductsList(prodData.products);
-            setIsCloud(true);
-            try {
-              localStorage.setItem("prince_cfa_products", JSON.stringify(prodData.products));
-            } catch {}
-            return;
+          if (prodData.products && Array.isArray(prodData.products) && prodData.products.length > 0) {
+            const valid = prodData.products.filter((p: any) => p && p.id && p.name && typeof p.price === 'number');
+            if (valid.length > 0) {
+              setProductsList(valid);
+              setIsCloud(true);
+              try {
+                localStorage.setItem("prince_cfa_products", JSON.stringify(valid));
+              } catch {}
+              return;
+            }
           }
         }
       } catch (err) {

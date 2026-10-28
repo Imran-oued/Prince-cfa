@@ -485,13 +485,16 @@ export default function Home() {
         if (apiRes && apiRes.ok) {
           const apiData = await apiRes.json();
           if (apiData?.success && Array.isArray(apiData.products) && apiData.products.length > 0) {
-            setLocalProducts(apiData.products);
-            try {
-              localStorage.setItem("prince_cfa_products", JSON.stringify(apiData.products));
-            } catch (e) {
-              console.warn("Storage warning:", e);
+            const valid = apiData.products.filter((p: any) => p && p.id && p.name && typeof p.price === 'number');
+            if (valid.length > 0) {
+              setLocalProducts(valid);
+              try {
+                localStorage.setItem("prince_cfa_products", JSON.stringify(valid));
+              } catch (e) {
+                console.warn("Storage warning:", e);
+              }
+              return;
             }
-            return;
           }
         }
 
@@ -658,7 +661,7 @@ export default function Home() {
 
   // Filtrage combiné (Recherche intelligente + Catégorie + Marque)
   const filteredProducts = useMemo(() => {
-    let filtered = localProducts;
+    let filtered = (localProducts || []).filter(p => p && p.id && p.name && typeof p.price === 'number');
     
     // Si l'utilisateur effectue une recherche globale, on recherche en priorité dans l'ensemble du catalogue
     if (searchQuery.trim()) {

@@ -31,7 +31,9 @@ function buildCacheEntry(products: any[], ttlMs: number): ProductsCacheEntry {
 }
 
 function sanitizeProductMedia(product: any): any {
-  if (!product) return product;
+  if (!product || typeof product !== "object" || !product.id || !product.name || typeof product.price !== "number") {
+    return null;
+  }
   let image = product.image;
   let images = Array.isArray(product.images) ? [...product.images] : [];
   let modified = false;
@@ -56,7 +58,6 @@ function sanitizeProductMedia(product: any): any {
     });
   }
 
-  if (!modified) return product;
   return {
     ...product,
     image,
@@ -91,7 +92,9 @@ async function loadProductsCacheEntry(): Promise<ProductsCacheEntry> {
       const missingDefaults = (defaultProducts as any[]).filter(
         dp => !existingIds.has(String(dp.id)) && !deletedSet.has(String(dp.id))
       );
-      const combined = [...activeCloud, ...missingDefaults].map(sanitizeProductMedia);
+      const combined = [...activeCloud, ...missingDefaults]
+        .map(sanitizeProductMedia)
+        .filter(Boolean);
 
       productsCache = buildCacheEntry(combined, PRODUCTS_TTL_MS);
       return productsCache;
@@ -110,7 +113,8 @@ async function loadProductsCacheEntry(): Promise<ProductsCacheEntry> {
 
   const fallback = (defaultProducts as any[])
     .filter(dp => !deletedSet.has(String(dp.id)))
-    .map(sanitizeProductMedia);
+    .map(sanitizeProductMedia)
+    .filter(Boolean);
   productsCache = buildCacheEntry(fallback, 60 * 1000);
   return productsCache;
 }
