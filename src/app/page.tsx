@@ -1262,28 +1262,20 @@ export default function Home() {
 
         {/* Ligne Copyright & Liens Légaux */}
         <div className="max-w-7xl mx-auto pt-8 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
-            <p>© 2026 PRINCE CFA. Tous droits réservés.</p>
-            <span className="hidden sm:inline text-zinc-400">|</span>
-            <div className="flex items-center gap-3">
-              <Link href="/a-propos" className="hover:text-gold transition-colors">
-                À Propos
-              </Link>
-              <span>•</span>
-              <Link href="/mentions-legales" className="hover:text-gold transition-colors">
-                Mentions Légales
-              </Link>
-              <span>•</span>
-              <Link href="/politique-de-confidentialite" className="hover:text-gold transition-colors">
-                Politique de Confidentialité
-              </Link>
-            </div>
-          </div>
-          <p className="flex items-center gap-3">
-            <span>Sécurisé par Firebase Cloud</span>
+          <p>© 2026 PRINCE CFA. Tous droits réservés.</p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link href="/a-propos" className="hover:text-gold transition-colors">
+              À Propos
+            </Link>
             <span>•</span>
-            <span className="text-gold font-medium">Excellence & Prestige</span>
-          </p>
+            <Link href="/mentions-legales" className="hover:text-gold transition-colors">
+              Mentions Légales
+            </Link>
+            <span>•</span>
+            <Link href="/politique-de-confidentialite" className="hover:text-gold transition-colors">
+              Politique de Confidentialité
+            </Link>
+          </div>
         </div>
       </footer>
 
