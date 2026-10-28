@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { SHOP_CONFIG } from '@/config/shop';
-import { X, Star, HardDrive, Check, Zap, Laptop, Refrigerator, Tablet, ShoppingBag, ChevronDown, ChevronLeft } from 'lucide-react';
+import { Star, HardDrive, Check, Zap, Laptop, Refrigerator, Tablet, ShoppingBag, ChevronDown, ChevronLeft } from 'lucide-react';
 import { getCategoryConfig, isStorageVariantCategory } from '@/config/categories';
 import { getProductImageBg, isAppleBrand } from '@/lib/productValidation';
 
@@ -788,21 +788,22 @@ export default function ProductDrawer({
         {/* Poignée discrète pour indication de glissement tactile sur mobile */}
         <div className="absolute top-1/2 -translate-y-1/2 left-1.5 w-1 h-12 rounded-full bg-zinc-300/80 sm:hidden pointer-events-none z-30" />
 
-        {/* Header du Drawer avec bouton retour / fermeture */}
+        {/* Header du Drawer avec bouton retour */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-5 border-b border-zinc-200 bg-white/95 backdrop-blur-md relative z-20">
-          <div className="flex items-center gap-2.5">
-            {/* Bouton Retour rapide pour revenir en 1 tap aux catégories sans devoir chercher la croix */}
-            <button
-              type="button"
-              onClick={handleCleanClose}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-semibold border border-zinc-200/80 transition-all active:scale-95 cursor-pointer shadow-xs"
-              title="Retour aux catégories (ou glisser vers la droite)"
-              aria-label="Retour aux catégories"
-            >
-              <ChevronLeft className="w-4 h-4 text-zinc-600" aria-hidden="true" />
-              <span>Retour</span>
-            </button>
+          {/* Bouton Retour rapide pour revenir en 1 tap aux catégories */}
+          <button
+            type="button"
+            onClick={handleCleanClose}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-semibold border border-zinc-200/80 transition-all active:scale-95 cursor-pointer shadow-xs"
+            title="Retour aux catégories (ou glisser vers la droite)"
+            aria-label="Retour aux catégories"
+          >
+            <ChevronLeft className="w-4 h-4 text-zinc-600" aria-hidden="true" />
+            <span>Retour</span>
+          </button>
 
+          {/* Statut du stock positionné à droite */}
+          <div className="flex items-center gap-2">
             {isComingSoon ? (
               <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 font-bold bg-amber-500/10 px-2.5 sm:px-3 py-1 rounded-full border border-amber-500/30">
                 <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
@@ -815,18 +816,6 @@ export default function ProductDrawer({
                 En stock
               </span>
             )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button 
-              type="button"
-              onClick={handleCleanClose}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-zinc-100 border border-zinc-200 text-zinc-600 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all duration-200 group cursor-pointer"
-              title="Fermer la fiche produit (Échap ou glisser vers la droite)"
-              aria-label="Fermer la fiche produit"
-            >
-              <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" aria-hidden="true" />
-            </button>
           </div>
         </div>
 
