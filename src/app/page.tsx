@@ -6,7 +6,7 @@ import { products as defaultProducts } from "@/data/products";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import ProductDrawer from "@/components/ProductDrawer";
-import { getProducts } from "@/lib/firestore";
+import { getProducts, getDeletedProductIds } from "@/lib/firestore";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import { getProductImageBg } from "@/lib/productValidation";
 import { SHOP_CONFIG } from "@/config/shop";
@@ -481,7 +481,7 @@ export default function Home() {
     async function loadProducts() {
       try {
         // 1. Essayer l'API serveur optimisée avec cache mémoire (protection anti-épuisement des quotas Firestore)
-        const apiRes = await fetch("/api/products").catch(() => null);
+        const apiRes = await fetch("/api/products", { cache: "no-store" }).catch(() => null);
         if (apiRes && apiRes.ok) {
           const apiData = await apiRes.json();
           if (apiData?.success && Array.isArray(apiData.products) && apiData.products.length > 0) {
@@ -500,12 +500,21 @@ export default function Home() {
           const timeoutPromise = new Promise((_, reject) => 
             setTimeout(() => reject(new Error("Timeout Firestore")), 3000)
           );
-          const firebaseProducts = (await Promise.race([getProducts(), timeoutPromise])) as Product[] | null;
+          const [firebaseProducts, deletedIds] = (await Promise.race([
+            Promise.all([
+              getProducts().catch(() => null),
+              getDeletedProductIds().catch(() => new Set<string>())
+            ]),
+            timeoutPromise
+          ])) as [Product[] | null, Set<string> | null];
+
           if (firebaseProducts && firebaseProducts.length > 0) {
-            // Fusionner Firebase avec les nouveaux produits par défaut non présents dans Firebase
+            const deletedSet = deletedIds instanceof Set ? deletedIds : new Set<string>();
+            const activeFirebase = firebaseProducts.filter((p: Product) => !deletedSet.has(String(p.id)));
+            // Fusionner Firebase avec les nouveaux produits par défaut non présents et non supprimés
             const existingIds = new Set(firebaseProducts.map((p: Product) => String(p.id)));
-            const newDefaults = defaultProducts.filter(dp => !existingIds.has(String(dp.id)));
-            const combined = [...firebaseProducts, ...newDefaults];
+            const newDefaults = defaultProducts.filter(dp => !existingIds.has(String(dp.id)) && !deletedSet.has(String(dp.id)));
+            const combined = [...activeFirebase, ...newDefaults];
             setLocalProducts(combined);
             try {
               localStorage.setItem("prince_cfa_products", JSON.stringify(combined));
@@ -519,7 +528,7 @@ export default function Home() {
         console.warn("API/Firebase non disponible, utilisation du fallback local:", err);
       }
 
-      // 3. Fallback sécurisé : localStorage + produits par défaut (protégé contre corruptions de cache)
+      // 3. Fallback sécurisé : localStorage (protégé contre corruptions de cache)
       try {
         const saved = typeof window !== "undefined" ? localStorage.getItem("prince_cfa_products") : null;
         if (saved) {
@@ -557,10 +566,7 @@ export default function Home() {
             }).filter(Boolean) as Product[];
 
             if (migrated.length > 0) {
-              const existingIds = new Set(migrated.map((p: Product) => String(p.id)));
-              const newDefaults = defaultProducts.filter(dp => !existingIds.has(String(dp.id)));
-              const combined = [...migrated, ...newDefaults];
-              setLocalProducts(combined);
+              setLocalProducts(migrated);
               return;
             }
           }

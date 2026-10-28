@@ -12,7 +12,7 @@ export async function GET(request: Request) {
         status: 304,
         headers: {
           "ETag": etag,
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "Cache-Control": "no-cache, must-revalidate",
         },
       });
     }
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "ETag": etag,
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        "Cache-Control": "no-cache, must-revalidate",
       },
     });
   } catch (error) {

@@ -1035,7 +1035,7 @@ export default function AdminPage() {
 
       // 2. Charger les produits via l'API serveur optimisée en mémoire vive (<2ms)
       try {
-        const prodRes = await fetch("/api/products");
+        const prodRes = await fetch("/api/products", { cache: "no-store" });
         if (prodRes.ok) {
           const prodData = await prodRes.json();
           if (prodData.products && prodData.products.length > 0) {
@@ -1862,14 +1862,21 @@ export default function AdminPage() {
   const handleDelete = async (id: string | number) => {
     if (confirm("Voulez-vous vraiment supprimer ce produit ?")) {
       try {
-        await fetch(`/api/admin/products/${id}`, {
+        const res = await fetch(`/api/admin/products/${id}`, {
           method: "DELETE",
           headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {}
         });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.success) {
+          alert(`Erreur lors de la suppression : ${data?.error || "Échec serveur"}`);
+          return;
+        }
       } catch (e) {
-        console.warn("Erreur suppression API", e);
+        console.error("Erreur suppression API", e);
+        alert("Erreur de communication réseau lors de la suppression.");
+        return;
       }
-      const updatedList = productsList.filter(p => p.id !== id);
+      const updatedList = productsList.filter(p => String(p.id) !== String(id));
       setProductsList(updatedList);
       try {
         localStorage.setItem("prince_cfa_products", JSON.stringify(updatedList));

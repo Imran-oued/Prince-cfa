@@ -14,9 +14,30 @@ import {
 import { db, isFirebaseConfigured } from "./firebase.js";
 
 const PRODUCTS_COLLECTION = "products";
+const DELETED_PRODUCTS_COLLECTION = "deleted_products";
 
 // Mémoire tampon en environnement serveur/test lorsque Firebase n'est pas configuré
 const memoryOrders = new Map();
+const memoryDeletedProductIds = new Set();
+
+/**
+ * Récupérer l'ensemble des identifiants des produits supprimés.
+ * Permet d'éviter que les produits par défaut supprimés ne réapparaissent lors des fusions.
+ * @returns {Promise<Set<string>>}
+ */
+export async function getDeletedProductIds() {
+  const ids = new Set(memoryDeletedProductIds);
+  if (!isFirebaseConfigured()) return ids;
+
+  try {
+    const snapshot = await getDocs(collection(db, DELETED_PRODUCTS_COLLECTION));
+    snapshot.docs.forEach((docSnap) => ids.add(String(docSnap.id)));
+    return ids;
+  } catch (error) {
+    console.warn("Avertissement lors de la récupération des produits supprimés:", error);
+    return ids;
+  }
+}
 
 /**
  * Récupérer tous les produits depuis Firestore
@@ -66,7 +87,17 @@ export async function getProduct(id) {
  * Ajouter un nouveau produit
  */
 export async function addProduct(productData) {
-  if (!isFirebaseConfigured()) return null;
+  if (productData?.id) {
+    const strId = String(productData.id);
+    memoryDeletedProductIds.delete(strId);
+    if (isFirebaseConfigured()) {
+      try {
+        await deleteDoc(doc(db, DELETED_PRODUCTS_COLLECTION, strId));
+      } catch {}
+    }
+  }
+
+  if (!isFirebaseConfigured()) return productData?.id || null;
 
   try {
     const docRef = await addDoc(
@@ -88,10 +119,19 @@ export async function addProduct(productData) {
  * Modifier un produit existant
  */
 export async function updateProduct(id, productData) {
-  if (!isFirebaseConfigured()) return false;
+  const strId = String(id);
+  memoryDeletedProductIds.delete(strId);
+
+  if (isFirebaseConfigured()) {
+    try {
+      await deleteDoc(doc(db, DELETED_PRODUCTS_COLLECTION, strId));
+    } catch {}
+  }
+
+  if (!isFirebaseConfigured()) return true;
 
   try {
-    const docRef = doc(db, PRODUCTS_COLLECTION, id);
+    const docRef = doc(db, PRODUCTS_COLLECTION, strId);
     await updateDoc(docRef, {
       ...productData,
       updatedAt: new Date().toISOString(),
@@ -104,14 +144,28 @@ export async function updateProduct(id, productData) {
 }
 
 /**
- * Supprimer un produit
+ * Supprimer un produit définitivement
+ * Supprime le document de la collection 'products' ET l'enregistre dans 'deleted_products'
+ * pour garantir qu'il ne sera jamais ressuscité par les fallbacks du catalogue statique.
  */
 export async function deleteProduct(id) {
-  if (!isFirebaseConfigured()) return false;
+  const strId = String(id);
+  memoryDeletedProductIds.add(strId);
+
+  if (!isFirebaseConfigured()) return true;
 
   try {
-    const docRef = doc(db, PRODUCTS_COLLECTION, id);
+    // 1. Supprimer le document de la collection des produits actifs
+    const docRef = doc(db, PRODUCTS_COLLECTION, strId);
     await deleteDoc(docRef);
+
+    // 2. Enregistrer l'ID dans la collection des produits supprimés (tombstone)
+    const deletedRef = doc(db, DELETED_PRODUCTS_COLLECTION, strId);
+    await setDoc(deletedRef, {
+      id: strId,
+      deletedAt: new Date().toISOString(),
+    });
+
     return true;
   } catch (error) {
     console.error("Erreur lors de la suppression du produit:", error);
@@ -130,10 +184,16 @@ export async function seedProducts(productsToSync) {
   try {
     for (const product of productsToSync) {
       const { id, ...data } = product;
-      await setDoc(doc(db, PRODUCTS_COLLECTION, String(id)), {
+      const strId = String(id);
+      memoryDeletedProductIds.delete(strId);
+      await setDoc(doc(db, PRODUCTS_COLLECTION, strId), {
         ...data,
         updatedAt: new Date().toISOString(),
       }, { merge: true });
+
+      try {
+        await deleteDoc(doc(db, DELETED_PRODUCTS_COLLECTION, strId));
+      } catch {}
     }
 
     console.log(`✅ ${productsToSync.length} produits synchronisés (upsert sécurisé) dans Firestore.`);

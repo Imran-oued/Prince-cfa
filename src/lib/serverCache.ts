@@ -1,4 +1,4 @@
-import { getProducts as getFirestoreProducts, getOrders as getFirestoreOrders } from "./firestore.js";
+import { getProducts as getFirestoreProducts, getOrders as getFirestoreOrders, getDeletedProductIds } from "./firestore.js";
 import { products as defaultProducts } from "../data/products.js";
 
 // Cache mémoire serveur pour les produits du catalogue
@@ -73,13 +73,25 @@ async function loadProductsCacheEntry(): Promise<ProductsCacheEntry> {
     return productsCache;
   }
 
+  let deletedSet: Set<string> = new Set();
   try {
-    const cloudProducts = await getFirestoreProducts();
-    if (cloudProducts && Array.isArray(cloudProducts) && cloudProducts.length > 0) {
-      // Fusionner avec les produits par défaut non présents
+    const [cloudProducts, deletedIds] = await Promise.all([
+      getFirestoreProducts().catch(() => null),
+      getDeletedProductIds().catch(() => new Set<string>())
+    ]);
+
+    deletedSet = deletedIds instanceof Set ? deletedIds : new Set<string>();
+
+    if (cloudProducts && Array.isArray(cloudProducts)) {
+      // 1. Exclure tout produit cloud qui aurait été marqué supprimé
+      const activeCloud = cloudProducts.filter((p: any) => !deletedSet.has(String(p.id)) && !p.isDeleted);
+
+      // 2. Fusionner avec les produits par défaut non présents ET non supprimés
       const existingIds = new Set(cloudProducts.map((p: any) => String(p.id)));
-      const missingDefaults = (defaultProducts as any[]).filter(dp => !existingIds.has(String(dp.id)));
-      const combined = [...cloudProducts, ...missingDefaults].map(sanitizeProductMedia);
+      const missingDefaults = (defaultProducts as any[]).filter(
+        dp => !existingIds.has(String(dp.id)) && !deletedSet.has(String(dp.id))
+      );
+      const combined = [...activeCloud, ...missingDefaults].map(sanitizeProductMedia);
 
       productsCache = buildCacheEntry(combined, PRODUCTS_TTL_MS);
       return productsCache;
@@ -88,8 +100,17 @@ async function loadProductsCacheEntry(): Promise<ProductsCacheEntry> {
     console.warn("[serverCache] Impossible de charger Firestore, utilisation du catalogue par défaut:", error);
   }
 
-  // Fallback si Firestore indisponible ou vide
-  const fallback = (defaultProducts as any[]).map(sanitizeProductMedia);
+  // Fallback si Firestore indisponible ou vide : exclure systématiquement les produits supprimés
+  try {
+    if (deletedSet.size === 0) {
+      const ids = await getDeletedProductIds().catch(() => new Set<string>());
+      deletedSet = ids instanceof Set ? ids : new Set<string>();
+    }
+  } catch {}
+
+  const fallback = (defaultProducts as any[])
+    .filter(dp => !deletedSet.has(String(dp.id)))
+    .map(sanitizeProductMedia);
   productsCache = buildCacheEntry(fallback, 60 * 1000);
   return productsCache;
 }
