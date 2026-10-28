@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   manifest: "/admin-manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "Prince CFA Admin",
   },
 };
@@ -17,7 +17,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="dark bg-[#09090b] text-white min-h-screen">
+    <div className="admin-portal min-h-screen bg-[#fbfbfc] text-zinc-900 selection:bg-gold selection:text-white">
       {children}
     </div>
   );

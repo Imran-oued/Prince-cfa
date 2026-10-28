@@ -145,4 +145,136 @@ textarea,
   scrollbar-width: none;
 }
 
+/* ==========================================================================
+   ESPACE ADMINISTRATION - THÈME CLAIR / FOND BLANC LUXE
+   ========================================================================== */
+.admin-portal {
+  background-color: #fbfbfc !important;
+  color: #09090b !important;
+}
+
+/* Panneaux effet verre en mode clair */
+.admin-portal .glass-panel {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-color: rgba(228, 228, 231, 0.9) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Modales d'administration */
+.admin-portal .bg-\[\#0d0d11\],
+.admin-portal .bg-\[\#0d0d11\]\/95 {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+  color: #09090b !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Champs de saisie, menus déroulants et zones de texte */
+.admin-portal input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+.admin-portal select,
+.admin-portal textarea {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+  color: #09090b !important;
+}
+
+.admin-portal input::placeholder,
+.admin-portal textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.admin-portal select option {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+}
+
+.admin-portal input:focus,
+.admin-portal select:focus,
+.admin-portal textarea:focus {
+  border-color: #b8860b !important;
+  box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.15) !important;
+}
+
+/* Tableaux de commandes et catalogue */
+.admin-portal table thead tr {
+  background-color: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.admin-portal table thead th {
+  color: #64748b !important;
+}
+
+.admin-portal table tbody tr {
+  border-bottom: 1px solid #f1f5f9 !important;
+  color: #334155 !important;
+}
+
+.admin-portal table tbody tr:hover {
+  background-color: rgba(248, 250, 252, 0.8) !important;
+}
+
+/* Cartes et conteneurs sombres adaptés au fond blanc */
+.admin-portal .bg-black\/40,
+.admin-portal .bg-black\/50,
+.admin-portal .bg-black\/60 {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #09090b !important;
+}
+
+.admin-portal .bg-white\/5 {
+  background-color: #f4f4f5 !important;
+  border-color: #e4e4e7 !important;
+  color: #3f3f46 !important;
+}
+
+.admin-portal .bg-white\/10 {
+  background-color: #e4e4e7 !important;
+  border-color: #d4d4d8 !important;
+  color: #18181b !important;
+}
+
+.admin-portal .bg-white\/\[0\.02\] {
+  background-color: #fafafa !important;
+}
+
+/* Remplacement des bordures blanches */
+.admin-portal .border-white\/5,
+.admin-portal .border-white\/10,
+.admin-portal .border-white\/15,
+.admin-portal .border-white\/20 {
+  border-color: #e4e4e7 !important;
+}
+
+.admin-portal .divide-white\/5 > * + *,
+.admin-portal .divide-white\/10 > * + * {
+  border-color: #f1f5f9 !important;
+}
+
+/* Titres et textes autrefois blancs */
+.admin-portal h1.text-white,
+.admin-portal h2.text-white,
+.admin-portal h3.text-white,
+.admin-portal p.text-white,
+.admin-portal span.text-white:not(.bg-red-500):not(.bg-emerald-500):not(.bg-green-500):not(.bg-blue-500),
+.admin-portal div.text-white:not(.bg-red-500):not(.bg-emerald-500):not(.bg-green-500):not(.bg-blue-500),
+.admin-portal td.text-white {
+  color: #09090b !important;
+}
+
+.admin-portal .text-zinc-400 {
+  color: #64748b !important;
+}
+
+.admin-portal .text-zinc-300 {
+  color: #475569 !important;
+}
+
+.admin-portal .text-zinc-500 {
+  color: #64748b !important;
+}
+
 

@@ -2316,18 +2316,18 @@ export default function AdminPage() {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gold/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-        <div className="glass-panel p-8 sm:p-10 rounded-3xl border border-white/10 w-full max-w-md z-10 shadow-2xl relative">
+        <div className="glass-panel p-8 sm:p-10 rounded-3xl border border-zinc-200/80 w-full max-w-md z-10 shadow-xl relative bg-white/90">
           <div className="text-center mb-8">
             <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center mx-auto mb-3 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
               <Crown className="w-8 h-8 text-gold" aria-hidden="true" />
             </div>
-            <h1 className="text-2xl font-black text-white tracking-wider">PRINCE <span className="text-gold">ADMIN</span></h1>
-            <p className="text-xs text-zinc-400 mt-1 uppercase tracking-widest font-light">Espace de gestion réservé</p>
+            <h1 className="text-2xl font-black text-zinc-900 tracking-wider">PRINCE <span className="text-gold">ADMIN</span></h1>
+            <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-medium">Espace de gestion réservé</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider block mb-1.5">
+              <label className="text-xs font-bold text-zinc-700 uppercase tracking-wider block mb-1.5">
                 Mot de passe administrateur
               </label>
               <input 
@@ -2335,14 +2335,14 @@ export default function AdminPage() {
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Entrez votre mot de passe..."
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all"
+                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all"
                 autoFocus
                 required
               />
             </div>
 
             {error && (
-              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center animate-in fade-in flex items-center justify-center gap-1.5">
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 text-xs text-center animate-in fade-in flex items-center justify-center gap-1.5 font-medium">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
                 <span>{error}</span>
               </div>
@@ -2350,13 +2350,13 @@ export default function AdminPage() {
 
             <button 
               type="submit" 
-              className="w-full py-3.5 rounded-xl bg-gold hover:bg-yellow-400 text-black font-extrabold uppercase tracking-widest text-xs transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] cursor-pointer"
+              className="w-full py-3.5 rounded-xl bg-gold hover:bg-yellow-500 text-black font-extrabold uppercase tracking-widest text-xs transition-all shadow-md cursor-pointer"
             >
               Accéder au panneau
             </button>
           </form>
 
-          <Link href="/" className="block text-center text-xs text-zinc-500 hover:text-zinc-300 mt-6 transition-colors">
+          <Link href="/" className="block text-center text-xs text-zinc-500 hover:text-zinc-800 mt-6 transition-colors font-medium">
             ← Retour à la boutique
           </Link>
         </div>
@@ -2368,24 +2368,24 @@ export default function AdminPage() {
     <div className="min-h-screen bg-background flex flex-col p-4 sm:p-8 relative">
       
       {/* Navbar Admin */}
-      <nav className="flex items-center justify-between glass-panel p-4 rounded-2xl border border-white/10 mb-6 z-10 flex-wrap gap-4">
+      <nav className="flex items-center justify-between glass-panel p-4 rounded-2xl border border-zinc-200/80 mb-6 z-10 flex-wrap gap-4 shadow-sm bg-white/90">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center">
             <Crown className="w-5 h-5 text-gold" aria-hidden="true" />
           </div>
           <div>
-            <h1 className="text-lg sm:text-xl font-bold text-white tracking-widest">PRINCE <span className="text-gold">ADMIN</span></h1>
-            <span className="text-xs text-green-500 font-medium">● Connecté en Administrateur</span>
+            <h1 className="text-lg sm:text-xl font-bold text-zinc-900 tracking-widest">PRINCE <span className="text-gold">ADMIN</span></h1>
+            <span className="text-xs text-emerald-600 font-semibold">● Connecté en Administrateur</span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/" className="px-4 py-2 rounded-lg bg-white/5 text-zinc-300 text-xs sm:text-sm hover:text-white hover:bg-white/10 transition-colors border border-white/5">
+          <Link href="/" className="px-4 py-2 rounded-lg bg-zinc-100 text-zinc-700 text-xs sm:text-sm hover:text-zinc-900 hover:bg-zinc-200 transition-colors border border-zinc-200 font-medium">
             Boutique ↗
           </Link>
           <button 
             onClick={handleLogout}
-            className="px-4 py-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 text-xs sm:text-sm hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-lg border border-red-500/30 bg-red-50 text-red-600 text-xs sm:text-sm hover:bg-red-500 hover:text-white transition-colors cursor-pointer font-medium"
           >
             Déconnexion
           </button>
@@ -2398,8 +2398,8 @@ export default function AdminPage() {
           onClick={() => setActiveTab("orders")}
           className={`px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === "orders"
-              ? "bg-gold text-black shadow-[0_0_20px_rgba(212,175,55,0.4)]"
-              : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+              ? "bg-gold text-black shadow-md"
+              : "bg-white text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200"
           }`}
         >
           <Package className="w-4 h-4" aria-hidden="true" />
@@ -2415,13 +2415,13 @@ export default function AdminPage() {
           onClick={() => setActiveTab("products")}
           className={`px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === "products"
-              ? "bg-gold text-black shadow-[0_0_20px_rgba(212,175,55,0.4)]"
-              : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+              ? "bg-gold text-black shadow-md"
+              : "bg-white text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200"
           }`}
         >
           <Tag className="w-4 h-4" aria-hidden="true" />
           <span>Catalogue Produits</span>
-          <span className="px-2 py-0.5 rounded-full bg-white/10 text-zinc-300 text-[10px]">
+          <span className="px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 text-[10px] border border-zinc-200">
             {productsList.length}
           </span>
         </button>
@@ -2429,7 +2429,7 @@ export default function AdminPage() {
         {activeTab === "orders" && (
           <button
             onClick={refreshOrders}
-            className="ml-auto px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="ml-auto px-3 py-2 rounded-lg bg-white hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-zinc-200 shadow-sm"
             title="Rafraîchir les commandes"
           >
             <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
@@ -2441,55 +2441,55 @@ export default function AdminPage() {
       {/* DASHBOARD STATS */}
       {activeTab === "orders" ? (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6 mb-8 z-10">
-          <div className="glass-panel p-5 rounded-2xl border border-white/5 border-l-gold/50 shadow-lg relative overflow-hidden">
-            <h3 className="text-zinc-400 text-xs uppercase tracking-wider mb-1 font-semibold">Total Commandes</h3>
-            <p className="text-2xl sm:text-3xl font-black text-white">{totalOrdersCount}</p>
-            <span className="text-[11px] text-zinc-400 mt-1 inline-block">Toutes périodes</span>
+          <div className="glass-panel p-5 rounded-2xl border border-zinc-200/80 border-l-4 border-l-gold shadow-sm relative overflow-hidden bg-white/90">
+            <h3 className="text-zinc-500 text-xs uppercase tracking-wider mb-1 font-semibold">Total Commandes</h3>
+            <p className="text-2xl sm:text-3xl font-black text-zinc-900">{totalOrdersCount}</p>
+            <span className="text-[11px] text-zinc-500 mt-1 inline-block font-medium">Toutes périodes</span>
           </div>
 
-          <div className="glass-panel p-5 rounded-2xl border border-white/5 border-l-yellow-500/50 shadow-lg relative overflow-hidden">
-            <h3 className="text-yellow-400 text-xs uppercase tracking-wider mb-1 font-semibold">En attente paiement</h3>
-            <p className="text-2xl sm:text-3xl font-black text-yellow-400">{pendingPaymentsCount}</p>
-            <span className="text-[11px] text-zinc-400 mt-1 inline-block">Orange Money / Wave à vérifier</span>
+          <div className="glass-panel p-5 rounded-2xl border border-zinc-200/80 border-l-4 border-l-amber-500 shadow-sm relative overflow-hidden bg-white/90">
+            <h3 className="text-amber-700 text-xs uppercase tracking-wider mb-1 font-semibold">En attente paiement</h3>
+            <p className="text-2xl sm:text-3xl font-black text-amber-700">{pendingPaymentsCount}</p>
+            <span className="text-[11px] text-zinc-500 mt-1 inline-block font-medium">Orange Money / Wave à vérifier</span>
           </div>
 
-          <div className="glass-panel p-5 rounded-2xl border border-white/5 border-l-green-500/50 shadow-lg relative overflow-hidden">
-            <h3 className="text-green-400 text-xs uppercase tracking-wider mb-1 font-semibold">Paiements Confirmés</h3>
-            <p className="text-2xl sm:text-3xl font-black text-green-400">{confirmedPaymentsCount}</p>
-            <span className="text-[11px] text-green-500/80 mt-1 inline-block">Validés manuellement</span>
+          <div className="glass-panel p-5 rounded-2xl border border-zinc-200/80 border-l-4 border-l-emerald-500 shadow-sm relative overflow-hidden bg-white/90">
+            <h3 className="text-emerald-700 text-xs uppercase tracking-wider mb-1 font-semibold">Paiements Confirmés</h3>
+            <p className="text-2xl sm:text-3xl font-black text-emerald-700">{confirmedPaymentsCount}</p>
+            <span className="text-[11px] text-emerald-700/80 mt-1 inline-block font-medium">Validés manuellement</span>
           </div>
 
-          <div className="glass-panel p-5 rounded-2xl border border-white/5 border-l-gold/50 shadow-lg relative overflow-hidden">
+          <div className="glass-panel p-5 rounded-2xl border border-zinc-200/80 border-l-4 border-l-gold shadow-sm relative overflow-hidden bg-white/90">
             <h3 className="text-gold text-xs uppercase tracking-wider mb-1 font-semibold">Chiffre Encaissé Réel</h3>
-            <p className="text-2xl sm:text-3xl font-black text-white">{totalCollectedRevenue.toLocaleString('fr-FR')} <span className="text-gold text-lg">F</span></p>
-            <span className="text-[11px] text-zinc-400 mt-1 inline-block">Fonds reçus et vérifiés</span>
+            <p className="text-2xl sm:text-3xl font-black text-zinc-900">{totalCollectedRevenue.toLocaleString('fr-FR')} <span className="text-gold text-lg">F</span></p>
+            <span className="text-[11px] text-zinc-500 mt-1 inline-block font-medium">Fonds reçus et vérifiés</span>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8 z-10">
-          <div className="glass-panel p-6 rounded-2xl border border-white/5 border-l-gold/50 shadow-lg relative overflow-hidden">
-            <div className="absolute right-[-10px] top-[-10px] text-white opacity-5 pointer-events-none">
+          <div className="glass-panel p-6 rounded-2xl border border-zinc-200/80 border-l-4 border-l-gold shadow-sm relative overflow-hidden bg-white/90">
+            <div className="absolute right-[-10px] top-[-10px] text-zinc-900 opacity-5 pointer-events-none">
               <Coins className="w-24 h-24" aria-hidden="true" />
             </div>
-            <h3 className="text-zinc-400 text-sm uppercase tracking-wider mb-2">Valeur du Catalogue</h3>
-            <p className="text-3xl font-black text-white">{totalCatalogValue.toLocaleString('fr-FR')} <span className="text-gold text-xl">FCFA</span></p>
-            <span className="text-xs text-green-500 mt-2 inline-block">Valeur marchande totale</span>
+            <h3 className="text-zinc-500 text-sm uppercase tracking-wider mb-2 font-semibold">Valeur du Catalogue</h3>
+            <p className="text-3xl font-black text-zinc-900">{totalCatalogValue.toLocaleString('fr-FR')} <span className="text-gold text-xl">FCFA</span></p>
+            <span className="text-xs text-emerald-600 font-semibold mt-2 inline-block">Valeur marchande totale</span>
           </div>
-          <div className="glass-panel p-6 rounded-2xl border border-white/5 shadow-lg relative overflow-hidden">
-            <div className="absolute right-[-10px] top-[-10px] text-white opacity-5 pointer-events-none">
+          <div className="glass-panel p-6 rounded-2xl border border-zinc-200/80 shadow-sm relative overflow-hidden bg-white/90">
+            <div className="absolute right-[-10px] top-[-10px] text-zinc-900 opacity-5 pointer-events-none">
               <Package className="w-24 h-24" aria-hidden="true" />
             </div>
-            <h3 className="text-zinc-400 text-sm uppercase tracking-wider mb-2">Rayons Actifs</h3>
-            <p className="text-3xl font-black text-white">{categoriesCount}</p>
-            <span className="text-xs text-zinc-500 mt-2 inline-block">Catégories en ligne</span>
+            <h3 className="text-zinc-500 text-sm uppercase tracking-wider mb-2 font-semibold">Rayons Actifs</h3>
+            <p className="text-3xl font-black text-zinc-900">{categoriesCount}</p>
+            <span className="text-xs text-zinc-500 mt-2 inline-block font-medium">Catégories en ligne</span>
           </div>
-          <div className="glass-panel p-6 rounded-2xl border border-white/5 shadow-lg relative overflow-hidden">
-            <div className="absolute right-[-10px] top-[-10px] text-white opacity-5 pointer-events-none">
+          <div className="glass-panel p-6 rounded-2xl border border-zinc-200/80 shadow-sm relative overflow-hidden bg-white/90">
+            <div className="absolute right-[-10px] top-[-10px] text-zinc-900 opacity-5 pointer-events-none">
               <ShoppingBag className="w-24 h-24" aria-hidden="true" />
             </div>
-            <h3 className="text-zinc-400 text-sm uppercase tracking-wider mb-2">Produits en Stock</h3>
-            <p className="text-3xl font-black text-white">{totalProductsCount}</p>
-            <span className="text-xs text-gold mt-2 inline-block">Catalogue actif</span>
+            <h3 className="text-zinc-500 text-sm uppercase tracking-wider mb-2 font-semibold">Produits en Stock</h3>
+            <p className="text-3xl font-black text-zinc-900">{totalProductsCount}</p>
+            <span className="text-xs text-gold font-bold mt-2 inline-block">Catalogue actif</span>
           </div>
         </div>
       )}
@@ -2498,17 +2498,17 @@ export default function AdminPage() {
 
       {/* ONGLET 1 : GESTION DES COMMANDES */}
       {activeTab === "orders" && (
-        <div className="glass-panel rounded-2xl border border-white/10 flex-1 z-10 overflow-hidden flex flex-col">
+        <div className="glass-panel rounded-2xl border border-zinc-200/80 flex-1 z-10 overflow-hidden flex flex-col shadow-sm bg-white/90">
           
           {/* Barre de filtres et recherche */}
-          <div className="p-4 sm:p-6 border-b border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 flex-wrap">
+          <div className="p-4 sm:p-6 border-b border-zinc-200/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 flex-wrap bg-zinc-50/50">
             <div className="flex-1 max-w-md">
               <input 
                 type="text"
                 value={orderSearchQuery}
                 onChange={e => setOrderSearchQuery(e.target.value)}
                 placeholder="Rechercher par N° commande, client ou téléphone..."
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-gold/50"
+                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold shadow-sm"
               />
             </div>
 
@@ -2516,7 +2516,7 @@ export default function AdminPage() {
               <select
                 value={orderStatusFilter}
                 onChange={e => setOrderStatusFilter(e.target.value)}
-                className="bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold/50 cursor-pointer"
+                className="bg-white border border-zinc-200 rounded-xl px-3 py-2 text-xs text-zinc-800 focus:outline-none focus:border-gold cursor-pointer shadow-sm font-medium"
               >
                 <option value="all">Tous les statuts ({totalOrdersCount})</option>
                 <option value="en_attente">Paiement en attente &lt; 48h ({pendingPaymentsCount})</option>
@@ -2534,7 +2534,7 @@ export default function AdminPage() {
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/10 text-[11px] text-zinc-400 uppercase tracking-wider bg-white/[0.02]">
+                <tr className="border-b border-zinc-200 text-[11px] text-zinc-500 uppercase tracking-wider bg-zinc-50/80">
                   <th className="p-4">Réf. Commande</th>
                   <th className="p-4">Date</th>
                   <th className="p-4">Client</th>
@@ -2546,41 +2546,41 @@ export default function AdminPage() {
                   <th className="p-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-xs text-zinc-300">
+              <tbody className="divide-y divide-zinc-200/80 text-xs text-zinc-700">
                 {filteredOrders.map(order => {
                   const isPaid = order.payment?.status === "confirme";
                   const methodBadge = order.payment?.method === "wave" ? (
-                    <span className="inline-flex items-center gap-1.5 text-cyan-400">
+                    <span className="inline-flex items-center gap-1.5 text-cyan-700 font-medium">
                       <WaveIcon className="w-3.5 h-3.5" /> Wave
                     </span>
                   ) : order.payment?.method === "store_pickup" ? (
-                    <span className="inline-flex items-center gap-1.5 text-gold">
+                    <span className="inline-flex items-center gap-1.5 text-gold font-medium">
                       <Store className="w-3.5 h-3.5 text-gold" aria-hidden="true" /> Boutique
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 text-orange-400">
+                    <span className="inline-flex items-center gap-1.5 text-orange-700 font-medium">
                       <OrangeMoneyIcon className="w-3.5 h-3.5" /> Orange Money
                     </span>
                   );
 
                   return (
-                    <tr key={order.id} className="hover:bg-white/[0.02] transition-colors">
+                    <tr key={order.id} className="hover:bg-zinc-50/80 transition-colors">
                       <td className="p-4 font-mono font-bold text-gold">{order.id}</td>
-                      <td className="p-4 text-zinc-400">
+                      <td className="p-4 text-zinc-500">
                         {new Date(order.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
                       </td>
                       <td className="p-4">
-                        <div className="font-bold text-white">{order.customer?.name}</div>
-                        <div className="text-[11px] text-zinc-400 font-mono">{order.customer?.phone}</div>
+                        <div className="font-bold text-zinc-900">{order.customer?.name}</div>
+                        <div className="text-[11px] text-zinc-500 font-mono">{order.customer?.phone}</div>
                       </td>
                       <td className="p-4">
                         {order.customer?.deliveryMethod === "delivery" ? (
-                          <span className="text-zinc-300 inline-flex items-center gap-1.5">
+                          <span className="text-zinc-600 inline-flex items-center gap-1.5 font-medium">
                             <Truck className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
                             <span>{order.customer.city}</span>
                           </span>
                         ) : (
-                          <span className="text-gold inline-flex items-center gap-1.5">
+                          <span className="text-gold inline-flex items-center gap-1.5 font-medium">
                             <Store className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
                             <span>Retrait en Boutique</span>
                           </span>
@@ -2590,24 +2590,24 @@ export default function AdminPage() {
                       <td className="p-4">
                         {isPaid ? (
                           <div className="space-y-0.5">
-                            <span className="px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
+                            <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
                               <Check className="w-3 h-3 stroke-[2.5]" aria-hidden="true" />
                               <span>Confirmé</span>
                             </span>
-                            <div className="text-[10px] text-green-400 font-medium">Stock débité</div>
+                            <div className="text-[10px] text-emerald-600 font-medium">Stock débité</div>
                           </div>
                         ) : isOrderExpired(order) ? (
                           <div className="space-y-0.5">
-                            <span className="px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
-                              <Clock className="w-3 h-3 text-zinc-400" aria-hidden="true" />
+                            <span className="px-2.5 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-600 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
+                              <Clock className="w-3 h-3 text-zinc-500" aria-hidden="true" />
                               <span>Non payée (&gt;48h)</span>
                             </span>
                             <div className="text-[10px] text-zinc-500 font-medium">Stock intact</div>
                           </div>
                         ) : (
                           <div className="space-y-0.5">
-                            <span className="px-2.5 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
-                              <Clock className="w-3 h-3" aria-hidden="true" />
+                            <span className="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-300 text-amber-700 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
+                              <Clock className="w-3 h-3 text-amber-600" aria-hidden="true" />
                               <span>En attente (&lt;48h)</span>
                             </span>
                             <div className="text-[10px] text-zinc-500 font-medium">Stock intact</div>
@@ -2616,17 +2616,17 @@ export default function AdminPage() {
                       </td>
                       <td className="p-4">
                         {isOrderExpired(order) ? (
-                          <span className="px-2 py-0.5 rounded bg-zinc-800/80 border border-zinc-700 text-zinc-400 text-[11px] font-bold inline-flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-zinc-400" aria-hidden="true" />
+                          <span className="px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-600 text-[11px] font-bold inline-flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-zinc-500" aria-hidden="true" />
                             Expirée (&gt;48h)
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded bg-white/10 text-zinc-300 text-[11px]">
+                          <span className="px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] font-medium">
                             {order.orderStatus}
                           </span>
                         )}
                       </td>
-                      <td className="p-4 font-black text-white whitespace-nowrap">
+                      <td className="p-4 font-black text-zinc-900 whitespace-nowrap">
                         {order.pricing?.total?.toLocaleString('fr-FR')} FCFA
                       </td>
                       <td className="p-4 text-right">
@@ -2636,14 +2636,14 @@ export default function AdminPage() {
                             onClick={() => handleNotifyCustomerWhatsApp(order, order.payment.status === "confirme" ? "payment_confirmed" : "custom")}
                             title="Notifier ou contacter le client sur WhatsApp"
                             aria-label="Contacter le client sur WhatsApp"
-                            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-sm"
                           >
                             <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366]" />
                             <span className="hidden xl:inline text-[11px]">WhatsApp</span>
                           </button>
                           <button
                             onClick={() => openOrderDetails(order)}
-                            className="px-3 py-1.5 rounded-lg bg-gold/15 hover:bg-gold text-gold hover:text-black font-bold text-xs transition-all border border-gold/30 cursor-pointer whitespace-nowrap"
+                            className="px-3 py-1.5 rounded-lg bg-gold/15 hover:bg-gold text-yellow-800 hover:text-black font-bold text-xs transition-all border border-gold/40 cursor-pointer whitespace-nowrap shadow-sm"
                           >
                             Détails & Validation
                           </button>
@@ -2652,7 +2652,7 @@ export default function AdminPage() {
                             onClick={() => handleDeleteOrder(order.id)}
                             title="Supprimer définitivement la commande"
                             aria-label="Supprimer la commande"
-                            className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 border border-white/10 hover:border-red-500/30 text-xs transition-all cursor-pointer"
+                            className="p-1.5 rounded-lg bg-zinc-100 hover:bg-red-50 text-zinc-400 hover:text-red-600 border border-zinc-200 hover:border-red-200 text-xs transition-all cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                           </button>
@@ -2664,7 +2664,7 @@ export default function AdminPage() {
 
                 {filteredOrders.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="p-10 text-center text-zinc-500">
+                    <td colSpan={9} className="p-10 text-center text-zinc-500 font-medium">
                       Aucune commande ne correspond aux critères.
                     </td>
                   </tr>
@@ -2678,34 +2678,34 @@ export default function AdminPage() {
       {/* MODAL DÉTAILS DE COMMANDE & VALIDATION MANUELLE */}
       {selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" onClick={() => setSelectedOrder(null)}></div>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedOrder(null)}></div>
           
-          <div className="glass-panel p-5 sm:p-7 rounded-3xl border border-gold/30 w-full max-w-2xl z-10 max-h-[90vh] overflow-y-auto relative shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-5">
+          <div className="glass-panel p-5 sm:p-7 rounded-3xl border border-zinc-200/80 w-full max-w-2xl z-10 max-h-[90vh] overflow-y-auto relative shadow-2xl bg-white">
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-200 mb-5">
               <div>
-                <span className="text-xs text-zinc-400 uppercase tracking-widest block font-medium">Fiche Commande</span>
+                <span className="text-xs text-zinc-500 uppercase tracking-widest block font-semibold">Fiche Commande</span>
                 <h3 className="text-xl font-black text-gold font-mono">{selectedOrder.id}</h3>
               </div>
               <button 
                 onClick={() => setSelectedOrder(null)} 
                 aria-label="Fermer la fiche commande"
                 title="Fermer"
-                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 hover:text-zinc-900 flex items-center justify-center transition-colors cursor-pointer border border-zinc-200"
               >
                 <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
             {/* Coordonnées Client */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/10 mb-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl bg-zinc-50 border border-zinc-200 mb-4 text-xs">
               <div>
-                <span className="text-zinc-500 uppercase tracking-wider block text-[10px]">Client</span>
-                <span className="font-bold text-white text-sm">{selectedOrder.customer.name}</span>
-                <div className="text-zinc-400 font-mono mt-0.5">{selectedOrder.customer.phone}</div>
+                <span className="text-zinc-500 uppercase tracking-wider block text-[10px] font-semibold">Client</span>
+                <span className="font-bold text-zinc-900 text-sm">{selectedOrder.customer.name}</span>
+                <div className="text-zinc-500 font-mono mt-0.5">{selectedOrder.customer.phone}</div>
               </div>
               <div>
-                <span className="text-zinc-500 uppercase tracking-wider block text-[10px]">Mode de réception</span>
-                <span className="font-bold text-white inline-flex items-center gap-1.5">
+                <span className="text-zinc-500 uppercase tracking-wider block text-[10px] font-semibold">Mode de réception</span>
+                <span className="font-bold text-zinc-900 inline-flex items-center gap-1.5">
                   {selectedOrder.customer.deliveryMethod === "delivery" ? (
                     <>
                       <Truck className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
@@ -2719,12 +2719,12 @@ export default function AdminPage() {
                   )}
                 </span>
                 {selectedOrder.customer.deliveryMethod === "delivery" && (
-                  <div className="text-zinc-400 mt-0.5">{selectedOrder.customer.city} - {selectedOrder.customer.neighborhood}</div>
+                  <div className="text-zinc-500 mt-0.5">{selectedOrder.customer.city} - {selectedOrder.customer.neighborhood}</div>
                 )}
               </div>
               {selectedOrder.customer.notes && (
-                <div className="col-span-2 pt-2 border-t border-white/5 text-zinc-400">
-                  <span className="text-zinc-500 text-[10px] block">Note client :</span>
+                <div className="col-span-2 pt-2 border-t border-zinc-200 text-zinc-600">
+                  <span className="text-zinc-500 text-[10px] block font-semibold">Note client :</span>
                   &quot;{selectedOrder.customer.notes}&quot;
                 </div>
               )}
@@ -2732,18 +2732,18 @@ export default function AdminPage() {
 
             {/* Articles de la commande (Snapshot figé) */}
             <div className="space-y-2 mb-4">
-              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Articles ({selectedOrder.items?.length})</span>
-              <div className="divide-y divide-white/5 border border-white/10 rounded-xl overflow-hidden bg-white/[0.01]">
+              <span className="text-xs font-bold text-zinc-600 uppercase tracking-wider block">Articles ({selectedOrder.items?.length})</span>
+              <div className="divide-y divide-zinc-200 border border-zinc-200 rounded-xl overflow-hidden bg-zinc-50/50">
                 {selectedOrder.items?.map((item, idx) => (
                   <div key={idx} className="p-3 flex items-center justify-between gap-3 text-xs">
                     <div className="flex-1">
-                      <div className="font-bold text-white">{item.name}</div>
-                      <div className="text-[11px] text-zinc-400">
+                      <div className="font-bold text-zinc-900">{item.name}</div>
+                      <div className="text-[11px] text-zinc-500">
                         {[item.selectedCapacity, item.selectedColor].filter(Boolean).join(" • ")}
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-zinc-400">{item.quantity} × {item.unitPrice.toLocaleString('fr-FR')} F</span>
+                      <span className="text-zinc-500">{item.quantity} × {item.unitPrice.toLocaleString('fr-FR')} F</span>
                       <div className="font-bold text-gold">{(item.quantity * item.unitPrice).toLocaleString('fr-FR')} FCFA</div>
                     </div>
                   </div>
@@ -2752,17 +2752,17 @@ export default function AdminPage() {
             </div>
 
             {/* Décomposition financière */}
-            <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-1.5 text-xs mb-5">
-              <div className="flex justify-between text-zinc-400">
+            <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2 text-xs mb-5">
+              <div className="flex justify-between text-zinc-600">
                 <span>Sous-total produits</span>
-                <span>{selectedOrder.pricing.subtotal.toLocaleString('fr-FR')} FCFA</span>
+                <span className="font-medium text-zinc-800">{selectedOrder.pricing.subtotal.toLocaleString('fr-FR')} FCFA</span>
               </div>
-              <div className="flex justify-between text-zinc-400">
+              <div className="flex justify-between text-zinc-600">
                 <span>Frais de réception</span>
-                <span>{selectedOrder.pricing.deliveryFee.toLocaleString('fr-FR')} FCFA</span>
+                <span className="font-medium text-zinc-800">{selectedOrder.pricing.deliveryFee.toLocaleString('fr-FR')} FCFA</span>
               </div>
-              <div className="pt-2 border-t border-white/10 flex justify-between font-bold text-sm">
-                <span className="text-white">Total Commande</span>
+              <div className="pt-2 border-t border-zinc-200 flex justify-between font-bold text-sm">
+                <span className="text-zinc-900">Total Commande</span>
                 <span className="text-gold font-black">{selectedOrder.pricing.total.toLocaleString('fr-FR')} FCFA</span>
               </div>
             </div>
@@ -2830,35 +2830,35 @@ export default function AdminPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">Nom / Matricule Admin</label>
+                      <label className="text-[10px] text-zinc-600 uppercase font-bold block mb-1">Nom / Matricule Admin</label>
                       <input 
                         type="text" 
                         value={verifierName} 
                         onChange={e => setVerifierName(e.target.value)}
-                        className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-white text-xs"
+                        className="w-full bg-white border border-zinc-200 rounded-lg p-2 text-zinc-900 text-xs shadow-sm focus:outline-none focus:border-gold"
                         placeholder="Ex: Moussa (Gérant)"
                         required
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">Réf. SMS / Transaction</label>
+                      <label className="text-[10px] text-zinc-600 uppercase font-bold block mb-1">Réf. SMS / Transaction</label>
                       <input 
                         type="text" 
                         value={confirmTxRef} 
                         onChange={e => setConfirmTxRef(e.target.value)}
-                        className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-white text-xs"
+                        className="w-full bg-white border border-zinc-200 rounded-lg p-2 text-zinc-900 text-xs shadow-sm focus:outline-none focus:border-gold"
                         placeholder="Ex: OM-883719"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">Note de vérification</label>
+                    <label className="text-[10px] text-zinc-600 uppercase font-bold block mb-1">Note de vérification</label>
                     <input 
                       type="text" 
                       value={confirmNote} 
                       onChange={e => setConfirmNote(e.target.value)}
-                      className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-white text-xs"
+                      className="w-full bg-white border border-zinc-200 rounded-lg p-2 text-zinc-900 text-xs shadow-sm focus:outline-none focus:border-gold"
                       placeholder="Ex: Débit reçu et vérifié sur le compte officiel"
                     />
                   </div>
@@ -2969,10 +2969,10 @@ export default function AdminPage() {
                 <span className="text-[10px] text-zinc-500 font-medium">Non communiqué au client</span>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-500/20 space-y-3">
+              <div className="p-3.5 rounded-xl bg-cyan-50/70 border border-cyan-200 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
+                    <label className="text-[10px] text-zinc-600 uppercase font-bold block mb-1">
                       Numéro IMEI de l&apos;Appareil (15 chiffres)
                     </label>
                     <input 
@@ -2980,11 +2980,11 @@ export default function AdminPage() {
                       value={imeiInput} 
                       onChange={e => setImeiInput(e.target.value)} 
                       placeholder="Ex: 356789123456789" 
-                      className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-white text-xs font-mono"
+                      className="w-full bg-white border border-zinc-200 rounded-lg p-2 text-zinc-900 text-xs font-mono shadow-sm focus:outline-none focus:border-cyan-600"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
+                    <label className="text-[10px] text-zinc-600 uppercase font-bold block mb-1">
                       Numéro de Série / Modèle Constructeur
                     </label>
                     <input 
@@ -2992,13 +2992,13 @@ export default function AdminPage() {
                       value={serialInput} 
                       onChange={e => setSerialInput(e.target.value)} 
                       placeholder="Ex: F2LZG9J80D" 
-                      className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-white text-xs font-mono"
+                      className="w-full bg-white border border-zinc-200 rounded-lg p-2 text-zinc-900 text-xs font-mono shadow-sm focus:outline-none focus:border-cyan-600"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
+                  <label className="text-[10px] text-zinc-600 uppercase font-bold block mb-1">
                     Notes Internes SAV & Garantie
                   </label>
                   <input 
@@ -3006,7 +3006,7 @@ export default function AdminPage() {
                     value={trackingNoteInput} 
                     onChange={e => setTrackingNoteInput(e.target.value)} 
                     placeholder="Ex: Appareil testé OK, batterie à 100%, film protecteur posé" 
-                    className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-white text-xs"
+                    className="w-full bg-white border border-zinc-200 rounded-lg p-2 text-zinc-900 text-xs shadow-sm focus:outline-none focus:border-cyan-600"
                   />
                 </div>
 
@@ -3020,7 +3020,7 @@ export default function AdminPage() {
                   type="button"
                   onClick={() => handleUpdateInternalTracking(selectedOrder.id)}
                   disabled={isUpdatingOrder}
-                  className="w-full py-2.5 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-500/40 text-cyan-200 font-bold uppercase tracking-wider text-xs transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-bold uppercase tracking-wider text-xs transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Save className="w-4 h-4" aria-hidden="true" />
                   <span>Enregistrer le suivi IMEI / Série interne</span>
@@ -3029,16 +3029,16 @@ export default function AdminPage() {
             </div>
 
             {/* ZONE DE SUPPRESSION DÉFINITIVE DE COMMANDE */}
-            <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="text-xs text-zinc-400">
-                <span className="font-bold text-zinc-300 block">Commande sans paiement ou erronée ?</span>
+            <div className="pt-4 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-xs text-zinc-600">
+                <span className="font-bold text-zinc-800 block">Commande sans paiement ou erronée ?</span>
                 <span className="text-[11px] text-zinc-500">Supprime définitivement cette commande. Si du stock avait été débité, il sera automatiquement restitué.</span>
               </div>
               <button
                 type="button"
                 onClick={() => handleDeleteOrder(selectedOrder.id)}
                 disabled={isUpdatingOrder}
-                className="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-600 hover:text-white text-red-400 text-xs font-bold border border-red-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-red-50 hover:bg-red-600 hover:text-white text-red-600 text-xs font-bold border border-red-200 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
               >
                 <Trash2 className="w-4 h-4" aria-hidden="true" />
                 <span>Supprimer cette commande</span>
@@ -3050,17 +3050,17 @@ export default function AdminPage() {
 
       {/* ONGLET 2 : GESTION DU CATALOGUE PRODUITS */}
       {activeTab === "products" && (
-        <div className="glass-panel rounded-2xl border border-white/10 flex-1 z-10 overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="glass-panel rounded-2xl border border-zinc-200/80 flex-1 z-10 overflow-hidden flex flex-col shadow-sm bg-white/90">
+          <div className="p-6 border-b border-zinc-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 bg-zinc-50/50">
             <div className="flex items-center gap-3 flex-wrap">
-              <h2 className="text-lg font-bold text-white uppercase tracking-widest">Gestion du Catalogue</h2>
+              <h2 className="text-lg font-bold text-zinc-900 uppercase tracking-widest">Gestion du Catalogue</h2>
               {isCloud ? (
-                <span className="px-2.5 py-1 text-xs rounded-full bg-green-500/10 border border-green-500/30 text-green-400 font-medium flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                <span className="px-2.5 py-1 text-xs rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 font-medium flex items-center gap-1.5 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                   Cloud Firebase Connecté
                 </span>
               ) : (
-                <span className="px-2.5 py-1 text-xs rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-medium">
+                <span className="px-2.5 py-1 text-xs rounded-full bg-amber-50 border border-amber-300 text-amber-700 font-medium shadow-sm">
                   Mode Local
                 </span>
               )}
@@ -3070,17 +3070,17 @@ export default function AdminPage() {
               {isCloud && (
                 <button 
                   onClick={handleSeedToCloud}
-                  className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-zinc-300 hover:text-white hover:border-gold/50 transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-white border border-zinc-200 text-xs font-bold text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
                   title="Synchroniser tous les produits vers Firebase Firestore"
                 >
-                  <CloudUpload className="w-4 h-4 text-zinc-400" aria-hidden="true" />
+                  <CloudUpload className="w-4 h-4 text-zinc-500" aria-hidden="true" />
                   <span>Envoyer vers Firebase</span>
                 </button>
               )}
 
               <button 
                 onClick={openModalForNew}
-                className="px-4 py-2 rounded-xl bg-gold text-black font-bold text-xs uppercase tracking-wider hover:bg-yellow-400 transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)] cursor-pointer flex items-center gap-2"
+                className="px-4 py-2 rounded-xl bg-gold text-black font-bold text-xs uppercase tracking-wider hover:bg-yellow-400 transition-all shadow-md cursor-pointer flex items-center gap-2"
               >
                 <span>+</span>
                 <span>Ajouter Produit</span>
@@ -3096,7 +3096,7 @@ export default function AdminPage() {
           )}
 
           {/* Barre de Recherche et Filtres Catalogue */}
-          <div className="p-4 sm:px-6 bg-white/[0.02] border-b border-white/10 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="p-4 sm:px-6 bg-zinc-50/50 border-b border-zinc-200/80 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               {/* Champ de recherche texte */}
               <div className="relative flex-1">
@@ -3106,13 +3106,13 @@ export default function AdminPage() {
                   value={productSearchQuery}
                   onChange={(e) => setProductSearchQuery(e.target.value)}
                   placeholder="Rechercher par nom, marque (Honda, Apple...), ID ou mot-clé..."
-                  className="w-full bg-black/50 border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all"
+                  className="w-full bg-white border border-zinc-200 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold/30 transition-all shadow-sm"
                 />
                 {productSearchQuery && (
                   <button
                     type="button"
                     onClick={() => setProductSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white rounded-md transition-colors cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-700 rounded-md transition-colors cursor-pointer"
                     title="Effacer la recherche"
                     aria-label="Effacer la recherche"
                   >
@@ -3129,29 +3129,29 @@ export default function AdminPage() {
                 <select
                   value={productCategoryFilter}
                   onChange={(e) => setProductCategoryFilter(e.target.value)}
-                  className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs font-medium text-zinc-200 focus:outline-none focus:border-gold/50 cursor-pointer appearance-none"
+                  className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-white border border-zinc-200 text-xs font-medium text-zinc-800 focus:outline-none focus:border-gold cursor-pointer appearance-none shadow-sm"
                   aria-label="Filtrer par catégorie"
                 >
-                  <option value="all" className="bg-zinc-900 text-white">
+                  <option value="all" className="bg-white text-zinc-900">
                     Toutes les catégories ({productsList.length})
                   </option>
                   {CATEGORIES_LIST.map((cat) => {
                     const count = productsList.filter(p => p.category === cat.id).length;
                     return (
-                      <option key={cat.id} value={cat.id} className="bg-zinc-900 text-white">
+                      <option key={cat.id} value={cat.id} className="bg-white text-zinc-900">
                         {cat.label} ({count})
                       </option>
                     );
                   })}
                 </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500 text-xs">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-xs">
                   ▼
                 </div>
               </div>
             </div>
 
             {/* Compteur et bouton de réinitialisation */}
-            <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-zinc-400 pt-1 md:pt-0">
+            <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-zinc-500 pt-1 md:pt-0">
               <span className="font-medium whitespace-nowrap">
                 <span className="text-gold font-bold">{filteredProducts.length}</span> sur {productsList.length} produit{productsList.length > 1 ? "s" : ""}
               </span>
@@ -3163,7 +3163,7 @@ export default function AdminPage() {
                     setProductSearchQuery("");
                     setProductCategoryFilter("all");
                   }}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white transition-all text-xs flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                  className="px-2.5 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 text-zinc-700 hover:text-zinc-900 transition-all text-xs flex items-center gap-1 cursor-pointer whitespace-nowrap shadow-sm"
                   title="Réinitialiser les filtres"
                 >
                   <X className="w-3 h-3" />
@@ -3177,7 +3177,7 @@ export default function AdminPage() {
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/10 text-xs text-zinc-400 uppercase tracking-wider bg-white/[0.02]">
+                <tr className="border-b border-zinc-200 text-xs text-zinc-500 uppercase tracking-wider bg-zinc-50/80">
                   <th className="p-4">Produit</th>
                   <th className="p-4">Catégorie</th>
                   <th className="p-4">Disponibilité</th>
@@ -3185,19 +3185,19 @@ export default function AdminPage() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+              <tbody className="divide-y divide-zinc-200/80 text-sm text-zinc-700">
                 {filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-white/[0.02] transition-colors">
+                  <tr key={product.id} className="hover:bg-zinc-50/80 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-black/50 p-1 border border-white/10 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                        <div className="w-10 h-10 rounded-lg bg-zinc-100 p-1 border border-zinc-200 flex-shrink-0 flex items-center justify-center overflow-hidden">
                           <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain" />
                         </div>
                         <div>
-                          <div className="text-white font-bold text-sm flex items-center gap-2">
+                          <div className="text-zinc-900 font-bold text-sm flex items-center gap-2">
                             <span>{product.name}</span>
                             {product.brand && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-400 uppercase">
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-600 uppercase font-medium">
                                 {product.brand}
                               </span>
                             )}
@@ -3209,7 +3209,7 @@ export default function AdminPage() {
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="px-3 py-1 rounded-full bg-white/10 text-zinc-300 text-xs font-medium inline-flex items-center gap-1.5">
+                      <span className="px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 text-xs font-medium inline-flex items-center gap-1.5">
                         {getCategoryIcon(product.category, "w-3.5 h-3.5 text-gold")}
                         <span>{getCategoryConfig(product.category).label}</span>
                       </span>
@@ -3220,8 +3220,8 @@ export default function AdminPage() {
                         onClick={() => handleQuickToggleAvailability(product)}
                         className={`px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer border ${
                           ((product as any).stockStatus === "bientot_disponible" || (product as any).isComingSoon || product.stock === 0)
-                            ? "bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
-                            : "bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25"
+                            ? "bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100 shadow-sm"
+                            : "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 shadow-sm"
                         }`}
                         title="Cliquer pour basculer : En stock ↔ Bientôt disponible"
                       >
@@ -3232,17 +3232,17 @@ export default function AdminPage() {
                           </>
                         ) : (
                           <>
-                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                             <span>En stock</span>
                           </>
                         )}
                       </button>
                     </td>
-                    <td className="p-4 font-bold text-white">
+                    <td className="p-4 font-bold text-zinc-900">
                       {product.salePrice ? (
                         <div>
                           <span className="text-gold font-extrabold">{product.salePrice.toLocaleString('fr-FR')} FCFA</span>
-                          <span className="block text-[11px] text-zinc-500 line-through">{product.price.toLocaleString('fr-FR')} FCFA</span>
+                          <span className="block text-[11px] text-zinc-400 line-through">{product.price.toLocaleString('fr-FR')} FCFA</span>
                         </div>
                       ) : (
                         <div>
@@ -3254,7 +3254,7 @@ export default function AdminPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => openModalForEdit(product)} 
-                          className="p-2 rounded-lg bg-white/5 text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" 
+                          className="p-2 rounded-lg bg-zinc-100 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200 transition-colors cursor-pointer border border-zinc-200 shadow-sm" 
                           title="Modifier"
                           aria-label={`Modifier ${product.name}`}
                         >
@@ -3318,22 +3318,22 @@ export default function AdminPage() {
 
       {/* DIALOGUE DE SÉCURITÉ AU CHANGEMENT DE CATÉGORIE */}
       {categorySwitchPending && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="glass-panel p-6 sm:p-7 rounded-3xl border border-amber-500/50 bg-[#0d0d10] max-w-md w-full space-y-4 shadow-2xl">
-            <div className="flex items-center gap-3 text-amber-400">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-amber-400" aria-hidden="true" />
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="glass-panel p-6 sm:p-7 rounded-3xl border border-amber-300 bg-white max-w-md w-full space-y-4 shadow-2xl">
+            <div className="flex items-center gap-3 text-amber-700">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-amber-600" aria-hidden="true" />
               </div>
               <div>
-                <h4 className="font-bold text-sm uppercase tracking-wider text-white">Changement de catégorie</h4>
-                <p className="text-[11px] text-zinc-400">Confirmation obligatoire</p>
+                <h4 className="font-bold text-sm uppercase tracking-wider text-zinc-900">Changement de catégorie</h4>
+                <p className="text-[11px] text-zinc-500 font-medium">Confirmation obligatoire</p>
               </div>
             </div>
 
-            <p className="text-xs text-zinc-300 leading-relaxed">
-              Vous êtes sur le point de passer de <strong className="text-white">{getCategoryConfig(categorySwitchPending.from).label}</strong> à <strong className="text-gold">{getCategoryConfig(categorySwitchPending.to).label}</strong>.
+            <p className="text-xs text-zinc-600 leading-relaxed">
+              Vous êtes sur le point de passer de <strong className="text-zinc-900">{getCategoryConfig(categorySwitchPending.from).label}</strong> à <strong className="text-gold">{getCategoryConfig(categorySwitchPending.to).label}</strong>.
             </p>
-            <p className="text-[11px] text-zinc-400 leading-normal">
+            <p className="text-[11px] text-zinc-500 leading-normal">
               Des caractéristiques spécifiques sont déjà renseignées pour ce produit. Afin d&apos;éviter toute corruption de vos données, choisissez l&apos;action souhaitée :
             </p>
 
@@ -3341,7 +3341,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => confirmCategorySwitch(true)}
-                className="w-full py-3 px-3.5 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/40 text-gold text-xs font-bold transition-all text-left flex items-center justify-between cursor-pointer group"
+                className="w-full py-3 px-3.5 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/40 text-yellow-800 text-xs font-bold transition-all text-left flex items-center justify-between cursor-pointer group shadow-sm"
               >
                 <span>Conserver les caractéristiques compatibles</span>
                 <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -3350,7 +3350,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => confirmCategorySwitch(false)}
-                className="w-full py-3 px-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-bold transition-all text-left flex items-center justify-between cursor-pointer"
+                className="w-full py-3 px-3.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 text-zinc-700 text-xs font-bold transition-all text-left flex items-center justify-between cursor-pointer shadow-sm"
               >
                 <span>Réinitialiser les caractéristiques spécifiques</span>
                 <span>↺</span>
@@ -3359,7 +3359,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => setCategorySwitchPending(null)}
-                className="w-full py-2.5 px-3 rounded-xl bg-transparent hover:bg-white/5 text-zinc-400 hover:text-white text-xs text-center transition-all cursor-pointer"
+                className="w-full py-2.5 px-3 rounded-xl bg-transparent hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 text-xs text-center transition-all cursor-pointer font-medium"
               >
                 Annuler et rester sur {getCategoryConfig(categorySwitchPending.from).label}
               </button>
@@ -3371,25 +3371,25 @@ export default function AdminPage() {
       {/* MODAL AJOUT / MODIFICATION DYNAMIQUE PAR CATÉGORIE */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-6 overflow-hidden">
-          {/* Backdrop sombre sécurisé : sur grand écran, demande confirmation si des données sont saisies ; sur mobile, ne ferme jamais accidentellement */}
+          {/* Backdrop sécurisé avec assombrissement doux */}
           <div 
-            className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
             onClick={requestCloseModal}
           ></div>
           
-          <div className="glass-panel p-4 sm:p-8 rounded-none sm:rounded-3xl border-0 sm:border border-white/15 w-full h-full sm:h-auto sm:max-h-[92vh] max-w-4xl z-10 flex flex-col relative bg-[#0d0d11] sm:bg-[#0d0d11]/95 shadow-2xl">
+          <div className="glass-panel p-4 sm:p-8 rounded-none sm:rounded-3xl border-0 sm:border border-zinc-200 w-full h-full sm:h-auto sm:max-h-[92vh] max-w-4xl z-10 flex flex-col relative bg-white shadow-2xl">
             
             {/* Entête du Modal & Bascule Formulaire / Aperçu en direct */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10 flex-shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gold/15 border border-gold/30 flex items-center justify-center text-gold">
                   {getCategoryIcon(formCategory, "w-5 h-5 text-gold")}
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
+                  <h3 className="text-base sm:text-lg font-black text-zinc-900 uppercase tracking-wider">
                     {editingId ? "Modifier le produit" : "Ajouter un produit"}
                   </h3>
-                  <p className="text-xs text-zinc-400">
+                  <p className="text-xs text-zinc-500 font-medium">
                     Catégorie active : <strong className="text-gold">{getCategoryConfig(formCategory).label}</strong>
                   </p>
                 </div>
@@ -3397,14 +3397,14 @@ export default function AdminPage() {
 
               {/* Sélecteur de mode Formulaire / Aperçu */}
               <div className="flex items-center gap-2">
-                <div className="flex items-center bg-black/60 p-1 rounded-xl border border-white/10">
+                <div className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200">
                   <button
                     type="button"
                     onClick={() => setModalViewMode("form")}
                     className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                       modalViewMode === "form"
-                        ? "bg-gold text-black shadow"
-                        : "text-zinc-400 hover:text-white"
+                        ? "bg-gold text-black shadow-sm"
+                        : "text-zinc-600 hover:text-zinc-900"
                     }`}
                   >
                     <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
@@ -3416,8 +3416,8 @@ export default function AdminPage() {
                     onClick={() => setModalViewMode("preview")}
                     className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                       modalViewMode === "preview"
-                        ? "bg-gold text-black shadow"
-                        : "text-zinc-400 hover:text-white"
+                        ? "bg-gold text-black shadow-sm"
+                        : "text-zinc-600 hover:text-zinc-900"
                     }`}
                   >
                     <Eye className="w-3.5 h-3.5" aria-hidden="true" />
@@ -3428,7 +3428,7 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={requestCloseModal}
-                  className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-600 hover:text-zinc-900 flex items-center justify-center transition-colors cursor-pointer border border-zinc-200"
                   title="Fermer"
                 >
                   <X className="w-4 h-4" aria-hidden="true" />
