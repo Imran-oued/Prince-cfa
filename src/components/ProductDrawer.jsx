@@ -133,7 +133,6 @@ export default function ProductDrawer({
     const idx = product?.colors?.indexOf(initCol);
     return idx !== -1 && idx !== undefined ? idx : 0;
   });
-  const [isLiked, setIsLiked] = useState(false);
   const [showAllSpecs, setShowAllSpecs] = useState(false);
 
   // Ajustement de l'état lors d'un changement de produit (pattern officiel React sans effet en cascade)
@@ -146,7 +145,6 @@ export default function ProductDrawer({
     setSelectedSimType(product.selectedSimType || getInitialSimType(product));
     const newIdx = product.colors?.indexOf(newColor);
     setActiveImageIndex(newIdx !== -1 && newIdx !== undefined ? newIdx : 0);
-    setIsLiked(false);
     setShowAllSpecs(false);
   }
 
@@ -696,14 +694,10 @@ export default function ProductDrawer({
               </div>
             </div>
 
-            {/* Barre inférieure : Points de pagination ronds au centre + Favoris & Partage à droite */}
-            <div className="flex items-center justify-between px-2 pt-1 pb-1">
-              {/* Espace vide gauche pour centrer parfaitement les points */}
-              <div className="w-16"></div>
-
-              {/* Points indicateurs avec transition dynamique */}
-              <div className="flex items-center justify-center gap-2">
-                {productImages.length > 1 && productImages.map((_, dotIdx) => {
+            {/* Points indicateurs de pagination avec transition dynamique */}
+            {productImages.length > 1 && (
+              <div className="flex items-center justify-center gap-2 pt-1 pb-1">
+                {productImages.map((_, dotIdx) => {
                   const isActive = dotIdx === activeImageIndex;
                   return (
                     <button
@@ -722,62 +716,11 @@ export default function ProductDrawer({
                   );
                 })}
               </div>
-
-              {/* Actions Favoris ♡ et Partage ↗ */}
-              <div className="w-16 flex items-center justify-end gap-3 text-zinc-500">
-                <button 
-                  type="button" 
-                  onClick={() => setIsLiked(!isLiked)}
-                  className={`p-1.5 transition-colors cursor-pointer ${isLiked ? 'text-red-500' : 'hover:text-red-500'}`}
-                  title={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
-                  aria-label="Favoris"
-                >
-                  <svg className="w-5 h-5" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => {
-                    if (typeof navigator !== 'undefined' && navigator.share) {
-                      navigator.share({ title: currentProduct.name, url: window.location.href }).catch(() => {});
-                    } else if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
-                      navigator.clipboard.writeText(window.location.href)
-                        .then(() => alert("Lien du produit copié !"))
-                        .catch(() => {});
-                    } else {
-                      try {
-                        const tempInput = document.createElement("input");
-                        tempInput.value = window.location.href;
-                        document.body.appendChild(tempInput);
-                        tempInput.select();
-                        document.execCommand("copy");
-                        document.body.removeChild(tempInput);
-                        alert("Lien du produit copié !");
-                      } catch {
-                        alert(`Lien du produit : ${window.location.href}`);
-                      }
-                    }
-                  }}
-                  className="p-1.5 hover:text-zinc-900 transition-colors cursor-pointer"
-                  title="Partager ce produit"
-                  aria-label="Partager"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                  </svg>
-                </button>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* En-tête du produit (Titre, Note & Prix) */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-zinc-500 font-medium">
-                Réf: {String(currentProduct.id).toLowerCase().startsWith('pcfa-') ? String(currentProduct.id).toUpperCase() : `PCFA-${String(currentProduct.id).padStart(3, '0')}`}
-              </span>
-            </div>
 
             <h1 id="product-drawer-title" className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight leading-snug">
               {currentProduct.name}
