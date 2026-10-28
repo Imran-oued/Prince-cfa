@@ -44,6 +44,8 @@ interface OrderData {
   createdAt: string;
   updatedAt: string;
   orderStatus: string;
+  isExpired?: boolean;
+  expirationHours?: number;
   customer: {
     name: string;
     deliveryMethod: string;
@@ -160,7 +162,7 @@ function TrackingContent() {
 
   // Déterminer l'état actuel de la timeline (0 à 4)
   const getProgressStep = (currentOrder: OrderData) => {
-    if (currentOrder.orderStatus === "annule") return -1;
+    if (currentOrder.orderStatus === "annule" || currentOrder.orderStatus === "expire" || currentOrder.isExpired) return -1;
     if (currentOrder.orderStatus === "livre") return 4;
     if (currentOrder.orderStatus === "en_livraison") return 3;
     if (currentOrder.orderStatus === "paye_en_preparation" || currentOrder.payment.status === "confirme") return 2;
@@ -170,6 +172,9 @@ function TrackingContent() {
   const getStatusBadge = (currentOrder: OrderData) => {
     if (currentOrder.orderStatus === "annule") {
       return { text: "Commande Annulée", color: "bg-red-500/20 text-red-400 border-red-500/30", icon: <X className="w-4 h-4" aria-hidden="true" /> };
+    }
+    if (currentOrder.orderStatus === "expire" || currentOrder.isExpired) {
+      return { text: "Commande Expirée (> 48h)", color: "bg-zinc-500/20 text-zinc-600 border-zinc-400/40", icon: <Clock className="w-4 h-4 text-zinc-500" aria-hidden="true" /> };
     }
     if (currentOrder.orderStatus === "livre") {
       return { text: "Commande Livrée", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40", icon: <Check className="w-4 h-4" aria-hidden="true" /> };
@@ -334,7 +339,7 @@ function TrackingContent() {
               </div>
 
               {/* BARRE DE PROGRESSION VISUELLE (TIMELINE À 4 ÉTAPES) */}
-              {order.orderStatus !== "annule" && (
+              {order.orderStatus !== "annule" && order.orderStatus !== "expire" && !order.isExpired && (
                 <div className="pt-2">
                   <div className="relative">
                     {/* Barre de fond */}
@@ -414,7 +419,28 @@ function TrackingContent() {
 
               {/* Message d'explication selon le statut */}
               <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200">
-                {order.payment.status === "confirme" ? (
+                {(order.orderStatus === "expire" || order.isExpired) ? (
+                  <div className="space-y-2 text-xs">
+                    <div className="text-zinc-800 font-bold flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-zinc-600 flex-shrink-0" aria-hidden="true" />
+                      <span>Délai de paiement de 48 heures dépassé</span>
+                    </div>
+                    <p className="text-zinc-700 font-normal leading-relaxed">
+                      Cette commande a été automatiquement clôturée car aucun paiement n&apos;a été confirmé dans les 48 heures suivant sa création.
+                    </p>
+                    <p className="text-zinc-600 font-normal leading-relaxed">
+                      <em>Si vous avez déjà envoyé votre transfert Orange Money ou Wave</em>, votre paiement est en sécurité. Contactez notre équipe pour réactiver et valider votre commande en direct :
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handleWhatsAppContact(`Bonjour PRINCE CFA, je souhaite réactiver ma commande ${order.id} expirée après 48h. Voici mon numéro de transfert.`)}
+                      className="px-4 py-2 rounded-xl bg-gold hover:bg-yellow-400 text-black font-extrabold text-xs inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    >
+                      <WhatsAppIcon className="w-4 h-4" />
+                      <span>Réactiver ma commande sur WhatsApp</span>
+                    </button>
+                  </div>
+                ) : order.payment.status === "confirme" ? (
                   <div className="space-y-1 text-xs">
                     <div className="text-emerald-600 font-bold flex items-center gap-1.5">
                       <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" aria-hidden="true" />

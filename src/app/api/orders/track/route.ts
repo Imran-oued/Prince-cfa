@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getOrderById, getOrders } from "@/lib/firestore";
+import { getOrderById, getOrders, isOrderExpired, ORDER_EXPIRATION_HOURS } from "@/lib/firestore";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 import { getCachedOrders } from "@/lib/serverCache";
 
@@ -9,6 +9,11 @@ import { getCachedOrders } from "@/lib/serverCache";
  */
 function sanitizePublicOrder(order: any, isPhoneVerified = false) {
   if (!order) return null;
+
+  const isExpired = isOrderExpired(order);
+  const resolvedOrderStatus = isExpired && order.orderStatus !== "annule"
+    ? "expire"
+    : (order.orderStatus || "en_attente_paiement");
 
   const rawPhone = order.customer?.phone || "";
   const digits = cleanDigits(rawPhone);
@@ -29,7 +34,9 @@ function sanitizePublicOrder(order: any, isPhoneVerified = false) {
     id: order.id,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
-    orderStatus: order.orderStatus || "en_attente_paiement",
+    orderStatus: resolvedOrderStatus,
+    isExpired: Boolean(isExpired),
+    expirationHours: ORDER_EXPIRATION_HOURS,
     customer: {
       name: customerName,
       deliveryMethod: order.customer?.deliveryMethod || "delivery",
@@ -160,8 +167,13 @@ export async function GET(request: Request) {
         );
       }
 
-      // Trier de la plus récente à la plus ancienne
-      matching.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      // Trier : commandes actives d'abord, puis de la plus récente à la plus ancienne
+      matching.sort((a: any, b: any) => {
+        const aExpired = isOrderExpired(a) ? 1 : 0;
+        const bExpired = isOrderExpired(b) ? 1 : 0;
+        if (aExpired !== bExpired) return aExpired - bExpired;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
       
       return NextResponse.json(
         {

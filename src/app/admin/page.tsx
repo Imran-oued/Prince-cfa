@@ -63,6 +63,7 @@ import {
   normalizeProductSpecs,
   isAppleBrand
 } from "@/lib/productValidation";
+import { isOrderExpired } from "@/lib/firestore";
 
 function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -2239,10 +2240,21 @@ export default function AdminPage() {
     const q = orderSearchQuery.toLowerCase().trim();
     const matchQuery = !q || 
       o.id.toLowerCase().includes(q) || 
-      o.customer.name.toLowerCase().includes(q) || 
-      o.customer.phone.includes(q);
+      (o.customer?.name || "").toLowerCase().includes(q) || 
+      (o.customer?.phone || "").includes(q);
 
-    const matchStatus = orderStatusFilter === "all" || o.orderStatus === orderStatusFilter || o.payment.status === orderStatusFilter;
+    const expired = isOrderExpired(o);
+    let matchStatus = true;
+    if (orderStatusFilter === "all") {
+      matchStatus = true;
+    } else if (orderStatusFilter === "expire") {
+      matchStatus = expired;
+    } else if (orderStatusFilter === "en_attente") {
+      matchStatus = (o.payment?.status === "en_attente" || o.orderStatus === "en_attente_paiement") && !expired;
+    } else {
+      matchStatus = (o.orderStatus === orderStatusFilter || o.payment?.status === orderStatusFilter) && !expired;
+    }
+
     return matchQuery && matchStatus;
   });
 
@@ -2277,10 +2289,11 @@ export default function AdminPage() {
   const categoriesCount = new Set(productsList.map(p => p.category)).size;
 
   const totalOrdersCount = ordersList.length;
-  const pendingPaymentsCount = ordersList.filter(o => o.payment.status === "en_attente").length;
-  const confirmedPaymentsCount = ordersList.filter(o => o.payment.status === "confirme").length;
+  const pendingPaymentsCount = ordersList.filter(o => o.payment?.status === "en_attente" && !isOrderExpired(o)).length;
+  const expiredOrdersCount = ordersList.filter(o => isOrderExpired(o)).length;
+  const confirmedPaymentsCount = ordersList.filter(o => o.payment?.status === "confirme").length;
   const totalCollectedRevenue = ordersList
-    .filter(o => o.payment.status === "confirme")
+    .filter(o => o.payment?.status === "confirme")
     .reduce((sum, o) => sum + (o.pricing?.total || 0), 0);
 
   // Écran de chargement ultra-rapide (<50ms) lors de la vérification initiale de session
@@ -2503,11 +2516,12 @@ export default function AdminPage() {
               <select
                 value={orderStatusFilter}
                 onChange={e => setOrderStatusFilter(e.target.value)}
-                className="bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold/50"
+                className="bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold/50 cursor-pointer"
               >
-                <option value="all">Tous les statuts</option>
-                <option value="en_attente">Paiement en attente</option>
-                <option value="confirme">Paiement confirmé</option>
+                <option value="all">Tous les statuts ({totalOrdersCount})</option>
+                <option value="en_attente">Paiement en attente &lt; 48h ({pendingPaymentsCount})</option>
+                <option value="expire">Commandes expirées &gt; 48h ({expiredOrdersCount})</option>
+                <option value="confirme">Paiement confirmé ({confirmedPaymentsCount})</option>
                 <option value="paye_en_preparation">En préparation</option>
                 <option value="en_livraison">En livraison</option>
                 <option value="livre">Livré</option>
@@ -2582,20 +2596,35 @@ export default function AdminPage() {
                             </span>
                             <div className="text-[10px] text-green-400 font-medium">Stock débité</div>
                           </div>
+                        ) : isOrderExpired(order) ? (
+                          <div className="space-y-0.5">
+                            <span className="px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
+                              <Clock className="w-3 h-3 text-zinc-400" aria-hidden="true" />
+                              <span>Non payée (&gt;48h)</span>
+                            </span>
+                            <div className="text-[10px] text-zinc-500 font-medium">Stock intact</div>
+                          </div>
                         ) : (
                           <div className="space-y-0.5">
                             <span className="px-2.5 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
                               <Clock className="w-3 h-3" aria-hidden="true" />
-                              <span>En attente</span>
+                              <span>En attente (&lt;48h)</span>
                             </span>
                             <div className="text-[10px] text-zinc-500 font-medium">Stock intact</div>
                           </div>
                         )}
                       </td>
                       <td className="p-4">
-                        <span className="px-2 py-0.5 rounded bg-white/10 text-zinc-300 text-[11px]">
-                          {order.orderStatus}
-                        </span>
+                        {isOrderExpired(order) ? (
+                          <span className="px-2 py-0.5 rounded bg-zinc-800/80 border border-zinc-700 text-zinc-400 text-[11px] font-bold inline-flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-zinc-400" aria-hidden="true" />
+                            Expirée (&gt;48h)
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded bg-white/10 text-zinc-300 text-[11px]">
+                            {order.orderStatus}
+                          </span>
+                        )}
                       </td>
                       <td className="p-4 font-black text-white whitespace-nowrap">
                         {order.pricing?.total?.toLocaleString('fr-FR')} FCFA

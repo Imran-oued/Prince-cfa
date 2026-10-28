@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { generateOrderId } from "../src/lib/firestore.js";
+import { generateOrderId, isOrderExpired, ORDER_EXPIRATION_HOURS } from "../src/lib/firestore.js";
 import { SHOP_CONFIG } from "../src/config/shop.js";
 
 test("1. generateOrderId generates compliant CMD-YYYYMMDD-XXXX format", () => {
@@ -173,5 +173,58 @@ test("9. USSD Orange Money code formatting matches *144*2*1*55443167*montant#", 
 
   assert.equal(ussdCodeString, "*144*2*1*55443167*901500#");
   assert.equal(telUssdUrl, "tel:*144*2*1*55443167*901500%23");
+});
+
+test("10. Order 48-hour expiration lifecycle protects against fake/abandoned orders", () => {
+  assert.equal(ORDER_EXPIRATION_HOURS, 48);
+
+  const now = Date.now();
+  const freshDate = new Date(now - 1000 * 60 * 60 * 2).toISOString(); // 2 heures
+  const oldDate = new Date(now - 1000 * 60 * 60 * 50).toISOString();   // 50 heures (> 48h)
+
+  // Cas 1 : Commande récente non payée (< 48h) -> N'est PAS expirée
+  const recentUnpaidOrder = {
+    id: "CMD-20261028-001",
+    createdAt: freshDate,
+    orderStatus: "en_attente_paiement",
+    payment: { status: "en_attente" }
+  };
+  assert.equal(isOrderExpired(recentUnpaidOrder), false, "Une commande de 2h ne doit pas être expirée");
+
+  // Cas 2 : Commande ancienne non payée (> 48h) -> DOIT être expirée
+  const oldUnpaidOrder = {
+    id: "CMD-20261026-002",
+    createdAt: oldDate,
+    orderStatus: "en_attente_paiement",
+    payment: { status: "en_attente" }
+  };
+  assert.equal(isOrderExpired(oldUnpaidOrder), true, "Une commande non payée de 50h doit être expirée");
+
+  // Cas 3 : Commande ancienne mais PAYÉE (> 48h) -> Ne doit JAMAIS expirer
+  const oldPaidOrder = {
+    id: "CMD-20261026-003",
+    createdAt: oldDate,
+    orderStatus: "paye_en_preparation",
+    payment: { status: "confirme" }
+  };
+  assert.equal(isOrderExpired(oldPaidOrder), false, "Une commande payée ne doit jamais expirer");
+
+  // Cas 4 : Commande ancienne livrée (> 48h) -> Ne doit jamais expirer
+  const oldDeliveredOrder = {
+    id: "CMD-20261026-004",
+    createdAt: oldDate,
+    orderStatus: "livre",
+    payment: { status: "confirme" }
+  };
+  assert.equal(isOrderExpired(oldDeliveredOrder), false, "Une commande livrée ne doit jamais expirer");
+
+  // Cas 5 : Commande déjà annulée (> 48h) -> Reste sous statut annulé
+  const cancelledOrder = {
+    id: "CMD-20261026-005",
+    createdAt: oldDate,
+    orderStatus: "annule",
+    payment: { status: "en_attente" }
+  };
+  assert.equal(isOrderExpired(cancelledOrder), false, "Une commande annulée n'est pas marquée expirée");
 });
 
