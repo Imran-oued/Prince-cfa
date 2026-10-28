@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { SHOP_CONFIG } from '@/config/shop';
-import { X, Star, HardDrive, Check, Zap, Laptop, Refrigerator, Tablet, ShoppingBag } from 'lucide-react';
+import { X, Star, HardDrive, Check, Zap, Laptop, Refrigerator, Tablet, ShoppingBag, ChevronDown } from 'lucide-react';
 import { getCategoryConfig, isStorageVariantCategory } from '@/config/categories';
-import { getProductImageBg } from '@/lib/productValidation';
+import { getProductImageBg, isAppleBrand } from '@/lib/productValidation';
 
 const SPEC_LABELS = {
   screen: 'Écran',
@@ -31,6 +31,23 @@ const SPEC_LABELS = {
   materials: 'Matériaux & Finition'
 };
 
+export const formatCleanSimLabel = (raw) => {
+  if (!raw) return '';
+  const s = String(raw).toLowerCase().trim();
+  if (s === 'dual_sim_physical' || s.includes('double') || (s.includes('2') && s.includes('sim'))) {
+    return 'double sim physique';
+  }
+  if (s === 'esim_only' || (s.includes('esim') && !s.includes('physique'))) {
+    return 'e-sim';
+  }
+  return '1 e-sim+1 sim physique';
+};
+
+export const isSimTypeMatch = (a, b) => {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  return formatCleanSimLabel(a) === formatCleanSimLabel(b);
+};
 
 export default function ProductDrawer({
   isOpen,
@@ -42,8 +59,20 @@ export default function ProductDrawer({
   const [cachedProduct, setCachedProduct] = useState(product);
   const currentProduct = product || cachedProduct;
 
+  const isAppleProduct = (p) => {
+    if (!p || p.category !== 'phones') return false;
+    return isAppleBrand(p.brand) || Boolean(p.name && p.name.toLowerCase().includes('iphone'));
+  };
+
+  const isIPhone = isAppleProduct(currentProduct);
+
   const getInitialCapacity = (p) => {
     if (!p) return '';
+    if (p.selectedCapacity) return p.selectedCapacity;
+    if (isAppleProduct(p)) {
+      // Pour les iPhones : aucun pré-choix obligatoire, l'utilisateur doit choisir
+      return '';
+    }
     const supportsStorage = isStorageVariantCategory(p.category) || p.category === 'phones';
     if (!supportsStorage) return '';
 
@@ -65,18 +94,26 @@ export default function ProductDrawer({
     if (p.selectedColor && Array.isArray(p.colors) && p.colors.includes(p.selectedColor)) {
       return p.selectedColor;
     }
+    if (isAppleProduct(p) && !p.selectedSimType && !p.selectedCapacity) {
+      // Pour les iPhones : masquer/attendre le choix de la SIM et capacité
+      return '';
+    }
     return p.colors?.[0] || '';
   };
 
   const getInitialSimType = (p) => {
     if (!p) return '';
     if (p.selectedSimType) return p.selectedSimType;
+    if (isAppleProduct(p)) {
+      // Pour les iPhones : aucun pré-choix obligatoire, l'utilisateur doit choisir
+      return '';
+    }
     if (p.category === 'phones') {
       if (p.simPricing && typeof p.simPricing === 'object') {
         const first = Object.entries(p.simPricing).find(([_, conf]) => conf?.enabled !== false);
-        if (first && first[1]?.label) return first[1].label;
+        if (first && first[1]?.label) return formatCleanSimLabel(first[1].label);
       }
-      return 'e-sim + sim physique';
+      return '1 e-sim+1 sim physique';
     }
     return '';
   };
@@ -99,7 +136,7 @@ export default function ProductDrawer({
     const newColor = getInitialColor(product);
     setActiveColor(newColor);
     setSelectedCapacity(product.selectedCapacity || getInitialCapacity(product));
-    setSelectedSimType(getInitialSimType(product));
+    setSelectedSimType(product.selectedSimType || getInitialSimType(product));
     const newIdx = product.colors?.indexOf(newColor);
     setActiveImageIndex(newIdx !== -1 && newIdx !== undefined ? newIdx : 0);
     setIsLiked(false);
@@ -285,11 +322,78 @@ export default function ProductDrawer({
     }
   };
 
-  // Calcul des capacités disponibles (GB, Tera)
+
+  // Formats SIM disponibles pour téléphones (1 e-sim+1 sim physique, double sim physique, e-sim)
+  const availableSimTypes = useMemo(() => {
+    if (!currentProduct || currentProduct.category !== 'phones') return [];
+
+    // Priorité 1 : Variantes explicites configurées par l'administrateur
+    if (currentProduct.variants && Array.isArray(currentProduct.variants) && currentProduct.variants.length > 0) {
+      const simsMap = new Map();
+      currentProduct.variants.forEach(v => {
+        const rawLabel = v.simType || v.simTypeId;
+        const cleanLabel = formatCleanSimLabel(rawLabel);
+        const key = v.simTypeId || cleanLabel;
+        if (!simsMap.has(cleanLabel)) {
+          simsMap.set(cleanLabel, {
+            id: key,
+            label: cleanLabel,
+            delta: 0
+          });
+        }
+      });
+      if (simsMap.size > 0) return Array.from(simsMap.values());
+    }
+
+    // Priorité 2 : Configuration simPricing
+    if (currentProduct.simPricing && typeof currentProduct.simPricing === 'object') {
+      const entries = Object.entries(currentProduct.simPricing)
+        .filter(([_, conf]) => conf && conf.enabled !== false)
+        .map(([key, conf]) => ({
+          id: key,
+          label: formatCleanSimLabel(conf.label || key),
+          delta: typeof conf.delta === 'number' ? conf.delta : 0
+        }));
+      if (entries.length > 0) return entries;
+    }
+    return [
+      { id: 'sim_and_esim', label: '1 e-sim+1 sim physique', delta: 0 },
+      { id: 'dual_sim_physical', label: 'double sim physique', delta: 30000 },
+      { id: 'esim_only', label: 'e-sim', delta: -20000 },
+    ];
+  }, [currentProduct]);
+
+  // Calcul des capacités disponibles selon le format SIM sélectionné
   const availableCapacities = useMemo(() => {
     if (!currentProduct) return [];
     const supportsStorage = isStorageVariantCategory(currentProduct.category) || currentProduct.category === 'phones';
     if (!supportsStorage) return [];
+
+    // Pour les iPhones : obliger de choisir d'abord le format de SIM
+    if (isIPhone && !selectedSimType) {
+      return [];
+    }
+
+    // Si le produit possède des variantes explicites configurées par SIM
+    if (currentProduct.variants && Array.isArray(currentProduct.variants) && currentProduct.variants.length > 0) {
+      const matchingVariants = currentProduct.variants.filter(v => 
+        !selectedSimType || 
+        isSimTypeMatch(v.simType, selectedSimType) ||
+        isSimTypeMatch(v.simTypeId, selectedSimType)
+      );
+      const capsMap = new Map();
+      (matchingVariants.length > 0 ? matchingVariants : currentProduct.variants).forEach(v => {
+        if (!capsMap.has(v.storage)) {
+          capsMap.set(v.storage, v.price);
+        }
+      });
+      if (capsMap.size > 0) {
+        return Array.from(capsMap.entries()).map(([capacity, price]) => ({
+          capacity,
+          price
+        }));
+      }
+    }
 
     if (currentProduct.storageOptions && Array.isArray(currentProduct.storageOptions) && currentProduct.storageOptions.length > 0) {
       return currentProduct.storageOptions;
@@ -309,34 +413,13 @@ export default function ProductDrawer({
       ];
     }
     return [];
-  }, [currentProduct]);
+  }, [currentProduct, selectedSimType, isIPhone]);
 
-  // Formats SIM disponibles pour téléphones (E-sim, e-sim + sim physique, 2 sim physique)
-  const availableSimTypes = useMemo(() => {
-    if (!currentProduct || currentProduct.category !== 'phones') return [];
-    if (currentProduct.simPricing && typeof currentProduct.simPricing === 'object') {
-      const entries = Object.entries(currentProduct.simPricing)
-        .filter(([_, conf]) => conf && conf.enabled !== false)
-        .map(([key, conf]) => ({
-          id: key,
-          label: conf.label || (key === 'sim_and_esim' ? 'e-sim + sim physique' : key === 'dual_sim_physical' ? '2 sim physique' : 'E-sim'),
-          delta: typeof conf.delta === 'number' ? conf.delta : 0,
-          subtitle: key === 'dual_sim_physical' ? 'Double Nano-SIM physique' : key === 'esim_only' ? '100% eSIM sans tiroir' : 'Standard international'
-        }));
-      if (entries.length > 0) return entries;
-    }
-    return [
-      { id: 'sim_and_esim', label: 'e-sim + sim physique', delta: 0, subtitle: 'Standard international' },
-      { id: 'dual_sim_physical', label: '2 sim physique', delta: 30000, subtitle: 'Double Nano-SIM physique' },
-      { id: 'esim_only', label: 'E-sim', delta: -20000, subtitle: '100% eSIM sans tiroir' },
-    ];
-  }, [currentProduct]);
-
-  // Delta actif selon le type de SIM choisi
+  // Delta actif selon le type de SIM choisi (pour compatibilité rétroactive)
   const currentSimDelta = useMemo(() => {
     if (availableSimTypes.length === 0 || !selectedSimType) return 0;
     const match = availableSimTypes.find(
-      s => s.label.toLowerCase() === selectedSimType.toLowerCase() || s.id === selectedSimType
+      s => isSimTypeMatch(s.label, selectedSimType) || isSimTypeMatch(s.id, selectedSimType)
     );
     return (match && typeof match.delta === 'number') ? match.delta : 0;
   }, [availableSimTypes, selectedSimType]);
@@ -344,6 +427,19 @@ export default function ProductDrawer({
   // Calcul du prix dynamique en fonction de la capacité et du type de SIM choisi
   const currentPrice = useMemo(() => {
     if (!currentProduct) return 0;
+
+    // Priorité 1 : Tarif exact de la variante configurée pour ce SIM et cette capacité
+    if (currentProduct.variants && Array.isArray(currentProduct.variants) && currentProduct.variants.length > 0) {
+      const match = currentProduct.variants.find(v => 
+        (!selectedSimType || isSimTypeMatch(v.simType, selectedSimType) || isSimTypeMatch(v.simTypeId, selectedSimType)) &&
+        (!selectedCapacity || v.storage.toLowerCase() === selectedCapacity.toLowerCase())
+      );
+      if (match && typeof match.price === 'number') {
+        return match.price;
+      }
+    }
+
+    // Priorité 2 : Calcul standard basePrice + delta SIM
     let basePrice = Number(currentProduct.price) || 0;
     if (availableCapacities.length > 0 && selectedCapacity) {
       const match = availableCapacities.find(c => c.capacity === selectedCapacity);
@@ -352,7 +448,82 @@ export default function ProductDrawer({
 
     // Intégration de la surcote / remise du type de SIM
     return Math.max(0, basePrice + currentSimDelta);
-  }, [currentProduct, availableCapacities, selectedCapacity, currentSimDelta]);
+  }, [currentProduct, availableCapacities, selectedCapacity, selectedSimType, currentSimDelta]);
+
+  // Couleurs disponibles selon le format SIM et la capacité sélectionnés
+  const availableColorsForSelection = useMemo(() => {
+    if (!currentProduct?.colors) return [];
+
+    // Pour les iPhones : les couleurs ne sont visibles QUE si SIM ET Capacité sont choisies
+    if (isIPhone && (!selectedSimType || !selectedCapacity)) {
+      return [];
+    }
+
+    if (currentProduct.variants && Array.isArray(currentProduct.variants) && currentProduct.variants.length > 0) {
+      const matching = currentProduct.variants.filter(v => 
+        (!selectedSimType || isSimTypeMatch(v.simType, selectedSimType) || isSimTypeMatch(v.simTypeId, selectedSimType)) &&
+        (!selectedCapacity || v.storage.toLowerCase() === selectedCapacity.toLowerCase())
+      );
+      if (matching.length > 0) {
+        const allowedColors = new Set(matching.map(v => v.color.toLowerCase()));
+        const filtered = currentProduct.colors.filter(c => allowedColors.has(c.toLowerCase()));
+        if (filtered.length > 0) return filtered;
+      }
+    }
+    return currentProduct.colors;
+  }, [currentProduct, selectedSimType, selectedCapacity, isIPhone]);
+
+  // Si la couleur active n'est pas disponible pour cette combinaison, basculer sur la première disponible
+  useEffect(() => {
+    if (isIPhone) {
+      if (selectedSimType && selectedCapacity && availableColorsForSelection && availableColorsForSelection.length > 0) {
+        const isCurrentActiveValid = availableColorsForSelection.some(
+          c => c.toLowerCase() === (activeColor || '').toLowerCase()
+        );
+        if (!isCurrentActiveValid) {
+          setActiveColor(availableColorsForSelection[0]);
+        }
+      } else if (!selectedSimType || !selectedCapacity) {
+        if (activeColor !== '') {
+          setActiveColor('');
+        }
+      }
+    } else {
+      if (availableColorsForSelection && availableColorsForSelection.length > 0) {
+        const isCurrentActiveValid = availableColorsForSelection.some(
+          c => c.toLowerCase() === (activeColor || '').toLowerCase()
+        );
+        if (!isCurrentActiveValid) {
+          setActiveColor(availableColorsForSelection[0]);
+        }
+      }
+    }
+  }, [availableColorsForSelection, activeColor, isIPhone, selectedSimType, selectedCapacity]);
+
+  // Si la capacité sélectionnée n'est pas disponible pour ce type de SIM, basculer sur la première disponible
+  useEffect(() => {
+    if (isIPhone) {
+      if (!selectedSimType) {
+        if (selectedCapacity !== '') setSelectedCapacity('');
+      } else if (availableCapacities && availableCapacities.length > 0) {
+        const isCurrentCapValid = selectedCapacity && availableCapacities.some(
+          c => c.capacity.toLowerCase() === selectedCapacity.toLowerCase()
+        );
+        if (!isCurrentCapValid && selectedCapacity !== '') {
+          setSelectedCapacity('');
+        }
+      }
+    } else {
+      if (availableCapacities && availableCapacities.length > 0) {
+        const isCurrentCapValid = availableCapacities.some(
+          c => c.capacity.toLowerCase() === (selectedCapacity || '').toLowerCase()
+        );
+        if (!isCurrentCapValid) {
+          setSelectedCapacity(availableCapacities[0].capacity);
+        }
+      }
+    }
+  }, [isIPhone, selectedSimType, availableCapacities, selectedCapacity]);
 
   // Fermeture avec la touche Échap
   useEffect(() => {
@@ -599,7 +770,10 @@ export default function ProductDrawer({
 
             <div className="flex flex-wrap items-baseline gap-3 pt-1">
               <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-600 to-amber-700">
-                {currentPrice.toLocaleString('fr-FR')} FCFA
+                {isIPhone && (!selectedSimType || !selectedCapacity)
+                  ? `À partir de ${(Number(currentProduct.price) || 0).toLocaleString('fr-FR')} FCFA`
+                  : `${currentPrice.toLocaleString('fr-FR')} FCFA`
+                }
               </span>
               {availableCapacities.length > 0 && selectedCapacity && (
                 <span className="text-xs text-gold bg-gold/10 border border-gold/30 px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5">
@@ -753,172 +927,298 @@ export default function ProductDrawer({
             </div>
           )}
 
-          {/* Sélecteur de Couleurs interactif style Amazon (Image 1) */}
-          {currentProduct.colors && currentProduct.colors.length > 0 && (
-            <div className="space-y-3 pt-3 border-t border-zinc-200">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-600 uppercase tracking-wider font-semibold">
-                  Couleur : <strong className="text-zinc-950 normal-case font-bold text-sm ml-1.5">{activeColor}</strong>
-                </span>
-                <span className="text-[11px] text-zinc-500 font-medium">
-                  {currentProduct.colors.length} {currentProduct.colors.length > 1 ? 'finitions' : 'finition'}
-                </span>
+          {/* CAS IPHONE : FLUX STRICT (1. FORMAT SIM → 2. CAPACITÉ → 3. COULEURS DISPONIBLES) */}
+          {isIPhone ? (
+            <div className="space-y-4 pt-3 border-t border-zinc-200">
+              {/* 1. Sélecteur Format de SIM */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label 
+                    htmlFor="user-sim-type-select" 
+                    className="text-xs text-zinc-600 uppercase tracking-wider font-bold"
+                  >
+                    1. Format SIM {selectedSimType ? <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">: {selectedSimType}</span> : <span className="text-amber-600 text-[11px] font-semibold normal-case ml-1">(Étape 1 : Requis)</span>}
+                  </label>
+                  <span className="text-[11px] text-zinc-400 font-medium">{availableSimTypes.length} formats</span>
+                </div>
+
+                <div className="relative">
+                  <select
+                    id="user-sim-type-select"
+                    value={selectedSimType}
+                    onChange={(e) => setSelectedSimType(e.target.value)}
+                    className="w-full bg-zinc-50 hover:bg-zinc-100 border-2 border-zinc-200 focus:border-gold rounded-2xl px-4 py-3 text-sm font-bold text-zinc-900 outline-none transition-all cursor-pointer appearance-none pr-10 shadow-sm"
+                  >
+                    <option value="">— Veuillez choisir le format de SIM —</option>
+                    {availableSimTypes.map((sim) => {
+                      const priceNote = sim.delta > 0 
+                        ? ` (+${sim.delta.toLocaleString('fr-FR')} FCFA)` 
+                        : sim.delta < 0 
+                        ? ` (${sim.delta.toLocaleString('fr-FR')} FCFA)` 
+                        : '';
+                      return (
+                        <option key={sim.id || sim.label} value={sim.label}>
+                          {sim.label}{priceNote}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                    <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                  </div>
+                </div>
               </div>
 
-              {/* Cartes de variations de couleur façon Amazon */}
-              <div className="flex items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
-                {currentProduct.colors.map((color, idx) => {
-                  const isSelected = activeColor === color;
-                  const variantImg = currentProduct.images?.[idx] || currentProduct.image;
-                  
-                  return (
-                    <button
-                      key={color}
-                      onClick={() => handleColorChange(color, idx)}
-                      className={`relative min-w-[90px] sm:min-w-[100px] p-2 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center text-center group flex-shrink-0 cursor-pointer ${
-                        isSelected 
-                          ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(212,175,55,0.25)] scale-[1.03]' 
-                          : 'border-zinc-200 bg-zinc-50 hover:border-gold/40 hover:bg-zinc-100/70'
-                      }`}
-                    >
-                      {isSelected && (
-                        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gold text-black flex items-center justify-center shadow-md">
-                          <Check className="w-3 h-3 text-black stroke-[3]" aria-hidden="true" />
-                        </span>
-                      )}
+              {/* 2. Sélecteur de Capacité (Déverrouillé après le choix de la SIM) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label 
+                    htmlFor="user-capacity-select" 
+                    className="text-xs text-zinc-600 uppercase tracking-wider font-bold"
+                  >
+                    2. Capacité {selectedCapacity ? <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">: {selectedCapacity}</span> : <span className="text-amber-600 text-[11px] font-semibold normal-case ml-1">(Étape 2 : Requis)</span>}
+                  </label>
+                  {selectedSimType && (
+                    <span className="text-[11px] text-zinc-400 font-medium">{availableCapacities.length} options</span>
+                  )}
+                </div>
+
+                <div className="relative">
+                  <select
+                    id="user-capacity-select"
+                    value={selectedCapacity}
+                    disabled={!selectedSimType}
+                    onChange={(e) => setSelectedCapacity(e.target.value)}
+                    className={`w-full border-2 rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all appearance-none pr-10 shadow-sm ${
+                      !selectedSimType
+                        ? 'bg-zinc-100/70 border-zinc-200 text-zinc-400 cursor-not-allowed'
+                        : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 focus:border-gold text-zinc-900 cursor-pointer'
+                    }`}
+                  >
+                    {!selectedSimType ? (
+                      <option value="">— Veuillez d&apos;abord choisir le format de SIM —</option>
+                    ) : (
+                      <>
+                        <option value="">— Veuillez choisir la capacité —</option>
+                        {availableCapacities.map((item) => {
+                          const itemWithSimPrice = item.price + currentSimDelta;
+                          return (
+                            <option key={item.capacity} value={item.capacity}>
+                              {item.capacity} — {itemWithSimPrice.toLocaleString('fr-FR')} FCFA
+                            </option>
+                          );
+                        })}
+                      </>
+                    )}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                    <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Sélecteur de Couleurs : Visible UNIQUEMENT si SIM ET Capacité sont choisies */}
+              {selectedSimType && selectedCapacity ? (
+                availableColorsForSelection && availableColorsForSelection.length > 0 && (
+                  <div className="space-y-3 pt-3 border-t border-zinc-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-zinc-600 uppercase tracking-wider font-semibold">
+                        3. Couleur : <strong className="text-zinc-950 normal-case font-bold text-sm ml-1.5">{activeColor || 'Sélectionnez une couleur'}</strong>
+                      </span>
+                      <span className="text-[11px] text-zinc-500 font-medium">
+                        {availableColorsForSelection.length} {availableColorsForSelection.length > 1 ? 'finitions disponibles' : 'finition disponible'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
+                      {availableColorsForSelection.map((color, idx) => {
+                        const isSelected = activeColor === color;
+                        const originalIdx = currentProduct.colors?.indexOf(color) ?? idx;
+                        const variantImg = currentProduct.images?.[originalIdx] || currentProduct.image;
+                        
+                        return (
+                          <button
+                            key={color}
+                            onClick={() => handleColorChange(color, originalIdx)}
+                            className={`relative min-w-[90px] sm:min-w-[100px] p-2 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center text-center group flex-shrink-0 cursor-pointer ${
+                              isSelected 
+                                ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(212,175,55,0.25)] scale-[1.03]' 
+                                : 'border-zinc-200 bg-zinc-50 hover:border-gold/40 hover:bg-zinc-100/70'
+                            }`}
+                          >
+                            {isSelected && (
+                              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gold text-black flex items-center justify-center shadow-md">
+                                <Check className="w-3 h-3 text-black stroke-[3]" aria-hidden="true" />
+                              </span>
+                            )}
+                            
+                            <div className={`w-16 h-16 sm:w-18 sm:h-18 rounded-xl ${getProductImageBg(currentProduct, variantImg).containerClass} p-1 flex items-center justify-center overflow-hidden mb-2 shadow-inner`}>
+                              {variantImg?.length > 4 ? (
+                                <img 
+                                  src={variantImg} 
+                                  alt={color} 
+                                  className={`w-full h-full object-contain ${getProductImageBg(currentProduct, variantImg).isBlack ? '' : 'mix-blend-multiply'} group-hover:scale-105 transition-transform`}
+                                />
+                              ) : (
+                                <span className="text-2xl">{variantImg}</span>
+                              )}
+                            </div>
+
+                            <span className={`text-[11px] font-bold line-clamp-1 leading-tight ${isSelected ? 'text-gold' : 'text-zinc-700'}`}>
+                              {color}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )
+              ) : (
+                <div className="p-4 rounded-2xl bg-amber-500/[0.06] border border-amber-500/20 text-center space-y-1">
+                  <p className="text-xs font-bold text-zinc-800">
+                    🎨 Finitions et Couleurs disponibles
+                  </p>
+                  <p className="text-[11px] text-zinc-500">
+                    Veuillez choisir le <strong>format de SIM</strong> et la <strong>capacité</strong> ci-dessus pour afficher les couleurs disponibles pour cet iPhone.
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* AUTRES PRODUITS : AFFICHAGE HABITUEL SANS RESTRICTION */
+            <>
+              {/* Sélecteur de Couleurs habituel */}
+              {availableColorsForSelection && availableColorsForSelection.length > 0 && (
+                <div className="space-y-3 pt-3 border-t border-zinc-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-zinc-600 uppercase tracking-wider font-semibold">
+                      Couleur : <strong className="text-zinc-950 normal-case font-bold text-sm ml-1.5">{activeColor}</strong>
+                    </span>
+                    <span className="text-[11px] text-zinc-500 font-medium">
+                      {availableColorsForSelection.length} {availableColorsForSelection.length > 1 ? 'finitions disponibles' : 'finition disponible'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
+                    {availableColorsForSelection.map((color, idx) => {
+                      const isSelected = activeColor === color;
+                      const originalIdx = currentProduct.colors?.indexOf(color) ?? idx;
+                      const variantImg = currentProduct.images?.[originalIdx] || currentProduct.image;
                       
-                      {/* Miniature du téléphone */}
-                      <div className={`w-16 h-16 sm:w-18 sm:h-18 rounded-xl ${getProductImageBg(currentProduct, variantImg).containerClass} p-1 flex items-center justify-center overflow-hidden mb-2 shadow-inner`}>
-                        {variantImg?.length > 4 ? (
-                          <img 
-                            src={variantImg} 
-                            alt={color} 
-                            className={`w-full h-full object-contain ${getProductImageBg(currentProduct, variantImg).isBlack ? '' : 'mix-blend-multiply'} group-hover:scale-105 transition-transform`}
-                          />
-                        ) : (
-                          <span className="text-2xl">{variantImg}</span>
-                        )}
-                      </div>
+                      return (
+                        <button
+                          key={color}
+                          onClick={() => handleColorChange(color, originalIdx)}
+                          className={`relative min-w-[90px] sm:min-w-[100px] p-2 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center text-center group flex-shrink-0 cursor-pointer ${
+                            isSelected 
+                              ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(212,175,55,0.25)] scale-[1.03]' 
+                              : 'border-zinc-200 bg-zinc-50 hover:border-gold/40 hover:bg-zinc-100/70'
+                          }`}
+                        >
+                          {isSelected && (
+                            <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gold text-black flex items-center justify-center shadow-md">
+                              <Check className="w-3 h-3 text-black stroke-[3]" aria-hidden="true" />
+                            </span>
+                          )}
+                          
+                          <div className={`w-16 h-16 sm:w-18 sm:h-18 rounded-xl ${getProductImageBg(currentProduct, variantImg).containerClass} p-1 flex items-center justify-center overflow-hidden mb-2 shadow-inner`}>
+                            {variantImg?.length > 4 ? (
+                              <img 
+                                src={variantImg} 
+                                alt={color} 
+                                className={`w-full h-full object-contain ${getProductImageBg(currentProduct, variantImg).isBlack ? '' : 'mix-blend-multiply'} group-hover:scale-105 transition-transform`}
+                              />
+                            ) : (
+                              <span className="text-2xl">{variantImg}</span>
+                            )}
+                          </div>
 
-                      {/* Nom de la couleur sous l'image */}
-                      <span className={`text-[11px] font-bold line-clamp-1 leading-tight ${isSelected ? 'text-gold' : 'text-zinc-700'}`}>
-                        {color}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                          <span className={`text-[11px] font-bold line-clamp-1 leading-tight ${isSelected ? 'text-gold' : 'text-zinc-700'}`}>
+                            {color}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
-          {/* Sélecteur Format de SIM (E-sim, e-sim + sim physique, 2 sim physique) */}
-          {availableSimTypes.length > 0 && (
-            <div className="space-y-3 pt-3 border-t border-zinc-200">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-600 uppercase tracking-wider font-semibold">
-                  Format SIM : <strong className="text-zinc-950 normal-case font-bold text-sm ml-1.5">{selectedSimType}</strong>
-                </span>
-                <span className="text-[11px] text-zinc-500 font-medium">{availableSimTypes.length} formats</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                {availableSimTypes.map((sim) => {
-                  const isSelected = selectedSimType?.toLowerCase() === sim.label.toLowerCase();
-                  return (
-                    <button
-                      key={sim.id || sim.label}
-                      type="button"
-                      onClick={() => setSelectedSimType(sim.label)}
-                      className={`relative p-3 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer ${
-                        isSelected 
-                          ? 'border-gold bg-gold/15 shadow-[0_0_20px_rgba(212,175,55,0.25)] scale-[1.02]' 
-                          : 'border-zinc-200 bg-zinc-50 hover:border-gold/40 hover:bg-zinc-100/70 text-zinc-600'
-                      }`}
+              {/* Sélecteur Format de SIM si applicable */}
+              {availableSimTypes.length > 0 && (
+                <div className="space-y-2 pt-3 border-t border-zinc-200">
+                  <div className="flex items-center justify-between">
+                    <label 
+                      htmlFor="user-sim-type-select" 
+                      className="text-xs text-zinc-600 uppercase tracking-wider font-bold"
                     >
-                      {isSelected && (
-                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-gold text-black flex items-center justify-center shadow-md">
-                          <Check className="w-2.5 h-2.5 text-black stroke-[3]" aria-hidden="true" />
-                        </span>
-                      )}
-                      <span className={`text-xs font-extrabold tracking-wide ${isSelected ? 'text-zinc-950' : 'text-zinc-800'}`}>
-                        {sim.label}
-                      </span>
-                      {sim.delta !== 0 ? (
-                        <span className={`text-[11px] font-bold mt-1 px-2 py-0.5 rounded-full ${
-                          sim.delta > 0 
-                            ? 'bg-amber-500/15 text-amber-700' 
-                            : 'bg-blue-500/15 text-blue-700'
-                        }`}>
-                          {sim.delta > 0 ? `+${sim.delta.toLocaleString('fr-FR')} F` : `${sim.delta.toLocaleString('fr-FR')} F`}
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-zinc-500 font-semibold mt-1">
-                          Standard
-                        </span>
-                      )}
-                      {sim.subtitle && (
-                        <span className="text-[9px] text-zinc-400 mt-0.5 line-clamp-1">
-                          {sim.subtitle}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                      Format SIM : <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">{selectedSimType}</span>
+                    </label>
+                    <span className="text-[11px] text-zinc-400 font-medium">{availableSimTypes.length} formats</span>
+                  </div>
 
-          {/* Sélecteur de Capacité / Taille style Amazon */}
-          {availableCapacities.length > 0 && (
-            <div className="space-y-3 pt-3 border-t border-zinc-200">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-600 uppercase tracking-wider font-semibold">
-                  Capacité : <strong className="text-zinc-950 normal-case font-bold text-sm ml-1.5">{selectedCapacity}</strong>
-                </span>
-                <span className="text-[11px] text-zinc-500 font-medium">{availableCapacities.length} options</span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {availableCapacities.map((item) => {
-                  const isSelected = selectedCapacity === item.capacity;
-                  const itemWithSimPrice = item.price + currentSimDelta;
-                  const diff = item.price - (Number(currentProduct.price) || 0);
-
-                  return (
-                    <button
-                      key={item.capacity}
-                      onClick={() => setSelectedCapacity(item.capacity)}
-                      className={`relative p-3 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer ${
-                        isSelected 
-                           ? 'border-gold bg-gold/15 shadow-[0_0_20px_rgba(212,175,55,0.25)] scale-[1.02]' 
-                          : 'border-zinc-200 bg-zinc-50 hover:border-gold/40 hover:bg-zinc-100/70 text-zinc-600'
-                      }`}
+                  <div className="relative">
+                    <select
+                      id="user-sim-type-select"
+                      value={selectedSimType}
+                      onChange={(e) => setSelectedSimType(e.target.value)}
+                      className="w-full bg-zinc-50 hover:bg-zinc-100 border-2 border-zinc-200 focus:border-gold rounded-2xl px-4 py-3 text-sm font-bold text-zinc-900 outline-none transition-all cursor-pointer appearance-none pr-10 shadow-sm"
                     >
-                      {isSelected && (
-                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-gold text-black flex items-center justify-center shadow-md">
-                          <Check className="w-2.5 h-2.5 text-black stroke-[3]" aria-hidden="true" />
-                        </span>
-                      )}
-                      <span className={`text-sm font-extrabold tracking-wide ${isSelected ? 'text-zinc-950' : 'text-zinc-800'}`}>
-                        {item.capacity}
-                      </span>
-                      <span className={`text-xs font-bold mt-1 ${isSelected ? 'text-gold' : 'text-zinc-500'}`}>
-                        {itemWithSimPrice.toLocaleString('fr-FR')} F
-                      </span>
-                      {diff > 0 ? (
-                        <span className="text-[9px] text-emerald-600 font-medium mt-0.5">
-                          +{diff.toLocaleString('fr-FR')} F
-                        </span>
-                      ) : (
-                        <span className="text-[9px] text-zinc-500 font-medium mt-0.5">
-                          Base
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                      {availableSimTypes.map((sim) => {
+                        const priceNote = sim.delta > 0 
+                          ? ` (+${sim.delta.toLocaleString('fr-FR')} FCFA)` 
+                          : sim.delta < 0 
+                          ? ` (${sim.delta.toLocaleString('fr-FR')} FCFA)` 
+                          : '';
+                        return (
+                          <option key={sim.id || sim.label} value={sim.label}>
+                            {sim.label}{priceNote}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                      <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Sélecteur de Capacité si applicable */}
+              {availableCapacities.length > 0 && (
+                <div className="space-y-2 pt-3 border-t border-zinc-200">
+                  <div className="flex items-center justify-between">
+                    <label 
+                      htmlFor="user-capacity-select" 
+                      className="text-xs text-zinc-600 uppercase tracking-wider font-bold"
+                    >
+                      Capacité : <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">{selectedCapacity}</span>
+                    </label>
+                    <span className="text-[11px] text-zinc-400 font-medium">{availableCapacities.length} options</span>
+                  </div>
+
+                  <div className="relative">
+                    <select
+                      id="user-capacity-select"
+                      value={selectedCapacity}
+                      onChange={(e) => setSelectedCapacity(e.target.value)}
+                      className="w-full bg-zinc-50 hover:bg-zinc-100 border-2 border-zinc-200 focus:border-gold rounded-2xl px-4 py-3 text-sm font-bold text-zinc-900 outline-none transition-all cursor-pointer appearance-none pr-10 shadow-sm"
+                    >
+                      {availableCapacities.map((item) => {
+                        const itemWithSimPrice = item.price + currentSimDelta;
+                        return (
+                          <option key={item.capacity} value={item.capacity}>
+                            {item.capacity} — {itemWithSimPrice.toLocaleString('fr-FR')} FCFA
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                      <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* Fiche Technique & Détails (Style Amazon épuré sans aucun emoji) */}
@@ -1065,23 +1365,44 @@ export default function ProductDrawer({
         <div className="p-4 sm:p-5 border-t border-zinc-200 bg-white/95 backdrop-blur-md flex items-center justify-between gap-4 relative z-20">
           <div className="flex flex-col pr-2">
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-medium">
-              Total {[selectedCapacity, selectedSimType].filter(Boolean).join(' · ')}
+              {isIPhone && (!selectedSimType || !selectedCapacity)
+                ? 'Configuration requise'
+                : `Total ${[selectedCapacity, selectedSimType].filter(Boolean).join(' · ')}`
+              }
             </span>
             <span className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-600 to-amber-700 whitespace-nowrap">
-              {currentPrice.toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
+              {isIPhone && (!selectedSimType || !selectedCapacity)
+                ? `${(Number(currentProduct.price) || 0).toLocaleString('fr-FR')} `
+                : `${currentPrice.toLocaleString('fr-FR')} `
+              }
+              <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
             </span>
           </div>
 
           {/* Bouton Unique Ultra-Prestige : Ajouter au Panier */}
           <button 
+            disabled={Boolean(isIPhone && (!selectedSimType || !selectedCapacity))}
             onClick={() => {
+              if (isIPhone && (!selectedSimType || !selectedCapacity)) {
+                return;
+              }
               onAddToCart(currentProduct, activeColor, selectedCapacity, currentPrice, selectedSimType);
               onClose();
             }}
-            className="flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border border-gold/40 bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black font-extrabold uppercase tracking-widest text-xs sm:text-sm hover:shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:brightness-105 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer shadow-md"
+            className={`flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border font-extrabold uppercase tracking-widest text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
+              isIPhone && (!selectedSimType || !selectedCapacity)
+                ? 'bg-zinc-200 border-zinc-300 text-zinc-400 cursor-not-allowed opacity-75'
+                : 'border-gold/40 bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black hover:shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:brightness-105 active:scale-[0.98] cursor-pointer'
+            }`}
           >
-            <ShoppingBag className="w-4 h-4 text-black stroke-[2.5]" aria-hidden="true" />
-            <span>Ajouter au panier</span>
+            <ShoppingBag className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
+            <span>
+              {isIPhone && !selectedSimType
+                ? '1. Choisissez le format SIM'
+                : isIPhone && !selectedCapacity
+                ? '2. Choisissez la capacité'
+                : 'Ajouter au panier'}
+            </span>
           </button>
         </div>
       </aside>

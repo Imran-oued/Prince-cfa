@@ -4,7 +4,8 @@ import {
   validateAndCleanProduct, 
   generateSlug, 
   normalizeProductSpecs,
-  getProductImageBg
+  getProductImageBg,
+  isAppleBrand
 } from "../src/lib/productValidation.ts";
 import { 
   PRODUCT_CATEGORIES, 
@@ -484,3 +485,86 @@ test("12. iPhone SIM Types & Official Colors: Config and validation adhere to pr
   assert.equal(validated.cleanedProduct.simPricing.esim_only.delta, -25000);
   assert.equal(validated.cleanedProduct.colors.length, 2);
 });
+
+test("13. Conditional Phone Form Logic: Apple (CAS 1) vs Autres Marques (CAS 2)", () => {
+  // A. Détection intelligente de la marque
+  assert.equal(isAppleBrand("Apple"), true);
+  assert.equal(isAppleBrand("apple"), true);
+  assert.equal(isAppleBrand("iPhone"), true);
+  assert.equal(isAppleBrand("Samsung"), false);
+  assert.equal(isAppleBrand("Xiaomi"), false);
+  assert.equal(isAppleBrand("Tecno"), false);
+
+  // B. CAS 1 : Apple (iPhone) avec matrice croisée de variantes, shortDesc et otherFeatures
+  const applePayload = {
+    name: "iPhone 15 Pro Max 256 Go Titane Naturel",
+    category: "phones",
+    brand: "Apple",
+    price: 850000,
+    shortDesc: "Modèle pro en titane avec puce A17 Pro et zoom 5x.",
+    desc: "Description complète du smartphone Apple avec finition Titane aérospatial.",
+    otherFeatures: [
+      "Écran Super Retina XDR OLED",
+      "Puce A17 Pro",
+      "Dynamic Island",
+      "Bouton Action"
+    ],
+    variants: [
+      {
+        id: "sim_and_esim-256_Go-Titane_Naturel",
+        simType: "e-sim + sim physique",
+        simTypeId: "sim_and_esim",
+        storage: "256 Go",
+        color: "Titane Naturel",
+        price: 850000,
+        active: true
+      },
+      {
+        id: "dual_sim_physical-256_Go-Titane_Naturel",
+        simType: "2 sim physique",
+        simTypeId: "dual_sim_physical",
+        storage: "256 Go",
+        color: "Titane Naturel",
+        price: 880000,
+        active: true
+      }
+    ],
+    specs: {
+      storage: "256 Go"
+    }
+  };
+
+  const appleRes = validateAndCleanProduct(applePayload);
+  assert.equal(appleRes.isValid, true, `Validation Apple réussie: ${appleRes.errorList.join(", ")}`);
+  assert.equal(appleRes.cleanedProduct.shortDesc, "Modèle pro en titane avec puce A17 Pro et zoom 5x.");
+  assert.equal(appleRes.cleanedProduct.otherFeatures.length, 4);
+  assert.equal(appleRes.cleanedProduct.variants.length, 2);
+  assert.equal(appleRes.cleanedProduct.variants[1].price, 880000);
+
+  // C. CAS 2 : Autres marques (ex: Samsung) - Nettoyage strict et absence de pollution
+  const samsungPayload = {
+    name: "Samsung Galaxy S24 Ultra",
+    category: "phones",
+    brand: "Samsung",
+    price: 790000,
+    desc: "Smartphone Android avec processeur Snapdragon 8 Gen 3.",
+    // Données parasites qu'on veut s'assurer de ne PAS polluer si soumises par mégarde
+    shortDesc: "Ne doit pas être conservé pour les autres marques",
+    otherFeatures: ["Feature parasite"],
+    variants: [{ simType: "2 sim", storage: "256 Go", color: "Noir", price: 800000 }],
+    simPricing: { esim_only: { enabled: true, delta: -20000, label: "E-sim" } },
+    specs: {
+      storage: "256 Go",
+      ram: 12
+    }
+  };
+
+  const samsungRes = validateAndCleanProduct(samsungPayload);
+  assert.equal(samsungRes.isValid, true, `Validation Samsung réussie: ${samsungRes.errorList.join(", ")}`);
+  assert.equal(samsungRes.cleanedProduct.shortDesc, undefined, "shortDesc doit être nettoyé pour les autres marques");
+  assert.equal(samsungRes.cleanedProduct.otherFeatures, undefined, "otherFeatures doit être nettoyé pour les autres marques");
+  assert.equal(samsungRes.cleanedProduct.variants, undefined, "variants croisés ne doivent pas exister pour les autres marques");
+  assert.equal(samsungRes.cleanedProduct.specs.storage, "256 Go");
+  assert.equal(samsungRes.cleanedProduct.specs.ram, 12);
+});
+

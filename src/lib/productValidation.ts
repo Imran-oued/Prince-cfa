@@ -26,6 +26,18 @@ export interface ProductInput {
   warranty?: string;
   accessories?: string;
   storageOptions?: StorageOptionInput[];
+  shortDesc?: string;
+  otherFeatures?: string[];
+  variants?: Array<{
+    id?: string;
+    simType: string;
+    simTypeId?: string;
+    storage: string;
+    color: string;
+    price: number | string;
+    active?: boolean;
+    sku?: string;
+  }>;
   specs?: Record<string, any>;
   [key: string]: any;
 }
@@ -36,6 +48,15 @@ export interface ValidationResult {
   errors: Record<string, string>;
   errorList: string[];
   cleanedProduct?: any;
+}
+
+/**
+ * Vérifier si une marque donnée correspond à Apple (iPhone)
+ */
+export function isAppleBrand(brand?: string): boolean {
+  if (!brand) return false;
+  const b = brand.trim().toLowerCase();
+  return b === "apple" || b.includes("iphone") || b === "ios";
 }
 
 /**
@@ -265,6 +286,47 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
     }
   }
 
+  // 5. Traitement des variantes croisées de prix (iPhones : SIM x Stockage x Couleur)
+  let cleanedVariants: Array<{
+    id: string;
+    simType: string;
+    simTypeId?: string;
+    storage: string;
+    color: string;
+    price: number;
+    active: boolean;
+  }> | undefined = undefined;
+
+  const isApple = category === "phones" && isAppleBrand(brand);
+
+  if (isApple && Array.isArray(raw.variants) && raw.variants.length > 0) {
+    cleanedVariants = raw.variants
+      .map((v, i) => {
+        const p = Number(v.price);
+        return {
+          id: String(v.id || `var-${i}-${Date.now()}`),
+          simType: String(v.simType || "").trim(),
+          simTypeId: String(v.simTypeId || "").trim(),
+          storage: String(v.storage || "").trim(),
+          color: String(v.color || "").trim(),
+          price: !isNaN(p) && p > 0 ? p : (priceCheck.value || 0),
+          active: v.active !== false,
+        };
+      })
+      .filter(v => v.simType && v.storage && v.color);
+  }
+
+  // 6. Traitement des tags "Autres caractéristiques" pour iPhones
+  let cleanedOtherFeatures: string[] | undefined = undefined;
+  if (isApple && Array.isArray(raw.otherFeatures)) {
+    cleanedOtherFeatures = raw.otherFeatures
+      .map(f => String(f).trim())
+      .filter(Boolean);
+  }
+
+  // 7. Description courte (exclusivement pour Apple / iPhone)
+  const cleanShortDesc = isApple && raw.shortDesc ? String(raw.shortDesc).trim() : undefined;
+
   const isValid = Object.keys(errors).length === 0;
 
   // Si des erreurs existent, renvoyer les détails
@@ -286,6 +348,7 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
     brand,
     price: priceCheck.value!,
     ...(cleanSalePrice !== null ? { salePrice: cleanSalePrice } : {}),
+    ...(cleanShortDesc ? { shortDesc: cleanShortDesc } : {}),
     desc,
     stock: cleanStock,
     condition,
@@ -298,6 +361,8 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
     ...(raw.imageBg ? { imageBg: raw.imageBg } : {}),
     ...(cleanedStorageOptions.length > 0 ? { storageOptions: cleanedStorageOptions } : {}),
     ...(cleanedSimPricing ? { simPricing: cleanedSimPricing } : {}),
+    ...(cleanedVariants && cleanedVariants.length > 0 ? { variants: cleanedVariants } : {}),
+    ...(cleanedOtherFeatures && cleanedOtherFeatures.length > 0 ? { otherFeatures: cleanedOtherFeatures } : {}),
     updatedAt: new Date().toISOString(),
     ...(raw.createdAt ? { createdAt: raw.createdAt } : { createdAt: new Date().toISOString() }),
   };

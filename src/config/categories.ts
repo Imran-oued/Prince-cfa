@@ -108,10 +108,10 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         label: "Format & Nombre de SIM",
         type: "select",
         options: [
-          { label: "Simple SIM (Nano-SIM)", value: "single_sim" },
-          { label: "Double SIM physique (Nano + Nano)", value: "dual_sim_physical" },
-          { label: "SIM physique + eSIM", value: "sim_and_esim" },
-          { label: "Double eSIM (100% digitale)", value: "dual_esim" },
+          { label: "Simple SIM", value: "single_sim" },
+          { label: "double sim physique", value: "dual_sim_physical" },
+          { label: "1 e-sim+1 sim physique", value: "sim_and_esim" },
+          { label: "e-sim", value: "esim_only" },
         ],
         required: false,
       },
@@ -931,25 +931,25 @@ export function isStorageVariantCategory(categoryId: string): boolean {
 export const IPHONE_SIM_TYPES = [
   { 
     id: "sim_and_esim", 
-    label: "e-sim + sim physique", 
-    shortLabel: "1 SIM + eSIM",
-    description: "Standard international (1 Nano SIM + eSIM)",
+    label: "1 e-sim+1 sim physique", 
+    shortLabel: "1 e-sim+1 sim physique",
+    description: "",
     defaultDelta: 0,
     badge: "Standard" 
   },
   { 
     id: "dual_sim_physical", 
-    label: "2 sim physique", 
-    shortLabel: "2 SIM Physiques",
-    description: "Double Nano-SIM physique (Asie / Dubaï)",
+    label: "double sim physique", 
+    shortLabel: "double sim physique",
+    description: "",
     defaultDelta: 30000,
     badge: "Recommandé" 
   },
   { 
     id: "esim_only", 
-    label: "E-sim", 
-    shortLabel: "100% E-Sim",
-    description: "Entièrement dématérialisée (Modèle US)",
+    label: "e-sim", 
+    shortLabel: "e-sim",
+    description: "",
     defaultDelta: -20000,
     badge: "Économique" 
   },

@@ -42,7 +42,12 @@ import {
   Sun,
   Layers,
   Refrigerator,
-  Flame
+  Flame,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  Plus
 } from "lucide-react";
 import { 
   PRODUCT_CATEGORIES, 
@@ -55,7 +60,8 @@ import {
 } from "@/config/categories";
 import { 
   validateAndCleanProduct, 
-  normalizeProductSpecs 
+  normalizeProductSpecs,
+  isAppleBrand
 } from "@/lib/productValidation";
 
 function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -127,6 +133,77 @@ interface StorageEntry {
   price: string;
 }
 
+export interface AppleVariant {
+  id: string;
+  simType: string;
+  simTypeId: string;
+  storage: string;
+  color: string;
+  price: number;
+  active: boolean;
+}
+
+const PREDEFINED_APPLE_FEATURES = [
+  "Écran Super Retina XDR OLED 120Hz",
+  "Puce A17 Pro (Gravure 3nm)",
+  "Puce A18 Pro (Gravure 3nm)",
+  "Dynamic Island interactive",
+  "Bouton Action personnalisable",
+  "USB-C 3.0 ultra-rapide (10 Gb/s)",
+  "Châssis en Titane aérospatial",
+  "Face ID biométrique sécurisé",
+  "Recharge sans fil MagSafe 15W",
+  "Résistance à l'eau IP68 (6 mètres)",
+  "Appareil photo 48 MP avec Zoom optique 5x",
+  "Enregistrement vidéo 4K Dolby Vision 60 fps",
+  "Apple Intelligence Ready",
+  "Autonomie jusqu'à 29h en lecture vidéo",
+  "Réseau 5G ultra-rapide",
+];
+
+const POPULAR_IPHONE_MODELS = [
+  "iPhone 16 Pro Max",
+  "iPhone 16 Pro",
+  "iPhone 16 Plus",
+  "iPhone 16",
+  "iPhone 15 Pro Max",
+  "iPhone 15 Pro",
+  "iPhone 15",
+  "iPhone 14 Pro Max",
+  "iPhone 14",
+  "iPhone 13",
+  "iPhone 11",
+];
+
+const POPULAR_OTHER_PHONE_BRANDS = [
+  "Samsung",
+  "Xiaomi",
+  "Tecno",
+  "Infinix",
+  "Google",
+  "Honor",
+  "Huawei",
+];
+
+const AVAILABLE_SIM_TYPES = [
+  { id: "sim_and_esim", label: "1 e-sim+1 sim physique" },
+  { id: "dual_sim_physical", label: "double sim physique" },
+  { id: "esim_only", label: "e-sim" },
+];
+
+interface SimCapacityItem {
+  id: string;
+  capacity: string;
+  price: string;
+  colors: string[];
+}
+
+interface SimConfigBlock {
+  simId: string;
+  simLabel: string;
+  capacities: SimCapacityItem[];
+}
+
 interface AdminProduct {
   id: string | number;
   name: string;
@@ -134,6 +211,7 @@ interface AdminProduct {
   category: string;
   price: number;
   salePrice?: number | null;
+  shortDesc?: string;
   desc?: string;
   image: string;
   brand?: string;
@@ -142,6 +220,8 @@ interface AdminProduct {
   images?: string[];
   storageOptions?: StorageOption[];
   simPricing?: Record<string, { enabled: boolean; delta: number; label: string }>;
+  variants?: AppleVariant[];
+  otherFeatures?: string[];
   specs?: Record<string, any>;
   stock?: number;
   condition?: "neuf" | "occasion" | "reconditionne" | string;
@@ -254,11 +334,13 @@ export default function AdminPage() {
   
   // Données dynamiques des produits selon la catégorie
   const [formCategory, setFormCategory] = useState<string>("phones");
+
   interface CommonFormData {
     name: string;
     brand: string;
     price: string;
     salePrice: string;
+    shortDesc?: string;
     desc: string;
     colors: string;
     stock: string;
@@ -273,6 +355,7 @@ export default function AdminPage() {
     brand: "",
     price: "",
     salePrice: "",
+    shortDesc: "",
     desc: "",
     colors: "",
     stock: "10",
@@ -286,6 +369,44 @@ export default function AdminPage() {
   const [modalViewMode, setModalViewMode] = useState<"form" | "preview">("form");
   const [categorySwitchPending, setCategorySwitchPending] = useState<{ from: string; to: string } | null>(null);
 
+  // Variantes dynamiques et caractéristiques pour iPhones (CAS 1)
+  const [appleVariants, setAppleVariants] = useState<AppleVariant[]>([]);
+  // Configuration hiérarchique : SIM -> Capacité -> Prix -> Couleurs (Souhait client)
+  const [simBlocks, setSimBlocks] = useState<SimConfigBlock[]>([
+    {
+      simId: "sim_and_esim",
+      simLabel: "1 e-sim+1 sim physique",
+      capacities: [
+        {
+          id: "cap-128",
+          capacity: "128 Go",
+          price: "750000",
+          colors: ["Titane Naturel", "Titane Noir", "Titane Blanc"],
+        },
+        {
+          id: "cap-256",
+          capacity: "256 Go",
+          price: "820000",
+          colors: ["Titane Naturel", "Titane Noir", "Titane Blanc", "Titane Désert"],
+        },
+      ],
+    },
+  ]);
+  const [selectedSims, setSelectedSims] = useState<string[]>(["sim_and_esim", "dual_sim_physical", "esim_only"]);
+  const [selectedCapacities, setSelectedCapacities] = useState<string[]>(["128 Go", "256 Go", "512 Go", "1 To"]);
+  const [selectedColors, setSelectedColors] = useState<string[]>(["Titane Naturel", "Titane Noir", "Titane Blanc"]);
+  const [otherFeatures, setOtherFeatures] = useState<string[]>([
+    "Écran Super Retina XDR OLED 120Hz",
+    "Châssis en Titane aérospatial",
+    "Face ID biométrique sécurisé",
+    "Recharge sans fil MagSafe 15W"
+  ]);
+  const [customFeatureInput, setCustomFeatureInput] = useState<string>("");
+  const [bulkSimFilter, setBulkSimFilter] = useState<string>("all");
+  const [bulkStorageFilter, setBulkStorageFilter] = useState<string>("all");
+  const [bulkAdjustAmount, setBulkAdjustAmount] = useState<string>("");
+  const [showVariantsTable, setShowVariantsTable] = useState<boolean>(false);
+
   // Gestion dynamique des options de stockage (cases successives) et des photos multiples
   const [storageItems, setStorageItems] = useState<StorageEntry[]>([]);
   const [imageList, setImageList] = useState<string[]>([]);
@@ -294,9 +415,9 @@ export default function AdminPage() {
 
   // Configuration professionnelle des variantes SIM pour téléphones (notamment iPhones)
   const DEFAULT_SIM_PRICING: Record<string, { enabled: boolean; delta: number; label: string }> = {
-    sim_and_esim: { enabled: true, delta: 0, label: "e-sim + sim physique" },
-    dual_sim_physical: { enabled: true, delta: 30000, label: "2 sim physique" },
-    esim_only: { enabled: true, delta: -20000, label: "E-sim" },
+    sim_and_esim: { enabled: true, delta: 0, label: "1 e-sim+1 sim physique" },
+    dual_sim_physical: { enabled: true, delta: 30000, label: "double sim physique" },
+    esim_only: { enabled: true, delta: -20000, label: "e-sim" },
   };
 
   const [simPricing, setSimPricing] = useState<Record<string, { enabled: boolean; delta: number; label: string }>>(DEFAULT_SIM_PRICING);
@@ -326,6 +447,517 @@ export default function AdminPage() {
     }
     setCommonFormData(prev => ({ ...prev, colors: next.join(", ") }));
   };
+
+  // Gestionnaire de changement de marque avec nettoyage strict des données (Transition Apple vs Autres)
+  const handleBrandChange = (newBrand: string) => {
+    const wasApple = isAppleBrand(commonFormData.brand);
+    const isNowApple = isAppleBrand(newBrand);
+
+    if (wasApple && !isNowApple) {
+      // Transition Apple -> Autres marques : Nettoyage strict
+      setCommonFormData(prev => ({
+        ...prev,
+        brand: newBrand,
+        shortDesc: "", // Suppression de la description courte
+      }));
+      setOtherFeatures([]); // Suppression des tags Apple
+      setAppleVariants([]); // Suppression de la matrice croisée
+      setStorageItems([]);
+      setSimPricing(DEFAULT_SIM_PRICING);
+      // Nettoyer formSpecs pour ne conserver QUE le stockage et la RAM
+      setFormSpecs(prev => ({
+        storage: prev.storage || "128 Go",
+        ram: prev.ram || "8",
+      }));
+    } else if (!wasApple && isNowApple) {
+      // Transition Autres -> Apple : Nettoyage strict
+      setCommonFormData(prev => ({
+        ...prev,
+        brand: newBrand,
+      }));
+      // Supprimer la RAM non applicable sur fiche Apple
+      setFormSpecs(prev => {
+        const copy = { ...prev };
+        delete copy.ram;
+        return copy;
+      });
+      // Initialiser les tags par défaut si vides
+      if (otherFeatures.length === 0) {
+        setOtherFeatures([
+          "Écran Super Retina XDR OLED 120Hz",
+          "Châssis en Titane aérospatial",
+          "Face ID biométrique sécurisé",
+          "Recharge sans fil MagSafe 15W"
+        ]);
+      }
+    } else {
+      setCommonFormData(prev => ({ ...prev, brand: newBrand }));
+    }
+  };
+
+  // Basculer l'inclusion d'un type de SIM pour Apple
+  const toggleSimSelection = (simId: string) => {
+    setSelectedSims(prev => {
+      const exists = prev.includes(simId);
+      if (exists) {
+        if (prev.length <= 1) return prev; // Au moins 1 type de SIM conservé
+        return prev.filter(s => s !== simId);
+      } else {
+        return [...prev, simId];
+      }
+    });
+  };
+
+  // Basculer l'inclusion d'une capacité de stockage pour Apple
+  const toggleCapacitySelection = (capacity: string) => {
+    setSelectedCapacities(prev => {
+      const exists = prev.includes(capacity);
+      if (exists) {
+        if (prev.length <= 1) return prev; // Au moins 1 capacité requise
+        return prev.filter(c => c !== capacity);
+      } else {
+        return [...prev, capacity];
+      }
+    });
+  };
+
+  // Basculer l'inclusion d'une couleur pour Apple
+  const toggleAppleColorSelection = (colorName: string) => {
+    setSelectedColors(prev => {
+      const exists = prev.some(c => c.toLowerCase() === colorName.toLowerCase());
+      let next: string[];
+      if (exists) {
+        if (prev.length <= 1) return prev;
+        next = prev.filter(c => c.toLowerCase() !== colorName.toLowerCase());
+      } else {
+        next = [...prev, colorName];
+      }
+      setCommonFormData(p => ({ ...p, colors: next.join(", ") }));
+      return next;
+    });
+  };
+
+  // Générer la matrice croisée des variantes Apple (Type de SIM x Capacité x Couleur)
+  const generateAppleVariants = () => {
+    const basePrice = Number(commonFormData.price) || 0;
+    const newVariants: AppleVariant[] = [];
+
+    const simConfigMap: Record<string, { label: string; delta: number }> = {
+      sim_and_esim: { label: "1 e-sim+1 sim physique", delta: 0 },
+      dual_sim_physical: { label: "double sim physique", delta: 30000 },
+      esim_only: { label: "e-sim", delta: -20000 },
+    };
+
+    const storageDeltaMap: Record<string, number> = {
+      "64 Go": -40000,
+      "128 Go": 0,
+      "256 Go": 60000,
+      "512 Go": 140000,
+      "1 To": 240000,
+      "2 To": 360000,
+    };
+
+    // Conserver les prix manuellement personnalisés par l'administrateur
+    const existingPriceMap = new Map<string, number>();
+    for (const v of appleVariants) {
+      existingPriceMap.set(v.id, v.price);
+    }
+
+    for (const simId of selectedSims) {
+      const simInfo = simConfigMap[simId] || { label: simId, delta: 0 };
+      for (const cap of selectedCapacities) {
+        const storageDelta = storageDeltaMap[cap] !== undefined ? storageDeltaMap[cap] : 0;
+        for (const col of selectedColors) {
+          const id = `${simId}-${cap.replace(/\s+/g, "_")}-${col.replace(/\s+/g, "_")}`;
+          const existingPrice = existingPriceMap.get(id);
+          const calculatedPrice = Math.max(0, basePrice + simInfo.delta + storageDelta);
+          const finalPrice = existingPrice !== undefined ? existingPrice : calculatedPrice;
+
+          newVariants.push({
+            id,
+            simType: simInfo.label,
+            simTypeId: simId,
+            storage: cap,
+            color: col,
+            price: finalPrice,
+            active: true,
+          });
+        }
+      }
+    }
+
+    setAppleVariants(newVariants);
+  };
+
+  // Mettre à jour le prix spécifique d'une variante
+  const handleUpdateVariantPrice = (id: string, newPrice: number) => {
+    setAppleVariants(prev => prev.map(v => v.id === id ? { ...v, price: Math.max(0, newPrice) } : v));
+  };
+
+  // Supprimer / désactiver une combinaison
+  const handleRemoveVariant = (id: string) => {
+    setAppleVariants(prev => prev.filter(v => v.id !== id));
+  };
+
+  // Ajustement en masse des variantes
+  const handleApplyBulkAdjustment = () => {
+    const amount = Number(bulkAdjustAmount);
+    if (!amount || isNaN(amount)) return;
+
+    setAppleVariants(prev => prev.map(v => {
+      const matchSim = bulkSimFilter === "all" || v.simTypeId === bulkSimFilter || v.simType === bulkSimFilter;
+      const matchStorage = bulkStorageFilter === "all" || v.storage === bulkStorageFilter;
+      if (matchSim && matchStorage) {
+        return { ...v, price: Math.max(0, v.price + amount) };
+      }
+      return v;
+    }));
+    setBulkAdjustAmount("");
+  };
+
+  // Basculer un tag de caractéristique prédéfinie
+  const toggleOtherFeature = (feature: string) => {
+    setOtherFeatures(prev => {
+      if (prev.includes(feature)) {
+        return prev.filter(f => f !== feature);
+      } else {
+        return [...prev, feature];
+      }
+    });
+  };
+
+  // Ajouter un tag personnalisé
+  const handleAddCustomFeature = () => {
+    const trimmed = customFeatureInput.trim();
+    if (!trimmed) return;
+    if (!otherFeatures.includes(trimmed)) {
+      setOtherFeatures(prev => [...prev, trimmed]);
+    }
+    setCustomFeatureInput("");
+  };
+
+  // Synchronisation automatique en temps réel des variantes Apple (aucun clic de génération requis)
+  useEffect(() => {
+    if (formCategory === "phones" && isAppleBrand(commonFormData.brand)) {
+      if (selectedSims.length > 0 && selectedCapacities.length > 0 && selectedColors.length > 0) {
+        generateAppleVariants();
+      }
+    }
+  }, [commonFormData.price, selectedSims, selectedCapacities, selectedColors, formCategory, commonFormData.brand]);
+
+  // =========================================================================
+  // GESTIONNAIRES HIÉRARCHIQUES IPHONE : SIM -> CAPACITÉ -> PRIX -> COULEURS
+  // =========================================================================
+
+  // 1. Ajouter un nouveau type de SIM
+  const handleAddSimType = (simId: string) => {
+    const def = AVAILABLE_SIM_TYPES.find(s => s.id === simId);
+    if (!def) return;
+    if (simBlocks.some(b => b.simId === simId)) return;
+
+    const firstBlock = simBlocks[0];
+    let newCapacities: SimCapacityItem[] = [];
+
+    if (firstBlock && firstBlock.capacities.length > 0) {
+      newCapacities = firstBlock.capacities.map(c => ({
+        id: `cap-${simId}-${c.capacity.replace(/\s+/g, '')}-${Date.now()}`,
+        capacity: c.capacity,
+        price: c.price,
+        colors: [...c.colors],
+      }));
+    } else {
+      newCapacities = [
+        {
+          id: `cap-${simId}-256-${Date.now()}`,
+          capacity: "256 Go",
+          price: commonFormData.price || "850000",
+          colors: ["Titane Naturel", "Titane Noir", "Titane Blanc"],
+        },
+      ];
+    }
+
+    setSimBlocks(prev => [...prev, {
+      simId: def.id,
+      simLabel: def.label,
+      capacities: newCapacities,
+    }]);
+  };
+
+  // 2. Supprimer un type de SIM
+  const handleRemoveSimType = (simId: string) => {
+    if (simBlocks.length <= 1) {
+      alert("Vous devez conserver au moins un type de SIM pour cet iPhone.");
+      return;
+    }
+    setSimBlocks(prev => prev.filter(b => b.simId !== simId));
+  };
+
+  // 3. Ajouter une capacité sous un type de SIM spécifique
+  const handleAddCapacityToSim = (simId: string, capacity: string, defaultPrice?: string) => {
+    setSimBlocks(prev => prev.map(b => {
+      if (b.simId !== simId) return b;
+      if (b.capacities.some(c => c.capacity.toLowerCase() === capacity.toLowerCase())) return b;
+
+      let suggestedPrice = defaultPrice;
+      if (!suggestedPrice) {
+        const last = b.capacities[b.capacities.length - 1];
+        if (last && Number(last.price)) {
+          suggestedPrice = String(Number(last.price) + 60000);
+        } else {
+          suggestedPrice = commonFormData.price || "750000";
+        }
+      }
+
+      const newCap: SimCapacityItem = {
+        id: `cap-${simId}-${capacity.replace(/\s+/g, '')}-${Date.now()}`,
+        capacity,
+        price: suggestedPrice,
+        colors: b.capacities[0]?.colors?.length > 0 ? [...b.capacities[0].colors] : ["Titane Naturel", "Titane Noir"],
+      };
+
+      return {
+        ...b,
+        capacities: [...b.capacities, newCap],
+      };
+    }));
+  };
+
+  // 4. Supprimer une capacité sous un type de SIM
+  const handleRemoveCapacityFromSim = (simId: string, capId: string) => {
+    setSimBlocks(prev => prev.map(b => {
+      if (b.simId !== simId) return b;
+      if (b.capacities.length <= 1) {
+        alert("Chaque type de SIM doit comporter au moins une capacité.");
+        return b;
+      }
+      return {
+        ...b,
+        capacities: b.capacities.filter(c => c.id !== capId),
+      };
+    }));
+  };
+
+  // 5. Mettre à jour une capacité (prix ou libellé)
+  const handleUpdateCapacityItem = (simId: string, capId: string, updates: Partial<SimCapacityItem>) => {
+    setSimBlocks(prev => prev.map(b => {
+      if (b.simId !== simId) return b;
+      return {
+        ...b,
+        capacities: b.capacities.map(c => c.id === capId ? { ...c, ...updates } : c),
+      };
+    }));
+  };
+
+  // 6. Basculer une couleur pour une capacité spécifique
+  const handleToggleColorForCapacity = (simId: string, capId: string, colorName: string) => {
+    setSimBlocks(prev => prev.map(b => {
+      if (b.simId !== simId) return b;
+      return {
+        ...b,
+        capacities: b.capacities.map(c => {
+          if (c.id !== capId) return c;
+          const exists = c.colors.some(col => col.toLowerCase() === colorName.toLowerCase());
+          let nextCols: string[];
+          if (exists) {
+            if (c.colors.length <= 1) return c;
+            nextCols = c.colors.filter(col => col.toLowerCase() !== colorName.toLowerCase());
+          } else {
+            nextCols = [...c.colors, colorName];
+          }
+          return { ...c, colors: nextCols };
+        }),
+      };
+    }));
+  };
+
+  // 7. Tout cocher / Décocher pour une capacité
+  const handleSelectAllColorsForCapacity = (simId: string, capId: string) => {
+    const all = IPHONE_OFFICIAL_COLORS.map(c => c.name);
+    setSimBlocks(prev => prev.map(b => {
+      if (b.simId !== simId) return b;
+      return {
+        ...b,
+        capacities: b.capacities.map(c => c.id === capId ? { ...c, colors: all } : c),
+      };
+    }));
+  };
+
+  const handleDeselectAllColorsForCapacity = (simId: string, capId: string) => {
+    setSimBlocks(prev => prev.map(b => {
+      if (b.simId !== simId) return b;
+      return {
+        ...b,
+        capacities: b.capacities.map(c => c.id === capId ? { ...c, colors: [c.colors[0] || "Titane Naturel"] } : c),
+      };
+    }));
+  };
+
+  // 8. Dupliquer les capacités d'un bloc SIM vers un autre
+  const handleCopyCapacitiesFromSim = (sourceSimId: string, targetSimId: string) => {
+    const sourceBlock = simBlocks.find(b => b.simId === sourceSimId);
+    if (!sourceBlock) return;
+
+    setSimBlocks(prev => prev.map(b => {
+      if (b.simId !== targetSimId) return b;
+      const copiedCapacities: SimCapacityItem[] = sourceBlock.capacities.map(c => ({
+        id: `cap-${targetSimId}-${c.capacity.replace(/\s+/g, '')}-${Date.now()}`,
+        capacity: c.capacity,
+        price: c.price,
+        colors: [...c.colors],
+      }));
+      return {
+        ...b,
+        capacities: copiedCapacities,
+      };
+    }));
+  };
+
+  // Synchronisation automatique de appleVariants et des couleurs depuis simBlocks
+  useEffect(() => {
+    if (formCategory === "phones" && isAppleBrand(commonFormData.brand) && simBlocks.length > 0) {
+      const flattened: AppleVariant[] = [];
+      const colorsSet = new Set<string>();
+      const prices: number[] = [];
+
+      simBlocks.forEach(b => {
+        b.capacities.forEach(c => {
+          const numPrice = Number(c.price) || Number(commonFormData.price) || 0;
+          if (numPrice > 0) prices.push(numPrice);
+          const cols = c.colors.length > 0 ? c.colors : ["Standard"];
+          cols.forEach(col => {
+            colorsSet.add(col);
+            flattened.push({
+              id: `${b.simId}-${c.capacity.replace(/\s+/g, "_")}-${col.replace(/\s+/g, "_")}`,
+              simType: b.simLabel,
+              simTypeId: b.simId,
+              storage: c.capacity,
+              color: col,
+              price: numPrice,
+              active: true,
+            });
+          });
+        });
+      });
+
+      setAppleVariants(flattened);
+      const allCols = Array.from(colorsSet);
+      if (allCols.length > 0 && !commonFormData.colors) {
+        setCommonFormData(p => ({ ...p, colors: allCols.join(", ") }));
+      }
+      if (prices.length > 0 && (!commonFormData.price || Number(commonFormData.price) <= 0)) {
+        setCommonFormData(p => ({ ...p, price: String(Math.min(...prices)) }));
+      }
+    }
+  }, [simBlocks, formCategory, commonFormData.brand]);
+
+  // Rendu modulaire du composant d'upload et de gestion des photos
+  const renderPhotoUploader = (sectionTitle = "Photos du Produit (Multi-fichiers)") => (
+    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <Camera className="w-4 h-4 text-gold" aria-hidden="true" />
+            <span>{sectionTitle}</span>
+          </label>
+          <p className="text-[11px] text-zinc-400 mt-0.5">
+            La <strong className="text-white">première photo</strong> sera l&apos;image principale affichée dans la boutique.
+          </p>
+        </div>
+
+        <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gold hover:bg-yellow-400 text-black text-xs font-extrabold uppercase tracking-wider cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.25)] transition-all flex-shrink-0">
+          <Upload className="w-4 h-4 text-black" aria-hidden="true" />
+          <span>{isCompressingImages ? "Traitement..." : "Choisir des fichiers"}</span>
+          <input 
+            type="file" 
+            accept="image/*" 
+            multiple 
+            disabled={isCompressingImages}
+            onChange={handleMultipleImagesUpload}
+            className="hidden" 
+          />
+        </label>
+      </div>
+
+      {imageList.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+          {imageList.map((imgSrc, index) => (
+            <div 
+              key={index} 
+              className={`relative group rounded-xl overflow-hidden border p-1 bg-black/60 transition-all ${
+                index === 0 
+                  ? "border-gold shadow-[0_0_15px_rgba(212,175,55,0.25)] ring-1 ring-gold/50" 
+                  : "border-white/10 hover:border-white/30"
+              }`}
+            >
+              <div className="aspect-square w-full rounded-lg bg-black/40 flex items-center justify-center overflow-hidden relative">
+                <img 
+                  src={imgSrc} 
+                  alt={`Photo ${index + 1}`} 
+                  className="w-full h-full object-contain"
+                />
+                
+                <div className="absolute top-1.5 left-1.5 pointer-events-none">
+                  {index === 0 ? (
+                    <span className="px-2 py-0.5 rounded-md bg-gold text-black text-[10px] font-black uppercase tracking-wider shadow inline-flex items-center gap-1">
+                      <Crown className="w-3 h-3" aria-hidden="true" />
+                      <span>Principale</span>
+                    </span>
+                  ) : (
+                    <span className="px-1.5 py-0.5 rounded-md bg-black/80 text-zinc-300 text-[10px] font-bold border border-white/10">
+                      #{index + 1}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(index)}
+                  className="absolute top-1.5 right-1.5 w-6 h-6 rounded-md bg-red-600/80 hover:bg-red-600 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow"
+                  title="Supprimer cette image"
+                >
+                  <X className="w-3.5 h-3.5" aria-hidden="true" />
+                </button>
+              </div>
+
+              {index !== 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleSetMainImage(index)}
+                  className="w-full mt-1.5 py-1 px-2 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-[10px] text-zinc-300 font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1"
+                >
+                  <Crown className="w-3 h-3" aria-hidden="true" />
+                  <span>Définir comme 1ère</span>
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="p-4 rounded-xl border border-dashed border-white/10 text-center text-zinc-500 text-xs">
+          Aucune photo sélectionnée. Cliquez sur <strong className="text-zinc-300">Choisir des fichiers</strong> ou ajoutez un lien ci-dessous.
+        </div>
+      )}
+
+      {/* Ajout par URL */}
+      <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+        <input 
+          type="url" 
+          value={newImageUrl} 
+          onChange={e => setNewImageUrl(e.target.value)} 
+          className="flex-1 bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:border-gold/50 outline-none" 
+          placeholder="Ou collez un lien URL d'image (https://...)" 
+        />
+        <button
+          type="button"
+          onClick={() => handleAddImageUrl(newImageUrl)}
+          disabled={!newImageUrl.trim()}
+          className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors disabled:opacity-30 cursor-pointer"
+        >
+          + Ajouter URL
+        </button>
+      </div>
+    </div>
+  );
 
   // 1. Vérification ultra-rapide de session active à l'ouverture de la page (< 50ms)
   useEffect(() => {
@@ -978,6 +1610,9 @@ export default function AdminPage() {
     const mainImage = imageList.length > 0 ? imageList[0] : "https://placehold.co/600x600/121216/d4af37?text=NOUVEAU";
     const allImages = imageList.length > 0 ? imageList : [mainImage];
 
+    const isApple = formCategory === "phones" && isAppleBrand(commonFormData.brand);
+    const isOtherPhone = formCategory === "phones" && !isAppleBrand(commonFormData.brand);
+
     // Les options de stockage ne sont transmises QUE si la catégorie les autorise
     const parsedStorage: StorageOption[] = getCategoryConfig(formCategory).supportsStorageVariants
       ? storageItems
@@ -988,25 +1623,97 @@ export default function AdminPage() {
           }))
       : [];
 
+    // Options de stockage et variantes : générées dynamiquement pour Apple depuis simBlocks
+    let finalStorageOptions: StorageOption[] | undefined = undefined;
+    let finalAppleVariants: AppleVariant[] = [];
+    let finalSimPricing: Record<string, { enabled: boolean; delta: number; label: string }> | undefined = undefined;
+    let allIPhoneColors: string[] = [];
+
+    if (isApple) {
+      const capsMap = new Map<string, number>();
+      const colorsSet = new Set<string>();
+
+      simBlocks.forEach(b => {
+        b.capacities.forEach(c => {
+          const capPrice = Number(c.price) || Number(commonFormData.price) || 0;
+          if (!capsMap.has(c.capacity) || capPrice < capsMap.get(c.capacity)!) {
+            capsMap.set(c.capacity, capPrice);
+          }
+          const cols = c.colors.length > 0 ? c.colors : ["Standard"];
+          cols.forEach(col => {
+            colorsSet.add(col);
+            finalAppleVariants.push({
+              id: `${b.simId}-${c.capacity.replace(/\s+/g, '_')}-${col.replace(/\s+/g, '_')}`,
+              simType: b.simLabel,
+              simTypeId: b.simId,
+              storage: c.capacity,
+              color: col,
+              price: capPrice,
+              active: true,
+            });
+          });
+        });
+      });
+
+      finalStorageOptions = Array.from(capsMap.entries()).map(([capacity, price]) => ({
+        capacity,
+        price
+      }));
+
+      finalSimPricing = {};
+      AVAILABLE_SIM_TYPES.forEach(def => {
+        const isAct = simBlocks.some(b => b.simId === def.id);
+        finalSimPricing![def.id] = {
+          enabled: isAct,
+          delta: 0,
+          label: def.label
+        };
+      });
+
+      allIPhoneColors = Array.from(colorsSet);
+    } else if (!isOtherPhone && getCategoryConfig(formCategory).supportsStorageVariants) {
+      finalStorageOptions = parsedStorage.length > 0 ? parsedStorage : undefined;
+    }
+
+    // Spécifications nettoyées selon le cas
+    let finalSpecs = { ...formSpecs };
+    if (isApple) {
+      finalSpecs = {
+        model: commonFormData.name,
+        storage: (appleVariants[0]?.storage || selectedCapacities[0] || "128 Go")
+      };
+    } else if (isOtherPhone) {
+      finalSpecs = {
+        model: commonFormData.name,
+        storage: formSpecs.storage || "128 Go",
+        ram: formSpecs.ram ? (Number(formSpecs.ram) || formSpecs.ram) : undefined
+      };
+    }
+
     const rawPayload = {
       id: editingId || undefined,
       name: commonFormData.name,
       category: formCategory,
       brand: commonFormData.brand,
-      price: commonFormData.price,
       salePrice: commonFormData.salePrice || null,
+      shortDesc: isApple ? commonFormData.shortDesc : undefined,
       desc: commonFormData.desc,
       stock: commonFormData.stock,
       condition: commonFormData.condition,
       warranty: commonFormData.warranty,
       accessories: commonFormData.accessories,
-      colors: parsedColors,
+      price: isApple && finalAppleVariants.length > 0 && (!commonFormData.price || Number(commonFormData.price) <= 0)
+        ? Math.min(...finalAppleVariants.map(v => v.price))
+        : commonFormData.price,
+      colors: isApple && allIPhoneColors.length > 0 ? allIPhoneColors : parsedColors,
       image: mainImage,
       images: allImages,
       imageBg: commonFormData.imageBg || "white",
-      storageOptions: parsedStorage.length > 0 ? parsedStorage : undefined,
-      simPricing: formCategory === "phones" ? simPricing : undefined,
-      specs: formSpecs
+      storageOptions: finalStorageOptions,
+      simPricing: isApple ? finalSimPricing : undefined,
+      variants: isApple && finalAppleVariants.length > 0 ? finalAppleVariants : undefined,
+      otherFeatures: isApple && otherFeatures.length > 0 ? otherFeatures : undefined,
+      specs: finalSpecs
     };
 
     // 1. Validation stricte selon les règles de la catégorie
@@ -1192,19 +1899,113 @@ export default function AdminPage() {
 
     if (product.simPricing && typeof product.simPricing === "object") {
       setSimPricing({
-        sim_and_esim: product.simPricing.sim_and_esim ? { ...product.simPricing.sim_and_esim } : { enabled: true, delta: 0, label: "e-sim + sim physique" },
-        dual_sim_physical: product.simPricing.dual_sim_physical ? { ...product.simPricing.dual_sim_physical } : { enabled: true, delta: 30000, label: "2 sim physique" },
-        esim_only: product.simPricing.esim_only ? { ...product.simPricing.esim_only } : { enabled: true, delta: -20000, label: "E-sim" },
+        sim_and_esim: product.simPricing.sim_and_esim ? { ...product.simPricing.sim_and_esim, label: "1 e-sim+1 sim physique" } : { enabled: true, delta: 0, label: "1 e-sim+1 sim physique" },
+        dual_sim_physical: product.simPricing.dual_sim_physical ? { ...product.simPricing.dual_sim_physical, label: "double sim physique" } : { enabled: true, delta: 30000, label: "double sim physique" },
+        esim_only: product.simPricing.esim_only ? { ...product.simPricing.esim_only, label: "e-sim" } : { enabled: true, delta: -20000, label: "e-sim" },
       });
     } else {
       setSimPricing(DEFAULT_SIM_PRICING);
     }
+
+    const isApple = (product.category || "phones") === "phones" && isAppleBrand(product.brand);
+    const prodVariants = (product as any).variants && Array.isArray((product as any).variants)
+      ? (product as any).variants
+      : [];
+    setAppleVariants(prodVariants);
+
+    const prodFeatures = (product as any).otherFeatures && Array.isArray((product as any).otherFeatures)
+      ? (product as any).otherFeatures
+      : (isApple ? [
+          "Écran Super Retina XDR OLED 120Hz",
+          "Châssis en Titane aérospatial",
+          "Face ID biométrique sécurisé",
+          "Recharge sans fil MagSafe 15W"
+        ] : []);
+    setOtherFeatures(prodFeatures);
+
+    if (isApple) {
+      if (prodVariants.length > 0) {
+        const simGroupMap = new Map<string, { label: string; caps: Map<string, { price: number; colors: Set<string> }> }>();
+        prodVariants.forEach((v: any) => {
+          const simKey = v.simTypeId || (String(v.simType).includes("2") || String(v.simType).toLowerCase().includes("double") ? "dual_sim_physical" : String(v.simType).toLowerCase().includes("esim") && !String(v.simType).includes("physique") ? "esim_only" : "sim_and_esim");
+          const simDef = AVAILABLE_SIM_TYPES.find(s => s.id === simKey);
+          const simLabel = simDef ? simDef.label : (simKey === "dual_sim_physical" ? "double sim physique" : simKey === "esim_only" ? "e-sim" : "1 e-sim+1 sim physique");
+          if (!simGroupMap.has(simKey)) {
+            simGroupMap.set(simKey, { label: simLabel, caps: new Map() });
+          }
+          const group = simGroupMap.get(simKey)!;
+          if (!group.caps.has(v.storage)) {
+            group.caps.set(v.storage, { price: v.price, colors: new Set() });
+          }
+          group.caps.get(v.storage)!.colors.add(v.color);
+        });
+
+        const reconstructed: SimConfigBlock[] = [];
+        simGroupMap.forEach((group, simKey) => {
+          const caps: SimCapacityItem[] = [];
+          group.caps.forEach((capData, capName) => {
+            caps.push({
+              id: `cap-${simKey}-${capName.replace(/\s+/g, '')}`,
+              capacity: capName,
+              price: String(capData.price),
+              colors: Array.from(capData.colors),
+            });
+          });
+          reconstructed.push({
+            simId: simKey,
+            simLabel: group.label,
+            capacities: caps,
+          });
+        });
+        setSimBlocks(reconstructed);
+
+        const sims = Array.from(new Set(prodVariants.map((v: any) => v.simTypeId || v.simType))).filter(Boolean);
+        const caps = Array.from(new Set(prodVariants.map((v: any) => v.storage))).filter(Boolean);
+        const cols = Array.from(new Set(prodVariants.map((v: any) => v.color))).filter(Boolean);
+        if (sims.length > 0) setSelectedSims(sims as string[]);
+        if (caps.length > 0) setSelectedCapacities(caps as string[]);
+        if (cols.length > 0) setSelectedColors(cols as string[]);
+      } else {
+        const initialCaps = initialStorage.length > 0
+          ? initialStorage.map((s, idx) => ({
+              id: `cap-legacy-${idx}`,
+              capacity: s.capacity,
+              price: s.price || String(product.price || "750000"),
+              colors: product.colors && product.colors.length > 0 ? product.colors : ["Titane Naturel", "Titane Noir"],
+            }))
+          : [
+              {
+                id: "cap-128",
+                capacity: "128 Go",
+                price: String(product.price || "750000"),
+                colors: product.colors && product.colors.length > 0 ? product.colors : ["Titane Naturel", "Titane Noir"],
+              },
+            ];
+        setSimBlocks([
+          {
+            simId: "sim_and_esim",
+            simLabel: "1 e-sim+1 sim physique",
+            capacities: initialCaps,
+          },
+        ]);
+        setSelectedSims(["sim_and_esim", "dual_sim_physical", "esim_only"]);
+        const caps = initialStorage.map(s => s.capacity).filter(Boolean);
+        setSelectedCapacities(caps.length > 0 ? caps : ["128 Go", "256 Go", "512 Go", "1 To"]);
+        setSelectedColors(product.colors && product.colors.length > 0 ? product.colors : ["Titane Naturel", "Titane Noir"]);
+      }
+    } else {
+      setSelectedSims(["sim_and_esim", "dual_sim_physical", "esim_only"]);
+      setSelectedCapacities(["128 Go", "256 Go", "512 Go", "1 To"]);
+      setSelectedColors(["Titane Naturel", "Titane Noir"]);
+    }
+    setCustomFeatureInput("");
 
     setCommonFormData({
       name: product.name || "",
       brand: product.brand || "",
       price: product.price ? product.price.toString() : "",
       salePrice: product.salePrice ? product.salePrice.toString() : "",
+      shortDesc: (product as any).shortDesc || "",
       desc: product.desc || "",
       colors: product.colors ? product.colors.join(", ") : "",
       stock: (product.stock !== undefined ? product.stock : 10).toString(),
@@ -1223,12 +2024,19 @@ export default function AdminPage() {
     setEditingId(null);
     setImageList([]);
     setStorageItems([]);
+    setAppleVariants([]);
+    setOtherFeatures([]);
+    setCustomFeatureInput("");
+    setSelectedSims(["sim_and_esim", "dual_sim_physical", "esim_only"]);
+    setSelectedCapacities(["128 Go", "256 Go", "512 Go", "1 To"]);
+    setSelectedColors(["Titane Naturel", "Titane Noir", "Titane Blanc"]);
     setNewImageUrl("");
     setFormCategory("phones");
     setFormSpecs({});
     setFormErrors({});
     setSimPricing(DEFAULT_SIM_PRICING);
     setModalViewMode("form");
+    setShowVariantsTable(false);
     setCategorySwitchPending(null);
     setDraftRestored(false);
     setCommonFormData({
@@ -1236,6 +2044,7 @@ export default function AdminPage() {
       brand: "",
       price: "",
       salePrice: "",
+      shortDesc: "",
       desc: "",
       colors: "",
       stock: "10",
@@ -1263,6 +2072,18 @@ export default function AdminPage() {
     setFormErrors({});
     setModalViewMode("form");
     setCategorySwitchPending(null);
+    setAppleVariants([]);
+    setOtherFeatures([
+      "Écran Super Retina XDR OLED 120Hz",
+      "Puce A17 Pro (Gravure 3nm)",
+      "Châssis en Titane aérospatial",
+      "Face ID biométrique sécurisé",
+      "Recharge sans fil MagSafe 15W"
+    ]);
+    setSelectedSims(["sim_and_esim", "dual_sim_physical", "esim_only"]);
+    setSelectedCapacities(["128 Go", "256 Go", "512 Go", "1 To"]);
+    setSelectedColors(["Titane Naturel", "Titane Noir", "Titane Blanc"]);
+    setCustomFeatureInput("");
 
     // Vérifier si un brouillon sauvegardé existe
     let restored = false;
@@ -1277,6 +2098,12 @@ export default function AdminPage() {
             setCommonFormData(parsed.commonFormData);
             setFormSpecs(parsed.formSpecs || {});
             setStorageItems(parsed.storageItems || []);
+            if (parsed.appleVariants && Array.isArray(parsed.appleVariants)) {
+              setAppleVariants(parsed.appleVariants);
+            }
+            if (parsed.otherFeatures && Array.isArray(parsed.otherFeatures)) {
+              setOtherFeatures(parsed.otherFeatures);
+            }
             if (parsed.simPricing && typeof parsed.simPricing === "object") {
               setSimPricing(parsed.simPricing);
             } else {
@@ -1296,19 +2123,41 @@ export default function AdminPage() {
     if (!restored) {
       setImageList([]);
       setStorageItems([]);
+      setAppleVariants([]);
       setNewImageUrl("");
       setFormCategory("phones");
       setFormSpecs({});
       setSimPricing(DEFAULT_SIM_PRICING);
+      setSimBlocks([
+        {
+          simId: "sim_and_esim",
+          simLabel: "1 e-sim+1 sim physique",
+          capacities: [
+            {
+              id: "cap-128",
+              capacity: "128 Go",
+              price: "750000",
+              colors: ["Titane Naturel", "Titane Noir", "Titane Blanc"],
+            },
+            {
+              id: "cap-256",
+              capacity: "256 Go",
+              price: "820000",
+              colors: ["Titane Naturel", "Titane Noir", "Titane Blanc", "Titane Désert"],
+            },
+          ],
+        },
+      ]);
       setDraftRestored(false);
       const phoneConfig = getCategoryConfig("phones");
       setCommonFormData({
         name: "",
-        brand: "",
+        brand: "Apple",
         price: "",
         salePrice: "",
+        shortDesc: "",
         desc: "",
-        colors: "",
+        colors: "Titane Naturel, Titane Noir, Titane Blanc",
         stock: "10",
         condition: "neuf",
         warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
@@ -2483,12 +3332,16 @@ export default function AdminPage() {
                     setFormCategory("phones");
                     setFormSpecs({});
                     setStorageItems([]);
+                    setAppleVariants([]);
+                    setOtherFeatures([]);
+                    setCustomFeatureInput("");
                     setImageList([]);
                     setCommonFormData({
                       name: "",
                       brand: "",
                       price: "",
                       salePrice: "",
+                      shortDesc: "",
                       desc: "",
                       colors: "",
                       stock: "10",
@@ -2650,42 +3503,118 @@ export default function AdminPage() {
                         </div>
                       )}
 
-                      {/* Variantes de stockage (SEULEMENT si la catégorie les autorise) */}
-                      {getCategoryConfig(formCategory).supportsStorageVariants && storageItems.length > 0 && (
-                        <div className="space-y-1.5">
-                          <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Options de capacité :</span>
-                          <div className="flex flex-wrap gap-2">
-                            {storageItems.map((opt, i) => (
-                              <span key={i} className="px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white flex items-center gap-1.5">
-                                <span>{opt.capacity}</span>
-                                <span className="text-gold text-[10px]">({Number(opt.price).toLocaleString("fr-FR")} F)</span>
-                              </span>
-                            ))}
+                      {/* CAS 1 : APERÇU IPHONE (APPLE) */}
+                      {formCategory === "phones" && isAppleBrand(commonFormData.brand) && (
+                        <div className="space-y-3 pt-2 border-t border-white/10">
+                          {commonFormData.shortDesc && (
+                            <div className="p-3 rounded-xl bg-gold/5 border border-gold/20">
+                              <span className="text-[10px] font-bold text-gold uppercase tracking-wider block mb-1">Accroche / Description courte :</span>
+                              <p className="text-xs text-white/90 italic font-medium">{commonFormData.shortDesc}</p>
+                            </div>
+                          )}
+
+                          {otherFeatures.length > 0 && (
+                            <div className="space-y-1.5">
+                              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">Caractéristiques sélectionnées :</span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {otherFeatures.map((feat, idx) => (
+                                  <span key={idx} className="px-2.5 py-1 rounded-lg bg-gold/10 border border-gold/20 text-[11px] text-gold flex items-center gap-1 font-medium">
+                                    <Sparkles className="w-3 h-3 text-gold" aria-hidden="true" />
+                                    <span>{feat}</span>
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {appleVariants.length > 0 ? (
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+                                  Variantes de prix ({appleVariants.length} combinaisons) :
+                                </span>
+                                <span className="text-[10px] text-gold font-bold">
+                                  Min: {Math.min(...appleVariants.map(v => v.price)).toLocaleString("fr-FR")} F
+                                </span>
+                              </div>
+                              <div className="max-h-40 overflow-y-auto rounded-xl border border-white/10 divide-y divide-white/5 text-[11px]">
+                                {appleVariants.slice(0, 8).map(v => (
+                                  <div key={v.id} className="p-2 flex items-center justify-between bg-black/40">
+                                    <span className="text-zinc-300 font-medium">{v.storage} • {v.color} • <span className="text-zinc-500">{v.simType}</span></span>
+                                    <span className="text-gold font-bold">{v.price.toLocaleString("fr-FR")} FCFA</span>
+                                  </div>
+                                ))}
+                                {appleVariants.length > 8 && (
+                                  <div className="p-1.5 text-center text-[10px] text-zinc-500 bg-black/60">
+                                    + {appleVariants.length - 8} autres variantes configurées
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-xs text-zinc-400">
+                              Aucune variante générée. Le prix de base sera appliqué.
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* CAS 2 : APERÇU AUTRE MARQUE DE TÉLÉPHONE */}
+                      {formCategory === "phones" && !isAppleBrand(commonFormData.brand) && (
+                        <div className="space-y-2 pt-2 border-t border-white/10">
+                          <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Spécifications Clés :</span>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col">
+                              <span className="text-[10px] text-zinc-500 uppercase font-semibold">Stockage</span>
+                              <span className="text-white font-bold mt-0.5 text-sm">{formSpecs.storage || "128 Go"}</span>
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col">
+                              <span className="text-[10px] text-zinc-500 uppercase font-semibold">Mémoire RAM</span>
+                              <span className="text-gold font-bold mt-0.5 text-sm">{formSpecs.ram ? `${formSpecs.ram} Go` : "Standard"}</span>
+                            </div>
                           </div>
                         </div>
                       )}
 
-                      {/* Caractéristiques Spécifiques Renseignées */}
-                      <div className="space-y-2 pt-2 border-t border-white/10">
-                        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Spécifications techniques :</span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                          {getCategoryConfig(formCategory).fields.map(f => {
-                            const val = formSpecs[f.key];
-                            if (val === undefined || val === null || String(val).trim() === "") return null;
-                            const optionMatch = f.options?.find(o => o.value === String(val));
-                            const displayVal = optionMatch ? optionMatch.label : String(val);
-
-                            return (
-                              <div key={f.key} className="p-2 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col">
-                                <span className="text-[10px] text-zinc-500 uppercase">{f.label}</span>
-                                <span className="text-white font-semibold mt-0.5">
-                                  {displayVal} {f.unit ? <span className="text-gold text-[10px] ml-1">{f.unit}</span> : null}
-                                </span>
+                      {/* AUTRES CATÉGORIES (Ordinateurs, Mobilité, Accessoires, etc.) */}
+                      {formCategory !== "phones" && (
+                        <>
+                          {getCategoryConfig(formCategory).supportsStorageVariants && storageItems.length > 0 && (
+                            <div className="space-y-1.5">
+                              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Options de capacité :</span>
+                              <div className="flex flex-wrap gap-2">
+                                {storageItems.map((opt, i) => (
+                                  <span key={i} className="px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white flex items-center gap-1.5">
+                                    <span>{opt.capacity}</span>
+                                    <span className="text-gold text-[10px]">({Number(opt.price).toLocaleString("fr-FR")} F)</span>
+                                  </span>
+                                ))}
                               </div>
-                            );
-                          })}
-                        </div>
-                      </div>
+                            </div>
+                          )}
+
+                          <div className="space-y-2 pt-2 border-t border-white/10">
+                            <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Spécifications techniques :</span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                              {getCategoryConfig(formCategory).fields.map(f => {
+                                const val = formSpecs[f.key];
+                                if (val === undefined || val === null || String(val).trim() === "") return null;
+                                const optionMatch = f.options?.find(o => o.value === String(val));
+                                const displayVal = optionMatch ? optionMatch.label : String(val);
+
+                                return (
+                                  <div key={f.key} className="p-2 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col">
+                                    <span className="text-[10px] text-zinc-500 uppercase">{f.label}</span>
+                                    <span className="text-white font-semibold mt-0.5">
+                                      {displayVal} {f.unit ? <span className="text-gold text-[10px] ml-1">{f.unit}</span> : null}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </>
+                      )}
 
                       {/* Description */}
                       <div className="pt-2 border-t border-white/10">
@@ -2776,8 +3705,10 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* 2. INFORMATIONS GÉNÉRALES COMMUNES */}
-                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-4">
+                  {/* 2 & 3. INFORMATIONS GÉNÉRALES ET PHOTOS (RÉSERVÉES AUX AUTRES CATÉGORIES HORS TÉLÉPHONES) */}
+                  {formCategory !== "phones" && (
+                    <>
+                      <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-4">
                     <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                       <Tag className="w-4 h-4 text-gold" aria-hidden="true" />
                       <span>2. Informations Générales Communes</span>
@@ -2802,12 +3733,23 @@ export default function AdminPage() {
                         {formErrors.name && <span className="text-[10px] text-red-400 mt-1 block">{formErrors.name}</span>}
                       </div>
 
-                      {/* Marque Fabricant avec suggestions intelligentes par catégorie */}
+                      {/* Marque Fabricant avec suggestions intelligentes par catégorie et détection Apple vs Autres */}
                       <div className="sm:col-span-2">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
-                          <label className="text-[11px] text-zinc-400 uppercase font-bold block">
-                            Marque Fabricant
-                          </label>
+                          <div className="flex items-center gap-2">
+                            <label className="text-[11px] text-zinc-400 uppercase font-bold block">
+                              Marque Fabricant <span className="text-red-400">*</span>
+                            </label>
+                            {formCategory === "phones" && (
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${
+                                isAppleBrand(commonFormData.brand)
+                                  ? "bg-gold/20 text-gold border border-gold/40 shadow-[0_0_10px_rgba(212,175,55,0.2)]"
+                                  : "bg-blue-500/15 text-blue-300 border border-blue-500/30"
+                              }`}>
+                                <span>{isAppleBrand(commonFormData.brand) ? "🍎 Mode iPhone (Variantes Dynamiques)" : "🤖 Mode Autres Marques (Standard)"}</span>
+                              </span>
+                            )}
+                          </div>
                           {getCategoryConfig(formCategory).popularBrands && getCategoryConfig(formCategory).popularBrands.length > 0 && (
                             <span className="text-[10px] text-zinc-500">
                               Marques suggérées pour {getCategoryConfig(formCategory).shortLabel} :
@@ -2823,7 +3765,7 @@ export default function AdminPage() {
                                 <button
                                   key={brandName}
                                   type="button"
-                                  onClick={() => setCommonFormData({ ...commonFormData, brand: brandName })}
+                                  onClick={() => handleBrandChange(brandName)}
                                   className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all border cursor-pointer ${
                                     isSelected
                                       ? "bg-gold text-black border-gold shadow-[0_0_10px_rgba(212,175,55,0.3)]"
@@ -2840,7 +3782,7 @@ export default function AdminPage() {
                         <input 
                           type="text" 
                           value={commonFormData.brand} 
-                          onChange={e => setCommonFormData({ ...commonFormData, brand: e.target.value })} 
+                          onChange={e => handleBrandChange(e.target.value)} 
                           placeholder={getCategoryConfig(formCategory).popularBrands && getCategoryConfig(formCategory).popularBrands[0] ? `Ex: ${getCategoryConfig(formCategory).popularBrands.slice(0, 3).join(", ")}... ou saisie libre` : "Ex: Nom du fabricant ou marque..."} 
                           className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
                         />
@@ -3031,10 +3973,29 @@ export default function AdminPage() {
                         />
                       </div>
 
-                      {/* Description commerciale */}
+                      {/* Description courte (Exclusivement affichée pour Apple / iPhone - CAS 1) */}
+                      {formCategory === "phones" && isAppleBrand(commonFormData.brand) && (
+                        <div className="sm:col-span-2">
+                          <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
+                            Description Courte (Accroche iPhone)
+                          </label>
+                          <input 
+                            type="text" 
+                            value={commonFormData.shortDesc} 
+                            onChange={e => setCommonFormData({ ...commonFormData, shortDesc: e.target.value })} 
+                            placeholder="Ex: Le fleuron Apple en titane avec puce A17 Pro et zoom optique 5x..." 
+                            className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
+                          />
+                          <p className="text-[10px] text-zinc-500 mt-1">
+                            Texte synthétique d&apos;accroche affiché sous le titre du produit pour les clients.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Description longue / commerciale */}
                       <div className="sm:col-span-2">
                         <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
-                          Description Commerciale <span className="text-red-400">*</span>
+                          Description Longue <span className="text-red-400">*</span>
                         </label>
                         <textarea 
                           rows={3} 
@@ -3191,375 +4152,908 @@ export default function AdminPage() {
                       </button>
                     </div>
                   </div>
+                </>
+              )}
 
-                  {/* 4. CARACTÉRISTIQUES SPÉCIFIQUES DYNAMIQUES PAR CATÉGORIE */}
-                  <div className="p-4 rounded-2xl bg-gold/[0.02] border border-gold/30 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {getCategoryIcon(formCategory, "w-4 h-4 text-gold")}
-                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                          4. Spécifications : {getCategoryConfig(formCategory).label}
-                        </h4>
+                  {/* 4. CONFIGURATEUR CONDITIONNEL : TÉLÉPHONES (APPLE VS AUTRES MARQUES) OU AUTRE CATÉGORIE */}
+                  {formCategory === "phones" ? (
+                    <div className="space-y-6">
+                      {/* BASCULE RAPIDE : IPHONE (APPLE) VS AUTRES MARQUES (ANDROID) */}
+                      <div className="flex p-1.5 bg-black/60 border border-white/10 rounded-2xl gap-2 shadow-lg">
+                        <button
+                          type="button"
+                          onClick={() => handleBrandChange("Apple")}
+                          className={`flex-1 py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
+                            isAppleBrand(commonFormData.brand)
+                              ? "bg-gradient-to-r from-gold to-yellow-400 text-black shadow-[0_0_20px_rgba(212,175,55,0.35)] scale-[1.01]"
+                              : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          }`}
+                        >
+                          <span className="text-base">🍎</span>
+                          <span>Mode iPhone (Apple)</span>
+                          {isAppleBrand(commonFormData.brand) && (
+                            <span className="text-[10px] bg-black/25 text-black px-2 py-0.5 rounded-full font-black">Actif</span>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleBrandChange(commonFormData.brand && !isAppleBrand(commonFormData.brand) ? commonFormData.brand : "Samsung")}
+                          className={`flex-1 py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
+                            !isAppleBrand(commonFormData.brand)
+                              ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-[0_0_20px_rgba(59,130,246,0.35)] scale-[1.01]"
+                              : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          }`}
+                        >
+                          <Smartphone className="w-4 h-4" />
+                          <span>Mode Autres Marques (Android)</span>
+                          {!isAppleBrand(commonFormData.brand) && (
+                            <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full font-black">Actif</span>
+                          )}
+                        </button>
                       </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/30">
-                        {getCategoryConfig(formCategory).fields.length} champ(s) configuré(s)
-                      </span>
-                    </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {getCategoryConfig(formCategory).fields.map((field) => {
-                        const val = formSpecs[field.key] !== undefined ? formSpecs[field.key] : "";
-                        const errorMsg = formErrors[`specs_${field.key}`];
-
-                        return (
-                          <div key={field.key} className={field.key === "model" ? "sm:col-span-2" : ""}>
-                            <label className="text-[11px] text-zinc-300 uppercase font-bold flex items-center justify-between mb-1">
-                              <span>
-                                {field.label} {field.required && <span className="text-red-400">*</span>}
+                      {isAppleBrand(commonFormData.brand) ? (
+                        /* ========================================================================= */
+                        /* CAS 1 : MODE IPHONE (APPLE) — SAISIE SIMPLIFIÉE & ERGONOMIQUE */
+                        /* ========================================================================= */
+                        <>
+                          {/* 1. NOM DE L'IPHONE ET PRIX DE BASE */}
+                          <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/[0.03] border border-gold/40 space-y-4 shadow-md">
+                            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                              <div className="flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-gold" aria-hidden="true" />
+                                <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                                  1. Modèle & Prix de Base de l&apos;iPhone
+                                </h4>
+                              </div>
+                              <span className="px-2.5 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30 text-[10px] font-black uppercase">
+                                Apple iPhone
                               </span>
-                              {field.unit && (
-                                <span className="text-[10px] text-gold font-mono px-1.5 py-0.2 rounded bg-gold/10 border border-gold/20">
-                                  {field.unit}
-                                </span>
-                              )}
-                            </label>
+                            </div>
 
-                            {/* Raccourcis rapides de stockage pour téléphones */}
-                            {field.key === "storage" && (
-                              <div className="space-y-1.5 mb-2">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[10px] text-zinc-400 font-bold uppercase">Choix rapide 1-clic :</span>
-                                  {val && (
+                            {/* Raccourcis modèles populaires */}
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] text-zinc-400 uppercase font-bold block">
+                                Raccourcis 1-clic modèles populaires :
+                              </span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {POPULAR_IPHONE_MODELS.map((modelName) => {
+                                  const isSelected = commonFormData.name.trim().toLowerCase() === modelName.toLowerCase();
+                                  return (
                                     <button
+                                      key={modelName}
                                       type="button"
-                                      onClick={() => setFormSpecs({ ...formSpecs, [field.key]: "" })}
-                                      className="text-[10px] text-zinc-500 hover:text-red-400 underline cursor-pointer"
+                                      onClick={() => {
+                                        setCommonFormData(prev => ({
+                                          ...prev,
+                                          name: modelName,
+                                          brand: "Apple",
+                                        }));
+                                      }}
+                                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all border cursor-pointer ${
+                                        isSelected
+                                          ? "bg-gold text-black border-gold shadow-[0_0_10px_rgba(212,175,55,0.3)] scale-[1.02]"
+                                          : "bg-white/5 text-zinc-300 border-white/10 hover:border-gold/50 hover:text-white hover:bg-white/10"
+                                      }`}
                                     >
-                                      Effacer
+                                      {isSelected ? `✓ ${modelName}` : modelName}
                                     </button>
-                                  )}
-                                </div>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {["64 Go", "128 Go", "256 Go", "512 Go", "1 To"].map((cap) => {
-                                    const isSelected = String(val).trim().toLowerCase() === cap.toLowerCase();
-                                    return (
-                                      <button
-                                        key={cap}
-                                        type="button"
-                                        onClick={() => setFormSpecs({ ...formSpecs, [field.key]: cap })}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
-                                          isSelected
-                                            ? "bg-gold text-black border-gold shadow-[0_0_12px_rgba(212,175,55,0.4)] scale-105"
-                                            : "bg-black/50 text-zinc-300 border-white/10 hover:border-gold/50 hover:text-white"
-                                        }`}
-                                      >
-                                        {isSelected ? `✓ ${cap}` : cap}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-
-                            {field.type === "select" ? (
-                              <select
-                                value={val}
-                                onChange={(e) => setFormSpecs({ ...formSpecs, [field.key]: e.target.value })}
-                                className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
-                                  errorMsg ? "border-red-500" : "border-white/10"
-                                }`}
-                              >
-                                <option value="">-- Sélectionner {field.label} --</option>
-                                {field.options?.map((opt) => (
-                                  <option key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : field.type === "number" ? (
-                              <div className="relative">
-                                <input
-                                  type="number"
-                                  min={field.min ?? 0}
-                                  max={field.max ?? Infinity}
-                                  step="any"
-                                  value={val}
-                                  onChange={(e) => setFormSpecs({ ...formSpecs, [field.key]: e.target.value })}
-                                  placeholder={field.placeholder || `Valeur en ${field.unit || "nombre"}`}
-                                  className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
-                                    field.unit ? "pr-14" : ""
-                                  } ${errorMsg ? "border-red-500" : "border-white/10"}`}
-                                />
-                                {field.unit && (
-                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gold font-bold pointer-events-none">
-                                    {field.unit}
-                                  </span>
-                                )}
-                              </div>
-                            ) : (
-                              <input
-                                type="text"
-                                value={val}
-                                onChange={(e) => setFormSpecs({ ...formSpecs, [field.key]: e.target.value })}
-                                placeholder={field.placeholder || `Saisir ${field.label.toLowerCase()}`}
-                                className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
-                                  errorMsg ? "border-red-500" : "border-white/10"
-                                }`}
-                              />
-                            )}
-
-                            {field.helpText && (
-                              <p className="text-[10px] text-zinc-500 mt-1">{field.helpText}</p>
-                            )}
-                            {errorMsg && (
-                              <span className="text-[10px] text-red-400 mt-1 block font-medium">{errorMsg}</span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* 5. VARIANTES MULTI-STOCKAGE (UNIQUEMENT SI LA CATÉGORIE LE SUPPORTE) */}
-                  {getCategoryConfig(formCategory).supportsStorageVariants && (
-                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                          <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                            <HardDrive className="w-4 h-4 text-gold" aria-hidden="true" />
-                            <span>5. Options de Stockage & Prix Différenciés</span>
-                          </label>
-                          <p className="text-[11px] text-zinc-400 mt-0.5">
-                            Permet au client de choisir entre différentes capacités avec recalcul automatique du prix.
-                          </p>
-                        </div>
-
-                        {/* Raccourcis d'ajout rapide */}
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10px] text-zinc-500 uppercase font-bold mr-1">Raccourcis :</span>
-                          {["64 Go", "128 Go", "256 Go", "512 Go", "1 To", "2 To"].map((cap) => (
-                            <button
-                              key={cap}
-                              type="button"
-                              onClick={() => handleQuickAddStorage(cap)}
-                              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-zinc-300 text-[10px] font-bold border border-white/10 transition-all cursor-pointer"
-                            >
-                              + {cap}
-                            </button>
-                          ))}
-                          <button
-                            type="button"
-                            onClick={handleGenerateStandardTiers}
-                            className="px-2.5 py-1 rounded-lg bg-gold/15 hover:bg-gold text-gold hover:text-black text-[10px] font-bold border border-gold/30 transition-all cursor-pointer flex items-center gap-1"
-                            title="Générer automatiquement les 4 paliers standards (128G, 256G, 512G, 1T)"
-                          >
-                            <span>⚡</span>
-                            <span>Paliers automatiques</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {storageItems.length > 0 ? (
-                        <div className="space-y-2.5 pt-1">
-                          {storageItems.map((item, idx) => (
-                            <div 
-                              key={idx} 
-                              className="flex items-center gap-2.5 p-3 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition-all"
-                            >
-                              <div className="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center font-black text-xs flex-shrink-0">
-                                #{idx + 1}
-                              </div>
-
-                              <div className="flex-1">
-                                <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
-                                  Capacité de stockage
-                                </label>
-                                <input 
-                                  type="text" 
-                                  value={item.capacity} 
-                                  onChange={(e) => handleUpdateStorageItem(idx, "capacity", e.target.value)}
-                                  placeholder="Ex: 256 Go" 
-                                  className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-semibold focus:border-gold/50 outline-none"
-                                />
-                              </div>
-
-                              <div className="flex-1">
-                                <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
-                                  Prix associé (FCFA)
-                                </label>
-                                <input 
-                                  type="number" 
-                                  value={item.price} 
-                                  onChange={(e) => handleUpdateStorageItem(idx, "price", e.target.value)}
-                                  placeholder={`Ex: ${commonFormData.price || "625000"}`} 
-                                  className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-bold text-gold focus:border-gold/50 outline-none"
-                                />
-                              </div>
-
-                              <div className="pt-4 flex-shrink-0">
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveStorageItem(idx)}
-                                  className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white transition-colors cursor-pointer"
-                                  title="Supprimer cette option"
-                                >
-                                  <Trash2 className="w-4 h-4" aria-hidden="true" />
-                                </button>
+                                  );
+                                })}
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="p-3.5 rounded-xl border border-dashed border-white/10 text-center text-zinc-500 text-xs">
-                          Optionnel : Utilisez les boutons de raccourci ci-dessus pour ajouter des variantes de stockage si ce modèle existe en plusieurs capacités.
-                        </div>
-                      )}
 
-                      <button
-                        type="button"
-                        onClick={() => handleAddStorageItem("", commonFormData.price || "")}
-                        className="w-full py-2.5 rounded-xl border border-dashed border-white/20 hover:border-gold text-zinc-300 hover:text-gold text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer bg-white/[0.01] hover:bg-gold/5"
-                      >
-                        <span>+</span>
-                        <span>Ajouter une option de stockage personnalisée</span>
-                      </button>
-                    </div>
-                  )}
-
-                  {/* 6. CONFIGURATEUR TYPES DE SIM & DIFFÉRENCIATION DE PRIX (POUR IPHONE / SMARTPHONES) */}
-                  {formCategory === "phones" && (
-                    <div className="p-4 rounded-2xl bg-amber-500/[0.04] border border-amber-500/30 space-y-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <Smartphone className="w-4 h-4 text-amber-400" aria-hidden="true" />
-                            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                              6. Types de SIM & Différenciation des Prix (E-sim / Double SIM)
-                            </h4>
-                          </div>
-                          <p className="text-[11px] text-zinc-400 mt-1">
-                            Ajustez le prix de vente en fonction du type de carte SIM (Standard, 2 SIM physiques, E-sim seule).
-                          </p>
-                        </div>
-
-                        <span className="text-[10px] px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 font-bold self-start sm:self-auto">
-                          Spécifique Marché iPhones
-                        </span>
-                      </div>
-
-                      {/* Grille des 3 types de SIM */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-                        {IPHONE_SIM_TYPES.map((simMeta) => {
-                          const currentConfig = simPricing[simMeta.id] || { 
-                            enabled: true, 
-                            delta: simMeta.defaultDelta, 
-                            label: simMeta.label 
-                          };
-                          const isEnabled = currentConfig.enabled !== false;
-                          const delta = typeof currentConfig.delta === "number" ? currentConfig.delta : 0;
-                          
-                          // Calcul du prix simulé avec le prix de base
-                          const basePrice = Number(commonFormData.price) || 0;
-                          const simulatedPrice = Math.max(0, basePrice + delta);
-
-                          return (
-                            <div 
-                              key={simMeta.id}
-                              className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
-                                isEnabled 
-                                  ? "bg-black/50 border-amber-500/40 shadow-sm" 
-                                  : "bg-black/20 border-white/5 opacity-50"
-                              }`}
-                            >
-                              <div className="space-y-2">
-                                {/* Header type de sim + interrupteur actif */}
-                                <div className="flex items-center justify-between gap-2">
-                                  <span className="text-xs font-black text-white">
-                                    {simMeta.label}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleUpdateSimType(simMeta.id, { enabled: !isEnabled })}
-                                    className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-all cursor-pointer ${
-                                      isEnabled 
-                                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" 
-                                        : "bg-zinc-800 text-zinc-500 border border-zinc-700"
-                                    }`}
-                                  >
-                                    {isEnabled ? "Actif" : "Désactivé"}
-                                  </button>
-                                </div>
-
-                                <p className="text-[10px] text-zinc-400 leading-snug">
-                                  {simMeta.description}
-                                </p>
-
-                                <div className="text-[10px] text-zinc-500 font-mono">
-                                  Badge : <strong className="text-zinc-300">{simMeta.badge}</strong>
-                                </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                              {/* Nom exact de l'iPhone */}
+                              <div>
+                                <label className="text-[11px] text-zinc-300 uppercase font-bold block mb-1">
+                                  Nom de l&apos;iPhone <span className="text-red-400">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  required
+                                  value={commonFormData.name}
+                                  onChange={(e) => setCommonFormData({ ...commonFormData, name: e.target.value })}
+                                  placeholder="Ex: iPhone 16 Pro Max"
+                                  className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
+                                    formErrors.name ? "border-red-500" : "border-white/10"
+                                  }`}
+                                />
+                                {formErrors.name && (
+                                  <span className="text-[10px] text-red-400 mt-1 block">{formErrors.name}</span>
+                                )}
                               </div>
 
-                              {/* Réglage du Delta de prix (surcoût / remise) */}
-                              <div className="mt-3 pt-3 border-t border-white/10 space-y-2">
-                                <label className="text-[10px] text-zinc-400 uppercase font-bold flex items-center justify-between">
-                                  <span>Ajustement de Prix :</span>
-                                  <span className={`font-mono font-bold ${
-                                    delta > 0 ? "text-amber-400" : delta < 0 ? "text-cyan-400" : "text-zinc-400"
-                                  }`}>
-                                    {delta > 0 ? `+${delta.toLocaleString("fr-FR")} F` : `${delta.toLocaleString("fr-FR")} F`}
-                                  </span>
+                              {/* Prix de base (FCFA) */}
+                              <div>
+                                <label className="text-[11px] text-zinc-300 uppercase font-bold block mb-1">
+                                  Prix de Référence / Base (FCFA) <span className="text-red-400">*</span>
                                 </label>
-
                                 <div className="relative">
-                                  <input 
+                                  <input
                                     type="number"
-                                    step="1000"
-                                    disabled={!isEnabled}
-                                    value={delta}
-                                    onChange={(e) => handleUpdateSimType(simMeta.id, { delta: Number(e.target.value) || 0 })}
-                                    placeholder="Ex: 30000 ou -20000"
-                                    className="w-full bg-black/60 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none focus:border-amber-400 disabled:opacity-40"
+                                    required
+                                    min="0"
+                                    step="5000"
+                                    value={commonFormData.price}
+                                    onChange={(e) => setCommonFormData({ ...commonFormData, price: e.target.value })}
+                                    placeholder="Ex: 850000"
+                                    className={`w-full bg-black/60 border rounded-xl p-3 pr-16 text-gold font-mono font-bold text-sm outline-none focus:border-gold ${
+                                      formErrors.price ? "border-red-500" : "border-gold/40"
+                                    }`}
                                   />
-                                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-500 font-bold pointer-events-none">
+                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400 pointer-events-none">
                                     FCFA
                                   </span>
                                 </div>
-
-                                {/* Raccourcis rapides de surcoût */}
-                                {isEnabled && (
-                                  <div className="flex flex-wrap gap-1 pt-1">
-                                    {[0, 15000, 25000, 30000, 50000, -15000, -20000].map((quickDelta) => (
-                                      <button
-                                        key={quickDelta}
-                                        type="button"
-                                        onClick={() => handleUpdateSimType(simMeta.id, { delta: quickDelta })}
-                                        className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border transition-all cursor-pointer ${
-                                          delta === quickDelta
-                                            ? "bg-amber-400 text-black border-amber-400"
-                                            : "bg-white/5 text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
-                                        }`}
-                                      >
-                                        {quickDelta > 0 ? `+${quickDelta / 1000}k` : quickDelta < 0 ? `${quickDelta / 1000}k` : "0F"}
-                                      </button>
-                                    ))}
-                                  </div>
-                                )}
-
-                                {/* Simulation visuelle du prix final */}
-                                {isEnabled && basePrice > 0 && (
-                                  <div className="p-2 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between text-[11px] mt-2">
-                                    <span className="text-zinc-400">Prix résultant :</span>
-                                    <span className="font-extrabold text-gold font-mono">
-                                      {simulatedPrice.toLocaleString("fr-FR")} FCFA
-                                    </span>
-                                  </div>
+                                {formErrors.price && (
+                                  <span className="text-[10px] text-red-400 mt-1 block">{formErrors.price}</span>
                                 )}
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
+                          </div>
+
+                          {/* 2. DESCRIPTIONS (COURTE ET LONGUE SUFFISENT SELON LE SOUHAIT DU CLIENT) */}
+                          <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-4">
+                            <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+                              <FileText className="w-4 h-4 text-gold" aria-hidden="true" />
+                              <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                                2. Descriptions de l&apos;iPhone
+                              </h4>
+                            </div>
+
+                            <div className="space-y-3">
+                              {/* Description courte (Accroche percutante) */}
+                              <div>
+                                <label className="text-[11px] text-zinc-300 uppercase font-bold block mb-1">
+                                  Description Courte (Accroche commerciale)
+                                </label>
+                                <input
+                                  type="text"
+                                  value={commonFormData.shortDesc || ""}
+                                  onChange={(e) => setCommonFormData({ ...commonFormData, shortDesc: e.target.value })}
+                                  placeholder="Ex: Puce A18 Pro, Châssis en Titane, Commande de l'appareil photo et autonomie record."
+                                  className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
+                                />
+                                <span className="text-[10px] text-zinc-500 mt-1 block">
+                                  Phrase synthétique mise en avant sous le titre du produit sur la boutique.
+                                </span>
+                              </div>
+
+                              {/* Description longue */}
+                              <div>
+                                <label className="text-[11px] text-zinc-300 uppercase font-bold block mb-1">
+                                  Description Longue Complète <span className="text-red-400">*</span>
+                                </label>
+                                <textarea
+                                  required
+                                  rows={4}
+                                  value={commonFormData.desc}
+                                  onChange={(e) => setCommonFormData({ ...commonFormData, desc: e.target.value })}
+                                  placeholder="Présentez les atouts de cet iPhone, les accessoires inclus dans la boîte, l'état esthétique et la garantie..."
+                                  className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold custom-scrollbar leading-relaxed ${
+                                    formErrors.desc ? "border-red-500" : "border-white/10"
+                                  }`}
+                                />
+                                {formErrors.desc && (
+                                  <span className="text-[10px] text-red-400 mt-1 block">{formErrors.desc}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 3. CONFIGURATION HIÉRARCHIQUE : SIM → CAPACITÉS → PRIX → COULEURS (LISTES DÉROULANTES SANS BULLES) */}
+                          <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/[0.04] border border-gold/40 space-y-6 shadow-lg">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <Sparkles className="w-4 h-4 text-gold" aria-hidden="true" />
+                                  <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                                    3. Prix selon Type de SIM, Capacité & Finitions
+                                  </h4>
+                                </div>
+                                <p className="text-[11px] text-zinc-400 mt-0.5">
+                                  Sélectionnez le type de SIM et la capacité dans les listes déroulantes, fixez le prix et cochez les couleurs disponibles.
+                                </p>
+                              </div>
+                              <span className="text-[11px] text-gold font-bold self-start sm:self-auto">
+                                {simBlocks.length} Format(s) SIM Actif(s)
+                              </span>
+                            </div>
+
+                            {/* LISTE DES FORMATS SIM ACTIFS */}
+                            <div className="space-y-5">
+                              {simBlocks.map((block, simIndex) => {
+                                const unusedSims = simBlocks.filter(b => b.simId !== block.simId);
+
+                                return (
+                                  <div 
+                                    key={block.simId}
+                                    className="p-4 sm:p-5 rounded-2xl bg-black/60 border border-gold/30 space-y-4 shadow-md"
+                                  >
+                                    {/* EN-TÊTE DU BLOC SIM : LISTE DÉROULANTE POUR LE TYPE DE SIM (SANS BULLE) */}
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+                                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                        <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider whitespace-nowrap">
+                                          Type de SIM :
+                                        </label>
+                                        <select
+                                          value={block.simId}
+                                          onChange={(e) => {
+                                            const nextId = e.target.value;
+                                            const def = AVAILABLE_SIM_TYPES.find(s => s.id === nextId);
+                                            if (!def) return;
+                                            setSimBlocks(prev => prev.map((b, idx) => {
+                                              if (idx !== simIndex) return b;
+                                              return { ...b, simId: def.id, simLabel: def.label };
+                                            }));
+                                          }}
+                                          className="bg-black border border-white/20 rounded-xl px-3 py-2 text-white text-xs font-semibold outline-none focus:border-gold cursor-pointer min-w-[240px]"
+                                        >
+                                          {AVAILABLE_SIM_TYPES.map(simDef => {
+                                            const isUsedElsewhere = simBlocks.some((b, idx) => idx !== simIndex && b.simId === simDef.id);
+                                            return (
+                                              <option key={simDef.id} value={simDef.id} disabled={isUsedElsewhere}>
+                                                {simDef.label} {isUsedElsewhere ? "(Déjà sélectionné)" : ""}
+                                              </option>
+                                            );
+                                          })}
+                                        </select>
+                                      </div>
+
+                                      <div className="flex items-center gap-2 self-end sm:self-auto">
+                                        {unusedSims.length > 0 && (
+                                          <button
+                                            type="button"
+                                            onClick={() => handleCopyCapacitiesFromSim(block.simId, unusedSims[0].simId)}
+                                            className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-medium border border-white/10 transition-all flex items-center gap-1 cursor-pointer"
+                                            title={`Dupliquer ces capacités vers ${unusedSims[0].simLabel}`}
+                                          >
+                                            <span>Dupliquer vers {unusedSims[0].simLabel}</span>
+                                          </button>
+                                        )}
+
+                                        {simBlocks.length > 1 && (
+                                          <button
+                                            type="button"
+                                            onClick={() => handleRemoveSimType(block.simId)}
+                                            className="px-2.5 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1"
+                                            title="Supprimer ce format de SIM"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                            <span>Supprimer</span>
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {/* LISTE DES CAPACITÉS POUR CE FORMAT SIM */}
+                                    <div className="space-y-4">
+                                      <span className="text-[11px] text-zinc-400 font-bold block">
+                                        Capacités, Prix & Couleurs pour &quot;{block.simLabel}&quot; :
+                                      </span>
+
+                                      {block.capacities.map((capItem) => (
+                                        <div 
+                                          key={capItem.id}
+                                          className="p-3.5 sm:p-4 rounded-xl bg-white/[0.02] border border-white/10 hover:border-gold/30 transition-all space-y-3"
+                                        >
+                                          {/* SÉLECTION CAPACITÉ (LISTE DÉROULANTE SANS BULLE) + PRIX */}
+                                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/5">
+                                            <div className="flex items-center gap-3">
+                                              <label className="text-xs font-bold text-zinc-300 whitespace-nowrap">
+                                                Capacité :
+                                              </label>
+                                              <select
+                                                value={capItem.capacity}
+                                                onChange={(e) => handleUpdateCapacityItem(block.simId, capItem.id, { capacity: e.target.value })}
+                                                className="bg-black border border-white/20 rounded-xl px-3 py-2 text-white text-xs font-semibold outline-none focus:border-gold cursor-pointer min-w-[120px]"
+                                              >
+                                                {["64 Go", "128 Go", "256 Go", "512 Go", "1 To", "2 To"].map(capChoice => {
+                                                  const isUsedInSameBlock = block.capacities.some(c => c.id !== capItem.id && c.capacity.toLowerCase() === capChoice.toLowerCase());
+                                                  return (
+                                                    <option key={capChoice} value={capChoice} disabled={isUsedInSameBlock}>
+                                                      {capChoice} {isUsedInSameBlock ? "(Déjà ajouté)" : ""}
+                                                    </option>
+                                                  );
+                                                })}
+                                              </select>
+                                            </div>
+
+                                            {/* PRIX POUR CETTE CAPACITÉ */}
+                                            <div className="flex items-center gap-2 self-end sm:self-auto">
+                                              <label className="text-xs font-bold text-zinc-300">
+                                                Prix :
+                                              </label>
+                                              <div className="relative">
+                                                <input
+                                                  type="number"
+                                                  min="0"
+                                                  step="5000"
+                                                  value={capItem.price}
+                                                  onChange={(e) => handleUpdateCapacityItem(block.simId, capItem.id, { price: e.target.value })}
+                                                  placeholder="Prix en FCFA"
+                                                  className="w-32 sm:w-36 bg-black border border-gold/40 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-gold text-right outline-none focus:ring-1 focus:ring-gold"
+                                                />
+                                                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[9px] text-zinc-500 font-bold pointer-events-none">
+                                                  FCFA
+                                                </span>
+                                              </div>
+
+                                              {block.capacities.length > 1 && (
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleRemoveCapacityFromSim(block.simId, capItem.id)}
+                                                  className="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                                                  title="Supprimer cette capacité"
+                                                >
+                                                  <X className="w-4 h-4" />
+                                                </button>
+                                              )}
+                                            </div>
+                                          </div>
+
+                                          {/* COULEURS DISPONIBLES POUR CETTE CAPACITÉ (SANS BULLE : CASES À COCHER PROPRES) */}
+                                          <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                              <span className="text-[11px] text-zinc-400 font-medium">
+                                                Couleurs disponibles ({capItem.colors.length} sélectionnée(s)) :
+                                              </span>
+                                              <div className="flex items-center gap-2">
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleSelectAllColorsForCapacity(block.simId, capItem.id)}
+                                                  className="text-[10px] text-gold hover:underline font-bold cursor-pointer"
+                                                >
+                                                  Tout cocher
+                                                </button>
+                                                <span className="text-zinc-600">•</span>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleDeselectAllColorsForCapacity(block.simId, capItem.id)}
+                                                  className="text-[10px] text-zinc-400 hover:underline cursor-pointer"
+                                                >
+                                                  Tout décocher
+                                                </button>
+                                              </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-36 overflow-y-auto p-2 bg-black/40 rounded-xl border border-white/5 custom-scrollbar">
+                                              {IPHONE_OFFICIAL_COLORS.map(c => {
+                                                const isSelected = capItem.colors.some(col => col.toLowerCase() === c.name.toLowerCase());
+                                                return (
+                                                  <label
+                                                    key={c.name}
+                                                    className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white cursor-pointer select-none py-1 px-1.5 rounded hover:bg-white/5"
+                                                  >
+                                                    <input
+                                                      type="checkbox"
+                                                      checked={isSelected}
+                                                      onChange={() => handleToggleColorForCapacity(block.simId, capItem.id, c.name)}
+                                                      className="w-3.5 h-3.5 accent-[#d4af37] rounded cursor-pointer"
+                                                    />
+                                                    <span 
+                                                      className="w-3 h-3 rounded-full flex-shrink-0 border border-white/20"
+                                                      style={{ backgroundColor: c.hex }}
+                                                    />
+                                                    <span className="truncate">{c.name}</span>
+                                                  </label>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+
+                                      {/* BOUTON AJOUTER UNE CAPACITÉ POUR CE FORMAT SIM (SANS BULLES) */}
+                                      <div className="pt-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const allCaps = ["64 Go", "128 Go", "256 Go", "512 Go", "1 To", "2 To"];
+                                            const unusedCap = allCaps.find(c => !block.capacities.some(item => item.capacity.toLowerCase() === c.toLowerCase())) || "256 Go";
+                                            handleAddCapacityToSim(block.simId, unusedCap);
+                                          }}
+                                          className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-gold/10 text-gold text-xs font-semibold border border-dashed border-gold/40 transition-all cursor-pointer flex items-center gap-1.5"
+                                        >
+                                          <Plus className="w-3.5 h-3.5" />
+                                          <span>+ Ajouter une capacité</span>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* BOUTON POUR AJOUTER UN AUTRE TYPE DE SIM (SANS BULLE) */}
+                            {AVAILABLE_SIM_TYPES.filter(def => !simBlocks.some(b => b.simId === def.id)).length > 0 && (
+                              <div className="pt-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const unusedDef = AVAILABLE_SIM_TYPES.find(def => !simBlocks.some(b => b.simId === def.id));
+                                    if (unusedDef) handleAddSimType(unusedDef.id);
+                                  }}
+                                  className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-gold/10 text-gold text-xs font-bold border border-dashed border-gold/40 transition-all cursor-pointer flex items-center gap-2"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  <span>+ Ajouter un autre type de SIM</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+{/* 4. AUTRES CARACTÉRISTIQUES (LISTE DE SÉLECTION MULTIPLE EN 1 CLIC) */}
+                          <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-white/10 pb-3">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <Check className="w-4 h-4 text-gold" aria-hidden="true" />
+                                  <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                                    4. Autres caractéristiques (Sélection multiple)
+                                  </h4>
+                                </div>
+                                <p className="text-[11px] text-zinc-400 mt-0.5">
+                                  Cochez simplement les technologies phares de cet iPhone ou ajoutez un tag libre.
+                                </p>
+                              </div>
+                              <span className="text-[10px] text-zinc-500 font-mono">
+                                {otherFeatures.length} caractéristique(s) active(s)
+                              </span>
+                            </div>
+
+                            <div className="space-y-2">
+                              <span className="text-[10px] text-zinc-400 uppercase font-bold block">
+                                Puces et caractéristiques phares recommandées :
+                              </span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {PREDEFINED_APPLE_FEATURES.map((feat) => {
+                                  const isSelected = otherFeatures.includes(feat);
+                                  return (
+                                    <button
+                                      key={feat}
+                                      type="button"
+                                      onClick={() => toggleOtherFeature(feat)}
+                                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
+                                        isSelected
+                                          ? "bg-gold text-black border-gold shadow-[0_0_12px_rgba(212,175,55,0.3)] scale-[1.02]"
+                                          : "bg-white/5 text-zinc-300 border-white/10 hover:border-gold/40 hover:text-white"
+                                      }`}
+                                    >
+                                      <span>{feat}</span>
+                                      {isSelected && <span className="font-black text-black">✓</span>}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            {/* Ajout d'une caractéristique personnalisée */}
+                            <div className="pt-2 border-t border-white/5 flex gap-2">
+                              <input 
+                                type="text" 
+                                value={customFeatureInput}
+                                onChange={(e) => setCustomFeatureInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    handleAddCustomFeature();
+                                  }
+                                }}
+                                placeholder="Ajouter une caractéristique personnalisée (ex: Coque cuir offerte, Écran 120Hz...)"
+                                className="flex-1 bg-black/60 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder:text-zinc-600 outline-none focus:border-gold"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleAddCustomFeature}
+                                disabled={!customFeatureInput.trim()}
+                                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-gold hover:text-black text-white text-xs font-bold transition-all disabled:opacity-40 cursor-pointer"
+                              >
+                                + Ajouter
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* 5. PHOTOS DE L'IPHONE */}
+                          {renderPhotoUploader("Photos de l'iPhone (Multi-fichiers)")}
+                        </>
+                      ) : (
+                        /* ========================================================================= */
+                        /* CAS 2 : AUTRES MARQUES (ANDROID) — ULTRA-SIMPLIFIÉ EN 30 SECONDES */
+                        /* ========================================================================= */
+                        <>
+                          {/* 1. MARQUE, MODÈLE ET PRIX UNIQUE */}
+                          <div className="p-4 sm:p-5 rounded-2xl bg-blue-500/[0.03] border border-blue-500/30 space-y-4 shadow-md">
+                            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                              <div className="flex items-center gap-2">
+                                <Smartphone className="w-4 h-4 text-blue-400" aria-hidden="true" />
+                                <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                                  1. Marque, Modèle & Prix Unique
+                                </h4>
+                              </div>
+                              <span className="px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 text-[10px] font-black uppercase">
+                                Android / Universel
+                              </span>
+                            </div>
+
+                            {/* Raccourcis marques populaires */}
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] text-zinc-400 uppercase font-bold block">
+                                Marques de smartphones populaires :
+                              </span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {POPULAR_OTHER_PHONE_BRANDS.map((brandName) => {
+                                  const isSelected = commonFormData.brand.trim().toLowerCase() === brandName.toLowerCase();
+                                  return (
+                                    <button
+                                      key={brandName}
+                                      type="button"
+                                      onClick={() => handleBrandChange(brandName)}
+                                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all border cursor-pointer ${
+                                        isSelected
+                                          ? "bg-blue-500 text-white border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.4)] scale-[1.02]"
+                                          : "bg-white/5 text-zinc-300 border-white/10 hover:border-blue-400/50 hover:text-white hover:bg-white/10"
+                                      }`}
+                                    >
+                                      {isSelected ? `✓ ${brandName}` : brandName}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                              {/* Marque */}
+                              <div>
+                                <label className="text-[11px] text-zinc-300 uppercase font-bold block mb-1">
+                                  Marque Fabricant <span className="text-red-400">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  required
+                                  value={commonFormData.brand}
+                                  onChange={(e) => handleBrandChange(e.target.value)}
+                                  placeholder="Ex: Samsung, Xiaomi..."
+                                  className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-blue-400 ${
+                                    formErrors.brand ? "border-red-500" : "border-white/10"
+                                  }`}
+                                />
+                                {formErrors.brand && (
+                                  <span className="text-[10px] text-red-400 mt-1 block">{formErrors.brand}</span>
+                                )}
+                              </div>
+
+                              {/* Nom du modèle */}
+                              <div>
+                                <label className="text-[11px] text-zinc-300 uppercase font-bold block mb-1">
+                                  Nom du Modèle <span className="text-red-400">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  required
+                                  value={commonFormData.name}
+                                  onChange={(e) => setCommonFormData({ ...commonFormData, name: e.target.value })}
+                                  placeholder="Ex: Galaxy S24 Ultra"
+                                  className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-blue-400 ${
+                                    formErrors.name ? "border-red-500" : "border-white/10"
+                                  }`}
+                                />
+                                {formErrors.name && (
+                                  <span className="text-[10px] text-red-400 mt-1 block">{formErrors.name}</span>
+                                )}
+                              </div>
+
+                              {/* Prix unique */}
+                              <div>
+                                <label className="text-[11px] text-zinc-300 uppercase font-bold block mb-1">
+                                  Prix de Vente (FCFA) <span className="text-red-400">*</span>
+                                </label>
+                                <div className="relative">
+                                  <input
+                                    type="number"
+                                    required
+                                    min="0"
+                                    step="5000"
+                                    value={commonFormData.price}
+                                    onChange={(e) => setCommonFormData({ ...commonFormData, price: e.target.value })}
+                                    placeholder="Ex: 450000"
+                                    className={`w-full bg-black/60 border rounded-xl p-3 pr-16 text-blue-400 font-mono font-bold text-sm outline-none focus:border-blue-400 ${
+                                      formErrors.price ? "border-red-500" : "border-blue-500/40"
+                                    }`}
+                                  />
+                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400 pointer-events-none">
+                                    FCFA
+                                  </span>
+                                </div>
+                                {formErrors.price && (
+                                  <span className="text-[10px] text-red-400 mt-1 block">{formErrors.price}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 2. FICHE ESSENTIELLE : CAPACITÉ DE STOCKAGE & RAM */}
+                          <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-4">
+                            <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+                              <Sparkles className="w-4 h-4 text-blue-400" aria-hidden="true" />
+                              <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                                2. Capacité & Mémoire RAM
+                              </h4>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              {/* Capacité de stockage (Liste déroulante sans bulle) */}
+                              <div className="space-y-1.5">
+                                <label className="text-[11px] text-zinc-300 uppercase font-bold block">
+                                  Capacité de Stockage <span className="text-red-400">*</span>
+                                </label>
+                                <select
+                                  value={formSpecs.storage || "128 Go"}
+                                  onChange={(e) => setFormSpecs({ ...formSpecs, storage: e.target.value })}
+                                  className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-blue-400 cursor-pointer"
+                                >
+                                  <option value="32 Go">32 Go</option>
+                                  <option value="64 Go">64 Go</option>
+                                  <option value="128 Go">128 Go</option>
+                                  <option value="256 Go">256 Go</option>
+                                  <option value="512 Go">512 Go</option>
+                                  <option value="1 To">1 To</option>
+                                </select>
+                              </div>
+
+                              {/* Mémoire RAM (Liste déroulante sans bulle) */}
+                              <div className="space-y-1.5">
+                                <label className="text-[11px] text-zinc-300 uppercase font-bold block">
+                                  Mémoire RAM <span className="text-red-400">*</span>
+                                </label>
+                                <select
+                                  value={formSpecs.ram || 8}
+                                  onChange={(e) => setFormSpecs({ ...formSpecs, ram: Number(e.target.value) || e.target.value })}
+                                  className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-blue-400 cursor-pointer"
+                                >
+                                  <option value={2}>2 Go</option>
+                                  <option value={3}>3 Go</option>
+                                  <option value={4}>4 Go</option>
+                                  <option value={6}>6 Go</option>
+                                  <option value={8}>8 Go</option>
+                                  <option value={12}>12 Go</option>
+                                  <option value={16}>16 Go</option>
+                                  <option value={24}>24 Go</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 3. LONGUE DESCRIPTION SEULEMENT */}
+                          <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
+                            <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+                              <FileText className="w-4 h-4 text-blue-400" aria-hidden="true" />
+                              <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                                3. Description Longue du Smartphone
+                              </h4>
+                            </div>
+
+                            <textarea
+                              required
+                              rows={5}
+                              value={commonFormData.desc}
+                              onChange={(e) => setCommonFormData({ ...commonFormData, desc: e.target.value })}
+                              placeholder="Présentez les qualités du smartphone, ses performances, son écran, son autonomie, ses accessoires..."
+                              className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-blue-400 custom-scrollbar leading-relaxed ${
+                                formErrors.desc ? "border-red-500" : "border-white/10"
+                              }`}
+                            />
+                            {formErrors.desc && (
+                              <span className="text-[10px] text-red-400 mt-1 block">{formErrors.desc}</span>
+                            )}
+                          </div>
+
+                          {/* 4. PHOTOS DU SMARTPHONE */}
+                          {renderPhotoUploader("Photos du Smartphone (Multi-fichiers)")}
+                        </>
+                      )}
                     </div>
+                  ) : (
+                    /* AUTRES CATÉGORIES (Ordinateurs, Motos, TV, Electroménager, etc.) */
+                    <>
+                      {/* CARACTÉRISTIQUES SPÉCIFIQUES DYNAMIQUES PAR CATÉGORIE */}
+                      <div className="p-4 rounded-2xl bg-gold/[0.02] border border-gold/30 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {getCategoryIcon(formCategory, "w-4 h-4 text-gold")}
+                            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                              4. Spécifications : {getCategoryConfig(formCategory).label}
+                            </h4>
+                          </div>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/30">
+                            {getCategoryConfig(formCategory).fields.length} champ(s) configuré(s)
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {getCategoryConfig(formCategory).fields.map((field) => {
+                            const val = formSpecs[field.key] !== undefined ? formSpecs[field.key] : "";
+                            const errorMsg = formErrors[`specs_${field.key}`];
+
+                            return (
+                              <div key={field.key} className={field.key === "model" ? "sm:col-span-2" : ""}>
+                                <label className="text-[11px] text-zinc-300 uppercase font-bold flex items-center justify-between mb-1">
+                                  <span>
+                                    {field.label} {field.required && <span className="text-red-400">*</span>}
+                                  </span>
+                                  {field.unit && (
+                                    <span className="text-[10px] text-gold font-mono px-1.5 py-0.2 rounded bg-gold/10 border border-gold/20">
+                                      {field.unit}
+                                    </span>
+                                  )}
+                                </label>
+
+                                {field.type === "select" ? (
+                                  <select
+                                    value={val}
+                                    onChange={(e) => setFormSpecs({ ...formSpecs, [field.key]: e.target.value })}
+                                    className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
+                                      errorMsg ? "border-red-500" : "border-white/10"
+                                    }`}
+                                  >
+                                    <option value="">-- Sélectionner {field.label} --</option>
+                                    {field.options?.map((opt) => (
+                                      <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                ) : field.type === "number" ? (
+                                  <div className="relative">
+                                    <input
+                                      type="number"
+                                      min={field.min ?? 0}
+                                      max={field.max ?? Infinity}
+                                      step="any"
+                                      value={val}
+                                      onChange={(e) => setFormSpecs({ ...formSpecs, [field.key]: e.target.value })}
+                                      placeholder={field.placeholder || `Valeur en ${field.unit || "nombre"}`}
+                                      className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
+                                        field.unit ? "pr-14" : ""
+                                      } ${errorMsg ? "border-red-500" : "border-white/10"}`}
+                                    />
+                                    {field.unit && (
+                                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gold font-bold pointer-events-none">
+                                        {field.unit}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <input
+                                    type="text"
+                                    value={val}
+                                    onChange={(e) => setFormSpecs({ ...formSpecs, [field.key]: e.target.value })}
+                                    placeholder={field.placeholder || `Saisir ${field.label.toLowerCase()}`}
+                                    className={`w-full bg-black/60 border rounded-xl p-3 text-white text-xs outline-none focus:border-gold ${
+                                      errorMsg ? "border-red-500" : "border-white/10"
+                                    }`}
+                                  />
+                                )}
+
+                                {field.helpText && (
+                                  <p className="text-[10px] text-zinc-500 mt-1">{field.helpText}</p>
+                                )}
+                                {errorMsg && (
+                                  <span className="text-[10px] text-red-400 mt-1 block font-medium">{errorMsg}</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* VARIANTES MULTI-STOCKAGE (UNIQUEMENT SI LA CATÉGORIE LE SUPPORTE) */}
+                      {getCategoryConfig(formCategory).supportsStorageVariants && (
+                        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                              <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <HardDrive className="w-4 h-4 text-gold" aria-hidden="true" />
+                                <span>5. Options de Stockage & Prix Différenciés</span>
+                              </label>
+                              <p className="text-[11px] text-zinc-400 mt-0.5">
+                                Permet au client de choisir entre différentes capacités avec recalcul automatique du prix.
+                              </p>
+                            </div>
+
+                            {/* Raccourcis d'ajout rapide */}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-[10px] text-zinc-500 uppercase font-bold mr-1">Raccourcis :</span>
+                              {["64 Go", "128 Go", "256 Go", "512 Go", "1 To", "2 To"].map((cap) => (
+                                <button
+                                  key={cap}
+                                  type="button"
+                                  onClick={() => handleQuickAddStorage(cap)}
+                                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-zinc-300 text-[10px] font-bold border border-white/10 transition-all cursor-pointer"
+                                >
+                                  + {cap}
+                                </button>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={handleGenerateStandardTiers}
+                                className="px-2.5 py-1 rounded-lg bg-gold/15 hover:bg-gold text-gold hover:text-black text-[10px] font-bold border border-gold/30 transition-all cursor-pointer flex items-center gap-1"
+                                title="Générer automatiquement les 4 paliers standards (128G, 256G, 512G, 1T)"
+                              >
+                                <span>⚡</span>
+                                <span>Paliers automatiques</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {storageItems.length > 0 ? (
+                            <div className="space-y-2.5 pt-1">
+                              {storageItems.map((item, idx) => (
+                                <div 
+                                  key={idx} 
+                                  className="flex items-center gap-2.5 p-3 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition-all"
+                                >
+                                  <div className="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center font-black text-xs flex-shrink-0">
+                                    #{idx + 1}
+                                  </div>
+
+                                  <div className="flex-1">
+                                    <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
+                                      Capacité de stockage
+                                    </label>
+                                    <input 
+                                      type="text" 
+                                      value={item.capacity} 
+                                      onChange={(e) => handleUpdateStorageItem(idx, "capacity", e.target.value)}
+                                      placeholder="Ex: 256 Go" 
+                                      className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-semibold focus:border-gold/50 outline-none"
+                                    />
+                                  </div>
+
+                                  <div className="flex-1">
+                                    <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
+                                      Prix associé (FCFA)
+                                    </label>
+                                    <input 
+                                      type="number" 
+                                      value={item.price} 
+                                      onChange={(e) => handleUpdateStorageItem(idx, "price", e.target.value)}
+                                      placeholder={`Ex: ${commonFormData.price || "625000"}`} 
+                                      className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-bold text-gold focus:border-gold/50 outline-none"
+                                    />
+                                  </div>
+
+                                  <div className="pt-4 flex-shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveStorageItem(idx)}
+                                      className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white transition-colors cursor-pointer"
+                                      title="Supprimer cette option"
+                                    >
+                                      <Trash2 className="w-4 h-4" aria-hidden="true" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="p-3.5 rounded-xl border border-dashed border-white/10 text-center text-zinc-500 text-xs">
+                              Optionnel : Utilisez les boutons de raccourci ci-dessus pour ajouter des variantes de stockage si ce modèle existe en plusieurs capacités.
+                            </div>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleAddStorageItem("", commonFormData.price || "")}
+                            className="w-full py-2.5 rounded-xl border border-dashed border-white/20 hover:border-gold text-zinc-300 hover:text-gold text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer bg-white/[0.01] hover:bg-gold/5"
+                          >
+                            <span>+</span>
+                            <span>Ajouter une option de stockage personnalisée</span>
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {/* BOUTONS D'ACTION DU FORMULAIRE */}
