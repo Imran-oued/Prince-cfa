@@ -73,6 +73,10 @@ type Product = {
   selectedSimType?: string;
   storageOptions?: { capacity: string; price: number }[];
   simPricing?: Record<string, { enabled: boolean; delta: number; label: string }>;
+  stock?: number;
+  stockStatus?: 'en_stock' | 'bientot_disponible' | string;
+  isComingSoon?: boolean;
+  inStock?: boolean;
 };
 
 const categories = [
@@ -197,6 +201,12 @@ function ProductCardItem({
   const activeColor = product.colors?.[activeColorIdx] || product.colors?.[0] || '';
   const specsSnippet = getProductSummarySnippet(product);
   const imgBg = getProductImageBg(product, activeImage);
+  const isComingSoon = Boolean(
+    product.stockStatus === 'bientot_disponible' ||
+    product.isComingSoon === true ||
+    product.inStock === false ||
+    (typeof product.stock === 'number' && product.stock <= 0)
+  );
 
   // Glissement tactile au doigt directement sur la carte (Amazon / AliExpress Style)
   const [touchStartX, setTouchStartX] = useState(0);
@@ -317,13 +327,18 @@ function ProductCardItem({
           </div>
         )}
 
-        {/* Badge PROMO si en promotion ou catégorie promotion */}
-        {(product.category === 'promotion' || (product.salePrice && product.salePrice < product.price)) && (
+        {/* Badge Bientôt disponible ou PROMO */}
+        {isComingSoon ? (
+          <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-amber-500/95 text-[9px] font-black tracking-wider uppercase text-white shadow-md z-10 flex items-center gap-1 pointer-events-none">
+            <span>⏳</span>
+            <span>Bientôt dispo</span>
+          </div>
+        ) : (product.category === 'promotion' || (product.salePrice && product.salePrice < product.price)) ? (
           <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-gradient-to-r from-red-600 to-amber-600 text-[9px] font-black tracking-wider uppercase text-white shadow-md z-10 flex items-center gap-1 pointer-events-none animate-pulse">
             <Flame className="w-3 h-3 text-yellow-200 fill-yellow-200" aria-hidden="true" />
             <span>PROMO</span>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* 2. Colonne DROITE : Caractéristiques & Infos Style Amazon */}
@@ -420,19 +435,35 @@ function ProductCardItem({
               <span>Détails</span>
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddToCart(product, activeColor);
-              }}
-              className="py-2 px-3.5 rounded-xl bg-gradient-to-r from-gold to-yellow-600 text-black text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm hover:brightness-105 transition-all active:scale-95 cursor-pointer"
-              title="Ajouter directement au panier"
-              aria-label="Ajouter directement au panier"
-            >
-              <ShoppingBag className="w-3.5 h-3.5 text-black" aria-hidden="true" />
-              <span className="text-[11px] font-black">Ajouter</span>
-            </button>
+            {isComingSoon ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpen(product);
+                }}
+                className="py-2 px-3.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-700 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
+                title="Consulter et réserver ce produit"
+                aria-label="Consulter et réserver ce produit"
+              >
+                <span>⏳</span>
+                <span className="text-[11px] font-black">Bientôt dispo</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToCart(product, activeColor);
+                }}
+                className="py-2 px-3.5 rounded-xl bg-gradient-to-r from-gold to-yellow-600 text-black text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm hover:brightness-105 transition-all active:scale-95 cursor-pointer"
+                title="Ajouter directement au panier"
+                aria-label="Ajouter directement au panier"
+              >
+                <ShoppingBag className="w-3.5 h-3.5 text-black" aria-hidden="true" />
+                <span className="text-[11px] font-black">Ajouter</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

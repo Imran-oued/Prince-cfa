@@ -68,6 +68,65 @@ export async function PUT(
   }
 }
 
+export async function PATCH(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const isAuthorized = await verifyAdminAuth(request);
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { success: false, error: "Accès refusé. Session administrateur requise." },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await context.params;
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Identifiant de produit manquant." },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
+    const existing = await getProduct(id);
+    if (!existing) {
+      return NextResponse.json(
+        { success: false, error: "Produit introuvable." },
+        { status: 404 }
+      );
+    }
+
+    const updatedData = {
+      ...existing,
+      ...body,
+      updatedAt: new Date().toISOString()
+    };
+
+    const updated = await updateProduct(id, updatedData);
+    if (!updated) {
+      return NextResponse.json(
+        { success: false, error: "Échec de la mise à jour partielle dans Firestore." },
+        { status: 500 }
+      );
+    }
+
+    invalidateProductsCache();
+
+    return NextResponse.json({
+      success: true,
+      product: updatedData
+    });
+  } catch (error) {
+    console.error("PATCH /api/admin/products/[id] error:", error);
+    return NextResponse.json(
+      { success: false, error: "Erreur serveur lors de la mise à jour partielle." },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   request: Request,
   context: { params: Promise<{ id: string }> }

@@ -224,6 +224,9 @@ interface AdminProduct {
   otherFeatures?: string[];
   specs?: Record<string, any>;
   stock?: number;
+  stockStatus?: "en_stock" | "bientot_disponible" | string;
+  isComingSoon?: boolean;
+  inStock?: boolean;
   condition?: "neuf" | "occasion" | "reconditionne" | string;
   warranty?: string;
   accessories?: string;
@@ -344,6 +347,7 @@ export default function AdminPage() {
     desc: string;
     colors: string;
     stock: string;
+    stockStatus: "en_stock" | "bientot_disponible";
     condition: string;
     warranty: string;
     accessories: string;
@@ -358,7 +362,8 @@ export default function AdminPage() {
     shortDesc: "",
     desc: "",
     colors: "",
-    stock: "10",
+    stock: "99",
+    stockStatus: "en_stock",
     condition: "neuf",
     warranty: "Garantie 12 Mois Certifiée",
     accessories: "",
@@ -1698,7 +1703,10 @@ export default function AdminPage() {
       salePrice: commonFormData.salePrice || null,
       shortDesc: isApple ? commonFormData.shortDesc : undefined,
       desc: commonFormData.desc,
-      stock: commonFormData.stock,
+      stock: commonFormData.stockStatus === "bientot_disponible" ? 0 : 99,
+      stockStatus: commonFormData.stockStatus || "en_stock",
+      inStock: commonFormData.stockStatus !== "bientot_disponible",
+      isComingSoon: commonFormData.stockStatus === "bientot_disponible",
       condition: commonFormData.condition,
       warranty: commonFormData.warranty,
       accessories: commonFormData.accessories,
@@ -1789,6 +1797,58 @@ export default function AdminPage() {
       } catch (e) {
         console.warn("LocalStorage warning:", e);
       }
+    }
+  };
+
+  // Basculer rapidement la disponibilité d'un produit en 1 clic (En stock ↔ Bientôt disponible)
+  const handleQuickToggleAvailability = async (product: AdminProduct) => {
+    const isCurrentlyComingSoon = (product as any).stockStatus === "bientot_disponible" || 
+      (product as any).isComingSoon === true || 
+      (product as any).inStock === false || 
+      product.stock === 0;
+    
+    const nextStatus = isCurrentlyComingSoon ? "en_stock" : "bientot_disponible";
+    const nextInStock = nextStatus === "en_stock";
+    const nextStock = nextStatus === "en_stock" ? 99 : 0;
+
+    // Mise à jour optimiste locale immédiate pour fluidité maximale
+    const updatedList = productsList.map(p => {
+      if (p.id !== product.id) return p;
+      return {
+        ...p,
+        stockStatus: nextStatus,
+        isComingSoon: !nextInStock,
+        inStock: nextInStock,
+        stock: nextStock
+      };
+    });
+    setProductsList(updatedList);
+
+    try {
+      localStorage.setItem("prince_cfa_products", JSON.stringify(updatedList));
+    } catch (e) {
+      console.warn("LocalStorage warning:", e);
+    }
+
+    try {
+      const res = await fetch(`/api/admin/products/${product.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(adminToken ? { Authorization: `Bearer ${adminToken}` } : {})
+        },
+        body: JSON.stringify({
+          stockStatus: nextStatus,
+          isComingSoon: !nextInStock,
+          inStock: nextInStock,
+          stock: nextStock
+        })
+      });
+      if (!res.ok) {
+        console.warn("Avertissement serveur mise à jour disponibilité produit");
+      }
+    } catch (err) {
+      console.warn("Erreur mise à jour disponibilité:", err);
     }
   };
 
@@ -2008,7 +2068,10 @@ export default function AdminPage() {
       shortDesc: (product as any).shortDesc || "",
       desc: product.desc || "",
       colors: product.colors ? product.colors.join(", ") : "",
-      stock: (product.stock !== undefined ? product.stock : 10).toString(),
+      stock: (product.stock !== undefined ? product.stock : 99).toString(),
+      stockStatus: ((product as any).stockStatus === "bientot_disponible" || (product as any).isComingSoon === true || (product as any).inStock === false || product.stock === 0)
+        ? "bientot_disponible"
+        : "en_stock",
       condition: (product.condition as any) || "neuf",
       warranty: product.warranty || "Garantie 12 Mois Certifiée",
       accessories: product.accessories || "",
@@ -2047,7 +2110,8 @@ export default function AdminPage() {
       shortDesc: "",
       desc: "",
       colors: "",
-      stock: "10",
+      stock: "99",
+      stockStatus: "en_stock",
       condition: "neuf",
       warranty: "Garantie 12 Mois Certifiée",
       accessories: "",
@@ -2158,7 +2222,8 @@ export default function AdminPage() {
         shortDesc: "",
         desc: "",
         colors: "Titane Naturel, Titane Noir, Titane Blanc",
-        stock: "10",
+        stock: "99",
+        stockStatus: "en_stock",
         condition: "neuf",
         warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
         accessories: phoneConfig.defaultAccessories || "",
@@ -3086,6 +3151,7 @@ export default function AdminPage() {
                 <tr className="border-b border-white/10 text-xs text-zinc-400 uppercase tracking-wider bg-white/[0.02]">
                   <th className="p-4">Produit</th>
                   <th className="p-4">Catégorie</th>
+                  <th className="p-4">Disponibilité</th>
                   <th className="p-4">Prix</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
@@ -3118,6 +3184,30 @@ export default function AdminPage() {
                         {getCategoryIcon(product.category, "w-3.5 h-3.5 text-gold")}
                         <span>{getCategoryConfig(product.category).label}</span>
                       </span>
+                    </td>
+                    <td className="p-4">
+                      <button
+                        type="button"
+                        onClick={() => handleQuickToggleAvailability(product)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer border ${
+                          ((product as any).stockStatus === "bientot_disponible" || (product as any).isComingSoon || product.stock === 0)
+                            ? "bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+                            : "bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25"
+                        }`}
+                        title="Cliquer pour basculer : En stock ↔ Bientôt disponible"
+                      >
+                        {((product as any).stockStatus === "bientot_disponible" || (product as any).isComingSoon || product.stock === 0) ? (
+                          <>
+                            <span>⏳</span>
+                            <span>Bientôt disponible</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                            <span>En stock</span>
+                          </>
+                        )}
+                      </button>
                     </td>
                     <td className="p-4 font-bold text-white">
                       {product.salePrice ? (
@@ -3155,7 +3245,7 @@ export default function AdminPage() {
                 ))}
                 {filteredProducts.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="p-10 text-center">
+                    <td colSpan={5} className="p-10 text-center">
                       <div className="max-w-md mx-auto flex flex-col items-center justify-center gap-3">
                         <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400">
                           <Search className="w-5 h-5 text-gold/70" />
@@ -3344,7 +3434,8 @@ export default function AdminPage() {
                       shortDesc: "",
                       desc: "",
                       colors: "",
-                      stock: "10",
+                      stock: "99",
+                      stockStatus: "en_stock",
                       condition: "neuf",
                       warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
                       accessories: phoneConfig.defaultAccessories || "",
@@ -3841,19 +3932,62 @@ export default function AdminPage() {
                         {formErrors.salePrice && <span className="text-[10px] text-red-400 mt-1 block">{formErrors.salePrice}</span>}
                       </div>
 
-                      {/* Quantité en stock */}
-                      <div>
-                        <label className="text-[11px] text-zinc-400 uppercase font-bold block mb-1">
-                          Quantité en Stock
-                        </label>
-                        <input 
-                          type="number" 
-                          min="0"
-                          value={commonFormData.stock} 
-                          onChange={e => setCommonFormData({ ...commonFormData, stock: e.target.value })} 
-                          placeholder="Ex: 10" 
-                          className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
-                        />
+                      {/* Disponibilité & Statut du Stock (Sans limite numérique contraignante) */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[11px] text-zinc-400 uppercase font-bold block">
+                            Disponibilité en Magasin
+                          </label>
+                          <span className="text-[10px] text-zinc-500 font-medium">
+                            Sans limite de stock numérique
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {/* Option 1 : En Stock */}
+                          <button
+                            type="button"
+                            onClick={() => setCommonFormData(prev => ({ ...prev, stockStatus: "en_stock", stock: "99" }))}
+                            className={`p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                              commonFormData.stockStatus !== "bientot_disponible"
+                                ? "border-emerald-500 bg-emerald-500/15 text-white ring-1 ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                                : "border-white/10 bg-black/40 text-zinc-400 hover:border-white/20 hover:text-zinc-200"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+                              <div>
+                                <div className="text-xs font-bold text-white">En stock</div>
+                                <div className="text-[10px] text-zinc-400">Disponible immédiatement en boutique</div>
+                              </div>
+                            </div>
+                            {commonFormData.stockStatus !== "bientot_disponible" && (
+                              <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                            )}
+                          </button>
+
+                          {/* Option 2 : Bientôt disponible */}
+                          <button
+                            type="button"
+                            onClick={() => setCommonFormData(prev => ({ ...prev, stockStatus: "bientot_disponible", stock: "0" }))}
+                            className={`p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                              commonFormData.stockStatus === "bientot_disponible"
+                                ? "border-amber-500 bg-amber-500/15 text-white ring-1 ring-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+                                : "border-white/10 bg-black/40 text-zinc-400 hover:border-white/20 hover:text-zinc-200"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <span className="text-sm flex-shrink-0">⏳</span>
+                              <div>
+                                <div className="text-xs font-bold text-amber-400">Bientôt disponible</div>
+                                <div className="text-[10px] text-zinc-400">En rupture temporaire / Arrivage imminent</div>
+                              </div>
+                            </div>
+                            {commonFormData.stockStatus === "bientot_disponible" && (
+                              <Check className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                            )}
+                          </button>
+                        </div>
                       </div>
 
                       {/* Couleurs disponibles avec Nuancier Officiel Apple & Universel */}

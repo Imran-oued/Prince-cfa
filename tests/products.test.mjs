@@ -5,7 +5,8 @@ import {
   generateSlug, 
   normalizeProductSpecs,
   getProductImageBg,
-  isAppleBrand
+  isAppleBrand,
+  isProductComingSoon
 } from "../src/lib/productValidation.ts";
 import { 
   PRODUCT_CATEGORIES, 
@@ -566,5 +567,43 @@ test("13. Conditional Phone Form Logic: Apple (CAS 1) vs Autres Marques (CAS 2)"
   assert.equal(samsungRes.cleanedProduct.variants, undefined, "variants croisés ne doivent pas exister pour les autres marques");
   assert.equal(samsungRes.cleanedProduct.specs.storage, "256 Go");
   assert.equal(samsungRes.cleanedProduct.specs.ram, 12);
+});
+
+test("14. Stock Availability: 'En stock' (continu sans limite) vs 'Bientôt disponible' (rupture temporaire / arrivage imminent)", () => {
+  // A. Produit par défaut : en stock sans limite
+  const inStockProd = validateAndCleanProduct({
+    name: "Produit En Stock Continu",
+    category: "phones",
+    brand: "Apple",
+    price: 500000,
+    desc: "Test disponibilité continue sans limite numérique."
+  });
+  assert.equal(inStockProd.isValid, true);
+  assert.equal(inStockProd.cleanedProduct.stockStatus, "en_stock");
+  assert.equal(inStockProd.cleanedProduct.inStock, true);
+  assert.equal(inStockProd.cleanedProduct.isComingSoon, false);
+  assert.ok(inStockProd.cleanedProduct.stock > 0, "Stock initial disponible sans blocage");
+
+  // B. Produit marqué comme bientôt disponible
+  const comingSoonProd = validateAndCleanProduct({
+    name: "iPhone 16 Pro Max Bientôt Dispo",
+    category: "phones",
+    brand: "Apple",
+    price: 950000,
+    desc: "En cours de réapprovisionnement.",
+    stockStatus: "bientot_disponible"
+  });
+  assert.equal(comingSoonProd.isValid, true);
+  assert.equal(comingSoonProd.cleanedProduct.stockStatus, "bientot_disponible");
+  assert.equal(comingSoonProd.cleanedProduct.inStock, false);
+  assert.equal(comingSoonProd.cleanedProduct.isComingSoon, true);
+  assert.equal(comingSoonProd.cleanedProduct.stock, 0);
+
+  // C. Helper isProductComingSoon
+  assert.equal(isProductComingSoon(comingSoonProd.cleanedProduct), true);
+  assert.equal(isProductComingSoon(inStockProd.cleanedProduct), false);
+  assert.equal(isProductComingSoon({ stock: 0 }), true);
+  assert.equal(isProductComingSoon({ inStock: false }), true);
+  assert.equal(isProductComingSoon({ isComingSoon: true }), true);
 });
 

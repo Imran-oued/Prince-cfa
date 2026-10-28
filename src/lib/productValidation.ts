@@ -22,6 +22,9 @@ export interface ProductInput {
   images?: string[];
   colors?: string[] | string;
   stock?: number | string;
+  stockStatus?: "en_stock" | "bientot_disponible" | string;
+  isComingSoon?: boolean;
+  inStock?: boolean;
   condition?: "neuf" | "occasion" | "reconditionne" | string;
   warranty?: string;
   accessories?: string;
@@ -141,12 +144,17 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
     }
   }
 
-  // Stock
-  const stockCheck = cleanNumber(raw.stock !== undefined ? raw.stock : 10, "Quantité en stock", 0);
+  // Stock et statut de disponibilité
+  const isComingSoon = raw.stockStatus === "bientot_disponible" || raw.isComingSoon === true || raw.inStock === false || (typeof raw.stock === "number" && raw.stock <= 0 && raw.stockStatus !== "en_stock");
+  const stockCheck = cleanNumber(
+    raw.stock !== undefined ? raw.stock : (isComingSoon ? 0 : 99), 
+    "Quantité en stock", 
+    0
+  );
   if (stockCheck.error) {
     errors.stock = stockCheck.error;
   }
-  const cleanStock = stockCheck.value !== undefined ? Math.floor(stockCheck.value) : 0;
+  const cleanStock = isComingSoon ? 0 : (stockCheck.value !== undefined ? Math.floor(stockCheck.value) : 99);
 
   // Description
   const desc = (raw.desc || "").trim();
@@ -351,6 +359,9 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
     ...(cleanShortDesc ? { shortDesc: cleanShortDesc } : {}),
     desc,
     stock: cleanStock,
+    stockStatus: isComingSoon ? "bientot_disponible" : "en_stock",
+    inStock: !isComingSoon,
+    isComingSoon,
     condition,
     warranty,
     accessories,
@@ -455,4 +466,16 @@ export function getProductImageBg(product?: any, imageSrc?: string): {
   // 2. Par défaut pour tous les produits (catalogue officiel Apple, smartphone, uploads réels, moto, réfrigérateur, etc.)
   // -> Fond blanc pur pour un rendu professionnel, épuré et parfaitement optimisé
   return { containerClass: 'bg-white', isBlack: false };
+}
+
+/**
+ * Détermine si un produit est marqué comme bientôt disponible (rupture temporaire / arrivage imminent)
+ */
+export function isProductComingSoon(p: any): boolean {
+  if (!p) return false;
+  if (p.stockStatus === "bientot_disponible") return true;
+  if (p.isComingSoon === true) return true;
+  if (p.inStock === false) return true;
+  if (typeof p.stock === "number" && p.stock <= 0) return true;
+  return false;
 }

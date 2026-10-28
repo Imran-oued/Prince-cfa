@@ -66,6 +66,13 @@ export default function ProductDrawer({
 
   const isIPhone = isAppleProduct(currentProduct);
 
+  const isComingSoon = Boolean(
+    currentProduct?.stockStatus === 'bientot_disponible' ||
+    currentProduct?.isComingSoon === true ||
+    currentProduct?.inStock === false ||
+    (typeof currentProduct?.stock === 'number' && currentProduct?.stock <= 0)
+  );
+
   const getInitialCapacity = (p) => {
     if (!p) return '';
     if (p.selectedCapacity) return p.selectedCapacity;
@@ -581,6 +588,28 @@ export default function ProductDrawer({
     window.open(`https://wa.me/${phoneNumber}?text=${encoded}`, '_blank');
   };
 
+  // Réservation / Alerte WhatsApp si le produit est marqué comme bientôt disponible
+  const handleReserveWhatsApp = () => {
+    if (!currentProduct) return;
+    const phoneNumber = SHOP_CONFIG.whatsappNumber;
+    let message = "👑 *PRÉCOMMANDE / RÉSERVATION - PRINCE CFA* 👑\n\n";
+    message += `▪ *Produit* : ${currentProduct.name}\n`;
+    if (selectedSimType) {
+      message += `▪ *Format SIM souhaité* : ${selectedSimType}\n`;
+    }
+    if (selectedCapacity) {
+      message += `▪ *Capacité souhaitée* : ${selectedCapacity}\n`;
+    }
+    if (activeColor) {
+      message += `▪ *Couleur souhaitée* : ${activeColor}\n`;
+    }
+    message += `▪ *Prix indicatif* : ${currentPrice.toLocaleString('fr-FR')} FCFA\n\n`;
+    message += "Bonjour Prince CFA, cet article est indiqué comme *bientôt disponible*. Je souhaite réserver mon exemplaire en priorité dès son arrivée en boutique !";
+
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/${phoneNumber}?text=${encoded}`, '_blank');
+  };
+
   if (!currentProduct) return null;
   if (!isOpen && !slideIn) return null;
 
@@ -610,10 +639,17 @@ export default function ProductDrawer({
         {/* Header du Drawer avec bouton retour / fermeture */}
         <div className="flex items-center justify-between px-6 py-4 sm:py-5 border-b border-zinc-200 bg-white/95 backdrop-blur-md relative z-20">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              En stock
-            </span>
+            {isComingSoon ? (
+              <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 font-bold bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                ⏳ Bientôt disponible (Arrivage imminent)
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-semibold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                En stock
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -784,6 +820,21 @@ export default function ProductDrawer({
               <span className="text-xs text-zinc-500 uppercase tracking-widest font-semibold ml-auto">TVA incluse</span>
             </div>
           </div>
+
+          {/* Bannière VIP Produit bientôt disponible */}
+          {isComingSoon && (
+            <div className="p-4 rounded-2xl bg-amber-500/[0.08] border-2 border-amber-500/30 flex items-start gap-3 shadow-sm">
+              <span className="text-2xl flex-shrink-0">⏳</span>
+              <div className="space-y-1">
+                <h3 className="text-xs font-black text-amber-900 uppercase tracking-wider">
+                  Produit bientôt disponible — Arrivage imminent
+                </h3>
+                <p className="text-xs text-zinc-600 leading-relaxed">
+                  Cet article est actuellement en cours de réapprovisionnement dans notre boutique à Ouagadougou. Vous pouvez réserver votre exemplaire en priorité ou être alerté dès réception via WhatsApp.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Badge de Performances Spécifiques pour Moto Électrique */}
           {currentProduct.category === 'mobility' && currentProduct.specs && (
@@ -1379,31 +1430,42 @@ export default function ProductDrawer({
             </span>
           </div>
 
-          {/* Bouton Unique Ultra-Prestige : Ajouter au Panier */}
-          <button 
-            disabled={Boolean(isIPhone && (!selectedSimType || !selectedCapacity))}
-            onClick={() => {
-              if (isIPhone && (!selectedSimType || !selectedCapacity)) {
-                return;
-              }
-              onAddToCart(currentProduct, activeColor, selectedCapacity, currentPrice, selectedSimType);
-              onClose();
-            }}
-            className={`flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border font-extrabold uppercase tracking-widest text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
-              isIPhone && (!selectedSimType || !selectedCapacity)
-                ? 'bg-zinc-200 border-zinc-300 text-zinc-400 cursor-not-allowed opacity-75'
-                : 'border-gold/40 bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black hover:shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:brightness-105 active:scale-[0.98] cursor-pointer'
-            }`}
-          >
-            <ShoppingBag className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
-            <span>
-              {isIPhone && !selectedSimType
-                ? '1. Choisissez le format SIM'
-                : isIPhone && !selectedCapacity
-                ? '2. Choisissez la capacité'
-                : 'Ajouter au panier'}
-            </span>
-          </button>
+          {/* Bouton d'action adapté : Réservation WhatsApp si bientôt disponible, sinon Ajout Panier */}
+          {isComingSoon ? (
+            <button
+              type="button"
+              onClick={handleReserveWhatsApp}
+              className="flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-black font-extrabold uppercase tracking-widest text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] hover:brightness-105 active:scale-[0.98] cursor-pointer"
+            >
+              <span className="text-base">📲</span>
+              <span>Réserver sur WhatsApp</span>
+            </button>
+          ) : (
+            <button 
+              disabled={Boolean(isIPhone && (!selectedSimType || !selectedCapacity))}
+              onClick={() => {
+                if (isIPhone && (!selectedSimType || !selectedCapacity)) {
+                  return;
+                }
+                onAddToCart(currentProduct, activeColor, selectedCapacity, currentPrice, selectedSimType);
+                onClose();
+              }}
+              className={`flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border font-extrabold uppercase tracking-widest text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
+                isIPhone && (!selectedSimType || !selectedCapacity)
+                  ? 'bg-zinc-200 border-zinc-300 text-zinc-400 cursor-not-allowed opacity-75'
+                  : 'border-gold/40 bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black hover:shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:brightness-105 active:scale-[0.98] cursor-pointer'
+              }`}
+            >
+              <ShoppingBag className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
+              <span>
+                {isIPhone && !selectedSimType
+                  ? '1. Choisissez le format SIM'
+                  : isIPhone && !selectedCapacity
+                  ? '2. Choisissez la capacité'
+                  : 'Ajouter au panier'}
+              </span>
+            </button>
+          )}
         </div>
       </aside>
     </>
