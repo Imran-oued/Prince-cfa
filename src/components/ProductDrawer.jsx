@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { SHOP_CONFIG } from '@/config/shop';
-import { X, Star, HardDrive, Check, Zap, Laptop, Refrigerator, Tablet, ShoppingBag, ChevronDown } from 'lucide-react';
+import { X, Star, HardDrive, Check, Zap, Laptop, Refrigerator, Tablet, ShoppingBag, ChevronDown, ChevronLeft } from 'lucide-react';
 import { getCategoryConfig, isStorageVariantCategory } from '@/config/categories';
 import { getProductImageBg, isAppleBrand } from '@/lib/productValidation';
 
@@ -248,8 +248,10 @@ export default function ProductDrawer({
   const [isDragging, setIsDragging] = useState(false);
 
   const handleTouchStart = (e) => {
-    if (productImages.length <= 1) return;
+    if (!e.touches || e.touches.length === 0) return;
     const touch = e.touches[0];
+    // Si glissement depuis le bord gauche (< 45px) ou 1 seule image, laisser le tiroir gérer le swipe retour
+    if (touch.clientX < 45 || productImages.length <= 1) return;
     setTouchStartX(touch.clientX);
     setTouchStartY(touch.clientY);
     setDragOffset(0);
@@ -257,7 +259,7 @@ export default function ProductDrawer({
   };
 
   const handleTouchMove = (e) => {
-    if (!isDragging) return;
+    if (!isDragging || !e.touches || e.touches.length === 0) return;
     const touch = e.touches[0];
     const diffX = touch.clientX - touchStartX;
     const diffY = touch.clientY - touchStartY;
@@ -267,17 +269,30 @@ export default function ProductDrawer({
       return;
     }
 
+    // Si on est sur la 1ère photo et qu'on glisse vers la droite, transférer le swipe au volet pour fermer
+    if (activeImageIndex === 0 && diffX > 0) {
+      setIsDragging(false);
+      setDragOffset(0);
+      return; // Le geste continue sur le tiroir
+    }
+
+    // Empêcher la propagation vers le tiroir quand on fait défiler les photos du carrousel
+    e.stopPropagation();
+
     // Résistance élastique style iOS aux extrémités (effet Rubber-Band)
-    if ((activeImageIndex === 0 && diffX > 0) || (activeImageIndex === productImages.length - 1 && diffX < 0)) {
+    if (activeImageIndex === productImages.length - 1 && diffX < 0) {
       setDragOffset(diffX * 0.35);
     } else {
       setDragOffset(diffX);
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e) => {
     if (!isDragging) return;
     setIsDragging(false);
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
 
     const threshold = 45; // Seuil de glissement en px pour valider le changement
     if (dragOffset < -threshold) {
@@ -530,16 +545,57 @@ export default function ProductDrawer({
     }
   }, [isIPhone, selectedSimType, availableCapacities, selectedCapacity]);
 
+  const drawerRef = useRef(null);
+  const backdropRef = useRef(null);
+  const isPopStateActionRef = useRef(false);
+
+  // Fermeture propre avec gestion de l'historique de navigation du navigateur
+  const handleCleanClose = useCallback(() => {
+    if (typeof window !== 'undefined' && !isPopStateActionRef.current) {
+      if (window.history.state && window.history.state.modal === 'product-drawer') {
+        window.history.back();
+      }
+    }
+    onClose();
+  }, [onClose]);
+
+  // Support natif de la navigation retour mobile (iOS Safari swipe back & bouton retour physique Android)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    isPopStateActionRef.current = false;
+
+    if (typeof window !== 'undefined') {
+      try {
+        if (!window.history.state || window.history.state.modal !== 'product-drawer') {
+          window.history.pushState({ modal: 'product-drawer', id: currentProduct?.id }, '');
+        }
+      } catch {
+        // Ignorer en cas d'environnement restreint
+      }
+
+      const handlePopState = () => {
+        isPopStateActionRef.current = true;
+        onClose();
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
+    }
+  }, [isOpen, onClose, currentProduct?.id]);
+
   // Fermeture avec la touche Échap
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
-        onClose();
+        handleCleanClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, handleCleanClose]);
 
   // Bloquer le défilement du corps quand le tiroir est ouvert
   useEffect(() => {
@@ -557,12 +613,123 @@ export default function ProductDrawer({
 
   useEffect(() => {
     if (isOpen) {
+      if (drawerRef.current) {
+        drawerRef.current.style.transform = '';
+        drawerRef.current.style.transition = '';
+      }
+      if (backdropRef.current) {
+        backdropRef.current.style.opacity = '';
+        backdropRef.current.style.transition = '';
+      }
       const frame = requestAnimationFrame(() => setSlideIn(true));
       return () => cancelAnimationFrame(frame);
     } else {
       setSlideIn(false);
     }
   }, [isOpen]);
+
+  // Gestion du glissement tactile au doigt vers la droite (Swipe to Dismiss) pour revenir aux catégories
+  const drawerTouchRef = useRef({
+    startX: 0,
+    startY: 0,
+    startTime: 0,
+    isDragging: false,
+    isScroll: false,
+    dragX: 0
+  });
+
+  const handleDrawerTouchStart = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    drawerTouchRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      startTime: Date.now(),
+      isDragging: false,
+      isScroll: false,
+      dragX: 0
+    };
+  };
+
+  const handleDrawerTouchMove = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    const state = drawerTouchRef.current;
+    if (state.isScroll) return;
+
+    const touch = e.touches[0];
+    const diffX = touch.clientX - state.startX;
+    const diffY = touch.clientY - state.startY;
+
+    // Déterminer la direction principale du mouvement
+    if (!state.isDragging) {
+      // Si défilement vertical dominant, laisser défiler la fiche technique
+      if (Math.abs(diffY) > 8 && Math.abs(diffY) > Math.abs(diffX)) {
+        state.isScroll = true;
+        return;
+      }
+      // Si glissement horizontal vers la droite clairement dominant
+      if (diffX > 10 && diffX > Math.abs(diffY)) {
+        state.isDragging = true;
+        if (drawerRef.current) {
+          drawerRef.current.style.transition = 'none';
+        }
+        if (backdropRef.current) {
+          backdropRef.current.style.transition = 'none';
+        }
+      } else {
+        return;
+      }
+    }
+
+    if (state.isDragging && diffX > 0) {
+      state.dragX = diffX;
+      if (drawerRef.current) {
+        drawerRef.current.style.transform = `translateX(${diffX}px)`;
+      }
+      if (backdropRef.current) {
+        const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
+        const progress = Math.min(1, Math.max(0, diffX / windowWidth));
+        backdropRef.current.style.opacity = String(Math.max(0, 0.75 * (1 - progress)));
+      }
+    }
+  };
+
+  const handleDrawerTouchEnd = () => {
+    const state = drawerTouchRef.current;
+    if (!state.isDragging) return;
+
+    state.isDragging = false;
+    const elapsed = Math.max(1, Date.now() - state.startTime);
+    const velocity = state.dragX / elapsed; // px/ms
+
+    // Seuil de fermeture : soit glissé de plus de 80px, soit petit coup rapide (flick) vers la droite
+    const shouldClose = state.dragX > 80 || (velocity > 0.35 && state.dragX > 35);
+
+    if (shouldClose) {
+      if (drawerRef.current) {
+        drawerRef.current.style.transition = 'transform 240ms cubic-bezier(0.16, 1, 0.3, 1)';
+        drawerRef.current.style.transform = 'translateX(100%)';
+      }
+      if (backdropRef.current) {
+        backdropRef.current.style.transition = 'opacity 240ms ease';
+        backdropRef.current.style.opacity = '0';
+      }
+      setTimeout(() => {
+        handleCleanClose();
+      }, 240);
+    } else {
+      // Rétablissement élastique
+      if (drawerRef.current) {
+        drawerRef.current.style.transition = 'transform 240ms cubic-bezier(0.16, 1, 0.3, 1)';
+        drawerRef.current.style.transform = 'translateX(0)';
+      }
+      if (backdropRef.current) {
+        backdropRef.current.style.transition = 'opacity 240ms ease';
+        backdropRef.current.style.opacity = '1';
+      }
+      state.dragX = 0;
+    }
+  };
 
   // Commande directe par WhatsApp avec détails de SIM, capacité et couleur
   const handleDirectWhatsApp = () => {
@@ -586,7 +753,6 @@ export default function ProductDrawer({
     window.open(`https://wa.me/${phoneNumber}?text=${encoded}`, '_blank');
   };
 
-
   if (!currentProduct) return null;
   if (!isOpen && !slideIn) return null;
 
@@ -597,15 +763,21 @@ export default function ProductDrawer({
     <>
       {/* Arrière-plan assombri et flouté (Backdrop) */}
       <div 
+        ref={backdropRef}
         className={`fixed inset-0 bg-black/75 backdrop-blur-md transition-opacity duration-300 ease-out z-[140] ${
           slideIn && isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
-        onClick={onClose}
+        onClick={handleCleanClose}
         aria-hidden="true"
       />
 
       {/* Volet Latéral / Slide-Over Drawer depuis le côté droit */}
       <aside 
+        ref={drawerRef}
+        onTouchStart={handleDrawerTouchStart}
+        onTouchMove={handleDrawerTouchMove}
+        onTouchEnd={handleDrawerTouchEnd}
+        onTouchCancel={handleDrawerTouchEnd}
         className={`fixed top-0 right-0 h-full w-full sm:w-[540px] md:w-[620px] lg:w-[680px] bg-white border-l border-zinc-200 shadow-[-20px_0_50px_rgba(0,0,0,0.15),-5px_0_20px_rgba(212,175,55,0.1)] z-[150] transition-transform duration-300 ease-out flex flex-col overflow-hidden will-change-transform ${
           slideIn && isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'
         }`}
@@ -613,16 +785,32 @@ export default function ProductDrawer({
         aria-modal="true"
         aria-labelledby="product-drawer-title"
       >
+        {/* Poignée discrète pour indication de glissement tactile sur mobile */}
+        <div className="absolute top-1/2 -translate-y-1/2 left-1.5 w-1 h-12 rounded-full bg-zinc-300/80 sm:hidden pointer-events-none z-30" />
+
         {/* Header du Drawer avec bouton retour / fermeture */}
-        <div className="flex items-center justify-between px-6 py-4 sm:py-5 border-b border-zinc-200 bg-white/95 backdrop-blur-md relative z-20">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-5 border-b border-zinc-200 bg-white/95 backdrop-blur-md relative z-20">
+          <div className="flex items-center gap-2.5">
+            {/* Bouton Retour rapide pour revenir en 1 tap aux catégories sans devoir chercher la croix */}
+            <button
+              type="button"
+              onClick={handleCleanClose}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-semibold border border-zinc-200/80 transition-all active:scale-95 cursor-pointer shadow-xs"
+              title="Retour aux catégories (ou glisser vers la droite)"
+              aria-label="Retour aux catégories"
+            >
+              <ChevronLeft className="w-4 h-4 text-zinc-600" aria-hidden="true" />
+              <span>Retour</span>
+            </button>
+
             {isComingSoon ? (
-              <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 font-bold bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30">
+              <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 font-bold bg-amber-500/10 px-2.5 sm:px-3 py-1 rounded-full border border-amber-500/30">
                 <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                ⏳ Bientôt disponible (Arrivage imminent)
+                <span className="hidden sm:inline">⏳ Bientôt disponible (Arrivage imminent)</span>
+                <span className="sm:hidden">⏳ Bientôt dispo</span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-semibold">
+              <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-semibold bg-emerald-50 px-2.5 sm:px-3 py-1 rounded-full border border-emerald-200/60">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 En stock
               </span>
@@ -631,9 +819,10 @@ export default function ProductDrawer({
 
           <div className="flex items-center gap-2">
             <button 
-              onClick={onClose}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-zinc-100 border border-zinc-200 text-zinc-600 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all duration-200 group"
-              title="Fermer la fiche produit (Échap)"
+              type="button"
+              onClick={handleCleanClose}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-zinc-100 border border-zinc-200 text-zinc-600 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all duration-200 group cursor-pointer"
+              title="Fermer la fiche produit (Échap ou glisser vers la droite)"
               aria-label="Fermer la fiche produit"
             >
               <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" aria-hidden="true" />
@@ -1370,7 +1559,7 @@ export default function ProductDrawer({
                   return;
                 }
                 onAddToCart(currentProduct, activeColor, selectedCapacity, currentPrice, selectedSimType);
-                onClose();
+                handleCleanClose();
               }}
               className={`flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border font-extrabold uppercase tracking-widest text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
                 isIPhone && (!selectedSimType || !selectedCapacity)
