@@ -2632,16 +2632,6 @@ export default function AdminPage() {
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
-                            type="button"
-                            onClick={() => handleNotifyCustomerWhatsApp(order, order.payment.status === "confirme" ? "payment_confirmed" : "custom")}
-                            title="Notifier ou contacter le client sur WhatsApp"
-                            aria-label="Contacter le client sur WhatsApp"
-                            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-sm"
-                          >
-                            <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366]" />
-                            <span className="hidden xl:inline text-[11px]">WhatsApp</span>
-                          </button>
-                          <button
                             onClick={() => openOrderDetails(order)}
                             className="px-3 py-1.5 rounded-lg bg-gold/15 hover:bg-gold text-yellow-800 hover:text-black font-bold text-xs transition-all border border-gold/40 cursor-pointer whitespace-nowrap shadow-sm"
                           >
