@@ -554,6 +554,7 @@ test("13. Conditional Phone Form Logic: Apple (CAS 1) vs Autres Marques (CAS 2)"
     otherFeatures: ["Feature parasite"],
     variants: [{ simType: "2 sim", storage: "256 Go", color: "Noir", price: 800000 }],
     simPricing: { esim_only: { enabled: true, delta: -20000, label: "E-sim" } },
+    colors: ["Noir Titane", "Gris Titane", "Violet"],
     specs: {
       storage: "256 Go",
       ram: 12
@@ -565,8 +566,24 @@ test("13. Conditional Phone Form Logic: Apple (CAS 1) vs Autres Marques (CAS 2)"
   assert.equal(samsungRes.cleanedProduct.shortDesc, undefined, "shortDesc doit être nettoyé pour les autres marques");
   assert.equal(samsungRes.cleanedProduct.otherFeatures, undefined, "otherFeatures doit être nettoyé pour les autres marques");
   assert.equal(samsungRes.cleanedProduct.variants, undefined, "variants croisés ne doivent pas exister pour les autres marques");
+  assert.deepEqual(samsungRes.cleanedProduct.colors, [], "colors doit être un tableau vide pour les téléphones Android (autres marques)");
   assert.equal(samsungRes.cleanedProduct.specs.storage, "256 Go");
   assert.equal(samsungRes.cleanedProduct.specs.ram, 12);
+
+  // Vérification de la rétrocompatibilité : normalizeProductSpecs nettoie aussi les couleurs existantes des Android
+  const legacyAndroid = {
+    id: "legacy-samsung",
+    name: "Samsung Galaxy S23",
+    category: "phones",
+    brand: "Samsung",
+    price: 450000,
+    colors: ["Noir", "Crème", "Vert"],
+    specs: { ram: "8 Go", battery: "3900 mAh" }
+  };
+  const normalizedLegacy = normalizeProductSpecs(legacyAndroid);
+  assert.deepEqual(normalizedLegacy.colors, [], "normalizeProductSpecs doit vider colors pour les Android existants");
+  assert.equal(normalizedLegacy.specs.ram, 8);
+  assert.equal(normalizedLegacy.specs.battery, 3900);
 });
 
 test("14. Stock Availability: 'En stock' (continu sans limite) vs 'Bientôt disponible' (rupture temporaire / arrivage imminent)", () => {

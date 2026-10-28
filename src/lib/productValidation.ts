@@ -184,10 +184,14 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
     accessories = raw.accessories.trim();
   }
   const brand = (raw.brand || "").trim();
+  const isApple = category === "phones" && isAppleBrand(brand);
+  const isOtherPhone = category === "phones" && !isAppleBrand(brand);
 
-  // Traitement des couleurs
+  // Traitement des couleurs (supprimé pour le mode Autres marques / Android)
   let colors: string[] = [];
-  if (Array.isArray(raw.colors)) {
+  if (isOtherPhone) {
+    colors = [];
+  } else if (Array.isArray(raw.colors)) {
     colors = raw.colors.map(c => String(c).trim()).filter(Boolean);
   } else if (typeof raw.colors === "string" && raw.colors.trim()) {
     colors = raw.colors.split(",").map(c => c.trim()).filter(Boolean);
@@ -309,8 +313,6 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
     active: boolean;
   }> | undefined = undefined;
 
-  const isApple = category === "phones" && isAppleBrand(brand);
-
   if (isApple && Array.isArray(raw.variants) && raw.variants.length > 0) {
     cleanedVariants = raw.variants
       .map((v, i) => {
@@ -403,6 +405,15 @@ export function normalizeProductSpecs(product: any): any {
     copy.specs = {};
   } else {
     copy.specs = { ...copy.specs };
+  }
+
+  // Suppression des couleurs pour les smartphones Android (autres marques) même existants
+  if (
+    (copy.category === "phones" || !copy.category) && 
+    !isAppleBrand(copy.brand) && 
+    !Boolean(copy.name && String(copy.name).toLowerCase().includes("iphone"))
+  ) {
+    copy.colors = [];
   }
 
   // Compatibilité générale processeur

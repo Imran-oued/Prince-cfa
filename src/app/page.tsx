@@ -8,7 +8,7 @@ import CartDrawer from "@/components/CartDrawer";
 import ProductDrawer from "@/components/ProductDrawer";
 import { getProducts, getDeletedProductIds } from "@/lib/firestore";
 import { isFirebaseConfigured } from "@/lib/firebase";
-import { getProductImageBg } from "@/lib/productValidation";
+import { getProductImageBg, isAppleBrand } from "@/lib/productValidation";
 import { SHOP_CONFIG } from "@/config/shop";
 import { 
   Star, 
@@ -94,6 +94,23 @@ const categories = [
 ];
 
 const phoneBrands = ['Iphones', 'Samsung', 'Google Pixel', 'Redmi', 'Huawei', 'Tecno', 'Infinix', 'Honor', 'Itel', 'OALE'];
+
+function isAndroidPhoneProduct(p?: any): boolean {
+  if (!p) return false;
+  const isPhone = p.category === 'phones' || !p.category;
+  if (!isPhone) return false;
+  return !isAppleBrand(p.brand) && !Boolean(p.name && String(p.name).toLowerCase().includes('iphone'));
+}
+
+function sanitizeCatalogProducts(prods: Product[]): Product[] {
+  return prods.map(p => {
+    if (!p) return p;
+    if (isAndroidPhoneProduct(p)) {
+      return { ...p, colors: [] };
+    }
+    return p;
+  });
+}
 
 const getColorCode = (name: string) => {
   const n = (name || '').toLowerCase();
@@ -195,10 +212,11 @@ function ProductCardItem({
   onOpen: (p: Product) => void; 
   onAddToCart: (p: Product, color?: string) => void;
 }) {
+  const isAndroidPhone = isAndroidPhoneProduct(product);
   const [activeColorIdx, setActiveColorIdx] = useState(0);
   const images = (product.images && product.images.length > 0) ? product.images : (product.image ? [product.image] : []);
   const activeImage = images[activeColorIdx] || product.image;
-  const activeColor = product.colors?.[activeColorIdx] || product.colors?.[0] || '';
+  const activeColor = isAndroidPhone ? '' : (product.colors?.[activeColorIdx] || product.colors?.[0] || '');
   const specsSnippet = getProductSummarySnippet(product);
   const imgBg = getProductImageBg(product, activeImage);
   const isComingSoon = Boolean(
@@ -390,8 +408,8 @@ function ProductCardItem({
             </span>
           </p>
 
-          {/* Pastilles de couleurs interactives style Amazon */}
-          {product.colors && product.colors.length > 0 && (
+          {/* Pastilles de couleurs interactives style Amazon (sauf mode Autres marques / Android) */}
+          {product.colors && product.colors.length > 0 && !isAndroidPhone && (
             <div className="mt-2 pt-2 border-t border-zinc-100">
               <div className="text-[10px] sm:text-[11px] text-zinc-500 mb-1">
                 Couleur : <strong className="text-zinc-900 font-semibold">{activeColor}</strong>
@@ -448,7 +466,7 @@ function ProductCardItem({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onAddToCart(product, activeColor);
+                  onAddToCart(product, isAndroidPhone ? undefined : activeColor);
                 }}
                 className="py-2 px-2.5 sm:px-3.5 rounded-xl bg-gradient-to-r from-gold to-yellow-600 text-black text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm hover:brightness-105 transition-all active:scale-95 cursor-pointer flex-shrink-0"
                 title="Ajouter directement au panier"
@@ -487,9 +505,10 @@ export default function Home() {
           if (apiData?.success && Array.isArray(apiData.products) && apiData.products.length > 0) {
             const valid = apiData.products.filter((p: any) => p && p.id && p.name && typeof p.price === 'number');
             if (valid.length > 0) {
-              setLocalProducts(valid);
+              const sanitized = sanitizeCatalogProducts(valid);
+              setLocalProducts(sanitized);
               try {
-                localStorage.setItem("prince_cfa_products", JSON.stringify(valid));
+                localStorage.setItem("prince_cfa_products", JSON.stringify(sanitized));
               } catch (e) {
                 console.warn("Storage warning:", e);
               }
@@ -517,7 +536,7 @@ export default function Home() {
             // Fusionner Firebase avec les nouveaux produits par défaut non présents et non supprimés
             const existingIds = new Set(firebaseProducts.map((p: Product) => String(p.id)));
             const newDefaults = defaultProducts.filter(dp => !existingIds.has(String(dp.id)) && !deletedSet.has(String(dp.id)));
-            const combined = [...activeFirebase, ...newDefaults];
+            const combined = sanitizeCatalogProducts([...activeFirebase, ...newDefaults]);
             setLocalProducts(combined);
             try {
               localStorage.setItem("prince_cfa_products", JSON.stringify(combined));
@@ -569,7 +588,8 @@ export default function Home() {
             }).filter(Boolean) as Product[];
 
             if (migrated.length > 0) {
-              setLocalProducts(migrated);
+              const sanitizedMigrated = sanitizeCatalogProducts(migrated);
+              setLocalProducts(sanitizedMigrated);
               return;
             }
           }
@@ -578,8 +598,8 @@ export default function Home() {
         console.warn("Erreur fallback localStorage:", err);
       }
 
-      // 4. Fallback final infaillible : catalogue par défaut
-      setLocalProducts(defaultProducts);
+      // 4. Fallback final infaillible : catalogue par défaut assaini
+      setLocalProducts(sanitizeCatalogProducts(defaultProducts));
     }
     loadProducts();
   }, []);
@@ -789,7 +809,8 @@ export default function Home() {
     customPrice?: number,
     simType?: string
   ) => {
-    const chosenColor = color || product.colors?.[0] || '';
+    const isAndroid = isAndroidPhoneProduct(product);
+    const chosenColor = isAndroid ? '' : (color || product.colors?.[0] || '');
     const chosenCapacity = capacity || product.selectedCapacity || '';
     const chosenSimType = simType || product.selectedSimType || '';
     const finalPrice = customPrice !== undefined ? customPrice : product.price;

@@ -1,5 +1,6 @@
 import { getProducts as getFirestoreProducts, getOrders as getFirestoreOrders, getDeletedProductIds } from "./firestore.js";
 import { products as defaultProducts } from "../data/products.js";
+import { isAppleBrand } from "./productValidation.ts";
 
 // Cache mémoire serveur pour les produits du catalogue
 interface ProductsCacheEntry {
@@ -58,10 +59,18 @@ function sanitizeProductMedia(product: any): any {
     });
   }
 
+  // Mode Autres Marques (Android) : aucun choix de couleur (suppression systématique même pour l'existant)
+  const isAndroidPhone = (product.category === "phones" || !product.category) &&
+    !isAppleBrand(product.brand) &&
+    !Boolean(product.name && String(product.name).toLowerCase().includes("iphone"));
+
+  const colors = isAndroidPhone ? [] : (Array.isArray(product.colors) ? product.colors : []);
+
   return {
     ...product,
     image,
     images,
+    colors,
   };
 }
 

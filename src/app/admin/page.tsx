@@ -478,6 +478,7 @@ export default function AdminPage() {
         ...prev,
         brand: newBrand,
         shortDesc: "", // Suppression de la description courte
+        colors: "", // Suppression des couleurs pour Android
       }));
       setOtherFeatures([]); // Suppression des tags Apple
       setAppleVariants([]); // Suppression de la matrice croisée
@@ -513,7 +514,11 @@ export default function AdminPage() {
         ]);
       }
     } else {
-      setCommonFormData(prev => ({ ...prev, brand: newBrand }));
+      setCommonFormData(prev => ({ 
+        ...prev, 
+        brand: newBrand,
+        ...(formCategory === "phones" && !isNowApple ? { colors: "" } : {})
+      }));
     }
   };
 
@@ -1041,10 +1046,11 @@ export default function AdminPage() {
           if (prodData.products && Array.isArray(prodData.products) && prodData.products.length > 0) {
             const valid = prodData.products.filter((p: any) => p && p.id && p.name && typeof p.price === 'number');
             if (valid.length > 0) {
-              setProductsList(valid);
+              const normalizedList = valid.map(normalizeProductSpecs);
+              setProductsList(normalizedList);
               setIsCloud(true);
               try {
-                localStorage.setItem("prince_cfa_products", JSON.stringify(valid));
+                localStorage.setItem("prince_cfa_products", JSON.stringify(normalizedList));
               } catch {}
               return;
             }
@@ -1058,12 +1064,13 @@ export default function AdminPage() {
       try {
         const saved = localStorage.getItem("prince_cfa_products");
         if (saved) {
-          setProductsList(JSON.parse(saved));
+          const parsed = JSON.parse(saved);
+          setProductsList(Array.isArray(parsed) ? parsed.map(normalizeProductSpecs) : []);
         } else {
-          setProductsList(defaultProducts);
+          setProductsList((defaultProducts as any[]).map(normalizeProductSpecs));
         }
       } catch {
-        setProductsList(defaultProducts);
+        setProductsList((defaultProducts as any[]).map(normalizeProductSpecs));
       }
     }
 
@@ -1795,7 +1802,7 @@ export default function AdminPage() {
         : isOtherPhone && androidVariants.length > 0 && (!commonFormData.price || Number(commonFormData.price) <= 0)
         ? (Number(androidVariants[0].price) || Number(commonFormData.price) || 0)
         : commonFormData.price,
-      colors: isApple && allIPhoneColors.length > 0 ? allIPhoneColors : parsedColors,
+      colors: isOtherPhone ? [] : (isApple && allIPhoneColors.length > 0 ? allIPhoneColors : parsedColors),
       image: mainImage,
       images: allImages,
       imageBg: commonFormData.imageBg || "white",
@@ -2059,6 +2066,7 @@ export default function AdminPage() {
     }
 
     const isApple = (product.category || "phones") === "phones" && isAppleBrand(product.brand);
+    const isOtherPhone = (product.category || "phones") === "phones" && !isAppleBrand(product.brand);
     const prodVariants = (product as any).variants && Array.isArray((product as any).variants)
       ? (product as any).variants
       : [];
@@ -2149,7 +2157,6 @@ export default function AdminPage() {
       setSelectedCapacities(["128 Go", "256 Go", "512 Go", "1 To"]);
       setSelectedColors(["Titane Naturel", "Titane Noir"]);
 
-      const isOtherPhone = (product.category || "phones") === "phones" && !isAppleBrand(product.brand);
       if (isOtherPhone) {
         let loadedVariants: AndroidPhoneVariant[] = [];
         if (product.storageOptions && Array.isArray(product.storageOptions) && product.storageOptions.length > 0) {
@@ -2206,7 +2213,7 @@ export default function AdminPage() {
       salePrice: product.salePrice ? product.salePrice.toString() : "",
       shortDesc: (product as any).shortDesc || "",
       desc: product.desc || "",
-      colors: product.colors ? product.colors.join(", ") : "",
+      colors: isOtherPhone ? "" : (product.colors ? product.colors.join(", ") : ""),
       stock: (product.stock !== undefined ? product.stock : 99).toString(),
       stockStatus: ((product as any).stockStatus === "bientot_disponible" || (product as any).isComingSoon === true || (product as any).inStock === false || product.stock === 0)
         ? "bientot_disponible"
@@ -4158,72 +4165,74 @@ export default function AdminPage() {
                         </div>
                       </div>
 
-                      {/* Couleurs disponibles avec Nuancier Officiel Apple & Universel */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <label className="text-[11px] text-zinc-400 uppercase font-bold block">
-                            Couleurs disponibles
-                          </label>
-                          {commonFormData.colors && (
-                            <button
-                              type="button"
-                              onClick={() => setCommonFormData(prev => ({ ...prev, colors: "" }))}
-                              className="text-[10px] text-zinc-500 hover:text-red-400 underline cursor-pointer"
-                            >
-                              Tout effacer
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Palette interactive 1-clic des teintes Apple */}
-                        <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2">
-                          <span className="text-[10px] text-gold font-bold uppercase tracking-wider block">
-                            Palette officielle Apple (Cliquez pour ajouter / retirer en 1 clic) :
-                          </span>
-                          <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scrollbar p-1">
-                            {IPHONE_OFFICIAL_COLORS.map(c => {
-                              const activeColors = commonFormData.colors
-                                ? commonFormData.colors.split(",").map(x => x.trim().toLowerCase())
-                                : [];
-                              const isSelected = activeColors.includes(c.name.toLowerCase());
-                              return (
-                                <button
-                                  key={c.name}
-                                  type="button"
-                                  onClick={() => toggleOfficialColor(c.name)}
-                                  className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-all cursor-pointer ${
-                                    isSelected
-                                      ? "bg-gold/20 border-gold text-white shadow-[0_0_10px_rgba(212,175,55,0.3)] scale-[1.02]"
-                                      : "bg-white/5 border-white/10 text-zinc-300 hover:border-white/30 hover:text-white"
-                                  }`}
-                                >
-                                  <span 
-                                    className="w-3.5 h-3.5 rounded-full flex-shrink-0 border shadow-sm"
-                                    style={{ 
-                                      backgroundColor: c.hex, 
-                                      borderColor: c.border || "rgba(255,255,255,0.25)" 
-                                    }}
-                                  />
-                                  <span>{c.name}</span>
-                                  {isSelected && <span className="text-gold font-bold text-[10px]">✓</span>}
-                                </button>
-                              );
-                            })}
+                      {/* Couleurs disponibles avec Nuancier Officiel Apple & Universel (Masqué pour le mode Autres marques / Android) */}
+                      {!(formCategory === "phones" && !isAppleBrand(commonFormData.brand)) && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[11px] text-zinc-400 uppercase font-bold block">
+                              Couleurs disponibles
+                            </label>
+                            {commonFormData.colors && (
+                              <button
+                                type="button"
+                                onClick={() => setCommonFormData(prev => ({ ...prev, colors: "" }))}
+                                className="text-[10px] text-zinc-500 hover:text-red-400 underline cursor-pointer"
+                              >
+                                Tout effacer
+                              </button>
+                            )}
                           </div>
-                        </div>
 
-                        {/* Champ texte direct modifiable */}
-                        <input 
-                          type="text" 
-                          value={commonFormData.colors} 
-                          onChange={e => setCommonFormData({ ...commonFormData, colors: e.target.value })} 
-                          placeholder="Ex: Titane Naturel, Titane Noir, Blanc, Or" 
-                          className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold font-medium"
-                        />
-                        <p className="text-[10px] text-zinc-500">
-                          Sélectionnez les teintes ci-dessus ou saisissez vos couleurs personnalisées séparées par une virgule.
-                        </p>
-                      </div>
+                          {/* Palette interactive 1-clic des teintes Apple */}
+                          <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2">
+                            <span className="text-[10px] text-gold font-bold uppercase tracking-wider block">
+                              Palette officielle Apple (Cliquez pour ajouter / retirer en 1 clic) :
+                            </span>
+                            <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scrollbar p-1">
+                              {IPHONE_OFFICIAL_COLORS.map(c => {
+                                const activeColors = commonFormData.colors
+                                  ? commonFormData.colors.split(",").map(x => x.trim().toLowerCase())
+                                  : [];
+                                const isSelected = activeColors.includes(c.name.toLowerCase());
+                                return (
+                                  <button
+                                    key={c.name}
+                                    type="button"
+                                    onClick={() => toggleOfficialColor(c.name)}
+                                    className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-all cursor-pointer ${
+                                      isSelected
+                                        ? "bg-gold/20 border-gold text-white shadow-[0_0_10px_rgba(212,175,55,0.3)] scale-[1.02]"
+                                        : "bg-white/5 border-white/10 text-zinc-300 hover:border-white/30 hover:text-white"
+                                    }`}
+                                  >
+                                    <span 
+                                      className="w-3.5 h-3.5 rounded-full flex-shrink-0 border shadow-sm"
+                                      style={{ 
+                                        backgroundColor: c.hex, 
+                                        borderColor: c.border || "rgba(255,255,255,0.25)" 
+                                      }}
+                                    />
+                                    <span>{c.name}</span>
+                                    {isSelected && <span className="text-gold font-bold text-[10px]">✓</span>}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Champ texte direct modifiable */}
+                          <input 
+                            type="text" 
+                            value={commonFormData.colors} 
+                            onChange={e => setCommonFormData({ ...commonFormData, colors: e.target.value })} 
+                            placeholder="Ex: Titane Naturel, Titane Noir, Blanc, Or" 
+                            className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold font-medium"
+                          />
+                          <p className="text-[10px] text-zinc-500">
+                            Sélectionnez les teintes ci-dessus ou saisissez vos couleurs personnalisées séparées par une virgule.
+                          </p>
+                        </div>
+                      )}
 
                       {/* Garantie vendeur */}
                       <div>

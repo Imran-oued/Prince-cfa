@@ -60,11 +60,18 @@ export default function ProductDrawer({
   const currentProduct = product || cachedProduct;
 
   const isAppleProduct = (p) => {
-    if (!p || p.category !== 'phones') return false;
+    if (!p) return false;
+    const cat = p.category || 'phones';
+    if (cat !== 'phones') return false;
     return isAppleBrand(p.brand) || Boolean(p.name && p.name.toLowerCase().includes('iphone'));
   };
 
   const isIPhone = isAppleProduct(currentProduct);
+  const isOtherPhone = Boolean(
+    currentProduct &&
+    (currentProduct.category === 'phones' || !currentProduct.category) &&
+    !isIPhone
+  );
 
   const isComingSoon = Boolean(
     currentProduct?.stockStatus === 'bientot_disponible' ||
@@ -98,6 +105,10 @@ export default function ProductDrawer({
 
   const getInitialColor = (p) => {
     if (!p) return '';
+    // Mode Autres Marques (Android) : aucun choix de couleur
+    if ((p.category === 'phones' || !p.category) && !isAppleProduct(p)) {
+      return '';
+    }
     if (p.selectedColor && Array.isArray(p.colors) && p.colors.includes(p.selectedColor)) {
       return p.selectedColor;
     }
@@ -472,7 +483,7 @@ export default function ProductDrawer({
 
   // Couleurs disponibles selon le format SIM et la capacité sélectionnés
   const availableColorsForSelection = useMemo(() => {
-    if (!currentProduct?.colors) return [];
+    if (!currentProduct?.colors || isOtherPhone) return [];
 
     // Pour les iPhones : les couleurs ne sont visibles QUE si SIM ET Capacité sont choisies
     if (isIPhone && (!selectedSimType || !selectedCapacity)) {
@@ -491,11 +502,15 @@ export default function ProductDrawer({
       }
     }
     return currentProduct.colors;
-  }, [currentProduct, selectedSimType, selectedCapacity, isIPhone]);
+  }, [currentProduct, selectedSimType, selectedCapacity, isIPhone, isOtherPhone]);
 
   // Si la couleur active n'est pas disponible pour cette combinaison, basculer sur la première disponible
   useEffect(() => {
-    if (isIPhone) {
+    if (isOtherPhone) {
+      if (activeColor !== '') {
+        setActiveColor('');
+      }
+    } else if (isIPhone) {
       if (selectedSimType && selectedCapacity && availableColorsForSelection && availableColorsForSelection.length > 0) {
         const isCurrentActiveValid = availableColorsForSelection.some(
           c => c.toLowerCase() === (activeColor || '').toLowerCase()
@@ -518,7 +533,7 @@ export default function ProductDrawer({
         }
       }
     }
-  }, [availableColorsForSelection, activeColor, isIPhone, selectedSimType, selectedCapacity]);
+  }, [availableColorsForSelection, activeColor, isIPhone, isOtherPhone, selectedSimType, selectedCapacity]);
 
   // Si la capacité sélectionnée n'est pas disponible pour ce type de SIM, basculer sur la première disponible
   useEffect(() => {
@@ -743,7 +758,7 @@ export default function ProductDrawer({
     if (selectedCapacity) {
       message += `▪ *Capacité* : ${selectedCapacity}\n`;
     }
-    if (activeColor) {
+    if (activeColor && !isOtherPhone) {
       message += `▪ *Couleur sélectionnée* : ${activeColor}\n`;
     }
     message += `▪ *Prix* : ${currentPrice.toLocaleString('fr-FR')} FCFA\n\n`;
@@ -1547,7 +1562,7 @@ export default function ProductDrawer({
                 if (isIPhone && (!selectedSimType || !selectedCapacity)) {
                   return;
                 }
-                onAddToCart(currentProduct, activeColor, selectedCapacity, currentPrice, selectedSimType);
+                onAddToCart(currentProduct, isOtherPhone ? '' : activeColor, selectedCapacity, currentPrice, selectedSimType);
                 handleCleanClose();
               }}
               className={`flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border font-extrabold uppercase tracking-widest text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
