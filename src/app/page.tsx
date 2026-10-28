@@ -436,19 +436,13 @@ function ProductCardItem({
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
             {isComingSoon ? (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpen(product);
-                }}
-                className="py-2 px-3.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-700 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
-                title="Consulter et réserver ce produit"
-                aria-label="Consulter et réserver ce produit"
+              <span
+                className="py-2 px-3 rounded-xl bg-zinc-100 border border-zinc-200 text-zinc-400 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1 cursor-not-allowed select-none"
+                title="Produit temporairement indisponible"
               >
-                <span>⏳</span>
-                <span className="text-[11px] font-black">Bientôt dispo</span>
-              </button>
+                <span className="text-xs">⏳</span>
+                <span className="text-[10px] font-bold">Bientôt dispo</span>
+              </span>
             ) : (
               <button
                 type="button"

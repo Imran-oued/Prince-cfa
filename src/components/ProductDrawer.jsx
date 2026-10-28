@@ -588,27 +588,6 @@ export default function ProductDrawer({
     window.open(`https://wa.me/${phoneNumber}?text=${encoded}`, '_blank');
   };
 
-  // Réservation / Alerte WhatsApp si le produit est marqué comme bientôt disponible
-  const handleReserveWhatsApp = () => {
-    if (!currentProduct) return;
-    const phoneNumber = SHOP_CONFIG.whatsappNumber;
-    let message = "👑 *PRÉCOMMANDE / RÉSERVATION - PRINCE CFA* 👑\n\n";
-    message += `▪ *Produit* : ${currentProduct.name}\n`;
-    if (selectedSimType) {
-      message += `▪ *Format SIM souhaité* : ${selectedSimType}\n`;
-    }
-    if (selectedCapacity) {
-      message += `▪ *Capacité souhaitée* : ${selectedCapacity}\n`;
-    }
-    if (activeColor) {
-      message += `▪ *Couleur souhaitée* : ${activeColor}\n`;
-    }
-    message += `▪ *Prix indicatif* : ${currentPrice.toLocaleString('fr-FR')} FCFA\n\n`;
-    message += "Bonjour Prince CFA, cet article est indiqué comme *bientôt disponible*. Je souhaite réserver mon exemplaire en priorité dès son arrivée en boutique !";
-
-    const encoded = encodeURIComponent(message);
-    window.open(`https://wa.me/${phoneNumber}?text=${encoded}`, '_blank');
-  };
 
   if (!currentProduct) return null;
   if (!isOpen && !slideIn) return null;
@@ -821,16 +800,16 @@ export default function ProductDrawer({
             </div>
           </div>
 
-          {/* Bannière VIP Produit bientôt disponible */}
+          {/* Bannière Produit bientôt disponible */}
           {isComingSoon && (
-            <div className="p-4 rounded-2xl bg-amber-500/[0.08] border-2 border-amber-500/30 flex items-start gap-3 shadow-sm">
+            <div className="p-4 rounded-2xl bg-amber-500/[0.08] border border-amber-500/25 flex items-start gap-3 shadow-sm">
               <span className="text-2xl flex-shrink-0">⏳</span>
               <div className="space-y-1">
                 <h3 className="text-xs font-black text-amber-900 uppercase tracking-wider">
-                  Produit bientôt disponible — Arrivage imminent
+                  Produit bientôt disponible
                 </h3>
                 <p className="text-xs text-zinc-600 leading-relaxed">
-                  Cet article est actuellement en cours de réapprovisionnement dans notre boutique à Ouagadougou. Vous pouvez réserver votre exemplaire en priorité ou être alerté dès réception via WhatsApp.
+                  Cet article est actuellement en rupture temporaire de stock dans notre boutique. Il sera de nouveau disponible très prochainement.
                 </p>
               </div>
             </div>
@@ -1430,15 +1409,15 @@ export default function ProductDrawer({
             </span>
           </div>
 
-          {/* Bouton d'action adapté : Réservation WhatsApp si bientôt disponible, sinon Ajout Panier */}
+          {/* Bouton d'action : Désactivé si bientôt disponible, sinon Ajout Panier */}
           {isComingSoon ? (
             <button
               type="button"
-              onClick={handleReserveWhatsApp}
-              className="flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-black font-extrabold uppercase tracking-widest text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] hover:brightness-105 active:scale-[0.98] cursor-pointer"
+              disabled
+              className="flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-400 font-extrabold uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center gap-2 cursor-not-allowed shadow-none"
             >
-              <span className="text-base">📲</span>
-              <span>Réserver sur WhatsApp</span>
+              <span className="text-sm">⏳</span>
+              <span>Bientôt disponible</span>
             </button>
           ) : (
             <button 
