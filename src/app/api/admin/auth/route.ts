@@ -42,14 +42,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // Génération d'un token HMAC-SHA256 sécurisé avec expiration 24h
+    // Génération d'un token HMAC-SHA256 sécurisé
     const token = generateAdminToken();
     const cookieStore = await cookies();
     cookieStore.set(ADMIN_COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 60 * 60 * 24, // 24 heures
       path: "/"
     });
 
@@ -69,13 +68,19 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    // Exiger le jeton Bearer actif de l'onglet courant pour valider la session
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ authenticated: false }, { status: 401 });
+    }
+
     const isAuthorized = await verifyAdminAuth(request);
     if (!isAuthorized) {
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
     const cookieStore = await cookies();
-    const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value || "";
+    const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value || authHeader.substring(7).trim();
     return NextResponse.json({ authenticated: true, token });
   } catch (error) {
     console.error("GET /api/admin/auth error:", error);

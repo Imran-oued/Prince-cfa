@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import { 
   generateAdminToken, 
   validateAdminToken, 
@@ -154,4 +155,43 @@ test("8. Admin session token validation supports instant authentication checks",
   const reqUnauth = new Request("http://localhost/api/admin/auth");
   const unauthorized = await verifyAdminAuth(reqUnauth);
   assert.equal(unauthorized, false, "Request without token or cookie must be rejected");
+});
+
+test("9. Admin token strictly expires after 4 hours TTL", () => {
+  // Simuler un token généré il y a 4 heures et 1 minute
+  const oldTimestamp = (Date.now() - (4 * 60 * 60 * 1000 + 60000)).toString(36);
+  const nonce = "a1b2c3d4e5f60718";
+  const payload = `${oldTimestamp}.${nonce}`;
+  
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin";
+  const AUTH_SECRET = process.env.ADMIN_JWT_SECRET || `${ADMIN_PASSWORD}:prince_cfa_secure_key_2026`;
+  const signature = crypto.createHmac("sha256", AUTH_SECRET).update(payload).digest("hex");
+  const expiredToken = `adm.${payload}.${signature}`;
+
+  assert.equal(validateAdminToken(expiredToken), false, "Token older than 4 hours must be strictly rejected");
+});
+
+test("10. Active session check strictly requires Authorization Bearer token to prevent auto-login", () => {
+  // Simuler la logique de vérification de session active dans /api/admin/auth
+  function checkSessionAuthHeader(authHeader) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return { authenticated: false, status: 401 };
+    }
+    const token = authHeader.substring(7).trim();
+    if (!validateAdminToken(token)) {
+      return { authenticated: false, status: 401 };
+    }
+    return { authenticated: true, status: 200 };
+  }
+
+  // Sans token Bearer (cas où l'admin ouvre un nouvel onglet sans sessionStorage actif)
+  const emptyRes = checkSessionAuthHeader(null);
+  assert.equal(emptyRes.status, 401);
+  assert.equal(emptyRes.authenticated, false, "Must reject request without active session Bearer");
+
+  // Avec un token Bearer valide
+  const validToken = generateAdminToken();
+  const validRes = checkSessionAuthHeader(`Bearer ${validToken}`);
+  assert.equal(validRes.status, 200);
+  assert.equal(validRes.authenticated, true, "Must accept request with valid session Bearer");
 });

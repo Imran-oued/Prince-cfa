@@ -4,8 +4,8 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin";
 const AUTH_SECRET = process.env.ADMIN_JWT_SECRET || `${ADMIN_PASSWORD}:prince_cfa_secure_key_2026`;
 export const ADMIN_COOKIE_NAME = "prince_cfa_admin_auth";
 
-// Durée de validité du token admin : 24 heures
-const TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+// Durée de validité du token admin : 4 heures (session de travail sécurisée)
+const TOKEN_TTL_MS = 4 * 60 * 60 * 1000;
 
 async function getCookieStore() {
   try {

@@ -987,7 +987,7 @@ export default function AdminPage() {
     </div>
   );
 
-  // 1. Vérification ultra-rapide de session active à l'ouverture de la page (< 50ms)
+  // 1. Vérification sécurisée de session active à l'ouverture de la page
   useEffect(() => {
     if (typeof document !== "undefined") {
       document.title = "Prince CFA Admin";
@@ -995,9 +995,20 @@ export default function AdminPage() {
 
     async function checkAuthSession() {
       const storedToken = typeof window !== "undefined" ? sessionStorage.getItem("prince_cfa_admin_token") : null;
+      
+      // Si aucun jeton actif n'est présent dans la session de cet onglet (l'utilisateur a fermé ou quitté l'admin) :
+      // On exige impérativement la saisie du mot de passe.
+      if (!storedToken) {
+        setIsCheckingAuth(false);
+        try {
+          fetch("/api/admin/auth", { method: "DELETE" }).catch(() => {});
+        } catch {}
+        return;
+      }
+
       try {
         const res = await fetch("/api/admin/auth", {
-          headers: storedToken ? { Authorization: `Bearer ${storedToken}` } : {}
+          headers: { Authorization: `Bearer ${storedToken}` }
         });
         if (res.ok) {
           const data = await res.json();
@@ -1006,13 +1017,21 @@ export default function AdminPage() {
             setAdminToken(token);
             setIsAuthenticated(true);
             setIsCloud(true);
-            if (token && typeof window !== "undefined") {
-              sessionStorage.setItem("prince_cfa_admin_token", token);
+          } else {
+            if (typeof window !== "undefined") {
+              sessionStorage.removeItem("prince_cfa_admin_token");
             }
+            setIsAuthenticated(false);
           }
+        } else {
+          if (typeof window !== "undefined") {
+            sessionStorage.removeItem("prince_cfa_admin_token");
+          }
+          setIsAuthenticated(false);
         }
       } catch (err) {
         console.warn("Vérification session:", err);
+        setIsAuthenticated(false);
       } finally {
         setIsCheckingAuth(false);
       }
@@ -1136,6 +1155,38 @@ export default function AdminPage() {
     setOrdersList([]);
     setSelectedOrder(null);
   };
+
+  // Déconnexion automatique de sécurité après 30 minutes d'inactivité
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+    let timer: ReturnType<typeof setTimeout>;
+
+    const logoutDueToInactivity = () => {
+      handleLogout();
+      setError("Votre session a expiré après 30 minutes d'inactivité. Veuillez vous reconnecter.");
+    };
+
+    const resetInactivityTimer = () => {
+      clearTimeout(timer);
+      timer = setTimeout(logoutDueToInactivity, INACTIVITY_TIMEOUT_MS);
+    };
+
+    resetInactivityTimer();
+
+    const activityEvents = ["mousedown", "mousemove", "keydown", "touchstart", "scroll", "click"];
+    activityEvents.forEach((evt) => {
+      window.addEventListener(evt, resetInactivityTimer, { passive: true });
+    });
+
+    return () => {
+      clearTimeout(timer);
+      activityEvents.forEach((evt) => {
+        window.removeEventListener(evt, resetInactivityTimer);
+      });
+    };
+  }, [isAuthenticated]);
 
   // Recharger manuellement les commandes via l'API sécurisée
   const refreshOrders = async () => {
@@ -2533,7 +2584,12 @@ export default function AdminPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/" className="px-4 py-2 rounded-lg bg-zinc-100 text-zinc-700 text-xs sm:text-sm hover:text-zinc-900 hover:bg-zinc-200 transition-colors border border-zinc-200 font-medium">
+          <Link 
+            href="/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="px-4 py-2 rounded-lg bg-zinc-100 text-zinc-700 text-xs sm:text-sm hover:text-zinc-900 hover:bg-zinc-200 transition-colors border border-zinc-200 font-medium"
+          >
             Boutique ↗
           </Link>
           <button 
