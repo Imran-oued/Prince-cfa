@@ -435,8 +435,8 @@ export default function AdminPage() {
   // Configuration professionnelle des variantes SIM pour téléphones (notamment iPhones)
   const DEFAULT_SIM_PRICING: Record<string, { enabled: boolean; delta: number; label: string }> = {
     sim_and_esim: { enabled: true, delta: 0, label: "1 e-sim+1 sim physique" },
-    dual_sim_physical: { enabled: true, delta: 30000, label: "double sim physique" },
-    esim_only: { enabled: true, delta: -20000, label: "e-sim" },
+    dual_sim_physical: { enabled: false, delta: 0, label: "double sim physique" },
+    esim_only: { enabled: false, delta: 0, label: "e-sim" },
   };
 
   const [simPricing, setSimPricing] = useState<Record<string, { enabled: boolean; delta: number; label: string }>>(DEFAULT_SIM_PRICING);
@@ -2058,9 +2058,9 @@ export default function AdminPage() {
 
     if (product.simPricing && typeof product.simPricing === "object") {
       setSimPricing({
-        sim_and_esim: product.simPricing.sim_and_esim ? { ...product.simPricing.sim_and_esim, label: "1 e-sim+1 sim physique" } : { enabled: true, delta: 0, label: "1 e-sim+1 sim physique" },
-        dual_sim_physical: product.simPricing.dual_sim_physical ? { ...product.simPricing.dual_sim_physical, label: "double sim physique" } : { enabled: true, delta: 30000, label: "double sim physique" },
-        esim_only: product.simPricing.esim_only ? { ...product.simPricing.esim_only, label: "e-sim" } : { enabled: true, delta: -20000, label: "e-sim" },
+        sim_and_esim: product.simPricing.sim_and_esim ? { ...product.simPricing.sim_and_esim, label: "1 e-sim+1 sim physique" } : { enabled: false, delta: 0, label: "1 e-sim+1 sim physique" },
+        dual_sim_physical: product.simPricing.dual_sim_physical ? { ...product.simPricing.dual_sim_physical, label: "double sim physique" } : { enabled: false, delta: 0, label: "double sim physique" },
+        esim_only: product.simPricing.esim_only ? { ...product.simPricing.esim_only, label: "e-sim" } : { enabled: false, delta: 0, label: "e-sim" },
       });
     } else {
       setSimPricing(DEFAULT_SIM_PRICING);
@@ -2148,13 +2148,13 @@ export default function AdminPage() {
             capacities: initialCaps,
           },
         ]);
-        setSelectedSims(["sim_and_esim", "dual_sim_physical", "esim_only"]);
+        setSelectedSims(["sim_and_esim"]);
         const caps = initialStorage.map(s => s.capacity).filter(Boolean);
         setSelectedCapacities(caps.length > 0 ? caps : ["128 Go", "256 Go", "512 Go", "1 To"]);
         setSelectedColors(product.colors && product.colors.length > 0 ? product.colors : ["Titane Naturel", "Titane Noir"]);
       }
     } else {
-      setSelectedSims(["sim_and_esim", "dual_sim_physical", "esim_only"]);
+      setSelectedSims(["sim_and_esim"]);
       setSelectedCapacities(["128 Go", "256 Go", "512 Go", "1 To"]);
       setSelectedColors(["Titane Naturel", "Titane Noir"]);
 

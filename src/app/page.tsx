@@ -583,6 +583,13 @@ export default function Home() {
                 if (!updatedProduct.specs) updatedProduct.specs = defaultMatch.specs;
                 if (!updatedProduct.desc) updatedProduct.desc = defaultMatch.desc;
                 if (!updatedProduct.brand && defaultMatch.brand) updatedProduct.brand = defaultMatch.brand;
+                if (!updatedProduct.shortDesc && defaultMatch.shortDesc) updatedProduct.shortDesc = defaultMatch.shortDesc;
+                if (defaultMatch.variants && (!updatedProduct.variants || updatedProduct.variants.length === 0)) {
+                  updatedProduct.variants = defaultMatch.variants;
+                }
+                if (defaultMatch.simPricing && (!updatedProduct.simPricing || Object.keys(updatedProduct.simPricing).length === 0)) {
+                  updatedProduct.simPricing = defaultMatch.simPricing;
+                }
                 if (defaultMatch.storageOptions && (!p.storageOptions || p.storageOptions.length <= 1)) {
                   updatedProduct.storageOptions = defaultMatch.storageOptions;
                 }

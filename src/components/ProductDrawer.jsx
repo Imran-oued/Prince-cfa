@@ -127,7 +127,20 @@ export default function ProductDrawer({
     }
     if (p.selectedSimType) return p.selectedSimType;
     if (isAppleProduct(p)) {
-      // Pour les iPhones : aucun pré-choix obligatoire, l'utilisateur doit choisir
+      if (p.variants && Array.isArray(p.variants) && p.variants.length > 0) {
+        const uniqueSims = Array.from(new Set(
+          p.variants.filter(v => v.active !== false).map(v => formatCleanSimLabel(v.simType || v.simTypeId)).filter(Boolean)
+        ));
+        if (uniqueSims.length === 1) {
+          return uniqueSims[0];
+        }
+      }
+      if (p.simPricing && typeof p.simPricing === 'object') {
+        const activeEntries = Object.entries(p.simPricing).filter(([_, conf]) => conf && conf.enabled === true);
+        if (activeEntries.length === 1) {
+          return formatCleanSimLabel(activeEntries[0][1].label || activeEntries[0][0]);
+        }
+      }
       return '';
     }
     return '';
@@ -353,7 +366,7 @@ export default function ProductDrawer({
   };
 
 
-  // Formats SIM disponibles pour téléphones (1 e-sim+1 sim physique, double sim physique, e-sim)
+  // Formats SIM disponibles pour téléphones (strictement basés sur les configurations administrateur)
   const availableSimTypes = useMemo(() => {
     if (!currentProduct || currentProduct.category !== 'phones') return [];
     // Pour les smartphones Android : aucun format SIM disponible
@@ -361,9 +374,11 @@ export default function ProductDrawer({
 
     // Priorité 1 : Variantes explicites configurées par l'administrateur
     if (currentProduct.variants && Array.isArray(currentProduct.variants) && currentProduct.variants.length > 0) {
+      const activeVars = currentProduct.variants.filter(v => v && v.active !== false);
       const simsMap = new Map();
-      currentProduct.variants.forEach(v => {
+      activeVars.forEach(v => {
         const rawLabel = v.simType || v.simTypeId;
+        if (!rawLabel) return;
         const cleanLabel = formatCleanSimLabel(rawLabel);
         const key = v.simTypeId || cleanLabel;
         if (!simsMap.has(cleanLabel)) {
@@ -377,10 +392,10 @@ export default function ProductDrawer({
       if (simsMap.size > 0) return Array.from(simsMap.values());
     }
 
-    // Priorité 2 : Configuration simPricing
+    // Priorité 2 : Configuration simPricing (uniquement les formats explicitement activés à true)
     if (currentProduct.simPricing && typeof currentProduct.simPricing === 'object') {
       const entries = Object.entries(currentProduct.simPricing)
-        .filter(([_, conf]) => conf && conf.enabled !== false)
+        .filter(([_, conf]) => conf && conf.enabled === true)
         .map(([key, conf]) => ({
           id: key,
           label: formatCleanSimLabel(conf.label || key),
@@ -389,12 +404,21 @@ export default function ProductDrawer({
       if (entries.length > 0) return entries;
     }
 
-    // Fallback par défaut uniquement pour iPhone
+    // Priorité 3 : Format unique hérité de specs ou selectedSimType
+    const singleSim = currentProduct.selectedSimType || currentProduct.specs?.simFormat || currentProduct.specs?.sim;
+    if (singleSim) {
+      const cleanLabel = formatCleanSimLabel(String(singleSim));
+      return [{
+        id: cleanLabel,
+        label: cleanLabel,
+        delta: 0
+      }];
+    }
+
+    // Fallback par défaut uniquement pour iPhone : 1 seul format standard, JAMAIS de faux formats fantômes (+30k / -20k)
     if (isIPhone) {
       return [
-        { id: 'sim_and_esim', label: '1 e-sim+1 sim physique', delta: 0 },
-        { id: 'dual_sim_physical', label: 'double sim physique', delta: 30000 },
-        { id: 'esim_only', label: 'e-sim', delta: -20000 },
+        { id: 'sim_and_esim', label: '1 e-sim+1 sim physique', delta: 0 }
       ];
     }
     return [];
@@ -565,6 +589,31 @@ export default function ProductDrawer({
       }
     }
   }, [isIPhone, selectedSimType, availableCapacities, selectedCapacity]);
+
+  // Synchronisation automatique du format SIM selon les choix réels configurés dans l'admin
+  useEffect(() => {
+    if (isOtherPhone) {
+      if (selectedSimType !== '') setSelectedSimType('');
+      return;
+    }
+
+    if (isIPhone && availableSimTypes.length > 0) {
+      // Cas 1 : Exactement 1 format SIM configuré (ex: 1 e-sim+1 sim physique uniquement)
+      if (availableSimTypes.length === 1) {
+        if (selectedSimType !== availableSimTypes[0].label) {
+          setSelectedSimType(availableSimTypes[0].label);
+        }
+      } else if (selectedSimType) {
+        // Cas 2 : Plusieurs formats, vérifier si le format actuellement actif existe toujours
+        const isValid = availableSimTypes.some(
+          sim => isSimTypeMatch(sim.label, selectedSimType) || isSimTypeMatch(sim.id, selectedSimType)
+        );
+        if (!isValid) {
+          setSelectedSimType('');
+        }
+      }
+    }
+  }, [isIPhone, isOtherPhone, availableSimTypes, selectedSimType]);
 
   const drawerRef = useRef(null);
   const backdropRef = useRef(null);
@@ -1117,7 +1166,9 @@ export default function ProductDrawer({
                   >
                     1. Format SIM {selectedSimType ? <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">: {selectedSimType}</span> : <span className="text-amber-600 text-[11px] font-semibold normal-case ml-1">(Étape 1 : Requis)</span>}
                   </label>
-                  <span className="text-[11px] text-zinc-400 font-medium">{availableSimTypes.length} formats</span>
+                  <span className="text-[11px] text-zinc-400 font-medium">
+                    {availableSimTypes.length} {availableSimTypes.length > 1 ? 'formats' : 'format'}
+                  </span>
                 </div>
 
                 <div className="relative">
@@ -1127,7 +1178,9 @@ export default function ProductDrawer({
                     onChange={(e) => setSelectedSimType(e.target.value)}
                     className="w-full bg-zinc-50 hover:bg-zinc-100 border-2 border-zinc-200 focus:border-gold rounded-2xl px-4 py-3 text-sm font-bold text-zinc-900 outline-none transition-all cursor-pointer appearance-none pr-10 shadow-sm"
                   >
-                    <option value="">— Veuillez choisir le format de SIM —</option>
+                    {availableSimTypes.length > 1 && (
+                      <option value="">— Veuillez choisir le format de SIM —</option>
+                    )}
                     {availableSimTypes.map((sim) => {
                       const priceNote = sim.delta > 0 
                         ? ` (+${sim.delta.toLocaleString('fr-FR')} FCFA)` 
@@ -1331,7 +1384,9 @@ export default function ProductDrawer({
                     >
                       Format SIM : <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">{selectedSimType}</span>
                     </label>
-                    <span className="text-[11px] text-zinc-400 font-medium">{availableSimTypes.length} formats</span>
+                    <span className="text-[11px] text-zinc-400 font-medium">
+                      {availableSimTypes.length} {availableSimTypes.length > 1 ? 'formats' : 'format'}
+                    </span>
                   </div>
 
                   <div className="relative">

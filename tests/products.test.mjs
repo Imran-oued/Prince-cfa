@@ -725,5 +725,36 @@ test("16. Android phones: SIM format, simPricing, and colors are strictly stripp
   assert.equal(iphoneCleaned.cleanedProduct.specs.simFormat, "dual_sim_physical");
 });
 
+test("17. iPhone Single SIM configuration strictly limits options without phantom formats", () => {
+  const singleSimIphone = {
+    name: "iPhone 12",
+    category: "phones",
+    brand: "Iphones",
+    price: 130000,
+    desc: "iPhone 12 avec puce A14 Bionic et écran OLED Super Retina.",
+    colors: ["Bleu", "Noir"],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: "1 e-sim+1 sim physique" }
+    },
+    variants: [
+      { id: "var-1", simType: "1 e-sim+1 sim physique", simTypeId: "sim_and_esim", storage: "64 Go", color: "Bleu", price: 130000, active: true },
+      { id: "var-2", simType: "1 e-sim+1 sim physique", simTypeId: "sim_and_esim", storage: "64 Go", color: "Noir", price: 130000, active: true },
+    ],
+    specs: {
+      storage: "64 Go",
+      simFormat: "sim_and_esim"
+    }
+  };
+
+  const cleaned = validateAndCleanProduct(singleSimIphone);
+  assert.equal(cleaned.isValid, true);
+  assert.ok(cleaned.cleanedProduct.variants);
+  assert.equal(cleaned.cleanedProduct.variants.length, 2);
+
+  const uniqueSimTypes = Array.from(new Set(cleaned.cleanedProduct.variants.map(v => v.simType)));
+  assert.deepEqual(uniqueSimTypes, ["1 e-sim+1 sim physique"], "Doit contenir uniquement le format SIM configuré dans l'admin");
+  assert.equal(uniqueSimTypes.length, 1, "Un seul format SIM configuré dans l'admin ne doit pas en inventer d'autres");
+});
+
 
 
