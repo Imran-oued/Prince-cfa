@@ -676,4 +676,54 @@ test("15. Android Phone Storage & RAM Multi-Price Variants", () => {
   assert.equal(res.cleanedProduct.storageOptions[2].price, 890000);
 });
 
+test("16. Android phones: SIM format, simPricing, and colors are strictly stripped while iPhone retains them", () => {
+  // Produit Android avec SIM et simPricing injectés
+  const androidWithSim = {
+    name: "Redmi Note 13 Pro 5G",
+    category: "phones",
+    brand: "Redmi",
+    price: 185000,
+    desc: "Smartphone Redmi Note 13 Pro 5G avec capteur 200MP et charge 67W.",
+    colors: ["Noir", "Bleu"],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: "1 e-sim+1 sim physique" }
+    },
+    specs: {
+      storage: "256 Go",
+      ram: 8,
+      simFormat: "dual_sim_physical"
+    }
+  };
+
+  const androidCleaned = validateAndCleanProduct(androidWithSim);
+  assert.equal(androidCleaned.isValid, true, `Validation Android: ${androidCleaned.errorList?.join(", ")}`);
+  assert.deepEqual(androidCleaned.cleanedProduct.colors, [], "Les couleurs doivent être vides pour Android");
+  assert.equal(androidCleaned.cleanedProduct.simPricing, undefined, "simPricing doit être indéfini pour Android");
+  assert.equal(androidCleaned.cleanedProduct.specs.simFormat, undefined, "specs.simFormat doit être supprimé pour Android");
+
+  // Produit Apple iPhone : doit conserver les informations SIM
+  const iphoneWithSim = {
+    name: "iPhone 15 Pro",
+    category: "phones",
+    brand: "Apple",
+    price: 750000,
+    desc: "iPhone 15 Pro en titane d'origine avec puce A17 Pro.",
+    colors: ["Titane Naturel"],
+    simPricing: {
+      dual_sim_physical: { enabled: true, delta: 30000, label: "double sim physique" }
+    },
+    specs: {
+      storage: "128 Go",
+      simFormat: "dual_sim_physical"
+    }
+  };
+
+  const iphoneCleaned = validateAndCleanProduct(iphoneWithSim);
+  assert.equal(iphoneCleaned.isValid, true, `Validation iPhone: ${iphoneCleaned.errorList?.join(", ")}`);
+  assert.deepEqual(iphoneCleaned.cleanedProduct.colors, ["Titane Naturel"]);
+  assert.ok(iphoneCleaned.cleanedProduct.simPricing);
+  assert.equal(iphoneCleaned.cleanedProduct.specs.simFormat, "dual_sim_physical");
+});
+
+
 

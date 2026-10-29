@@ -273,6 +273,12 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
     cleanedSpecs.battery = cleanedSpecs.batteryCapacity;
   }
 
+  // Pour les téléphones autres marques (Android) : aucun format de SIM dans les spécifications
+  if (!isApple && (category === "phones" || !category)) {
+    delete cleanedSpecs.simFormat;
+    delete (cleanedSpecs as any).sim;
+  }
+
   // 3. Traitement des variantes de stockage (ex: iPhones, smartphones Android, tablettes)
   let cleanedStorageOptions: Array<{ capacity: string; price: number; storage?: string; ram?: number | string }> = [];
   if (catConfig.supportsStorageVariants && Array.isArray(raw.storageOptions)) {
@@ -286,9 +292,9 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
       .filter(opt => opt.capacity !== "" && opt.price >= 0);
   }
 
-  // 4. Traitement de la tarification par type de SIM (iPhones)
+  // 4. Traitement de la tarification par type de SIM (exclusivement iPhones)
   let cleanedSimPricing: Record<string, { enabled: boolean; delta: number; label: string }> | undefined = undefined;
-  if (raw.simPricing && typeof raw.simPricing === "object") {
+  if (isApple && raw.simPricing && typeof raw.simPricing === "object") {
     cleanedSimPricing = {};
     for (const [key, val] of Object.entries(raw.simPricing)) {
       if (val && typeof val === "object") {
@@ -457,6 +463,20 @@ export function normalizeProductSpecs(product: any): any {
     if (typeof copy.specs.max_speed === "string" && !copy.specs.maxSpeedKm) {
       const match = copy.specs.max_speed.match(/(\d+)/);
       if (match) copy.specs.maxSpeedKm = parseInt(match[1], 10);
+    }
+  }
+
+  // Mode Autres Marques (Android) : supprimer format de SIM et couleurs
+  const isAndroidPhone = (copy.category === "phones" || !copy.category) &&
+    !isAppleBrand(copy.brand) &&
+    !Boolean(copy.name && String(copy.name).toLowerCase().includes("iphone"));
+
+  if (isAndroidPhone) {
+    delete copy.simPricing;
+    delete copy.selectedSimType;
+    if (copy.specs) {
+      delete copy.specs.simFormat;
+      delete copy.specs.sim;
     }
   }
 

@@ -106,7 +106,17 @@ function sanitizeCatalogProducts(prods: Product[]): Product[] {
   return prods.map(p => {
     if (!p) return p;
     if (isAndroidPhoneProduct(p)) {
-      return { ...p, colors: [] };
+      const { selectedSimType, simPricing, ...rest } = p as any;
+      const specs = p.specs ? { ...p.specs } : undefined;
+      if (specs) {
+        delete (specs as any).simFormat;
+        delete (specs as any).sim;
+      }
+      return { 
+        ...rest, 
+        colors: [],
+        ...(specs ? { specs } : {})
+      };
     }
     return p;
   });
@@ -812,7 +822,7 @@ export default function Home() {
     const isAndroid = isAndroidPhoneProduct(product);
     const chosenColor = isAndroid ? '' : (color || product.colors?.[0] || '');
     const chosenCapacity = capacity || product.selectedCapacity || '';
-    const chosenSimType = simType || product.selectedSimType || '';
+    const chosenSimType = isAndroid ? '' : (simType || product.selectedSimType || '');
     const finalPrice = customPrice !== undefined ? customPrice : product.price;
     
     const cartId = [product.id, chosenColor, chosenCapacity, chosenSimType].filter(Boolean).join('-');

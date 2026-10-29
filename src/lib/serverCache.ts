@@ -59,19 +59,32 @@ function sanitizeProductMedia(product: any): any {
     });
   }
 
-  // Mode Autres Marques (Android) : aucun choix de couleur (suppression systématique même pour l'existant)
+  // Mode Autres Marques (Android) : aucun choix de couleur ni format de SIM (suppression systématique même pour l'existant)
   const isAndroidPhone = (product.category === "phones" || !product.category) &&
     !isAppleBrand(product.brand) &&
     !Boolean(product.name && String(product.name).toLowerCase().includes("iphone"));
 
   const colors = isAndroidPhone ? [] : (Array.isArray(product.colors) ? product.colors : []);
 
-  return {
+  const cleaned = {
     ...product,
     image,
     images,
     colors,
   };
+
+  if (isAndroidPhone) {
+    delete cleaned.simPricing;
+    delete cleaned.selectedSimType;
+    if (cleaned.specs) {
+      const sp = { ...cleaned.specs };
+      delete sp.simFormat;
+      delete sp.sim;
+      cleaned.specs = sp;
+    }
+  }
+
+  return cleaned;
 }
 
 /**

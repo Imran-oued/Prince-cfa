@@ -121,17 +121,14 @@ export default function ProductDrawer({
 
   const getInitialSimType = (p) => {
     if (!p) return '';
+    // Pour les téléphones autres marques (Android) : aucun choix ni mention de format SIM
+    if ((p.category === 'phones' || !p.category) && !isAppleProduct(p)) {
+      return '';
+    }
     if (p.selectedSimType) return p.selectedSimType;
     if (isAppleProduct(p)) {
       // Pour les iPhones : aucun pré-choix obligatoire, l'utilisateur doit choisir
       return '';
-    }
-    if (p.category === 'phones') {
-      if (p.simPricing && typeof p.simPricing === 'object') {
-        const first = Object.entries(p.simPricing).find(([_, conf]) => conf?.enabled !== false);
-        if (first && first[1]?.label) return formatCleanSimLabel(first[1].label);
-      }
-      return '1 e-sim+1 sim physique';
     }
     return '';
   };
@@ -198,6 +195,7 @@ export default function ProductDrawer({
     const catConfig = getCategoryConfig(currentProduct.category);
     if (catConfig && catConfig.fields && currentProduct.specs) {
       catConfig.fields.forEach(field => {
+        if (isOtherPhone && (field.key === 'simFormat' || field.key === 'sim')) return;
         const val = currentProduct.specs[field.key];
         if (val !== undefined && val !== null && String(val).trim() !== '') {
           let displayVal = String(val);
@@ -218,6 +216,7 @@ export default function ProductDrawer({
       const officialKeys = catConfig?.fields ? catConfig.fields.map(f => f.key) : [];
       const handledKeys = [...officialKeys, 'info'];
       Object.entries(currentProduct.specs).forEach(([k, v]) => {
+        if (isOtherPhone && (k.toLowerCase().includes('sim') || k === 'simFormat')) return;
         if (!handledKeys.includes(k) && v !== undefined && v !== null && String(v).trim() !== '' && typeof v !== 'object') {
           const label = SPEC_LABELS[k] || k.replace(/_/g, ' ');
           details.push({ label, value: String(v) });
@@ -236,7 +235,7 @@ export default function ProductDrawer({
     }
 
     return details;
-  }, [currentProduct, selectedCapacity]);
+  }, [currentProduct, selectedCapacity, isOtherPhone]);
 
   const visibleDetails = showAllSpecs ? technicalDetails : technicalDetails.slice(0, 7);
 
@@ -357,6 +356,8 @@ export default function ProductDrawer({
   // Formats SIM disponibles pour téléphones (1 e-sim+1 sim physique, double sim physique, e-sim)
   const availableSimTypes = useMemo(() => {
     if (!currentProduct || currentProduct.category !== 'phones') return [];
+    // Pour les smartphones Android : aucun format SIM disponible
+    if (isOtherPhone) return [];
 
     // Priorité 1 : Variantes explicites configurées par l'administrateur
     if (currentProduct.variants && Array.isArray(currentProduct.variants) && currentProduct.variants.length > 0) {
@@ -387,12 +388,17 @@ export default function ProductDrawer({
         }));
       if (entries.length > 0) return entries;
     }
-    return [
-      { id: 'sim_and_esim', label: '1 e-sim+1 sim physique', delta: 0 },
-      { id: 'dual_sim_physical', label: 'double sim physique', delta: 30000 },
-      { id: 'esim_only', label: 'e-sim', delta: -20000 },
-    ];
-  }, [currentProduct]);
+
+    // Fallback par défaut uniquement pour iPhone
+    if (isIPhone) {
+      return [
+        { id: 'sim_and_esim', label: '1 e-sim+1 sim physique', delta: 0 },
+        { id: 'dual_sim_physical', label: 'double sim physique', delta: 30000 },
+        { id: 'esim_only', label: 'e-sim', delta: -20000 },
+      ];
+    }
+    return [];
+  }, [currentProduct, isOtherPhone, isIPhone]);
 
   // Calcul des capacités disponibles selon le format SIM sélectionné
   const availableCapacities = useMemo(() => {
@@ -408,6 +414,7 @@ export default function ProductDrawer({
     // Si le produit possède des variantes explicites configurées par SIM
     if (currentProduct.variants && Array.isArray(currentProduct.variants) && currentProduct.variants.length > 0) {
       const matchingVariants = currentProduct.variants.filter(v => 
+        isOtherPhone ||
         !selectedSimType || 
         isSimTypeMatch(v.simType, selectedSimType) ||
         isSimTypeMatch(v.simTypeId, selectedSimType)
@@ -444,16 +451,16 @@ export default function ProductDrawer({
       ];
     }
     return [];
-  }, [currentProduct, selectedSimType, isIPhone]);
+  }, [currentProduct, selectedSimType, isIPhone, isOtherPhone]);
 
   // Delta actif selon le type de SIM choisi (pour compatibilité rétroactive)
   const currentSimDelta = useMemo(() => {
-    if (availableSimTypes.length === 0 || !selectedSimType) return 0;
+    if (isOtherPhone || availableSimTypes.length === 0 || !selectedSimType) return 0;
     const match = availableSimTypes.find(
       s => isSimTypeMatch(s.label, selectedSimType) || isSimTypeMatch(s.id, selectedSimType)
     );
     return (match && typeof match.delta === 'number') ? match.delta : 0;
-  }, [availableSimTypes, selectedSimType]);
+  }, [availableSimTypes, selectedSimType, isOtherPhone]);
 
   // Calcul du prix dynamique en fonction de la capacité et du type de SIM choisi
   const currentPrice = useMemo(() => {
@@ -462,7 +469,7 @@ export default function ProductDrawer({
     // Priorité 1 : Tarif exact de la variante configurée pour ce SIM et cette capacité
     if (currentProduct.variants && Array.isArray(currentProduct.variants) && currentProduct.variants.length > 0) {
       const match = currentProduct.variants.find(v => 
-        (!selectedSimType || isSimTypeMatch(v.simType, selectedSimType) || isSimTypeMatch(v.simTypeId, selectedSimType)) &&
+        (isOtherPhone || !selectedSimType || isSimTypeMatch(v.simType, selectedSimType) || isSimTypeMatch(v.simTypeId, selectedSimType)) &&
         (!selectedCapacity || v.storage.toLowerCase() === selectedCapacity.toLowerCase())
       );
       if (match && typeof match.price === 'number') {
@@ -479,7 +486,7 @@ export default function ProductDrawer({
 
     // Intégration de la surcote / remise du type de SIM
     return Math.max(0, basePrice + currentSimDelta);
-  }, [currentProduct, availableCapacities, selectedCapacity, selectedSimType, currentSimDelta]);
+  }, [currentProduct, availableCapacities, selectedCapacity, selectedSimType, currentSimDelta, isOtherPhone]);
 
   // Couleurs disponibles selon le format SIM et la capacité sélectionnés
   const availableColorsForSelection = useMemo(() => {
@@ -752,7 +759,7 @@ export default function ProductDrawer({
     const phoneNumber = SHOP_CONFIG.whatsappNumber;
     let message = "👑 *COMMANDE EXPRESS - PRINCE CFA* 👑\n\n";
     message += `▪ *Produit* : ${currentProduct.name}\n`;
-    if (selectedSimType) {
+    if (selectedSimType && !isOtherPhone) {
       message += `▪ *Format SIM* : ${selectedSimType}\n`;
     }
     if (selectedCapacity) {
@@ -1309,8 +1316,8 @@ export default function ProductDrawer({
                 </div>
               )}
 
-              {/* Sélecteur Format de SIM si applicable */}
-              {availableSimTypes.length > 0 && (
+              {/* Sélecteur Format de SIM si applicable (exclus pour les Android) */}
+              {!isOtherPhone && availableSimTypes.length > 0 && (
                 <div className="space-y-2 pt-3 border-t border-zinc-200">
                   <div className="flex items-center justify-between">
                     <label 
@@ -1533,7 +1540,7 @@ export default function ProductDrawer({
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-medium">
               {isIPhone && (!selectedSimType || !selectedCapacity)
                 ? 'Configuration requise'
-                : `Total ${[selectedCapacity, selectedSimType].filter(Boolean).join(' · ')}`
+                : `Total ${[selectedCapacity, !isOtherPhone && selectedSimType].filter(Boolean).join(' · ')}`
               }
             </span>
             <span className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-600 to-amber-700 whitespace-nowrap">
@@ -1562,7 +1569,7 @@ export default function ProductDrawer({
                 if (isIPhone && (!selectedSimType || !selectedCapacity)) {
                   return;
                 }
-                onAddToCart(currentProduct, isOtherPhone ? '' : activeColor, selectedCapacity, currentPrice, selectedSimType);
+                onAddToCart(currentProduct, isOtherPhone ? '' : activeColor, selectedCapacity, currentPrice, isOtherPhone ? '' : selectedSimType);
                 handleCleanClose();
               }}
               className={`flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border font-extrabold uppercase tracking-widest text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
