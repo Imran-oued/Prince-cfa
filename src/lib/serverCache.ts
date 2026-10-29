@@ -118,7 +118,17 @@ async function loadProductsCacheEntry(): Promise<ProductsCacheEntry> {
         .map(sanitizeProductMedia)
         .filter(Boolean);
 
-      productsCache = buildCacheEntry(combined, PRODUCTS_TTL_MS);
+      // Déduplication stricte par ID pour garantir l'absence totale de doublons
+      const uniqueMap = new Map();
+      for (const p of combined) {
+        const idKey = String(p.id);
+        if (!uniqueMap.has(idKey)) {
+          uniqueMap.set(idKey, p);
+        }
+      }
+      const deduplicated = Array.from(uniqueMap.values());
+
+      productsCache = buildCacheEntry(deduplicated, PRODUCTS_TTL_MS);
       return productsCache;
     }
   } catch (error) {

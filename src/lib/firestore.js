@@ -52,10 +52,13 @@ export async function getProducts() {
       orderBy("name", "asc")
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: doc.id, // L'ID du document Firestore fait TOUJOURS autorité (évite les conflits d'ID imbriqués)
+      };
+    });
   } catch (error) {
     console.error("Erreur lors du chargement des produits:", error);
     return null;
@@ -74,7 +77,7 @@ export async function getProduct(id) {
     const docRef = doc(db, PRODUCTS_COLLECTION, id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() };
+      return { ...docSnap.data(), id: docSnap.id };
     }
     return null;
   } catch (error) {
@@ -87,28 +90,34 @@ export async function getProduct(id) {
  * Ajouter un nouveau produit
  */
 export async function addProduct(productData) {
-  if (productData?.id) {
-    const strId = String(productData.id);
-    memoryDeletedProductIds.delete(strId);
+  const targetId = productData?.id ? String(productData.id) : null;
+  if (targetId) {
+    memoryDeletedProductIds.delete(targetId);
     if (isFirebaseConfigured()) {
       try {
-        await deleteDoc(doc(db, DELETED_PRODUCTS_COLLECTION, strId));
+        await deleteDoc(doc(db, DELETED_PRODUCTS_COLLECTION, targetId));
       } catch {}
     }
   }
 
-  if (!isFirebaseConfigured()) return productData?.id || null;
+  if (!isFirebaseConfigured()) return targetId || null;
 
   try {
-    const docRef = await addDoc(
-      collection(db, PRODUCTS_COLLECTION),
-      {
-        ...productData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-    );
-    return docRef.id;
+    // Si un identifiant est déjà présent (généré côté client ou fourni), l'utiliser directement comme clé Firestore
+    // pour garantir une synchronisation parfaite entre l'ID du document et le champ interne id
+    const docRef = targetId
+      ? doc(db, PRODUCTS_COLLECTION, targetId)
+      : doc(collection(db, PRODUCTS_COLLECTION));
+
+    const finalId = docRef.id;
+    await setDoc(docRef, {
+      ...productData,
+      id: finalId,
+      createdAt: productData.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }, { merge: true });
+
+    return finalId;
   } catch (error) {
     console.error("Erreur lors de l'ajout du produit:", error);
     return null;

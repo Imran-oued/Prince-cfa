@@ -325,7 +325,6 @@ export default function AdminPage() {
   // Formulaire de confirmation manuelle de paiement
   const [verifierName, setVerifierName] = useState("Prince CFA Admin");
   const [confirmTxRef, setConfirmTxRef] = useState("");
-  const [confirmNote, setConfirmNote] = useState("");
   const [isUpdatingOrder, setIsUpdatingOrder] = useState(false);
 
   // Suivi interne sécurisé (IMEI / Série) pour la commande sélectionnée
@@ -1067,10 +1066,18 @@ export default function AdminPage() {
             const valid = prodData.products.filter((p: any) => p && p.id && p.name && typeof p.price === 'number');
             if (valid.length > 0) {
               const normalizedList = valid.map(normalizeProductSpecs);
-              setProductsList(normalizedList);
+              // Déduplication stricte par ID pour éviter tout doublon visuel
+              const dedupMap = new Map();
+              normalizedList.forEach((p: any) => {
+                if (p && p.id && !dedupMap.has(String(p.id))) {
+                  dedupMap.set(String(p.id), p);
+                }
+              });
+              const uniqueList = Array.from(dedupMap.values());
+              setProductsList(uniqueList);
               setIsCloud(true);
               try {
-                localStorage.setItem("prince_cfa_products", JSON.stringify(normalizedList));
+                localStorage.setItem("prince_cfa_products", JSON.stringify(uniqueList));
               } catch {}
               return;
             }
@@ -1222,8 +1229,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           action: "confirm_payment",
           confirmedBy: verifierName.trim(),
-          transactionRef: confirmTxRef.trim(),
-          note: confirmNote.trim()
+          transactionRef: confirmTxRef.trim()
         })
       });
 
@@ -1236,7 +1242,6 @@ export default function AdminPage() {
       setOrdersList(prev => prev.map(o => o.id === orderId ? data.order : o));
       setSelectedOrder(data.order);
       setConfirmTxRef("");
-      setConfirmNote("");
       alert("Paiement vérifié et confirmé manuellement avec succès ! Le stock a été débité.");
     } catch (err) {
       console.error(err);
@@ -1862,7 +1867,8 @@ export default function AdminPage() {
       simPricing: isApple ? finalSimPricing : undefined,
       variants: isApple && finalAppleVariants.length > 0 ? finalAppleVariants : undefined,
       otherFeatures: isApple && otherFeatures.length > 0 ? otherFeatures : undefined,
-      specs: finalSpecs
+      specs: finalSpecs,
+      createdAt: editingId ? (productsList.find(p => p.id === editingId) as any)?.createdAt : undefined
     };
 
     // 1. Validation stricte selon les règles de la catégorie
@@ -1901,13 +1907,22 @@ export default function AdminPage() {
       console.warn("Erreur sauvegarde API, enregistrement local", saveErr);
     }
 
-    // 3. Mise à jour de la liste locale
+    // 3. Mise à jour de la liste locale avec déduplication stricte
     let updatedList: AdminProduct[];
     if (editingId) {
-      updatedList = productsList.map(p => p.id === editingId ? savedProduct : p);
+      updatedList = productsList.map(p => String(p.id) === String(editingId) ? savedProduct : p);
     } else {
-      updatedList = [savedProduct, ...productsList];
+      updatedList = [savedProduct, ...productsList.filter(p => String(p.id) !== String(savedProduct.id))];
     }
+
+    // Déduplication de sécurité par ID
+    const uniqueMap = new Map();
+    updatedList.forEach(p => {
+      if (p && p.id && !uniqueMap.has(String(p.id))) {
+        uniqueMap.set(String(p.id), p);
+      }
+    });
+    updatedList = Array.from(uniqueMap.values());
 
     setProductsList(updatedList);
     try {
@@ -2468,9 +2483,14 @@ export default function AdminPage() {
 
   // Filtrage des produits du catalogue
   const filteredProducts = productsList.filter((product) => {
-    // Filtre par catégorie sélectionnée
-    if (productCategoryFilter !== "all" && product.category !== productCategoryFilter) {
-      return false;
+    // Filtre par catégorie sélectionnée (avec support transparent des alias)
+    if (productCategoryFilter !== "all") {
+      const pCat = product.category;
+      if (productCategoryFilter === "accessories" || productCategoryFilter === "tech") {
+        if (pCat !== "accessories" && pCat !== "tech") return false;
+      } else if (pCat !== productCategoryFilter) {
+        return false;
+      }
     }
     // Filtre par mot-clé de recherche (insensible à la casse et accents simples)
     if (!productSearchQuery.trim()) return true;
@@ -2973,7 +2993,7 @@ export default function AdminPage() {
                   <CreditCard className="w-4 h-4 text-gold" aria-hidden="true" />
                   <span>Vérification Paiement {selectedOrder.payment.method.toUpperCase()}</span>
                 </h4>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${selectedOrder.payment.status === "confirme" ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"}`}>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${selectedOrder.payment.status === "confirme" ? "bg-green-500/20 text-green-700 border border-green-500/30" : "bg-amber-500/15 text-amber-800 border border-amber-500/30"}`}>
                   {selectedOrder.payment.status === "confirme" ? "PAIEMENT CONFIRMÉ" : "PAIEMENT EN ATTENTE"}
                 </span>
               </div>
@@ -3020,10 +3040,10 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <div className="space-y-3 text-xs">
-                  <div className="p-2.5 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-[11px] leading-relaxed flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-300/80 text-amber-950 text-[11px] leading-relaxed flex items-start gap-2.5 shadow-xs">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <div>
-                      <strong>Vérification obligatoire :</strong> Connectez-vous sur votre terminal Orange Money ou Wave et assurez-vous de la réception effective de <strong>{selectedOrder.pricing.total.toLocaleString('fr-FR')} FCFA</strong> avant de cliquer.
+                      <strong className="font-extrabold text-amber-950">Vérification obligatoire :</strong> Connectez-vous sur votre terminal Orange Money ou Wave et assurez-vous de la réception effective de <strong className="font-black text-amber-950 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300/60">{selectedOrder.pricing.total.toLocaleString('fr-FR')} FCFA</strong> avant de cliquer.
                     </div>
                   </div>
 
@@ -3049,17 +3069,6 @@ export default function AdminPage() {
                         placeholder="Ex: OM-883719"
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] text-zinc-600 uppercase font-bold block mb-1">Note de vérification</label>
-                    <input 
-                      type="text" 
-                      value={confirmNote} 
-                      onChange={e => setConfirmNote(e.target.value)}
-                      className="w-full bg-white border border-zinc-200 rounded-lg p-2 text-zinc-900 text-xs shadow-sm focus:outline-none focus:border-gold"
-                      placeholder="Ex: Débit reçu et vérifié sur le compte officiel"
-                    />
                   </div>
 
                   <button

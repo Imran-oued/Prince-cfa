@@ -27,5 +27,10 @@
     "postcss": "^8.5.31",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.13.6",
+    "re2js": "^2.8.7",
+    "zod": "^4.6.6"
   }
 }

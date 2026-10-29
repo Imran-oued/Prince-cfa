@@ -702,53 +702,11 @@ export default function Home() {
 
   const cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
-  // Filtrage combiné (Recherche intelligente + Catégorie + Marque)
+  // Filtrage combiné (Catégorie + Marque + Recherche intelligente)
   const filteredProducts = useMemo(() => {
     let filtered = (localProducts || []).filter(p => p && p.id && p.name && typeof p.price === 'number');
-    
-    // Si l'utilisateur effectue une recherche globale, on recherche en priorité dans l'ensemble du catalogue
-    if (searchQuery.trim()) {
-      const normalize = (str: string) =>
-        (str || '')
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .trim();
 
-      const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-      const tokens = normalize(searchQuery).split(/\s+/).filter(Boolean);
-
-      return filtered.filter((product: Product) => {
-        const brandAlias = (product.name?.toLowerCase().includes('iphone') || product.brand?.toLowerCase() === 'iphones')
-          ? 'apple iphones'
-          : (product.brand || '');
-
-        const capacities = product.storageOptions?.map(s => s.capacity).join(' ') || '';
-        const colors = product.colors?.join(' ') || '';
-        const specs = product.specs ? Object.values(product.specs).join(' ') : '';
-        
-        const combined = normalize([
-          product.name,
-          brandAlias,
-          product.category,
-          product.desc,
-          capacities,
-          colors,
-          specs
-        ].join(' '));
-
-        return tokens.every((token: string) => {
-          if (/^[a-z0-9]+$/i.test(token)) {
-            const regex = new RegExp(`\\b${escapeRegExp(token)}`, 'i');
-            return regex.test(combined);
-          }
-          return combined.includes(token);
-        });
-      });
-    }
-
-    // 1. Filtre par catégorie (quand aucune recherche active)
+    // 1. Filtre par catégorie sélectionnée (s'applique en priorité)
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(p => {
         if (selectedCategory === 'appliances' || selectedCategory === 'electromenager') {
@@ -789,7 +747,7 @@ export default function Home() {
       });
     }
     
-    // 1.5 Filtre par marque (si catégorie Téléphones)
+    // 2. Filtre par marque (si catégorie Téléphones)
     if (selectedCategory === 'phones' && selectedBrand !== 'all') {
       filtered = filtered.filter(p => {
         const pBrand = (p.brand || '').toLowerCase();
@@ -799,6 +757,47 @@ export default function Home() {
         const matchName = pName.includes(selBrand) || 
                           (selBrand === 'iphones' && pName.includes('iphone'));
         return matchBrand || matchName;
+      });
+    }
+
+    // 3. Filtre par mot-clé de recherche (s'applique au sein de la sélection active)
+    if (searchQuery.trim()) {
+      const normalize = (str: string) =>
+        (str || '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .trim();
+
+      const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const tokens = normalize(searchQuery).split(/\s+/).filter(Boolean);
+
+      filtered = filtered.filter((product: Product) => {
+        const brandAlias = (product.name?.toLowerCase().includes('iphone') || product.brand?.toLowerCase() === 'iphones')
+          ? 'apple iphones'
+          : (product.brand || '');
+
+        const capacities = product.storageOptions?.map(s => s.capacity).join(' ') || '';
+        const colors = product.colors?.join(' ') || '';
+        const specs = product.specs ? Object.values(product.specs).join(' ') : '';
+        
+        const combined = normalize([
+          product.name,
+          brandAlias,
+          product.category,
+          product.desc,
+          capacities,
+          colors,
+          specs
+        ].join(' '));
+
+        return tokens.every((token: string) => {
+          if (/^[a-z0-9]+$/i.test(token)) {
+            const regex = new RegExp(`\\b${escapeRegExp(token)}`, 'i');
+            return regex.test(combined);
+          }
+          return combined.includes(token);
+        });
       });
     }
     

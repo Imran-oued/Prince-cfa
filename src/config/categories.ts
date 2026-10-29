@@ -506,13 +506,13 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
 
   accessories: {
     id: "accessories",
-    label: "Accessoires Technologiques",
-    shortLabel: "Accessoires",
-    description: "Écouteurs, chargeurs rapides, coques, câbles et protections",
+    label: "High-Tech & Accessoires",
+    shortLabel: "High-Tech & Accessoires",
+    description: "Montres connectées, écouteurs, chargeurs rapides, coques, câbles et gadgets high-tech",
     iconName: "Headphones",
     supportsStorageVariants: false,
     popularBrands: ["Apple", "Anker", "Samsung", "Baseus", "Oraimo", "JBL", "Sony", "Ugreen"],
-    placeholderName: "Ex: Chargeur Rapide GaN 65W Multi-Ports USB-C",
+    placeholderName: "Ex: Apple Watch Series 9, AirPods Pro 2, Chargeur GaN 65W",
     defaultWarranty: "Garantie 6 Mois Échange à Neuf",
     defaultAccessories: "Câble de charge renforcé, Manuel d'utilisation",
     fields: [
@@ -520,7 +520,7 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         key: "model",
         label: "Modèle ou Référence",
         type: "text",
-        placeholder: "Ex: AirPods Pro 2, Adaptateur USB-C 65W GaN",
+        placeholder: "Ex: Apple Watch Ultra 2, AirPods Pro 2, Adaptateur GaN 65W",
         required: true,
       },
       {
@@ -528,8 +528,9 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         label: "Type d'accessoire",
         type: "select",
         options: [
-          { label: "Chargeurs & Blocs d'alimentation", value: "charger" },
+          { label: "Montres connectées & Smartwatches", value: "smartwatch" },
           { label: "Écouteurs & Casques audio", value: "audio" },
+          { label: "Chargeurs & Blocs d'alimentation", value: "charger" },
           { label: "Câbles de charge & données", value: "cable" },
           { label: "Batteries externes (Powerbanks)", value: "powerbank" },
           { label: "Coques, Étuis & Verres trempés", value: "protection" },
@@ -900,6 +901,9 @@ export function getCategoryConfig(categoryId: string): CategoryDefinition {
   const normId = (categoryId || "").toLowerCase().trim();
   if (normId === "promotion" || normId === "promotions" || normId === "promo") {
     return PRODUCT_CATEGORIES["promotion"];
+  }
+  if (normId === "tech" || normId === "accessories") {
+    return PRODUCT_CATEGORIES["accessories"];
   }
   return (
     PRODUCT_CATEGORIES[categoryId] || {
