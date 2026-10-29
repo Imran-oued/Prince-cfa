@@ -1242,7 +1242,7 @@ export default function AdminPage() {
       setOrdersList(prev => prev.map(o => o.id === orderId ? data.order : o));
       setSelectedOrder(data.order);
       setConfirmTxRef("");
-      alert("Paiement vérifié et confirmé manuellement avec succès ! Le stock a été débité.");
+      alert("Paiement vérifié et confirmé manuellement avec succès !");
     } catch (err) {
       console.error(err);
       alert("Erreur réseau lors de la confirmation.");
@@ -1251,9 +1251,9 @@ export default function AdminPage() {
     }
   };
 
-  // Annuler la validation d'un paiement (Restitue automatiquement le stock en magasin)
+  // Annuler la validation d'un paiement
   const handleCancelPaymentConfirmation = async (orderId: string) => {
-    if (!confirm("Voulez-vous vraiment annuler la validation de ce paiement ?\n\n- Le statut repassera à 'En attente de paiement'.\n- Le stock réservé pour cette commande sera automatiquement RESTITUÉ en rayon.")) {
+    if (!confirm("Voulez-vous vraiment annuler la validation de ce paiement ?\n\nLe statut repassera à 'En attente de paiement'.")) {
       return;
     }
 
@@ -1279,7 +1279,7 @@ export default function AdminPage() {
 
       setOrdersList(prev => prev.map(o => o.id === orderId ? data.order : o));
       setSelectedOrder(data.order);
-      alert("Validation de paiement annulée. Le stock a été restitué avec succès en rayon !");
+      alert("Validation de paiement annulée avec succès !");
     } catch (err) {
       console.error(err);
       alert("Erreur réseau lors de l'annulation.");
@@ -1290,7 +1290,7 @@ export default function AdminPage() {
 
   // Supprimer définitivement une commande (ex: commande non payée, fausse commande)
   const handleDeleteOrder = async (orderId: string) => {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT la commande ${orderId} ?\n\nCette action est irréversible. Si du stock avait été débité, il sera automatiquement restitué.`)) {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT la commande ${orderId} ?\n\nCette action est irréversible.`)) {
       return;
     }
 
@@ -2818,29 +2818,20 @@ export default function AdminPage() {
                       <td className="p-4 font-semibold">{methodBadge}</td>
                       <td className="p-4">
                         {isPaid ? (
-                          <div className="space-y-0.5">
-                            <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
-                              <Check className="w-3 h-3 stroke-[2.5]" aria-hidden="true" />
-                              <span>Confirmé</span>
-                            </span>
-                            <div className="text-[10px] text-emerald-600 font-medium">Stock débité</div>
-                          </div>
+                          <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 font-bold text-[10px] inline-flex items-center gap-1 w-fit shadow-xs">
+                            <Check className="w-3 h-3 stroke-[2.5]" aria-hidden="true" />
+                            <span>Confirmé</span>
+                          </span>
                         ) : isOrderExpired(order) ? (
-                          <div className="space-y-0.5">
-                            <span className="px-2.5 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-600 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
-                              <Clock className="w-3 h-3 text-zinc-500" aria-hidden="true" />
-                              <span>Non payée (&gt;48h)</span>
-                            </span>
-                            <div className="text-[10px] text-zinc-500 font-medium">Stock intact</div>
-                          </div>
+                          <span className="px-2.5 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-600 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
+                            <Clock className="w-3 h-3 text-zinc-500" aria-hidden="true" />
+                            <span>Non payée (&gt;48h)</span>
+                          </span>
                         ) : (
-                          <div className="space-y-0.5">
-                            <span className="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-300 text-amber-700 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
-                              <Clock className="w-3 h-3 text-amber-600" aria-hidden="true" />
-                              <span>En attente (&lt;48h)</span>
-                            </span>
-                            <div className="text-[10px] text-zinc-500 font-medium">Stock intact</div>
-                          </div>
+                          <span className="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-300 text-amber-700 font-bold text-[10px] inline-flex items-center gap-1 w-fit">
+                            <Clock className="w-3 h-3 text-amber-600" aria-hidden="true" />
+                            <span>En attente (&lt;48h)</span>
+                          </span>
                         )}
                       </td>
                       <td className="p-4">
@@ -2987,54 +2978,60 @@ export default function AdminPage() {
             </div>
 
             {/* SECTION VALIDATION DU PAIEMENT MANUEL */}
-            <div className="p-4 rounded-2xl border border-gold/30 bg-gold/5 space-y-3 mb-5">
+            <div className="p-4 rounded-2xl border border-amber-300/60 bg-amber-50/50 space-y-3 mb-5">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-black uppercase tracking-wider text-gold flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-gold" aria-hidden="true" />
+                <h4 className="text-xs font-black uppercase tracking-wider text-amber-950 flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-amber-700" aria-hidden="true" />
                   <span>Vérification Paiement {selectedOrder.payment.method.toUpperCase()}</span>
                 </h4>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${selectedOrder.payment.status === "confirme" ? "bg-green-500/20 text-green-700 border border-green-500/30" : "bg-amber-500/15 text-amber-800 border border-amber-500/30"}`}>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${selectedOrder.payment.status === "confirme" ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-amber-100 text-amber-900 border border-amber-300"}`}>
                   {selectedOrder.payment.status === "confirme" ? "PAIEMENT CONFIRMÉ" : "PAIEMENT EN ATTENTE"}
                 </span>
               </div>
 
               {selectedOrder.payment.status === "confirme" ? (
-                <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-xs text-green-300 space-y-3">
+                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 space-y-3 shadow-xs">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-green-400 flex-shrink-0" aria-hidden="true" /><span>Confirmé par : <strong>{selectedOrder.payment.confirmedBy}</strong></span></div>
-                    <span className="text-[10px] text-zinc-400">{new Date(selectedOrder.payment.confirmedAt || "").toLocaleString("fr-FR")}</span>
+                    <div className="flex items-center gap-1.5">
+                      <Check className="w-4 h-4 text-emerald-700 flex-shrink-0" aria-hidden="true" />
+                      <span>Confirmé par : <strong className="font-bold text-emerald-950">{selectedOrder.payment.confirmedBy}</strong></span>
+                    </div>
+                    <span className="text-[10px] text-zinc-500 font-medium">{new Date(selectedOrder.payment.confirmedAt || "").toLocaleString("fr-FR")}</span>
                   </div>
                   {selectedOrder.payment.transactionRef && (
-                    <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-green-400 flex-shrink-0" aria-hidden="true" /><span>Réf. Transaction : <span className="font-mono font-bold text-white">{selectedOrder.payment.transactionRef}</span></span></div>
+                    <div className="flex items-center gap-1.5">
+                      <Check className="w-4 h-4 text-emerald-700 flex-shrink-0" aria-hidden="true" />
+                      <span>Réf. Transaction : <span className="font-mono font-bold text-emerald-950 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">{selectedOrder.payment.transactionRef}</span></span>
+                    </div>
                   )}
 
-                  <div className="pt-2 border-t border-green-500/20 flex flex-wrap gap-2">
+                  <div className="pt-2 border-t border-emerald-200 flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => handleNotifyCustomerWhatsApp(selectedOrder, "payment_confirmed")}
-                      className="py-2 px-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all"
+                      className="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center gap-2 cursor-pointer shadow-xs transition-all"
                     >
-                      <WhatsAppIcon className="w-4 h-4 text-black" />
+                      <WhatsAppIcon className="w-4 h-4 text-white" />
                       <span>Prévenir le client sur WhatsApp (Paiement Validé)</span>
                     </button>
                     <a
                       href={`/suivi?id=${encodeURIComponent(selectedOrder.id)}&phone=${encodeURIComponent(selectedOrder.customer.phone)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-zinc-300 text-xs font-semibold border border-white/10 flex items-center gap-1.5 transition-colors"
+                      className="py-2 px-3 rounded-xl bg-white hover:bg-zinc-100 text-zinc-800 text-xs font-semibold border border-zinc-300 flex items-center gap-1.5 transition-colors shadow-xs"
                     >
-                      <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+                      <Eye className="w-3.5 h-3.5 text-zinc-600" aria-hidden="true" />
                       <span>Voir page de suivi client</span>
                     </a>
                     <button
                       type="button"
                       onClick={() => handleCancelPaymentConfirmation(selectedOrder.id)}
                       disabled={isUpdatingOrder}
-                      className="py-2 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/30 text-red-300 hover:text-red-200 text-xs font-bold border border-red-500/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
-                      title="Annule la validation et restitue immédiatement le stock en rayon"
+                      className="py-2 px-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                      title="Annuler la confirmation du paiement"
                     >
-                      <RotateCcw className="w-3.5 h-3.5 text-red-400" aria-hidden="true" />
-                      <span>Annuler le paiement (Restituer le stock)</span>
+                      <RotateCcw className="w-3.5 h-3.5 text-red-600" aria-hidden="true" />
+                      <span>Annuler le paiement</span>
                     </button>
                   </div>
                 </div>
@@ -3075,7 +3072,7 @@ export default function AdminPage() {
                     type="button"
                     onClick={() => handleConfirmPayment(selectedOrder.id)}
                     disabled={isUpdatingOrder}
-                    className="w-full py-3 rounded-xl bg-green-500 hover:bg-green-400 text-black font-extrabold uppercase tracking-widest text-xs transition-all shadow-[0_0_20px_rgba(34,197,94,0.3)] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold uppercase tracking-widest text-xs transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
                     <span>Confirmer la réception des fonds ({selectedOrder.pricing.total.toLocaleString('fr-FR')} F)</span>
@@ -3085,17 +3082,17 @@ export default function AdminPage() {
             </div>
 
             {/* CHANGEMENT D'ÉTAPE D'ACHEMINEMENT */}
-            <div className="pt-3 border-t border-white/10 space-y-3">
+            <div className="pt-4 border-t border-zinc-200 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">Changer le statut d&apos;acheminement</span>
-                <span className="text-[10px] text-zinc-500">Statut actuel : <strong className="text-white">{selectedOrder.orderStatus}</strong></span>
+                <span className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider block">Changer le statut d&apos;acheminement</span>
+                <span className="text-[11px] text-zinc-600 font-medium">Statut actuel : <strong className="text-zinc-950 font-bold bg-zinc-100 px-2 py-0.5 rounded border border-zinc-300 uppercase text-[10px]">{selectedOrder.orderStatus}</strong></span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 <button
                   type="button"
                   onClick={() => handleUpdateOrderStatus(selectedOrder.id, "paye_en_preparation")}
-                  className={`py-2 px-2 rounded-lg border font-bold text-[11px] transition-colors flex items-center justify-center gap-1.5 ${selectedOrder.orderStatus === "paye_en_preparation" ? "bg-white/20 border-white text-white" : "bg-white/5 border-white/10 text-zinc-400 hover:text-white"}`}
+                  className={`py-2 px-2 rounded-lg border font-bold text-[11px] transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${selectedOrder.orderStatus === "paye_en_preparation" ? "bg-zinc-900 border-zinc-950 text-white shadow-sm" : "bg-zinc-100 hover:bg-zinc-200 border-zinc-300 text-zinc-700"}`}
                 >
                   <Package className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>En préparation</span>
@@ -3103,7 +3100,7 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => handleUpdateOrderStatus(selectedOrder.id, "en_livraison")}
-                  className={`py-2 px-2 rounded-lg border font-bold text-[11px] transition-colors flex items-center justify-center gap-1.5 ${selectedOrder.orderStatus === "en_livraison" ? "bg-cyan-500/20 border-cyan-400 text-cyan-300" : "bg-white/5 border-white/10 text-zinc-400 hover:text-white"}`}
+                  className={`py-2 px-2 rounded-lg border font-bold text-[11px] transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${selectedOrder.orderStatus === "en_livraison" ? "bg-sky-600 border-sky-700 text-white shadow-sm" : "bg-zinc-100 hover:bg-zinc-200 border-zinc-300 text-zinc-700"}`}
                 >
                   <Truck className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>En livraison</span>
@@ -3111,7 +3108,7 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => handleUpdateOrderStatus(selectedOrder.id, "livre")}
-                  className={`py-2 px-2 rounded-lg border font-bold text-[11px] transition-colors flex items-center justify-center gap-1.5 ${selectedOrder.orderStatus === "livre" ? "bg-green-500/20 border-green-400 text-green-300" : "bg-white/5 border-white/10 text-zinc-400 hover:text-white"}`}
+                  className={`py-2 px-2 rounded-lg border font-bold text-[11px] transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${selectedOrder.orderStatus === "livre" ? "bg-emerald-600 border-emerald-700 text-white shadow-sm" : "bg-zinc-100 hover:bg-zinc-200 border-zinc-300 text-zinc-700"}`}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Livrée</span>
@@ -3119,11 +3116,11 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (confirm("Voulez-vous annuler cette commande ? Les stocks réservés seront automatiquement restitués.")) {
+                    if (confirm("Voulez-vous annuler cette commande ?")) {
                       handleUpdateOrderStatus(selectedOrder.id, "annule");
                     }
                   }}
-                  className={`py-2 px-2 rounded-lg border font-bold text-[11px] transition-colors flex items-center justify-center gap-1.5 ${selectedOrder.orderStatus === "annule" ? "bg-red-500/20 border-red-500 text-red-400" : "bg-white/5 border-white/10 text-red-400 hover:bg-red-500/10"}`}
+                  className={`py-2 px-2 rounded-lg border font-bold text-[11px] transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${selectedOrder.orderStatus === "annule" ? "bg-red-600 border-red-700 text-white shadow-sm" : "bg-red-50 hover:bg-red-100 border-red-200 text-red-700"}`}
                 >
                   <X className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Annuler</span>
@@ -3131,8 +3128,8 @@ export default function AdminPage() {
               </div>
 
               {/* Boutons d'envoi WhatsApp selon le statut */}
-              <div className="p-3 rounded-2xl bg-emerald-950/20 border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
-                <div className="flex items-center gap-2 text-emerald-400 font-bold">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+                <div className="flex items-center gap-2 text-emerald-950 font-bold">
                   <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
                   <span>Envoyer un message WhatsApp au client :</span>
                 </div>
@@ -3140,27 +3137,27 @@ export default function AdminPage() {
                   <button
                     type="button"
                     onClick={() => handleNotifyCustomerWhatsApp(selectedOrder, "shipping")}
-                    className="py-1 px-2.5 rounded-lg bg-white/10 hover:bg-emerald-500 hover:text-black text-emerald-300 text-[11px] font-bold border border-emerald-500/30 transition-all cursor-pointer flex items-center gap-1"
+                    className="py-1.5 px-3 rounded-lg bg-white hover:bg-emerald-600 hover:text-white text-emerald-800 text-[11px] font-bold border border-emerald-300 transition-all cursor-pointer flex items-center gap-1 shadow-xs"
                   >
-                    <Truck className="w-3 h-3" aria-hidden="true" />
+                    <Truck className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>En livraison</span>
                   </button>
                   {selectedOrder.customer.deliveryMethod === "pickup" && (
                     <button
                       type="button"
                       onClick={() => handleNotifyCustomerWhatsApp(selectedOrder, "ready_pickup")}
-                      className="py-1 px-2.5 rounded-lg bg-white/10 hover:bg-gold hover:text-black text-gold text-[11px] font-bold border border-gold/30 transition-all cursor-pointer flex items-center gap-1"
+                      className="py-1.5 px-3 rounded-lg bg-white hover:bg-amber-600 hover:text-white text-amber-900 text-[11px] font-bold border border-amber-300 transition-all cursor-pointer flex items-center gap-1 shadow-xs"
                     >
-                      <Store className="w-3 h-3" aria-hidden="true" />
+                      <Store className="w-3.5 h-3.5" aria-hidden="true" />
                       <span>Prêt en Boutique</span>
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={() => handleNotifyCustomerWhatsApp(selectedOrder, "delivered")}
-                    className="py-1 px-2.5 rounded-lg bg-white/10 hover:bg-green-500 hover:text-black text-green-300 text-[11px] font-bold border border-green-500/30 transition-all cursor-pointer flex items-center gap-1"
+                    className="py-1.5 px-3 rounded-lg bg-white hover:bg-emerald-600 hover:text-white text-emerald-800 text-[11px] font-bold border border-emerald-300 transition-all cursor-pointer flex items-center gap-1 shadow-xs"
                   >
-                    <Check className="w-3 h-3 stroke-[2.5]" aria-hidden="true" />
+                    <Check className="w-3.5 h-3.5 stroke-[2.5]" aria-hidden="true" />
                     <span>Livrée</span>
                   </button>
                 </div>
@@ -3168,10 +3165,10 @@ export default function AdminPage() {
             </div>
 
             {/* SUIVI INTERNE SÉCURISÉ (IMEI / N° DE SÉRIE / SAV) */}
-            <div className="pt-4 border-t border-white/10 space-y-3">
+            <div className="pt-4 border-t border-zinc-200 space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-black uppercase tracking-wider text-cyan-400 flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-cyan-400" aria-hidden="true" />
+                <h4 className="text-xs font-black uppercase tracking-wider text-cyan-950 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-cyan-700" aria-hidden="true" />
                   <span>Suivi Interne Sécurisé (IMEI / N° Série SAV)</span>
                 </h4>
                 <span className="text-[10px] text-zinc-500 font-medium">Non communiqué au client</span>
@@ -3240,7 +3237,7 @@ export default function AdminPage() {
             <div className="pt-4 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="text-xs text-zinc-600">
                 <span className="font-bold text-zinc-800 block">Commande sans paiement ou erronée ?</span>
-                <span className="text-[11px] text-zinc-500">Supprime définitivement cette commande. Si du stock avait été débité, il sera automatiquement restitué.</span>
+                <span className="text-[11px] text-zinc-500">Supprime définitivement cette commande de votre historique.</span>
               </div>
               <button
                 type="button"
