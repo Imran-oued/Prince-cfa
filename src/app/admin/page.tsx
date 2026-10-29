@@ -2512,10 +2512,6 @@ export default function AdminPage() {
               Accéder au panneau
             </button>
           </form>
-
-          <Link href="/" className="block text-center text-xs text-zinc-500 hover:text-zinc-800 mt-6 transition-colors font-medium">
-            ← Retour à la boutique
-          </Link>
         </div>
       </div>
     );
