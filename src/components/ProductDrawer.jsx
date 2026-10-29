@@ -503,9 +503,8 @@ export default function ProductDrawer({
         (!selectedCapacity || v.storage.toLowerCase() === selectedCapacity.toLowerCase())
       );
       if (matching.length > 0) {
-        const allowedColors = new Set(matching.map(v => v.color.toLowerCase()));
-        const filtered = currentProduct.colors.filter(c => allowedColors.has(c.toLowerCase()));
-        if (filtered.length > 0) return filtered;
+        const variantColors = Array.from(new Set(matching.map(v => v.color).filter(Boolean)));
+        if (variantColors.length > 0) return variantColors;
       }
     }
     return currentProduct.colors;
@@ -925,6 +924,12 @@ export default function ProductDrawer({
             <h1 id="product-drawer-title" className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight leading-snug">
               {currentProduct.name}
             </h1>
+
+            {currentProduct.shortDesc && (
+              <p className="text-xs sm:text-sm text-zinc-600 font-medium leading-relaxed">
+                {currentProduct.shortDesc}
+              </p>
+            )}
 
             <div className="flex flex-wrap items-baseline gap-3 pt-1">
               <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-600 to-amber-700">
@@ -1446,6 +1451,11 @@ export default function ProductDrawer({
           {/* Description du produit */}
           <div className="space-y-2 pt-2 border-t border-zinc-200">
             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Description</h3>
+            {currentProduct.shortDesc && (
+              <p className="text-xs font-semibold text-zinc-900 bg-amber-500/[0.08] border border-gold/30 rounded-xl p-3 leading-relaxed">
+                {currentProduct.shortDesc}
+              </p>
+            )}
             <p className="text-zinc-700 text-sm sm:text-base leading-relaxed border-l-2 border-gold/50 pl-4 py-1 bg-zinc-50/80 rounded-r-xl">
               {currentProduct.desc}
             </p>

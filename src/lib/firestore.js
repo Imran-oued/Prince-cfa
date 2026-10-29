@@ -132,10 +132,11 @@ export async function updateProduct(id, productData) {
 
   try {
     const docRef = doc(db, PRODUCTS_COLLECTION, strId);
-    await updateDoc(docRef, {
+    await setDoc(docRef, {
       ...productData,
+      id: strId,
       updatedAt: new Date().toISOString(),
-    });
+    }, { merge: true });
     return true;
   } catch (error) {
     console.error("Erreur lors de la mise à jour du produit:", error);

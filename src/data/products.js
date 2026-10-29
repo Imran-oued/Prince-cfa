@@ -36,11 +36,20 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 85000,
+    shortDesc: 'Puce A15 Bionic, format compact 4,7 pouces avec Touch ID et connectivité 5G ultra-rapide.',
     image: '/products/apple/iphone-se-midnight.png',
     rating: 4.8,
     colors: ['Minuit', 'Lumière stellaire', '(PRODUCT)RED'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '128 Go', price: 85000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-128_Go-Minuit', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Minuit', price: 85000, active: true },
+      { id: 'sim_and_esim-128_Go-Lumiere_stellaire', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Lumière stellaire', price: 85000, active: true },
+      { id: 'sim_and_esim-128_Go-PRODUCT_RED', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: '(PRODUCT)RED', price: 85000, active: true },
     ],
     images: [
       '/products/apple/iphone-se-midnight.png',
@@ -61,11 +70,23 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 120000,
+    shortDesc: 'Puce A13 Bionic, écran Liquid Retina 6,1 pouces et double appareil photo 12 MP avec mode Nuit.',
     image: '/products/apple/iphone-11-black.png',
     rating: 4.8,
     colors: ['Noir', 'Blanc', 'Mauve', 'Vert', 'Jaune', 'Rouge'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '128 Go', price: 120000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-128_Go-Noir', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Noir', price: 120000, active: true },
+      { id: 'sim_and_esim-128_Go-Blanc', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Blanc', price: 120000, active: true },
+      { id: 'sim_and_esim-128_Go-Mauve', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Mauve', price: 120000, active: true },
+      { id: 'sim_and_esim-128_Go-Vert', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Vert', price: 120000, active: true },
+      { id: 'sim_and_esim-128_Go-Jaune', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Jaune', price: 120000, active: true },
+      { id: 'sim_and_esim-128_Go-Rouge', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Rouge', price: 120000, active: true },
     ],
     images: [
       '/products/apple/iphone-11-black.png',
@@ -89,11 +110,21 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 150000,
+    shortDesc: 'Finition prestige en acier inoxydable chirurgical, triple capteur photo professionnel et écran Super Retina XDR.',
     image: '/products/apple/iphone-11-pro-space.png',
     rating: 4.8,
     colors: ['Gris sidéral', 'Argent', 'Vert nuit', 'Or'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '256 Go', price: 150000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-256_Go-Gris_sideral', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Gris sidéral', price: 150000, active: true },
+      { id: 'sim_and_esim-256_Go-Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Argent', price: 150000, active: true },
+      { id: 'sim_and_esim-256_Go-Vert_nuit', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Vert nuit', price: 150000, active: true },
+      { id: 'sim_and_esim-256_Go-Or', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Or', price: 150000, active: true },
     ],
     images: [
       '/products/apple/iphone-11-pro-space.png',
@@ -115,12 +146,28 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 130000,
+    shortDesc: 'Design à bords plats en aluminium aérospatial, écran OLED immersif et protection Ceramic Shield 4x plus résistante.',
     image: '/products/apple/iphone-12-blue.png',
     rating: 4.8,
     colors: ['Bleu', 'Noir', 'Blanc', 'Vert', 'Mauve'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '64 Go', price: 130000 },
       { capacity: '128 Go', price: 145000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-64_Go-Bleu', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '64 Go', color: 'Bleu', price: 130000, active: true },
+      { id: 'sim_and_esim-64_Go-Noir', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '64 Go', color: 'Noir', price: 130000, active: true },
+      { id: 'sim_and_esim-64_Go-Blanc', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '64 Go', color: 'Blanc', price: 130000, active: true },
+      { id: 'sim_and_esim-64_Go-Vert', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '64 Go', color: 'Vert', price: 130000, active: true },
+      { id: 'sim_and_esim-64_Go-Mauve', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '64 Go', color: 'Mauve', price: 130000, active: true },
+      { id: 'sim_and_esim-128_Go-Bleu', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Bleu', price: 145000, active: true },
+      { id: 'sim_and_esim-128_Go-Noir', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Noir', price: 145000, active: true },
+      { id: 'sim_and_esim-128_Go-Blanc', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Blanc', price: 145000, active: true },
+      { id: 'sim_and_esim-128_Go-Vert', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Vert', price: 145000, active: true },
+      { id: 'sim_and_esim-128_Go-Mauve', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Mauve', price: 145000, active: true },
     ],
     images: [
       '/products/apple/iphone-12-blue.png',
@@ -143,11 +190,22 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 170000,
+    shortDesc: 'Mode Cinématique dynamique, double capteur en diagonale et puce A15 Bionic ultra-rapide.',
     image: '/products/apple/iphone-13-midnight.png',
     rating: 4.9,
     colors: ['Minuit', 'Lumière stellaire', 'Bleu', 'Rose', 'Vert'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '128 Go', price: 170000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-128_Go-Minuit', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Minuit', price: 170000, active: true },
+      { id: 'sim_and_esim-128_Go-Lumiere_stellaire', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Lumière stellaire', price: 170000, active: true },
+      { id: 'sim_and_esim-128_Go-Bleu', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Bleu', price: 170000, active: true },
+      { id: 'sim_and_esim-128_Go-Rose', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Rose', price: 170000, active: true },
+      { id: 'sim_and_esim-128_Go-Vert', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Vert', price: 170000, active: true },
     ],
     images: [
       '/products/apple/iphone-13-midnight.png',
@@ -170,11 +228,21 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 240000,
+    shortDesc: 'Écran ProMotion 120Hz, triple capteur photo Pro avec mode Macro et puce A15 Bionic.',
     image: '/products/apple/iphone-13-pro-blue.png',
     rating: 4.9,
     colors: ['Bleu alpin', 'Graphite', 'Argent', 'Or'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '256 Go', price: 240000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-256_Go-Bleu_alpin', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Bleu alpin', price: 240000, active: true },
+      { id: 'sim_and_esim-256_Go-Graphite', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Graphite', price: 240000, active: true },
+      { id: 'sim_and_esim-256_Go-Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Argent', price: 240000, active: true },
+      { id: 'sim_and_esim-256_Go-Or', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Or', price: 240000, active: true },
     ],
     images: [
       '/products/apple/iphone-13-pro-blue.png',
@@ -196,12 +264,26 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 250000,
+    shortDesc: 'Grand écran 6,7 pouces 120Hz ProMotion, triple optique Pro Macro et autonomie phénoménale.',
     image: '/products/apple/iphone-13-promax-blue.png',
     rating: 4.9,
     colors: ['Bleu alpin', 'Graphite', 'Argent', 'Or'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '128 Go', price: 250000 },
       { capacity: '256 Go', price: 280000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-128_Go-Bleu_alpin', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Bleu alpin', price: 250000, active: true },
+      { id: 'sim_and_esim-128_Go-Graphite', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Graphite', price: 250000, active: true },
+      { id: 'sim_and_esim-128_Go-Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Argent', price: 250000, active: true },
+      { id: 'sim_and_esim-128_Go-Or', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Or', price: 250000, active: true },
+      { id: 'sim_and_esim-256_Go-Bleu_alpin', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Bleu alpin', price: 280000, active: true },
+      { id: 'sim_and_esim-256_Go-Graphite', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Graphite', price: 280000, active: true },
+      { id: 'sim_and_esim-256_Go-Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Argent', price: 280000, active: true },
+      { id: 'sim_and_esim-256_Go-Or', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Or', price: 280000, active: true },
     ],
     images: [
       '/products/apple/iphone-13-promax-blue.png',
@@ -223,11 +305,21 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 280000,
+    shortDesc: 'Dynamic Island interactive, capteur photo pro 48MP ProRAW et écran Always-On ProMotion.',
     image: '/products/apple/iphone-14-pro-deeppurple.png',
     rating: 4.9,
     colors: ['Violet intense', 'Noir sidéral', 'Argent', 'Or'],
+    simPricing: {
+      esim_only: { enabled: true, delta: 0, label: 'e-sim' }
+    },
     storageOptions: [
       { capacity: '256 Go eSIM', price: 280000 }
+    ],
+    variants: [
+      { id: 'esim_only-256_Go_eSIM-Violet_intense', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Violet intense', price: 280000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Noir_sideral', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Noir sidéral', price: 280000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Argent', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Argent', price: 280000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Or', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Or', price: 280000, active: true },
     ],
     images: [
       '/products/apple/iphone-14-pro-deeppurple.png',
@@ -249,12 +341,26 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 300000,
+    shortDesc: 'Dynamic Island, écran géant 6,7 pouces 2000 nits, capteur 48MP et autonomie record.',
     image: '/products/apple/iphone-14-pro-deeppurple.png',
     rating: 4.9,
     colors: ['Violet intense', 'Noir sidéral', 'Argent', 'Or'],
+    simPricing: {
+      esim_only: { enabled: true, delta: 0, label: 'e-sim' }
+    },
     storageOptions: [
       { capacity: '128 Go eSIM', price: 300000 },
       { capacity: '256 Go eSIM', price: 325000 }
+    ],
+    variants: [
+      { id: 'esim_only-128_Go_eSIM-Violet_intense', simType: 'e-sim', simTypeId: 'esim_only', storage: '128 Go eSIM', color: 'Violet intense', price: 300000, active: true },
+      { id: 'esim_only-128_Go_eSIM-Noir_sideral', simType: 'e-sim', simTypeId: 'esim_only', storage: '128 Go eSIM', color: 'Noir sidéral', price: 300000, active: true },
+      { id: 'esim_only-128_Go_eSIM-Argent', simType: 'e-sim', simTypeId: 'esim_only', storage: '128 Go eSIM', color: 'Argent', price: 300000, active: true },
+      { id: 'esim_only-128_Go_eSIM-Or', simType: 'e-sim', simTypeId: 'esim_only', storage: '128 Go eSIM', color: 'Or', price: 300000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Violet_intense', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Violet intense', price: 325000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Noir_sideral', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Noir sidéral', price: 325000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Argent', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Argent', price: 325000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Or', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Or', price: 325000, active: true },
     ],
     images: [
       '/products/apple/iphone-14-pro-deeppurple.png',
@@ -276,11 +382,21 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 350000,
+    shortDesc: 'Châssis en titane aérospatial, puce A17 Pro gravée en 3nm, bouton Action et connecteur USB-C.',
     image: '/products/apple/iphone-15-pro-naturaltitanium.png',
     rating: 4.9,
     colors: ['Titane Naturel', 'Titane Bleu', 'Titane Blanc', 'Titane Noir'],
+    simPricing: {
+      esim_only: { enabled: true, delta: 0, label: 'e-sim' }
+    },
     storageOptions: [
       { capacity: '256 Go eSIM', price: 350000 }
+    ],
+    variants: [
+      { id: 'esim_only-256_Go_eSIM-Titane_Naturel', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Naturel', price: 350000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Bleu', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Bleu', price: 350000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Blanc', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Blanc', price: 350000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Noir', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Noir', price: 350000, active: true },
     ],
     images: [
       '/products/apple/iphone-15-pro-naturaltitanium.png',
@@ -303,11 +419,21 @@ export const products = [
     brand: 'Iphones',
     price: 400000,
     salePrice: 375000,
+    shortDesc: 'Boîtier en titane ultra-résistant, téléobjectif périscopique zoom 5x, puce A17 Pro et USB-C.',
     image: '/products/apple/iphone-15-pro-naturaltitanium.png',
     rating: 5.0,
     colors: ['Titane Naturel', 'Titane Bleu', 'Titane Blanc', 'Titane Noir'],
+    simPricing: {
+      esim_only: { enabled: true, delta: 0, label: 'e-sim' }
+    },
     storageOptions: [
       { capacity: '256 Go eSIM', price: 400000 }
+    ],
+    variants: [
+      { id: 'esim_only-256_Go_eSIM-Titane_Naturel', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Naturel', price: 400000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Bleu', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Bleu', price: 400000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Blanc', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Blanc', price: 400000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Noir', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Noir', price: 400000, active: true },
     ],
     images: [
       '/products/apple/iphone-15-pro-naturaltitanium.png',
@@ -329,11 +455,22 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 385000,
+    shortDesc: 'Bouton Commande de l’appareil photo dédié, puce A18 taillée pour Apple Intelligence et double optique 48MP.',
     image: '/products/apple/iphone-16-ultramarine.png',
     rating: 4.9,
     colors: ['Bleu outremer', 'Sarcelle', 'Rose', 'Blanc', 'Noir'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '256 Go 1SIM', price: 385000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-256_Go_1SIM-Bleu_outremer', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go 1SIM', color: 'Bleu outremer', price: 385000, active: true },
+      { id: 'sim_and_esim-256_Go_1SIM-Sarcelle', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go 1SIM', color: 'Sarcelle', price: 385000, active: true },
+      { id: 'sim_and_esim-256_Go_1SIM-Rose', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go 1SIM', color: 'Rose', price: 385000, active: true },
+      { id: 'sim_and_esim-256_Go_1SIM-Blanc', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go 1SIM', color: 'Blanc', price: 385000, active: true },
+      { id: 'sim_and_esim-256_Go_1SIM-Noir', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go 1SIM', color: 'Noir', price: 385000, active: true },
     ],
     images: [
       '/products/apple/iphone-16-ultramarine.png',
@@ -356,12 +493,26 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 435000,
+    shortDesc: 'Écran 6,3 pouces agrandi, zoom optique 5x tétraprisme, vidéo 4K à 120 i/s Dolby Vision et puce A18 Pro.',
     image: '/products/apple/iphone-16-pro-deserttitanium.png',
     rating: 5.0,
     colors: ['Titane Désert', 'Titane Naturel', 'Titane Blanc', 'Titane Noir'],
+    simPricing: {
+      esim_only: { enabled: true, delta: 0, label: 'e-sim' }
+    },
     storageOptions: [
       { capacity: '128 Go eSIM', price: 435000 },
       { capacity: '256 Go eSIM', price: 480000 }
+    ],
+    variants: [
+      { id: 'esim_only-128_Go_eSIM-Titane_Desert', simType: 'e-sim', simTypeId: 'esim_only', storage: '128 Go eSIM', color: 'Titane Désert', price: 435000, active: true },
+      { id: 'esim_only-128_Go_eSIM-Titane_Naturel', simType: 'e-sim', simTypeId: 'esim_only', storage: '128 Go eSIM', color: 'Titane Naturel', price: 435000, active: true },
+      { id: 'esim_only-128_Go_eSIM-Titane_Blanc', simType: 'e-sim', simTypeId: 'esim_only', storage: '128 Go eSIM', color: 'Titane Blanc', price: 435000, active: true },
+      { id: 'esim_only-128_Go_eSIM-Titane_Noir', simType: 'e-sim', simTypeId: 'esim_only', storage: '128 Go eSIM', color: 'Titane Noir', price: 435000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Desert', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Désert', price: 480000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Naturel', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Naturel', price: 480000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Blanc', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Blanc', price: 480000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Noir', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Noir', price: 480000, active: true },
     ],
     images: [
       '/products/apple/iphone-16-pro-deserttitanium.png',
@@ -383,11 +534,21 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 500000,
+    shortDesc: 'Écran géant 6,9 pouces, boîtier Titane Désert, zoom optique 5x et la plus grande autonomie d’Apple.',
     image: '/products/apple/iphone-16-pro-deserttitanium.png',
     rating: 5.0,
     colors: ['Titane Désert', 'Titane Naturel', 'Titane Blanc', 'Titane Noir'],
+    simPricing: {
+      esim_only: { enabled: true, delta: 0, label: 'e-sim' }
+    },
     storageOptions: [
       { capacity: '256 Go eSIM', price: 500000 }
+    ],
+    variants: [
+      { id: 'esim_only-256_Go_eSIM-Titane_Desert', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Désert', price: 500000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Naturel', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Naturel', price: 500000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Blanc', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Blanc', price: 500000, active: true },
+      { id: 'esim_only-256_Go_eSIM-Titane_Noir', simType: 'e-sim', simTypeId: 'esim_only', storage: '256 Go eSIM', color: 'Titane Noir', price: 500000, active: true },
     ],
     images: [
       '/products/apple/iphone-16-pro-deserttitanium.png',
@@ -409,13 +570,31 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 625000,
+    shortDesc: 'Silhouette ultra-mince de 5,5 mm, nouveau module caméra horizontal en bandeau et puce A19 Bionic.',
     image: '/products/apple/iphone-17-air-skyblue.png',
     rating: 5.0,
     colors: ['Bleu Ciel Céleste', 'Blanc Pur Nuage', 'Or Champagne', 'Noir Sidéral'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '256 Go', price: 625000 },
       { capacity: '512 Go', price: 695000 },
       { capacity: '1 To', price: 785000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-256_Go-Bleu_Ciel_Celeste', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Bleu Ciel Céleste', price: 625000, active: true },
+      { id: 'sim_and_esim-256_Go-Blanc_Pur_Nuage', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Blanc Pur Nuage', price: 625000, active: true },
+      { id: 'sim_and_esim-256_Go-Or_Champagne', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Or Champagne', price: 625000, active: true },
+      { id: 'sim_and_esim-256_Go-Noir_Sideral', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Noir Sidéral', price: 625000, active: true },
+      { id: 'sim_and_esim-512_Go-Bleu_Ciel_Celeste', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Bleu Ciel Céleste', price: 695000, active: true },
+      { id: 'sim_and_esim-512_Go-Blanc_Pur_Nuage', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Blanc Pur Nuage', price: 695000, active: true },
+      { id: 'sim_and_esim-512_Go-Or_Champagne', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Or Champagne', price: 695000, active: true },
+      { id: 'sim_and_esim-512_Go-Noir_Sideral', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Noir Sidéral', price: 695000, active: true },
+      { id: 'sim_and_esim-1_To-Bleu_Ciel_Celeste', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Bleu Ciel Céleste', price: 785000, active: true },
+      { id: 'sim_and_esim-1_To-Blanc_Pur_Nuage', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Blanc Pur Nuage', price: 785000, active: true },
+      { id: 'sim_and_esim-1_To-Or_Champagne', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Or Champagne', price: 785000, active: true },
+      { id: 'sim_and_esim-1_To-Noir_Sideral', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Noir Sidéral', price: 785000, active: true },
     ],
     images: [
       '/products/apple/iphone-17-air-skyblue.png',
@@ -437,13 +616,31 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 520000,
+    shortDesc: 'Écran ProMotion 120Hz de série, double capteur photo 48MP et puce A19 gravée en 2nm.',
     image: '/products/apple/iphone-17-black.png',
     rating: 4.9,
     colors: ['Noir Minuit', 'Blanc Pur', 'Vert Sauge', 'Lavande'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '128 Go', price: 520000 },
       { capacity: '256 Go', price: 580000 },
       { capacity: '512 Go', price: 660000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-128_Go-Noir_Minuit', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Noir Minuit', price: 520000, active: true },
+      { id: 'sim_and_esim-128_Go-Blanc_Pur', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Blanc Pur', price: 520000, active: true },
+      { id: 'sim_and_esim-128_Go-Vert_Sauge', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Vert Sauge', price: 520000, active: true },
+      { id: 'sim_and_esim-128_Go-Lavande', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Lavande', price: 520000, active: true },
+      { id: 'sim_and_esim-256_Go-Noir_Minuit', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Noir Minuit', price: 580000, active: true },
+      { id: 'sim_and_esim-256_Go-Blanc_Pur', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Blanc Pur', price: 580000, active: true },
+      { id: 'sim_and_esim-256_Go-Vert_Sauge', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Vert Sauge', price: 580000, active: true },
+      { id: 'sim_and_esim-256_Go-Lavande', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Lavande', price: 580000, active: true },
+      { id: 'sim_and_esim-512_Go-Noir_Minuit', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Noir Minuit', price: 660000, active: true },
+      { id: 'sim_and_esim-512_Go-Blanc_Pur', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Blanc Pur', price: 660000, active: true },
+      { id: 'sim_and_esim-512_Go-Vert_Sauge', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Vert Sauge', price: 660000, active: true },
+      { id: 'sim_and_esim-512_Go-Lavande', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Lavande', price: 660000, active: true },
     ],
     images: [
       '/products/apple/iphone-17-black.png',
@@ -465,13 +662,28 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 690000,
+    shortDesc: 'Bandeau caméra transversal en titane unibody, processeur A19 Pro 2nm et zoom optique haute précision.',
     image: '/products/apple/iphone-17-pro-deepblue.png',
     rating: 5.0,
     colors: ['Titane Bleu Océan', 'Titane Argent Naturel', 'Titane Orange Cosmique'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '256 Go', price: 690000 },
       { capacity: '512 Go', price: 780000 },
       { capacity: '1 To', price: 890000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-256_Go-Titane_Bleu_Ocean', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Bleu Océan', price: 690000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Argent_Naturel', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Argent Naturel', price: 690000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Orange_Cosmique', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Orange Cosmique', price: 690000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Bleu_Ocean', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Bleu Océan', price: 780000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Argent_Naturel', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Argent Naturel', price: 780000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Orange_Cosmique', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Orange Cosmique', price: 780000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Bleu_Ocean', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Bleu Océan', price: 890000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Argent_Naturel', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Argent Naturel', price: 890000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Orange_Cosmique', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Orange Cosmique', price: 890000, active: true },
     ],
     images: [
       '/products/apple/iphone-17-pro-deepblue.png',
@@ -492,14 +704,32 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 750000,
+    shortDesc: 'Écran immersif 6,9 pouces 3000 nits, zoom optique 8x, bandeau caméra titane et autonomie record 35h.',
     image: '/products/apple/iphone-17-promax-deepblue.png',
     rating: 5.0,
     colors: ['Titane Bleu Océan', 'Titane Argent Naturel', 'Titane Orange Cosmique'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '256 Go', price: 750000 },
       { capacity: '512 Go', price: 840000 },
       { capacity: '1 To', price: 960000 },
       { capacity: '2 To', price: 1100000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-256_Go-Titane_Bleu_Ocean', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Bleu Océan', price: 750000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Argent_Naturel', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Argent Naturel', price: 750000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Orange_Cosmique', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Orange Cosmique', price: 750000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Bleu_Ocean', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Bleu Océan', price: 840000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Argent_Naturel', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Argent Naturel', price: 840000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Orange_Cosmique', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Orange Cosmique', price: 840000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Bleu_Ocean', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Bleu Océan', price: 960000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Argent_Naturel', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Argent Naturel', price: 960000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Orange_Cosmique', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Orange Cosmique', price: 960000, active: true },
+      { id: 'sim_and_esim-2_To-Titane_Bleu_Ocean', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '2 To', color: 'Titane Bleu Océan', price: 1100000, active: true },
+      { id: 'sim_and_esim-2_To-Titane_Argent_Naturel', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '2 To', color: 'Titane Argent Naturel', price: 1100000, active: true },
+      { id: 'sim_and_esim-2_To-Titane_Orange_Cosmique', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '2 To', color: 'Titane Orange Cosmique', price: 1100000, active: true },
     ],
     images: [
       '/products/apple/iphone-17-promax-deepblue.png',
@@ -520,13 +750,31 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 590000,
+    shortDesc: 'Puce Apple A20 Bionic avec IA générative embarquée, écran 3200 nits et batterie au graphène.',
     image: '/products/apple/iphone-18-glacier.png',
     rating: 5.0,
     colors: ['Bleu Glacier', 'Titane Platine Argent', 'Titane Noir Onyx', 'Titane Bordeaux'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '128 Go', price: 590000 },
       { capacity: '256 Go', price: 660000 },
       { capacity: '512 Go', price: 750000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-128_Go-Bleu_Glacier', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Bleu Glacier', price: 590000, active: true },
+      { id: 'sim_and_esim-128_Go-Titane_Platine_Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Titane Platine Argent', price: 590000, active: true },
+      { id: 'sim_and_esim-128_Go-Titane_Noir_Onyx', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Titane Noir Onyx', price: 590000, active: true },
+      { id: 'sim_and_esim-128_Go-Titane_Bordeaux', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '128 Go', color: 'Titane Bordeaux', price: 590000, active: true },
+      { id: 'sim_and_esim-256_Go-Bleu_Glacier', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Bleu Glacier', price: 660000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Platine_Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Platine Argent', price: 660000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Noir_Onyx', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Noir Onyx', price: 660000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Bordeaux', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Bordeaux', price: 660000, active: true },
+      { id: 'sim_and_esim-512_Go-Bleu_Glacier', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Bleu Glacier', price: 750000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Platine_Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Platine Argent', price: 750000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Noir_Onyx', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Noir Onyx', price: 750000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Bordeaux', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Bordeaux', price: 750000, active: true },
     ],
     images: [
       '/products/apple/iphone-18-glacier.png',
@@ -548,13 +796,31 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 790000,
+    shortDesc: 'Capteur Fusion 48MP à ouverture variable mécanique, puce Apple A20 Pro 2nm et 12 Go de mémoire vive.',
     image: '/products/apple/iphone-18-pro-black.png',
     rating: 5.0,
     colors: ['Titane Noir Onyx', 'Titane Platine Argent', 'Titane Bordeaux Impérial', 'Titane Bleu Glacier'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '256 Go', price: 790000 },
       { capacity: '512 Go', price: 890000 },
       { capacity: '1 To', price: 1020000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-256_Go-Titane_Noir_Onyx', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Noir Onyx', price: 790000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Platine_Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Platine Argent', price: 790000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Bordeaux_Imperial', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Bordeaux Impérial', price: 790000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Bleu_Glacier', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Bleu Glacier', price: 790000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Noir_Onyx', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Noir Onyx', price: 890000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Platine_Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Platine Argent', price: 890000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Bordeaux_Imperial', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Bordeaux Impérial', price: 890000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Bleu_Glacier', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Bleu Glacier', price: 890000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Noir_Onyx', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Noir Onyx', price: 1020000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Platine_Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Platine Argent', price: 1020000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Bordeaux_Imperial', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Bordeaux Impérial', price: 1020000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Bleu_Glacier', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Bleu Glacier', price: 1020000, active: true },
     ],
     images: [
       '/products/apple/iphone-18-pro-black.png',
@@ -576,14 +842,36 @@ export const products = [
     category: 'phones',
     brand: 'Iphones',
     price: 890000,
+    shortDesc: 'Écran 6,9 pouces 3000 nits, ouverture variable mécanique, batterie colossale 5567 mAh et puce A20 Pro.',
     image: '/products/apple/iphone-18-promax-black.png',
     rating: 5.0,
     colors: ['Titane Noir Onyx', 'Titane Platine Argent', 'Titane Bordeaux Impérial', 'Titane Bleu Glacier'],
+    simPricing: {
+      sim_and_esim: { enabled: true, delta: 0, label: '1 e-sim+1 sim physique' }
+    },
     storageOptions: [
       { capacity: '256 Go', price: 890000 },
       { capacity: '512 Go', price: 990000 },
       { capacity: '1 To', price: 1150000 },
       { capacity: '2 To', price: 1350000 }
+    ],
+    variants: [
+      { id: 'sim_and_esim-256_Go-Titane_Noir_Onyx', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Noir Onyx', price: 890000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Platine_Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Platine Argent', price: 890000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Bordeaux_Imperial', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Bordeaux Impérial', price: 890000, active: true },
+      { id: 'sim_and_esim-256_Go-Titane_Bleu_Glacier', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '256 Go', color: 'Titane Bleu Glacier', price: 890000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Noir_Onyx', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Noir Onyx', price: 990000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Platine_Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Platine Argent', price: 990000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Bordeaux_Imperial', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Bordeaux Impérial', price: 990000, active: true },
+      { id: 'sim_and_esim-512_Go-Titane_Bleu_Glacier', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '512 Go', color: 'Titane Bleu Glacier', price: 990000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Noir_Onyx', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Noir Onyx', price: 1150000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Platine_Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Platine Argent', price: 1150000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Bordeaux_Imperial', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Bordeaux Impérial', price: 1150000, active: true },
+      { id: 'sim_and_esim-1_To-Titane_Bleu_Glacier', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '1 To', color: 'Titane Bleu Glacier', price: 1150000, active: true },
+      { id: 'sim_and_esim-2_To-Titane_Noir_Onyx', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '2 To', color: 'Titane Noir Onyx', price: 1350000, active: true },
+      { id: 'sim_and_esim-2_To-Titane_Platine_Argent', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '2 To', color: 'Titane Platine Argent', price: 1350000, active: true },
+      { id: 'sim_and_esim-2_To-Titane_Bordeaux_Imperial', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '2 To', color: 'Titane Bordeaux Impérial', price: 1350000, active: true },
+      { id: 'sim_and_esim-2_To-Titane_Bleu_Glacier', simType: '1 e-sim+1 sim physique', simTypeId: 'sim_and_esim', storage: '2 To', color: 'Titane Bleu Glacier', price: 1350000, active: true },
     ],
     images: [
       '/products/apple/iphone-18-promax-black.png',

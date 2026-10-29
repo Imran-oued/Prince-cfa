@@ -783,11 +783,12 @@ export default function AdminPage() {
         ...b,
         capacities: b.capacities.map(c => {
           if (c.id !== capId) return c;
-          const exists = c.colors.some(col => col.toLowerCase() === colorName.toLowerCase());
+          const matchCol = (col: string) => 
+            col.toLowerCase().trim() === colorName.toLowerCase().trim();
+          const exists = c.colors.some(matchCol);
           let nextCols: string[];
           if (exists) {
-            if (c.colors.length <= 1) return c;
-            nextCols = c.colors.filter(col => col.toLowerCase() !== colorName.toLowerCase());
+            nextCols = c.colors.filter(col => !matchCol(col));
           } else {
             nextCols = [...c.colors, colorName];
           }
@@ -814,7 +815,7 @@ export default function AdminPage() {
       if (b.simId !== simId) return b;
       return {
         ...b,
-        capacities: b.capacities.map(c => c.id === capId ? { ...c, colors: [c.colors[0] || "Titane Naturel"] } : c),
+        capacities: b.capacities.map(c => c.id === capId ? { ...c, colors: [] } : c),
       };
     }));
   };
@@ -4829,28 +4830,50 @@ export default function AdminPage() {
                                               </div>
                                             </div>
 
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-36 overflow-y-auto p-2 bg-black/40 rounded-xl border border-white/5 custom-scrollbar">
-                                              {IPHONE_OFFICIAL_COLORS.map(c => {
-                                                const isSelected = capItem.colors.some(col => col.toLowerCase() === c.name.toLowerCase());
-                                                return (
-                                                  <label
-                                                    key={c.name}
-                                                    className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white cursor-pointer select-none py-1 px-1.5 rounded hover:bg-white/5"
-                                                  >
-                                                    <input
-                                                      type="checkbox"
-                                                      checked={isSelected}
-                                                      onChange={() => handleToggleColorForCapacity(block.simId, capItem.id, c.name)}
-                                                      className="w-3.5 h-3.5 accent-[#d4af37] rounded cursor-pointer"
-                                                    />
-                                                    <span 
-                                                      className="w-3 h-3 rounded-full flex-shrink-0 border border-white/20"
-                                                      style={{ backgroundColor: c.hex }}
-                                                    />
-                                                    <span className="truncate">{c.name}</span>
-                                                  </label>
-                                                );
-                                              })}
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-2 bg-black/40 rounded-xl border border-white/5 custom-scrollbar">
+                                              {(() => {
+                                                const list = [...IPHONE_OFFICIAL_COLORS];
+                                                capItem.colors.forEach(col => {
+                                                  if (col && !list.some(c => c.name.toLowerCase() === col.toLowerCase())) {
+                                                    list.unshift({
+                                                      name: col,
+                                                      hex: "#d4af37",
+                                                      border: "#d4af37"
+                                                    });
+                                                  }
+                                                });
+
+                                                return list.map(c => {
+                                                  const isSelected = capItem.colors.some(col => 
+                                                    col.toLowerCase().trim() === c.name.toLowerCase().trim() ||
+                                                    (c.name.toLowerCase() === "rouge (product red)" && col.toLowerCase() === "rouge") ||
+                                                    (c.name.toLowerCase() === "noir sidéral" && col.toLowerCase() === "noir sidéral") ||
+                                                    (c.name.toLowerCase() === "lumière stellaire" && col.toLowerCase() === "lumière stellaire")
+                                                  );
+                                                  return (
+                                                    <label
+                                                      key={c.name}
+                                                      className={`flex items-center gap-2 text-xs cursor-pointer select-none py-1.5 px-2 rounded-lg transition-colors border ${
+                                                        isSelected 
+                                                          ? 'text-white bg-gold/15 border-gold/40 font-bold' 
+                                                          : 'text-zinc-400 hover:text-white border-transparent hover:bg-white/5'
+                                                      }`}
+                                                    >
+                                                      <input
+                                                        type="checkbox"
+                                                        checked={isSelected}
+                                                        onChange={() => handleToggleColorForCapacity(block.simId, capItem.id, c.name)}
+                                                        className="w-3.5 h-3.5 accent-[#d4af37] rounded cursor-pointer"
+                                                      />
+                                                      <span 
+                                                        className="w-3.5 h-3.5 rounded-full flex-shrink-0 border border-white/20 shadow-sm"
+                                                        style={{ backgroundColor: c.hex }}
+                                                      />
+                                                      <span className="truncate">{c.name}</span>
+                                                    </label>
+                                                  );
+                                                });
+                                              })()}
                                             </div>
                                           </div>
                                         </div>

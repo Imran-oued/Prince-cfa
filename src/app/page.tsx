@@ -72,11 +72,14 @@ type Product = {
   selectedCapacity?: string;
   selectedSimType?: string;
   storageOptions?: { capacity: string; price: number }[];
-  simPricing?: Record<string, { enabled: boolean; delta: number; label: string }>;
+  simPricing?: Record<string, any>;
+  variants?: any[];
+  otherFeatures?: string[];
   stock?: number;
   stockStatus?: 'en_stock' | 'bientot_disponible' | string;
   isComingSoon?: boolean;
   inStock?: boolean;
+  shortDesc?: string;
 };
 
 const categories = [
@@ -187,6 +190,9 @@ function getProductSummarySnippet(product: Product): string {
   }
 
   if (cat === 'phones' || cat === 'smartphones') {
+    if (product.shortDesc) {
+      return product.shortDesc;
+    }
     const parts = [
       specs.storage ? String(specs.storage) : null,
       specs.screen,
@@ -571,12 +577,12 @@ export default function Home() {
               const defaultMatch = defaultProducts.find(dp => dp.id === p.id);
               const updatedProduct = { ...p };
               if (defaultMatch) {
-                updatedProduct.image = defaultMatch.image;
-                updatedProduct.images = defaultMatch.images;
-                updatedProduct.colors = defaultMatch.colors;
-                updatedProduct.specs = defaultMatch.specs;
-                updatedProduct.desc = defaultMatch.desc;
-                if (defaultMatch.brand) updatedProduct.brand = defaultMatch.brand;
+                if (!updatedProduct.image) updatedProduct.image = defaultMatch.image;
+                if (!updatedProduct.images || updatedProduct.images.length === 0) updatedProduct.images = defaultMatch.images;
+                if (!updatedProduct.colors || updatedProduct.colors.length === 0) updatedProduct.colors = defaultMatch.colors;
+                if (!updatedProduct.specs) updatedProduct.specs = defaultMatch.specs;
+                if (!updatedProduct.desc) updatedProduct.desc = defaultMatch.desc;
+                if (!updatedProduct.brand && defaultMatch.brand) updatedProduct.brand = defaultMatch.brand;
                 if (defaultMatch.storageOptions && (!p.storageOptions || p.storageOptions.length <= 1)) {
                   updatedProduct.storageOptions = defaultMatch.storageOptions;
                 }

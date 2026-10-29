@@ -959,21 +959,56 @@ export const IPHONE_SIM_TYPES = [
  * Palette des coloris officiels Apple pour iPhones (sélection en 1 clic)
  */
 export const IPHONE_OFFICIAL_COLORS = [
+  // Coloris intemporels & standards (iPhone 11, 12, 13, 14, 15, SE)
+  { name: "Noir", hex: "#1c1d1f", border: "#000000" },
+  { name: "Blanc", hex: "#f5f5f7", border: "#d2d2d7" },
+  { name: "Mauve", hex: "#d1cdda", border: "#b8b2c4" },
+  { name: "Vert", hex: "#dae5d8", border: "#b2c7b0" },
+  { name: "Rouge", hex: "#ba0c2f", border: "#8a0620" },
+  { name: "Bleu", hex: "#215e7f", border: "#17435a" },
+  { name: "Jaune", hex: "#fde87e", border: "#dbc55e" },
+  { name: "Rose", hex: "#fed0d3", border: "#dbadb0" },
+  { name: "Minuit", hex: "#19212c", border: "#0d131b" },
+  { name: "Lumière Stellaire", hex: "#faf6f2", border: "#dcd6cf" },
+  { name: "Rouge (PRODUCT RED)", hex: "#ba0c2f", border: "#8a0620" },
+
+  // Coloris Pro Titane (iPhone 15 Pro, 16 Pro)
   { name: "Titane Naturel", hex: "#9a958e", border: "#7a756e" },
   { name: "Titane Noir", hex: "#3b3a36", border: "#252422" },
   { name: "Titane Blanc", hex: "#e4e5e7", border: "#c5c6c8" },
   { name: "Titane Bleu", hex: "#3b4452", border: "#28303c" },
   { name: "Titane Sable / Désert", hex: "#c4a683", border: "#a58866" },
+
+  // Coloris Pro Acier Chirurgical & Éditions Spéciales (iPhone 11 Pro, 12 Pro, 13 Pro, 14 Pro, 16)
+  { name: "Gris sidéral", hex: "#535150", border: "#3c3b3a" },
   { name: "Noir Sidéral", hex: "#1f2024", border: "#111214" },
+  { name: "Graphite", hex: "#4b4845", border: "#373533" },
   { name: "Argent", hex: "#e3e4e5", border: "#c1c2c4" },
   { name: "Or", hex: "#fae7cf", border: "#d8c4ad" },
-  { name: "Minuit", hex: "#19212c", border: "#0d131b" },
-  { name: "Lumière Stellaire", hex: "#faf6f2", border: "#dcd6cf" },
+  { name: "Vert nuit", hex: "#4e5851", border: "#363e39" },
+  { name: "Vert Alpin", hex: "#505e4d", border: "#384435" },
+  { name: "Bleu alpin", hex: "#94a9bf", border: "#6c849c" },
   { name: "Bleu Pacifique", hex: "#2d4e60", border: "#1b3442" },
   { name: "Bleu Sierra", hex: "#9bb5ce", border: "#7b94ad" },
-  { name: "Vert Alpin", hex: "#505e4d", border: "#384435" },
   { name: "Violet Intense", hex: "#594f63", border: "#3e3646" },
-  { name: "Rose", hex: "#fed0d3", border: "#dbadb0" },
-  { name: "Rouge (PRODUCT RED)", hex: "#ba0c2f", border: "#8a0620" },
-  { name: "Jaune", hex: "#fde87e", border: "#dbc55e" },
+  { name: "Bleu outremer", hex: "#3b5898", border: "#273f73" },
+  { name: "Sarcelle", hex: "#408282", border: "#2b5c5c" },
+  { name: "Titane Désert", hex: "#c4a683", border: "#a58866" },
+
+  // Coloris concept & nouvelles générations (iPhone 17 & 18)
+  { name: "Bleu Ciel Céleste", hex: "#a4c2e6", border: "#7da2d0" },
+  { name: "Blanc Pur Nuage", hex: "#f0f2f5", border: "#d0d4dc" },
+  { name: "Or Champagne", hex: "#edd9b4", border: "#d1b98d" },
+  { name: "Noir Minuit", hex: "#15171c", border: "#08090b" },
+  { name: "Blanc Pur", hex: "#fcfcfc", border: "#dcdcdc" },
+  { name: "Vert Sauge", hex: "#9bb09f", border: "#768d7b" },
+  { name: "Lavande", hex: "#b5a7c9", border: "#9381ad" },
+  { name: "Titane Bleu Océan", hex: "#2b4c6f", border: "#18324f" },
+  { name: "Titane Argent Naturel", hex: "#c0c2c4", border: "#9ea1a4" },
+  { name: "Titane Orange Cosmique", hex: "#e67332", border: "#b85319" },
+  { name: "Bleu Glacier", hex: "#8fb7d2", border: "#6896b5" },
+  { name: "Titane Platine Argent", hex: "#d5d7da", border: "#abadb1" },
+  { name: "Titane Noir Onyx", hex: "#1a1a1c", border: "#0d0d0e" },
+  { name: "Titane Bordeaux", hex: "#5e1927", border: "#3e0d17" },
+  { name: "Titane Bordeaux Impérial", hex: "#521422", border: "#360a14" },
 ];
