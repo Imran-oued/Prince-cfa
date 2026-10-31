@@ -38,13 +38,13 @@ export const SHOP_CONFIG = {
       name: "Orange Money",
       shortName: "Orange Money",
       badge: "orange",
-      number: "55443167",
-      displayNumber: "+226 55 44 31 67",
+      number: "8451921",
+      displayNumber: "8451921",
       recipientName: "PRINCE CFA",
       instructions: "Effectuez votre paiement Orange Money avec le code USSD ci-dessous vers le compte officiel avec le montant exact. Dès réception du SMS, conservez la référence.",
-      ussdCode: "*144*2*1*55443167*MONTANT#",
-      ussdPrefix: "*144*2*1*",
-      merchantCode: "55443167",
+      ussdCode: "*144*3*8451921*MONTANT#",
+      ussdPrefix: "*144*3*",
+      merchantCode: "8451921",
       appUrl: "https://play.google.com/store/apps/details?id=com.orange.omservices"
     },
     wave: {

@@ -148,10 +148,11 @@ export default function CartDrawer({
     });
   };
 
-  // Code USSD interactif Orange Money (Burkina Faso) : *144*2*1*55443167*montant#
-  const orangeNumber = SHOP_CONFIG.paymentMethods.orange_money?.merchantCode || SHOP_CONFIG.paymentMethods.orange_money?.number || "55443167";
-  const ussdCodeString = `*144*2*1*${orangeNumber}*${totalPrice}#`;
-  const telUssdUrl = `tel:*144*2*1*${orangeNumber}*${totalPrice}%23`;
+  // Code USSD interactif Orange Money (Burkina Faso) : *144*3*8451921*montant#
+  const orangeNumber = SHOP_CONFIG.paymentMethods.orange_money?.merchantCode || SHOP_CONFIG.paymentMethods.orange_money?.number || "8451921";
+  const ussdPrefix = SHOP_CONFIG.paymentMethods.orange_money?.ussdPrefix || "*144*3*";
+  const ussdCodeString = `${ussdPrefix}${orangeNumber}*${totalPrice}#`;
+  const telUssdUrl = `tel:${ussdPrefix}${orangeNumber}*${totalPrice}%23`;
 
   // Copier le code USSD complet
   const handleCopyUssd = () => {
