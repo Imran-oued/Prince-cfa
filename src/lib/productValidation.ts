@@ -175,8 +175,13 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
     }
   }
 
+  const catConfig = getCategoryConfig(category);
+
   // Garantie & Accessoires
-  const warranty = (raw.warranty || "").trim() || "Garantie 12 Mois Certifiée";
+  const defaultWarrantyForCategory = (category === "phones" || category === "tablets" || category === "tablettes")
+    ? "Garantie 1 Mois"
+    : (catConfig?.defaultWarranty || "Garantie 12 Mois Certifiée");
+  const warranty = (raw.warranty || "").trim() || defaultWarrantyForCategory;
   let accessories: string | string[] = "";
   if (Array.isArray(raw.accessories)) {
     accessories = raw.accessories.map(a => String(a).trim()).filter(Boolean);
@@ -206,7 +211,6 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
   }
   const mainImage = images[0] || (typeof raw.image === "string" && raw.image ? raw.image : "https://placehold.co/600x600/121216/d4af37?text=PRINCE+CFA");
 
-  const catConfig = getCategoryConfig(category);
   const rawSpecs: Record<string, any> = raw.specs && typeof raw.specs === "object" ? { ...raw.specs } : {};
   if (!rawSpecs.model && name) {
     rawSpecs.model = name;
@@ -420,6 +424,18 @@ export function normalizeProductSpecs(product: any): any {
     !Boolean(copy.name && String(copy.name).toLowerCase().includes("iphone"))
   ) {
     copy.colors = [];
+  }
+
+  // Application de la garantie officielle 1 mois pour tous les téléphones (iPhones et Android) et tablettes
+  if (
+    copy.category === "phones" || 
+    copy.category === "tablets" || 
+    copy.category === "tablettes" ||
+    (copy.name && /iphone|samsung|galaxy|xiaomi|redmi|pixel|tablette|ipad/i.test(copy.name))
+  ) {
+    if (!copy.warranty || copy.warranty.includes("12 Mois") || copy.warranty.includes("12 mois") || copy.warranty.includes("2 Ans")) {
+      copy.warranty = "Garantie 1 Mois";
+    }
   }
 
   // Compatibilité générale processeur

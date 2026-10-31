@@ -374,7 +374,7 @@ export default function AdminPage() {
     stock: "99",
     stockStatus: "en_stock",
     condition: "neuf",
-    warranty: "Garantie 12 Mois Certifiée",
+    warranty: "Garantie 1 Mois",
     accessories: "",
     imageBg: "white",
   });
@@ -2316,7 +2316,9 @@ export default function AdminPage() {
         ? "bientot_disponible"
         : "en_stock",
       condition: (product.condition as any) || "neuf",
-      warranty: product.warranty || "Garantie 12 Mois Certifiée",
+      warranty: product.warranty && !product.warranty.includes("12 Mois")
+        ? product.warranty
+        : ((product.category === "phones" || product.category === "tablets") ? "Garantie 1 Mois" : (product.warranty || "Garantie 12 Mois Certifiée")),
       accessories: product.accessories || "",
       imageBg: (product as any).imageBg || "white",
     });
@@ -2360,7 +2362,7 @@ export default function AdminPage() {
       stock: "99",
       stockStatus: "en_stock",
       condition: "neuf",
-      warranty: "Garantie 12 Mois Certifiée",
+      warranty: "Garantie 1 Mois",
       accessories: "",
       imageBg: "white",
     });
@@ -2481,7 +2483,7 @@ export default function AdminPage() {
         stock: "99",
         stockStatus: "en_stock",
         condition: "neuf",
-        warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
+        warranty: phoneConfig.defaultWarranty || "Garantie 1 Mois",
         accessories: phoneConfig.defaultAccessories || "",
         imageBg: "white",
       });
@@ -3720,7 +3722,7 @@ export default function AdminPage() {
                       stock: "99",
                       stockStatus: "en_stock",
                       condition: "neuf",
-                      warranty: phoneConfig.defaultWarranty || "Garantie 12 Mois Certifiée",
+                      warranty: phoneConfig.defaultWarranty || "Garantie 1 Mois",
                       accessories: phoneConfig.defaultAccessories || "",
                       imageBg: "white",
                     });
@@ -4381,9 +4383,15 @@ export default function AdminPage() {
                           type="text" 
                           value={commonFormData.warranty} 
                           onChange={e => setCommonFormData({ ...commonFormData, warranty: e.target.value })} 
-                          placeholder={getCategoryConfig(formCategory).defaultWarranty || "Ex: Garantie 12 Mois Certifiée"} 
+                          placeholder={getCategoryConfig(formCategory).defaultWarranty || "Ex: Garantie 1 Mois"} 
                           className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
                         />
+                        {(formCategory === "phones" || formCategory === "tablets") && (
+                          <div className="mt-1.5 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-300 space-y-0.5">
+                            <span className="font-bold block">Conditions officielles Prince CFA (1 Mois) :</span>
+                            <span>La garantie ne couvre pas : problème lié à l&apos;écran, dommage causé par un liquide, appareil qui ne s&apos;allume plus.</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Accessoires inclus */}

@@ -776,5 +776,41 @@ test("17. iPhone Single SIM configuration strictly limits options without phanto
   assert.equal(uniqueSimTypes.length, 1, "Un seul format SIM configuré dans l'admin ne doit pas en inventer d'autres");
 });
 
+test("18. Warranty rules: phones and tablets default to 1-month warranty with Prince CFA conditions", () => {
+  assert.equal(PRODUCT_CATEGORIES.phones.defaultWarranty, "Garantie 1 Mois");
+  assert.equal(PRODUCT_CATEGORIES.tablets.defaultWarranty, "Garantie 1 Mois");
+
+  // Phone without warranty specified
+  const phoneRes = validateAndCleanProduct({
+    name: "iPhone 15",
+    category: "phones",
+    brand: "Apple",
+    price: 650000,
+    desc: "iPhone 15 standard."
+  });
+  assert.equal(phoneRes.isValid, true);
+  assert.equal(phoneRes.cleanedProduct.warranty, "Garantie 1 Mois");
+
+  // Tablet without warranty specified
+  const tabletRes = validateAndCleanProduct({
+    name: "WOWO G702",
+    category: "tablets",
+    brand: "WOWO",
+    price: 35000,
+    desc: "Tablette enfant."
+  });
+  assert.equal(tabletRes.isValid, true);
+  assert.equal(tabletRes.cleanedProduct.warranty, "Garantie 1 Mois");
+
+  // Existing phone normalized with legacy 12-month warranty is updated to 1 month
+  const normalizedPhone = normalizeProductSpecs({
+    name: "iPhone 11",
+    category: "phones",
+    warranty: "Garantie 12 Mois Certifiée"
+  });
+  assert.equal(normalizedPhone.warranty, "Garantie 1 Mois");
+});
+
+
 
 

@@ -65,5 +65,20 @@ export const SHOP_CONFIG = {
       badge: "store",
       instructions: "Réglez directement en espèces ou par Mobile Money lors du retrait de votre appareil dans notre boutique à Koulouba, Ouagadougou."
     }
+  },
+
+  // Conditions officielles de garantie
+  warrantyPolicy: {
+    phonesAndTablets: {
+      duration: "1 MOIS",
+      title: "CONDITIONS DE GARANTIE — DURÉE : 1 MOIS",
+      shortLabel: "Garantie 1 Mois",
+      exclusionsTitle: "La garantie ne couvre pas les cas suivants :",
+      exclusions: [
+        "Problème lié à l'écran",
+        "Dommage causé par un liquide",
+        "Appareil qui ne s'allume plus"
+      ]
+    }
   }
 };

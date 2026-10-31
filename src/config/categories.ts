@@ -40,7 +40,7 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     supportsStorageVariants: true,
     popularBrands: ["Apple", "Samsung", "Google Pixel", "Redmi", "Xiaomi", "Tecno", "Infinix", "Honor", "OALE", "Itel", "Huawei", "Oppo"],
     placeholderName: "Ex: iPhone 15 Pro Max 256 Go Titane Naturel",
-    defaultWarranty: "Garantie 12 Mois Certifiée",
+    defaultWarranty: "Garantie 1 Mois",
     defaultAccessories: "Câble USB-C officiel, Boîte d'origine, Extracteur de SIM",
     fields: [
       {
@@ -284,7 +284,7 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     supportsStorageVariants: true,
     popularBrands: ["WOWO", "Motorola", "BTOUCH", "17 Pro Max", "Apple", "Samsung", "Xiaomi", "Lenovo", "Huawei"],
     placeholderName: "Ex: iPad Pro 11, Galaxy Tab S9, WOWO G702...",
-    defaultWarranty: "Garantie 12 Mois Certifiée",
+    defaultWarranty: "Garantie 1 Mois",
     defaultAccessories: "Câble de charge, Adaptateur secteur",
     fields: [
       {

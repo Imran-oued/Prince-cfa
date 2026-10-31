@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { SHOP_CONFIG } from '@/config/shop';
-import { Star, HardDrive, Check, Zap, Laptop, Refrigerator, Tablet, ShoppingBag, ChevronDown, ChevronLeft } from 'lucide-react';
+import { Star, HardDrive, Check, Zap, Laptop, Refrigerator, Tablet, ShoppingBag, ChevronDown, ChevronLeft, ShieldCheck } from 'lucide-react';
 import { getCategoryConfig, isStorageVariantCategory } from '@/config/categories';
 import { getProductImageBg, isAppleBrand } from '@/lib/productValidation';
 
@@ -240,7 +240,10 @@ export default function ProductDrawer({
     }
 
     // 7. Garantie
-    if (currentProduct.warranty) {
+    const isPhoneOrTablet = currentProduct.category === 'phones' || currentProduct.category === 'tablets' || currentProduct.category === 'tablettes';
+    if (isPhoneOrTablet) {
+      details.push({ label: 'Garantie', value: '1 Mois (Hors écran, liquide, non-allumage)' });
+    } else if (currentProduct.warranty) {
       details.push({ label: 'Garantie', value: currentProduct.warranty });
     }
 
@@ -1580,9 +1583,45 @@ export default function ProductDrawer({
                 </svg>
                 <div>
                   <div className="text-[10px] text-zinc-500 uppercase font-semibold">Garantie Vendeur</div>
-                  <div className="font-bold text-zinc-900">{currentProduct.warranty || "Garantie 12 Mois Certifiée"}</div>
+                  <div className="font-bold text-zinc-900">
+                    {(currentProduct.category === 'phones' || currentProduct.category === 'tablets' || currentProduct.category === 'tablettes')
+                      ? "Garantie 1 Mois"
+                      : (currentProduct.warranty || "Garantie 12 Mois Certifiée")}
+                  </div>
                 </div>
               </div>
+
+              {/* Conditions de Garantie Officielles Prince CFA pour Téléphones et Tablettes */}
+              {(currentProduct.category === 'phones' || currentProduct.category === 'tablets' || currentProduct.category === 'tablettes') && (
+                <div className="col-span-1 sm:col-span-2 p-3.5 rounded-2xl bg-amber-500/[0.07] border border-amber-500/35 space-y-2">
+                  <div className="flex items-center justify-between text-amber-900 text-xs font-bold uppercase tracking-wider">
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-amber-600" aria-hidden="true" />
+                      <span>Condition de Garantie — Durée : 1 Mois</span>
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-950 font-black border border-amber-500/30">
+                      Prince CFA
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-700 font-semibold">
+                    La garantie ne couvre pas les cas suivants :
+                  </p>
+                  <ul className="text-xs text-zinc-800 space-y-1.5 pl-1 font-medium">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                      <span>Problème lié à l&apos;écran</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                      <span>Dommage causé par un liquide</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                      <span>Appareil qui ne s&apos;allume plus</span>
+                    </li>
+                  </ul>
+                </div>
+              )}
 
               {currentProduct.accessories ? (
                 <div className="col-span-1 sm:col-span-2 p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start gap-2.5">
