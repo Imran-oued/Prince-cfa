@@ -938,23 +938,49 @@ export default function AdminPage() {
 
                 <button
                   type="button"
-                  onClick={() => handleRemoveImage(index)}
-                  className="absolute top-1.5 right-1.5 w-6 h-6 rounded-md bg-red-600/80 hover:bg-red-600 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow"
-                  title="Supprimer cette image"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveImage(index);
+                  }}
+                  className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-md border border-white/20"
+                  title="Supprimer cette photo"
+                  aria-label="Supprimer cette photo"
                 >
-                  <X className="w-3.5 h-3.5" aria-hidden="true" />
+                  <Trash2 className="w-3.5 h-3.5 text-white" aria-hidden="true" />
                 </button>
               </div>
 
-              {index !== 0 && (
+              {index === 0 ? (
                 <button
                   type="button"
-                  onClick={() => handleSetMainImage(index)}
-                  className="w-full mt-1.5 py-1 px-2 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-[10px] text-zinc-300 font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1"
+                  onClick={() => handleRemoveImage(0)}
+                  className="w-full mt-1.5 py-1 px-2 rounded-lg bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white text-[10px] font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-red-500/20"
+                  title="Supprimer cette photo principale"
                 >
-                  <Crown className="w-3 h-3" aria-hidden="true" />
-                  <span>Définir comme 1ère</span>
+                  <Trash2 className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                  <span>Supprimer</span>
                 </button>
+              ) : (
+                <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSetMainImage(index)}
+                    className="py-1 px-1 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-[10px] text-zinc-300 font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-white/5 truncate"
+                    title="Définir comme photo principale"
+                  >
+                    <Crown className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                    <span className="truncate">1ère</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index)}
+                    className="py-1 px-1 rounded-lg bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white text-[10px] font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-red-500/20 truncate"
+                    title="Supprimer cette photo"
+                  >
+                    <Trash2 className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                    <span className="truncate">Suppr.</span>
+                  </button>
+                </div>
               )}
             </div>
           ))}
@@ -3630,6 +3656,23 @@ export default function AdminPage() {
                   </button>
                 </div>
 
+                {editingId && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (confirm("Voulez-vous vraiment supprimer définitivement cet article du catalogue ?")) {
+                        await handleDelete(editingId);
+                        closeModal();
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-200 hover:border-red-600 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                    title="Supprimer définitivement cet article"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
+                    <span className="hidden sm:inline">Supprimer l'article</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={requestCloseModal}
@@ -3958,22 +4001,41 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setModalViewMode("form")}
-                      className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
-                    >
-                      Revenir à l&apos;édition
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSaveProduct}
-                      disabled={isSaving}
-                      className="px-6 py-2.5 rounded-xl bg-gold text-black font-extrabold text-xs uppercase tracking-wider hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(212,175,55,0.4)] disabled:opacity-50 cursor-pointer"
-                    >
-                      {isSaving ? "Enregistrement..." : (editingId ? "Mettre à jour" : "Confirmer & Enregistrer")}
-                    </button>
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    {editingId ? (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (confirm("Voulez-vous vraiment supprimer définitivement cet article du catalogue ?")) {
+                            await handleDelete(editingId);
+                            closeModal();
+                          }
+                        }}
+                        disabled={isSaving}
+                        className="px-4 py-2.5 rounded-xl bg-red-500/15 hover:bg-red-600 text-red-500 hover:text-white text-xs font-bold uppercase tracking-wider transition-all border border-red-500/30 cursor-pointer flex items-center gap-1.5 active:scale-95"
+                      >
+                        <Trash2 className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                        <span>Supprimer l'article</span>
+                      </button>
+                    ) : <div />}
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setModalViewMode("form")}
+                        className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                      >
+                        Revenir à l&apos;édition
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveProduct}
+                        disabled={isSaving}
+                        className="px-6 py-2.5 rounded-xl bg-gold text-black font-extrabold text-xs uppercase tracking-wider hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(212,175,55,0.4)] disabled:opacity-50 cursor-pointer"
+                      >
+                        {isSaving ? "Enregistrement..." : (editingId ? "Mettre à jour" : "Confirmer & Enregistrer")}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -4442,23 +4504,49 @@ export default function AdminPage() {
 
                               <button
                                 type="button"
-                                onClick={() => handleRemoveImage(index)}
-                                className="absolute top-1.5 right-1.5 w-6 h-6 rounded-md bg-red-600/80 hover:bg-red-600 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow"
-                                title="Supprimer cette image"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveImage(index);
+                                }}
+                                className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-md border border-white/20"
+                                title="Supprimer cette photo"
+                                aria-label="Supprimer cette photo"
                               >
-                                <X className="w-3.5 h-3.5" aria-hidden="true" />
+                                <Trash2 className="w-3.5 h-3.5 text-white" aria-hidden="true" />
                               </button>
                             </div>
 
-                            {index !== 0 && (
+                            {index === 0 ? (
                               <button
                                 type="button"
-                                onClick={() => handleSetMainImage(index)}
-                                className="w-full mt-1.5 py-1 px-2 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-[10px] text-zinc-300 font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1"
+                                onClick={() => handleRemoveImage(0)}
+                                className="w-full mt-1.5 py-1 px-2 rounded-lg bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white text-[10px] font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-red-500/20"
+                                title="Supprimer cette photo principale"
                               >
-                                <Crown className="w-3 h-3" aria-hidden="true" />
-                                <span>Définir comme 1ère</span>
+                                <Trash2 className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                                <span>Supprimer</span>
                               </button>
+                            ) : (
+                              <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleSetMainImage(index)}
+                                  className="py-1 px-1 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-[10px] text-zinc-300 font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-white/5 truncate"
+                                  title="Définir comme photo principale"
+                                >
+                                  <Crown className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                                  <span className="truncate">1ère</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveImage(index)}
+                                  className="py-1 px-1 rounded-lg bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white text-[10px] font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-red-500/20 truncate"
+                                  title="Supprimer cette photo"
+                                >
+                                  <Trash2 className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                                  <span className="truncate">Suppr.</span>
+                                </button>
+                              </div>
                             )}
                           </div>
                         ))}
@@ -5530,7 +5618,25 @@ export default function AdminPage() {
                   )}
 
                   {/* BOUTONS D'ACTION DU FORMULAIRE */}
-                  <div className="flex gap-4 pt-4 border-t border-white/10">
+                  <div className="flex flex-wrap sm:flex-nowrap gap-3 pt-4 border-t border-white/10">
+                    {editingId && (
+                      <button 
+                        type="button" 
+                        onClick={async () => {
+                          if (confirm("Voulez-vous vraiment supprimer définitivement cet article du catalogue ?")) {
+                            await handleDelete(editingId);
+                            closeModal();
+                          }
+                        }}
+                        disabled={isSaving}
+                        className="py-3.5 px-4 rounded-xl bg-red-500/15 hover:bg-red-600 text-red-500 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-red-500/30 cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 disabled:opacity-50"
+                        title="Supprimer définitivement cet article"
+                      >
+                        <Trash2 className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                        <span className="hidden sm:inline">Supprimer l'article</span>
+                      </button>
+                    )}
+
                     <button 
                       type="button" 
                       onClick={requestCloseModal} 
