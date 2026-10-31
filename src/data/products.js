@@ -2447,5 +2447,29 @@ export const products = [
           "connectionType": "bluetooth"
     },
     desc: '• Produit : Enceinte Karaoké / Haut-parleur sans fil portable • Puissance maximale : 350W (Puissance de pointe) • Capacité de la batterie : 16 000 mAh (Large Battery) • Fonctionnalités principales : Karaoké sans fil, connectivité Bluetooth, réglage de l\'écho et du volume du micro, entrées auxiliaires et guitare • Design : Format Boombox robuste avec poignée de transport fixe et ergonomique • Usage recommandé : Fêtes en plein air, grands rassemblements, soirées karaoké à la maison'
+  },
+  {
+    id: 'p-1793464524867',
+    name: '30W Home Speaker Disc',
+    category: 'accessories',
+    brand: 'OEM',
+    price: 75000,
+    image: '/products/accessories/p-1793464524867.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: 'Garantie 1 Mois',
+    images: [
+      '/products/accessories/p-1793464524867.jpg',
+      '/products/accessories/p-1793464524867-2.jpg'
+    ],
+    specs: {
+      "compatibility": "Tous les appareils",
+      "accessoryType": "speaker",
+      "model": "OEM 30W Home Speaker Disc",
+      "connectionType": "bluetooth"
+    },
+    desc: 'Enceinte sans fil portable et de salon 30W RMS (jusqu\'à 60W-100W en crête) avec Bluetooth 5.0, batterie Li-ion longue autonomie, façade tissu acoustique avec cerclage soigné et trépied amovible antidérapant.'
   }
 ];

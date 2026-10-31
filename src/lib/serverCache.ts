@@ -39,31 +39,46 @@ function sanitizeProductMedia(product: any): any {
   let images = Array.isArray(product.images) ? [...product.images] : [];
   let modified = false;
 
-  // Remplacement des Base64 par les chemins de fichiers statiques propres
-  if (typeof image === "string" && image.startsWith("data:image/")) {
-    if (product.id === "UOGdbGVosnh6CovWNOkD") {
-      image = "/products/mobility/moto-electrique-1.jpg";
-      modified = true;
-    } else if (String(product.id).startsWith("p-179")) {
-      image = `/products/accessories/${product.id}.jpg`;
+  // Dictionnaire des produits avec images statiques pré-extraites dans public/products/accessories
+  const staticAccessoryFiles: Record<string, { image: string; images?: string[] }> = {
+    "p-1793436636409": { image: "/products/accessories/p-1793436636409.jpg", images: ["/products/accessories/p-1793436636409.jpg"] },
+    "p-1793438013744": { image: "/products/accessories/p-1793438013744.jpg", images: ["/products/accessories/p-1793438013744.jpg"] },
+    "p-1793438552357": { image: "/products/accessories/p-1793438552357.jpg", images: ["/products/accessories/p-1793438552357.jpg"] },
+    "p-1793451231100": { image: "/products/accessories/p-1793451231100.jpg", images: ["/products/accessories/p-1793451231100.jpg"] },
+    "p-1793451514805": { image: "/products/accessories/p-1793451514805.jpg", images: ["/products/accessories/p-1793451514805.jpg"] },
+    "p-1793451797408": { image: "/products/accessories/p-1793451797408.jpg", images: ["/products/accessories/p-1793451797408.jpg"] },
+    "p-1793452645875": { image: "/products/accessories/p-1793452645875.jpg", images: ["/products/accessories/p-1793452645875.jpg"] },
+    "p-1793452841657": { image: "/products/accessories/p-1793452841657.jpg", images: ["/products/accessories/p-1793452841657.jpg"] },
+    "p-1793453107207": { image: "/products/accessories/p-1793453107207.jpg", images: ["/products/accessories/p-1793453107207.jpg"] },
+    "p-1793453840425": { image: "/products/accessories/p-1793453840425.jpg", images: ["/products/accessories/p-1793453840425.jpg"] },
+    "p-1793454132122": { image: "/products/accessories/p-1793454132122.jpg", images: ["/products/accessories/p-1793454132122.jpg"] },
+    "p-1793464524867": { image: "/products/accessories/p-1793464524867.jpg", images: ["/products/accessories/p-1793464524867.jpg", "/products/accessories/p-1793464524867-2.jpg"] },
+  };
+
+  const staticConfig = staticAccessoryFiles[String(product.id)];
+  if (staticConfig) {
+    if (typeof image === "string" && image.startsWith("data:image/")) {
+      image = staticConfig.image;
       modified = true;
     }
-  }
-
-  if (Array.isArray(images) && images.length > 0) {
-    images = images.map((img: any, idx: number) => {
-      if (typeof img === "string" && img.startsWith("data:image/")) {
-        if (product.id === "UOGdbGVosnh6CovWNOkD") {
+    if (Array.isArray(images) && images.length > 0 && staticConfig.images) {
+      images = staticConfig.images;
+      modified = true;
+    }
+  } else if (product.id === "UOGdbGVosnh6CovWNOkD") {
+    if (typeof image === "string" && image.startsWith("data:image/")) {
+      image = "/products/mobility/moto-electrique-1.jpg";
+      modified = true;
+    }
+    if (Array.isArray(images) && images.length > 0) {
+      images = images.map((img: any, idx: number) => {
+        if (typeof img === "string" && img.startsWith("data:image/")) {
           modified = true;
           return idx === 1 ? "/products/mobility/moto-electrique-2.jpg" : "/products/mobility/moto-electrique-1.jpg";
         }
-        if (String(product.id).startsWith("p-179")) {
-          modified = true;
-          return `/products/accessories/${product.id}.jpg`;
-        }
-      }
-      return img;
-    });
+        return img;
+      });
+    }
   }
 
   // Mode Autres Marques (Android) : aucun choix de couleur ni format de SIM (suppression systématique même pour l'existant)
