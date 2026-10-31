@@ -508,11 +508,11 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     id: "accessories",
     label: "High-Tech & Accessoires",
     shortLabel: "High-Tech & Accessoires",
-    description: "Montres connectées, écouteurs, chargeurs rapides, coques, câbles et gadgets high-tech",
+    description: "Montres connectées, écouteurs, boomers, casques, chargeurs rapides, coques, câbles et gadgets high-tech",
     iconName: "Headphones",
     supportsStorageVariants: false,
-    popularBrands: ["Apple", "Anker", "Samsung", "Baseus", "Oraimo", "JBL", "Sony", "Ugreen"],
-    placeholderName: "Ex: Apple Watch Series 9, AirPods Pro 2, Chargeur GaN 65W",
+    popularBrands: ["Apple", "Anker", "Samsung", "Baseus", "Oraimo", "JBL", "Sony", "Harman Kardon", "Bose", "Marshall", "Ugreen"],
+    placeholderName: "Ex: Apple Watch Series 9, AirPods Pro 2, Boomer JBL PartyBox, Chargeur GaN 65W",
     defaultWarranty: "Garantie 6 Mois Échange à Neuf",
     defaultAccessories: "Câble de charge renforcé, Manuel d'utilisation",
     fields: [
@@ -520,7 +520,7 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         key: "model",
         label: "Modèle ou Référence",
         type: "text",
-        placeholder: "Ex: Apple Watch Ultra 2, AirPods Pro 2, Adaptateur GaN 65W",
+        placeholder: "Ex: Apple Watch Ultra 2, AirPods Pro 2, Boomer JBL PartyBox, Adaptateur GaN 65W",
         required: true,
       },
       {
@@ -529,7 +529,8 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         type: "select",
         options: [
           { label: "Montres connectées & Smartwatches", value: "smartwatch" },
-          { label: "Écouteurs & Casques audio", value: "audio" },
+          { label: "Écouteurs, Casques & Audio", value: "audio" },
+          { label: "Boomers & Enceintes Haute Fidélité", value: "speaker" },
           { label: "Chargeurs & Blocs d'alimentation", value: "charger" },
           { label: "Câbles de charge & données", value: "cable" },
           { label: "Batteries externes (Powerbanks)", value: "powerbank" },
@@ -618,49 +619,6 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         label: "Système audio intégré",
         type: "text",
         placeholder: "Ex: Dolby Atmos 60W 2.2",
-        required: false,
-      },
-    ],
-  },
-
-  audio: {
-    id: "audio",
-    label: "Boomers & Hi-Fi",
-    shortLabel: "Boomers",
-    description: "Enceintes de fête, boomers et barres de son",
-    iconName: "Speaker",
-    supportsStorageVariants: false,
-    popularBrands: ["JBL", "Sony", "Harman Kardon", "Bose", "Marshall", "Oraimo"],
-    placeholderName: "Ex: JBL PartyBox 310 Bluetooth 240W",
-    defaultWarranty: "Garantie 12 Mois Certifiée",
-    defaultAccessories: "Câble d'alimentation secteur, Câble audio auxiliaire",
-    fields: [
-      {
-        key: "power",
-        label: "Puissance sonore",
-        type: "text",
-        placeholder: "Ex: 240W RMS, 800W Peak",
-        required: true,
-      },
-      {
-        key: "connectivity",
-        label: "Connectivité",
-        type: "text",
-        placeholder: "Ex: Bluetooth 5.3, USB, Aux, Entrée Micro & Guitare",
-        required: false,
-      },
-      {
-        key: "battery_life",
-        label: "Autonomie sur batterie",
-        type: "text",
-        placeholder: "Ex: 18 heures (Batterie rechargeable intégrée)",
-        required: false,
-      },
-      {
-        key: "waterproof",
-        label: "Indice de protection étanchéité",
-        type: "text",
-        placeholder: "Ex: IPX4 anti-éclaboussures, IP67",
         required: false,
       },
     ],
@@ -878,7 +836,6 @@ const CATEGORY_CANONICAL_ORDER = [
   "tv",
   "appliances",
   "accessories",
-  "audio",
   "mobility",
   "solar",
   "promotion",
@@ -902,7 +859,14 @@ export function getCategoryConfig(categoryId: string): CategoryDefinition {
   if (normId === "promotion" || normId === "promotions" || normId === "promo") {
     return PRODUCT_CATEGORIES["promotion"];
   }
-  if (normId === "tech" || normId === "accessories") {
+  if (
+    normId === "tech" || 
+    normId === "accessories" || 
+    normId === "accessoires" || 
+    normId === "audio" || 
+    normId === "boomer" || 
+    normId === "boomers"
+  ) {
     return PRODUCT_CATEGORIES["accessories"];
   }
   return (

@@ -37,7 +37,6 @@ import {
   Tv,
   Refrigerator,
   Package,
-  Speaker,
   Bike,
   SunMedium
 } from "lucide-react";
@@ -90,7 +89,6 @@ const categories = [
   { id: 'tv', label: 'Téléviseurs & Smart TV', icon: Tv },
   { id: 'appliances', label: 'Électroménager & Maison', icon: Refrigerator },
   { id: 'tech', label: 'High-Tech & Accessoires', icon: Package },
-  { id: 'audio', label: 'Boomers & Son Haute Fidélité', icon: Speaker },
   { id: 'mobility', label: 'Motos Électriques', icon: Bike },
   { id: 'solar', label: 'Énergie Solaire & Kits', icon: SunMedium },
   { id: 'promotion', label: 'PROMOTION & Bons Plans', icon: Flame },
@@ -700,17 +698,14 @@ export default function Home() {
         if (selectedCategory === 'appliances' || selectedCategory === 'electromenager') {
           return p.category === 'appliances' || p.category === 'electromenager';
         }
-        if (selectedCategory === 'tech' || selectedCategory === 'accessories') {
-          return p.category === 'tech' || p.category === 'accessories';
+        if (selectedCategory === 'tech' || selectedCategory === 'accessories' || selectedCategory === 'audio' || selectedCategory === 'boomers') {
+          return p.category === 'tech' || p.category === 'accessories' || p.category === 'audio' || p.category === 'boomers';
         }
         if (selectedCategory === 'computers' || selectedCategory === 'ordinateurs') {
           return p.category === 'computers' || p.category === 'ordinateurs';
         }
         if (selectedCategory === 'tablets' || selectedCategory === 'tablettes') {
           return p.category === 'tablets' || p.category === 'tablettes';
-        }
-        if (selectedCategory === 'audio' || selectedCategory === 'boomers') {
-          return p.category === 'audio' || p.category === 'boomers';
         }
         if (selectedCategory === 'mobility' || selectedCategory === 'motos') {
           return p.category === 'mobility' || p.category === 'motos';
@@ -1203,7 +1198,6 @@ export default function Home() {
               <li><button onClick={() => { handleSelectCategory('tv'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Téléviseurs & Smart TV</button></li>
               <li><button onClick={() => { handleSelectCategory('appliances'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Électroménager & Maison</button></li>
               <li><button onClick={() => { handleSelectCategory('tech'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">High-Tech & Accessoires</button></li>
-              <li><button onClick={() => { handleSelectCategory('audio'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Boomers & Son Haute Fidélité</button></li>
               <li><button onClick={() => { handleSelectCategory('mobility'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Motos Électriques</button></li>
               <li><button onClick={() => { handleSelectCategory('solar'); window.scrollTo({top: 400, behavior: 'smooth'}); }} className="hover:text-gold transition-colors">Énergie Solaire & Kits</button></li>
               <li>

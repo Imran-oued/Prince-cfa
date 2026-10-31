@@ -19,7 +19,7 @@ import {
 test("1. Category definitions are declarative, complete, and have units", () => {
   assert.ok(Object.keys(PRODUCT_CATEGORIES).length >= 7, "Au moins 7 catégories configurées");
   
-  const expectedCats = ["phones", "computers", "tablets", "mobility", "accessories", "tv", "audio", "solar"];
+  const expectedCats = ["phones", "computers", "tablets", "mobility", "accessories", "tv", "solar"];
   for (const catId of expectedCats) {
     const config = getCategoryConfig(catId);
     assert.ok(config, `La configuration pour ${catId} doit exister`);
@@ -27,6 +27,12 @@ test("1. Category definitions are declarative, complete, and have units", () => 
     assert.ok(Array.isArray(config.fields), `Les champs pour ${catId} doivent être un tableau`);
     assert.ok(config.fields.length > 0, `Au moins un champ pour ${catId}`);
   }
+
+  // Audio / Boomers intégrés dans accessories
+  const audioFallback = getCategoryConfig("audio");
+  assert.equal(audioFallback.id, "accessories", "La catégorie audio est intégrée dans accessories");
+  const boomerFallback = getCategoryConfig("boomer");
+  assert.equal(boomerFallback.id, "accessories", "La catégorie boomer est intégrée dans accessories");
 
   // Vérification des unités déclaratives
   const motoConfig = getCategoryConfig("mobility");

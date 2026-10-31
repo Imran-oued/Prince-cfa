@@ -1169,7 +1169,7 @@ export const products = [
   {
     id: 'p-003',
     name: 'Boomer Titan Gold Edition',
-    category: 'audio',
+    category: 'accessories',
     price: 450000,
     image: 'https://placehold.co/600x600/121216/d4af37?text=BOOMER',
     rating: 4.8,
@@ -1255,7 +1255,7 @@ export const products = [
   {
     id: 'p-006',
     name: 'Casque Audio Studio Prestige',
-    category: 'audio',
+    category: 'accessories',
     price: 250000,
     image: 'https://placehold.co/600x600/121216/d4af37?text=CASQUE',
     rating: 4.9,
