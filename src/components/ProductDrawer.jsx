@@ -1158,40 +1158,6 @@ export default function ProductDrawer({
             </div>
           )}
 
-          {/* Badge de Spécifications Clés pour Tablettes */}
-          {(currentProduct.category === 'tablets' || currentProduct.category === 'tablettes') && currentProduct.specs && (
-            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
-              <div className="flex items-center justify-between text-amber-600 text-xs font-bold uppercase tracking-wider">
-                <span className="flex items-center gap-1.5">
-                  <Tablet className="w-4 h-4 text-amber-600" aria-hidden="true" />
-                  <span>Fiche Tablette Officielle</span>
-                </span>
-                <span className="text-[10px] text-zinc-500 font-mono">
-                  {currentProduct.specs.connectivity === 'wifi_cellular' ? '4G/5G + Wi-Fi' : 'Wi-Fi'}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Écran</span>
-                  <span className="text-xs font-black text-zinc-900">{currentProduct.specs.screenSize || currentProduct.specs.screen || "—"}</span>
-                </div>
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">RAM</span>
-                  <span className="text-sm font-black text-gold">{currentProduct.specs.ram ? `${currentProduct.specs.ram} Go` : "—"}</span>
-                </div>
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Stockage</span>
-                  <span className="text-xs font-black text-emerald-600">{currentProduct.specs.storageSize || "—"}</span>
-                </div>
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Batterie</span>
-                  <span className="text-xs font-black text-zinc-900">
-                    {currentProduct.specs.batteryCapacity ? `${currentProduct.specs.batteryCapacity} mAh` : (currentProduct.specs.battery || "—")}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Badge de Spécifications Clés pour Électroménager */}
           {(currentProduct.category === 'appliances' || currentProduct.category === 'electromenager') && currentProduct.specs && (

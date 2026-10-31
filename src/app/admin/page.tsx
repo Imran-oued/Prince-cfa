@@ -428,6 +428,7 @@ export default function AdminPage() {
     { id: "var-android-1", storage: "128 Go", ram: 8, price: "" }
   ]);
   const [imageList, setImageList] = useState<string[]>([]);
+  const [showTabletAdvancedSpecs, setShowTabletAdvancedSpecs] = useState<boolean>(false);
   const [newImageUrl, setNewImageUrl] = useState("");
   const [isCompressingImages, setIsCompressingImages] = useState(false);
 
@@ -1825,12 +1826,29 @@ export default function AdminPage() {
         }
       }
     } else if (getCategoryConfig(formCategory).supportsStorageVariants) {
-      finalStorageOptions = parsedStorage.length > 0 ? parsedStorage : undefined;
+      if (parsedStorage.length > 0) {
+        finalStorageOptions = parsedStorage;
+      } else if (formCategory === "tablets" && (formSpecs.storageSize || formSpecs.storage)) {
+        finalStorageOptions = [{
+          capacity: String(formSpecs.storageSize || formSpecs.storage).trim(),
+          price: Number(commonFormData.price) || 0
+        }];
+      } else {
+        finalStorageOptions = undefined;
+      }
     }
 
     // Spécifications nettoyées selon le cas
     let finalSpecs = { ...formSpecs };
-    if (isApple) {
+    if (formCategory === "tablets") {
+      finalSpecs = {
+        ...formSpecs,
+        storageSize: formSpecs.storageSize || (finalStorageOptions?.[0]?.capacity) || undefined
+      };
+      if (!finalSpecs.model && commonFormData.name) {
+        finalSpecs.model = commonFormData.name;
+      }
+    } else if (isApple) {
       finalSpecs = {
         model: commonFormData.name,
         storage: (appleVariants[0]?.storage || selectedCapacities[0] || "128 Go")
@@ -2103,6 +2121,7 @@ export default function AdminPage() {
     setFormSpecs(normalized.specs ? { ...normalized.specs } : {});
     setFormErrors({});
     setModalViewMode("form");
+    setShowTabletAdvancedSpecs(false);
     setCategorySwitchPending(null);
     setDraftRestored(false);
 
@@ -2123,8 +2142,14 @@ export default function AdminPage() {
         capacity: o.capacity || "",
         price: o.price !== null && o.price !== undefined ? String(o.price) : String(product.price || "")
       }));
+    } else if ((product.category === "tablets" || product.category === "tablettes") && (product.specs?.storageSize || product.specs?.storage)) {
+      initialStorage = [{
+        capacity: String(product.specs.storageSize || product.specs.storage || ""),
+        price: String(product.price || "")
+      }];
     }
     setStorageItems(initialStorage);
+    setShowTabletAdvancedSpecs(false);
     setNewImageUrl("");
 
     if (product.simPricing && typeof product.simPricing === "object") {
@@ -2321,6 +2346,7 @@ export default function AdminPage() {
     setSimPricing(DEFAULT_SIM_PRICING);
     setModalViewMode("form");
     setShowVariantsTable(false);
+    setShowTabletAdvancedSpecs(false);
     setCategorySwitchPending(null);
     setDraftRestored(false);
     setCommonFormData({
@@ -2356,6 +2382,7 @@ export default function AdminPage() {
     setEditingId(null);
     setFormErrors({});
     setModalViewMode("form");
+    setShowTabletAdvancedSpecs(false);
     setCategorySwitchPending(null);
     setAppleVariants([]);
     setOtherFeatures([
@@ -5372,6 +5399,186 @@ export default function AdminPage() {
                           {renderPhotoUploader("Photos du Smartphone (Multi-fichiers)")}
                         </>
                       )}
+                    </div>
+                  ) : formCategory === "tablets" ? (
+                    /* ========================================================================= */
+                    /* CATÉGORIE TABLETTES : SAISIE SIMPLIFIÉE (CAPACITÉ & PRIX SEULEMENT) */
+                    /* ========================================================================= */
+                    <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/[0.04] border border-amber-500/40 space-y-4 shadow-md">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                        <div className="flex items-center gap-2">
+                          <Tablet className="w-4 h-4 text-amber-500" aria-hidden="true" />
+                          <div>
+                            <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                              4. Capacité & Prix de la Tablette
+                            </h4>
+                            <p className="text-[11px] text-zinc-400">
+                              Saisie simplifiée : renseignez la capacité (ex: 2GB, 32 Go, 64 Go...) et son prix. Aucun champ n&apos;est obligatoire.
+                            </p>
+                          </div>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-black uppercase self-start sm:self-auto">
+                          Mode Tablette Express
+                        </span>
+                      </div>
+
+                      {/* Options de capacité et prix */}
+                      <div className="space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <HardDrive className="w-4 h-4 text-gold" aria-hidden="true" />
+                            <span>Capacité(s) & Prix Associé(s)</span>
+                          </label>
+
+                          {/* Raccourcis d'ajout rapide 1-clic */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[10px] text-zinc-500 uppercase font-bold mr-1">Raccourcis :</span>
+                            {["2GB", "16 Go", "32 Go", "64 Go", "128 Go", "256 Go", "512 Go", "1 To"].map((cap) => (
+                              <button
+                                key={cap}
+                                type="button"
+                                onClick={() => {
+                                  if (storageItems.length === 0) {
+                                    setStorageItems([{ capacity: cap, price: commonFormData.price || "" }]);
+                                    setFormSpecs(prev => ({ ...prev, storageSize: cap }));
+                                  } else {
+                                    handleQuickAddStorage(cap);
+                                  }
+                                }}
+                                className="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-zinc-300 text-[10px] font-bold border border-white/10 transition-all cursor-pointer"
+                              >
+                                + {cap}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Liste des capacités saisies */}
+                        <div className="space-y-2.5 pt-1">
+                          {(storageItems.length > 0 ? storageItems : [{ capacity: formSpecs.storageSize || "64 Go", price: commonFormData.price || "" }]).map((item, idx) => (
+                            <div 
+                              key={idx} 
+                              className="flex items-center gap-2.5 p-3 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition-all"
+                            >
+                              <div className="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center font-black text-xs flex-shrink-0">
+                                #{idx + 1}
+                              </div>
+
+                              <div className="flex-1">
+                                <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
+                                  Capacité (Facultatif)
+                                </label>
+                                <input 
+                                  type="text" 
+                                  value={item.capacity} 
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (storageItems.length === 0) {
+                                      setStorageItems([{ capacity: val, price: commonFormData.price || "" }]);
+                                    } else {
+                                      handleUpdateStorageItem(idx, "capacity", val);
+                                    }
+                                    if (idx === 0) {
+                                      setFormSpecs(prev => ({ ...prev, storageSize: val }));
+                                    }
+                                  }}
+                                  placeholder="Ex: 2GB, 32 Go, 64 Go..." 
+                                  className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-semibold focus:border-gold/50 outline-none"
+                                />
+                              </div>
+
+                              <div className="flex-1">
+                                <label className="text-[10px] text-zinc-400 uppercase font-bold block mb-1">
+                                  Prix Associé (FCFA)
+                                </label>
+                                <input 
+                                  type="number" 
+                                  value={item.price} 
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (storageItems.length === 0) {
+                                      setStorageItems([{ capacity: formSpecs.storageSize || "64 Go", price: val }]);
+                                    } else {
+                                      handleUpdateStorageItem(idx, "price", val);
+                                    }
+                                    if (idx === 0) {
+                                      setCommonFormData(prev => ({ ...prev, price: val }));
+                                    }
+                                  }}
+                                  placeholder={`Ex: ${commonFormData.price || "35000"}`} 
+                                  className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-bold text-gold focus:border-gold/50 outline-none"
+                                />
+                              </div>
+
+                              {storageItems.length > 1 && (
+                                <div className="pt-4 flex-shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveStorageItem(idx)}
+                                    className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white transition-colors cursor-pointer"
+                                    title="Supprimer cette capacité"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+
+                          <button
+                            type="button"
+                            onClick={() => setStorageItems(prev => [
+                              ...(prev.length > 0 ? prev : [{ capacity: formSpecs.storageSize || "64 Go", price: commonFormData.price || "" }]),
+                              { capacity: "", price: commonFormData.price || "" }
+                            ])}
+                            className="w-full py-2.5 rounded-xl border border-dashed border-white/20 hover:border-gold text-zinc-300 hover:text-gold text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>Ajouter une autre capacité / prix</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Accordéon pour les caractéristiques optionnelles supplémentaires */}
+                      <div className="pt-3 border-t border-white/10">
+                        <button
+                          type="button"
+                          onClick={() => setShowTabletAdvancedSpecs(!showTabletAdvancedSpecs)}
+                          className="text-xs text-zinc-400 hover:text-gold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showTabletAdvancedSpecs ? "rotate-180" : ""}`} />
+                          <span>{showTabletAdvancedSpecs ? "Masquer les caractéristiques avancées (Optionnelles)" : "Afficher d'autres caractéristiques (Écran, RAM, Batterie...) — 100% Optionnel"}</span>
+                        </button>
+
+                        {showTabletAdvancedSpecs && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 pt-3 border-t border-white/5 animate-in fade-in duration-200">
+                            {getCategoryConfig("tablets").fields
+                              .filter(f => f.key !== "storageSize")
+                              .map((field) => {
+                                const val = formSpecs[field.key] !== undefined ? formSpecs[field.key] : "";
+                                return (
+                                  <div key={field.key} className={field.key === "model" ? "sm:col-span-2" : ""}>
+                                    <label className="text-[11px] text-zinc-300 uppercase font-bold flex items-center justify-between mb-1">
+                                      <span>{field.label} <span className="text-[10px] text-zinc-500 font-normal lowercase">(facultatif)</span></span>
+                                      {field.unit && (
+                                        <span className="text-[10px] text-gold font-mono px-1.5 py-0.2 rounded bg-gold/10 border border-gold/20">
+                                          {field.unit}
+                                        </span>
+                                      )}
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={val}
+                                      onChange={(e) => setFormSpecs({ ...formSpecs, [field.key]: e.target.value })}
+                                      placeholder={field.placeholder || `Saisir ${field.label.toLowerCase()}`}
+                                      className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs outline-none focus:border-gold"
+                                    />
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ) : (
                     /* AUTRES CATÉGORIES (Ordinateurs, Motos, TV, Electroménager, etc.) */

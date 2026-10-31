@@ -172,7 +172,11 @@ function getProductSummarySnippet(product: Product): string {
   if (cat === 'tablets' || cat === 'tablettes') {
     const parts = [
       specs.screenSize ? (String(specs.screenSize).includes('"') || String(specs.screenSize).includes('pouces') ? specs.screenSize : `${specs.screenSize}"`) : (specs.screen || null),
-      specs.storageSize ? (String(specs.storageSize).includes('Go') ? specs.storageSize : `${specs.storageSize} Go`) : null,
+      (specs.storageSize || product.storageOptions?.[0]?.capacity) 
+        ? (/go|gb|to|tb/i.test(String(specs.storageSize || product.storageOptions?.[0]?.capacity)) 
+            ? String(specs.storageSize || product.storageOptions?.[0]?.capacity) 
+            : `${specs.storageSize || product.storageOptions?.[0]?.capacity} Go`) 
+        : null,
       specs.ram ? `${specs.ram} Go RAM` : null,
       specs.connectivity === 'wifi_cellular' ? '4G/5G' : (specs.connectivity === 'wifi_only' ? 'Wi-Fi' : specs.connectivity)
     ].filter(Boolean);

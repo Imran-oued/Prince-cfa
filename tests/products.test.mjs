@@ -239,6 +239,20 @@ test("6. Validation & sanitization of a Tablet and Tech Accessory", () => {
   assert.equal(tabletRes.cleanedProduct.specs.connectivity, "wifi_cellular");
   assert.equal(tabletRes.cleanedProduct.storageOptions.length, 2);
 
+  // Minimal Tablet with only capacity and price (aucun champ obligatoire)
+  const minimalTablet = {
+    name: "WOWO G702 (tablette enfant)",
+    category: "tablets",
+    brand: "WOWO",
+    price: 35000,
+    desc: "Tablette éducative pour enfant.",
+    storageOptions: [{ capacity: "2GB", price: 35000 }]
+  };
+  const minTabletRes = validateAndCleanProduct(minimalTablet);
+  assert.equal(minTabletRes.isValid, true, `Validation tablette minimale réussie: ${minTabletRes.errorList.join(", ")}`);
+  assert.equal(minTabletRes.cleanedProduct.price, 35000);
+  assert.equal(minTabletRes.cleanedProduct.storageOptions[0].capacity, "2GB");
+
   // Accessory
   const accPayload = {
     name: "Chargeur Rapide GaN 65W Multi-Ports",
