@@ -226,7 +226,7 @@ function ProductCardItem({
 }: { 
   product: Product; 
   onOpen: (p: Product) => void; 
-  onAddToCart: (p: Product, color?: string) => void;
+  onAddToCart?: (p: Product, color?: string) => void;
 }) {
   const isAndroidPhone = isAndroidPhoneProduct(product);
   const [activeColorIdx, setActiveColorIdx] = useState(0);
@@ -297,7 +297,7 @@ function ProductCardItem({
       <div 
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className={`w-[30%] min-w-[95px] max-w-[115px] sm:w-48 sm:max-w-none md:w-52 flex-shrink-0 rounded-xl sm:rounded-2xl ${imgBg.containerClass} ${imgBg.isBlack ? '' : 'border border-zinc-200/80'} overflow-hidden flex items-center justify-center p-1.5 sm:p-2.5 relative shadow-sm group/img select-none`}
+        className={`w-[30%] min-w-[95px] max-w-[115px] sm:w-48 sm:max-w-none md:w-52 flex-shrink-0 rounded-xl sm:rounded-2xl ${imgBg.containerClass} ${imgBg.isBlack ? '' : 'border border-zinc-200/80'} overflow-hidden flex items-center justify-center p-1.5 sm:p-2.5 relative shadow-sm group/img select-none cursor-pointer`}
       >
         {activeImage?.length > 4 ? (
           <img 
@@ -376,7 +376,7 @@ function ProductCardItem({
       </div>
 
       {/* 2. Colonne DROITE : Caractéristiques & Infos Style Amazon */}
-      <div className="flex-1 flex flex-col justify-between min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col justify-center min-w-0 overflow-hidden py-1">
         <div>
           {/* Titre Produit */}
           <h3 className="text-sm sm:text-base font-bold text-zinc-950 line-clamp-2 group-hover:text-gold transition-colors leading-snug">
@@ -455,44 +455,6 @@ function ProductCardItem({
               </div>
             </div>
           )}
-
-          {/* Boutons d'action optimisés pour mobile Android / Samsung & desktop */}
-          <div className="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-zinc-100 flex items-center gap-1.5 sm:gap-2 w-full min-w-0">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpen(product);
-              }}
-              className="flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl bg-gold/10 hover:bg-gold/20 border border-gold/30 text-gold text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 transition-all active:scale-95 cursor-pointer"
-            >
-              <span className="truncate">Détails</span>
-              <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" aria-hidden="true" />
-            </button>
-            {isComingSoon ? (
-              <span
-                className="py-2 px-2 sm:px-3 rounded-xl bg-zinc-100 border border-zinc-200 text-zinc-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1 cursor-not-allowed select-none flex-shrink-0"
-                title="Produit temporairement indisponible"
-              >
-                <span className="text-xs">⏳</span>
-                <span className="text-[10px] font-bold">Bientôt dispo</span>
-              </span>
-            ) : (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddToCart(product, isAndroidPhone ? undefined : activeColor);
-                }}
-                className="py-2 px-2.5 sm:px-3.5 rounded-xl bg-gradient-to-r from-gold to-yellow-600 text-black text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm hover:brightness-105 transition-all active:scale-95 cursor-pointer flex-shrink-0"
-                title="Ajouter directement au panier"
-                aria-label="Ajouter directement au panier"
-              >
-                <ShoppingBag className="w-3.5 h-3.5 text-black flex-shrink-0" aria-hidden="true" />
-                <span className="text-[10.5px] sm:text-[11px] font-black whitespace-nowrap">Ajouter</span>
-              </button>
-            )}
-          </div>
         </div>
       </div>
     </div>
