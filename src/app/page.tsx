@@ -635,24 +635,45 @@ export default function Home() {
   const scrollLeftPosRef = useRef(0);
   const hasMovedRef = useRef(false);
 
-  // Centrage automatique de la catégorie active
+  // Centrage automatique de la catégorie active dans son ruban (sans défilement horizontal de la fenêtre)
   useEffect(() => {
     const timer = setTimeout(() => {
-      const activeEl = categoryScrollRef.current?.querySelector(`[data-cat-id="${selectedCategory}"]`) as HTMLElement;
-      if (activeEl) {
-        activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      const container = categoryScrollRef.current;
+      const activeEl = container?.querySelector(`[data-cat-id="${selectedCategory}"]`) as HTMLElement;
+      if (container && activeEl) {
+        const containerRect = container.getBoundingClientRect();
+        const activeRect = activeEl.getBoundingClientRect();
+        const targetScrollLeft = container.scrollLeft + (activeRect.left - containerRect.left) - (container.clientWidth / 2) + (activeEl.clientWidth / 2);
+        container.scrollTo({
+          left: Math.max(0, targetScrollLeft),
+          behavior: 'smooth'
+        });
+      }
+      // Sécurité anti-dérive : s'assurer que la fenêtre principale ne dérive jamais horizontalement
+      if (typeof window !== 'undefined' && window.scrollX !== 0) {
+        window.scrollTo({ left: 0, top: window.scrollY });
       }
     }, 60);
     return () => clearTimeout(timer);
   }, [selectedCategory]);
 
-  // Centrage automatique de la marque active dans le ruban des marques
+  // Centrage automatique de la marque active dans le ruban des marques (sans défilement horizontal de la fenêtre)
   useEffect(() => {
     if (selectedCategory === 'phones') {
       const timer = setTimeout(() => {
-        const activeBrandEl = brandScrollRef.current?.querySelector(`[data-brand="${selectedBrand}"]`) as HTMLElement;
-        if (activeBrandEl) {
-          activeBrandEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        const container = brandScrollRef.current;
+        const activeBrandEl = container?.querySelector(`[data-brand="${selectedBrand}"]`) as HTMLElement;
+        if (container && activeBrandEl) {
+          const containerRect = container.getBoundingClientRect();
+          const activeRect = activeBrandEl.getBoundingClientRect();
+          const targetScrollLeft = container.scrollLeft + (activeRect.left - containerRect.left) - (container.clientWidth / 2) + (activeBrandEl.clientWidth / 2);
+          container.scrollTo({
+            left: Math.max(0, targetScrollLeft),
+            behavior: 'smooth'
+          });
+        }
+        if (typeof window !== 'undefined' && window.scrollX !== 0) {
+          window.scrollTo({ left: 0, top: window.scrollY });
         }
       }, 50);
       return () => clearTimeout(timer);
@@ -689,6 +710,11 @@ export default function Home() {
   const handleSelectCategory = (catId: string) => {
     setSelectedCategory(catId);
     setSelectedBrand('all');
+
+    // Sécurité anti-dérive horizontale du viewport sur mobile
+    if (typeof window !== 'undefined' && window.scrollX !== 0) {
+      window.scrollTo({ left: 0, top: window.scrollY });
+    }
 
     if (catId === 'phones') {
       setTimeout(() => {
@@ -998,7 +1024,7 @@ export default function Home() {
         <div id="produits" className="flex flex-col items-center w-full max-w-6xl mx-auto mt-8 mb-14 relative z-20 scroll-mt-28 px-2 sm:px-4">
           
           {/* Ruban Horizontal Défilable des Catégories (Défilement naturel) */}
-          <div className="w-full">
+          <div className="w-full max-w-full overflow-hidden">
             {/* Piste de Défilement Horizontal */}
             <div
               ref={categoryScrollRef}
@@ -1060,7 +1086,7 @@ export default function Home() {
           {selectedCategory === 'phones' && (
             <div 
               id="sous-categories-telephones" 
-              className="w-full max-w-5xl mt-3 pt-3 border-t border-zinc-200 animate-in slide-in-from-top-2 fade-in duration-300 scroll-mt-24 sm:scroll-mt-28"
+              className="w-full max-w-5xl mt-3 pt-3 border-t border-zinc-200 animate-in slide-in-from-top-2 fade-in duration-300 scroll-mt-24 sm:scroll-mt-28 overflow-hidden"
             >
               <div className="text-[11px] font-bold text-gold uppercase tracking-[0.2em] mb-2 px-2 flex items-center gap-1.5">
                 <Smartphone className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
