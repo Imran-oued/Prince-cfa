@@ -158,7 +158,7 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
     supportsStorageVariants: true,
     popularBrands: ["Apple", "Dell", "HP", "Lenovo", "Asus", "Acer", "MSI", "Microsoft"],
     placeholderName: "Ex: MacBook Pro 16 M3 Max, Dell XPS 15 9530",
-    defaultWarranty: "Garantie 12 Mois Constructeur",
+    defaultWarranty: "Garantie 1 Mois",
     defaultAccessories: "Chargeur d'origine haute puissance, Câble secteur",
     fields: [
       {

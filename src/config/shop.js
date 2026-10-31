@@ -69,7 +69,29 @@ export const SHOP_CONFIG = {
 
   // Conditions officielles de garantie
   warrantyPolicy: {
+    devices: {
+      duration: "1 MOIS",
+      title: "CONDITIONS DE GARANTIE — DURÉE : 1 MOIS",
+      shortLabel: "Garantie 1 Mois",
+      exclusionsTitle: "La garantie ne couvre pas les cas suivants :",
+      exclusions: [
+        "Problème lié à l'écran",
+        "Dommage causé par un liquide",
+        "Appareil qui ne s'allume plus"
+      ]
+    },
     phonesAndTablets: {
+      duration: "1 MOIS",
+      title: "CONDITIONS DE GARANTIE — DURÉE : 1 MOIS",
+      shortLabel: "Garantie 1 Mois",
+      exclusionsTitle: "La garantie ne couvre pas les cas suivants :",
+      exclusions: [
+        "Problème lié à l'écran",
+        "Dommage causé par un liquide",
+        "Appareil qui ne s'allume plus"
+      ]
+    },
+    computers: {
       duration: "1 MOIS",
       title: "CONDITIONS DE GARANTIE — DURÉE : 1 MOIS",
       shortLabel: "Garantie 1 Mois",

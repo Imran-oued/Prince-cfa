@@ -240,8 +240,8 @@ export default function ProductDrawer({
     }
 
     // 7. Garantie
-    const isPhoneOrTablet = currentProduct.category === 'phones' || currentProduct.category === 'tablets' || currentProduct.category === 'tablettes';
-    if (isPhoneOrTablet) {
+    const isCoveredDevice = currentProduct.category === 'phones' || currentProduct.category === 'tablets' || currentProduct.category === 'tablettes' || currentProduct.category === 'computers' || currentProduct.category === 'ordinateurs';
+    if (isCoveredDevice) {
       details.push({ label: 'Garantie', value: '1 Mois (Hors écran, liquide, non-allumage)' });
     } else if (currentProduct.warranty) {
       details.push({ label: 'Garantie', value: currentProduct.warranty });
@@ -1584,15 +1584,15 @@ export default function ProductDrawer({
                 <div>
                   <div className="text-[10px] text-zinc-500 uppercase font-semibold">Garantie Vendeur</div>
                   <div className="font-bold text-zinc-900">
-                    {(currentProduct.category === 'phones' || currentProduct.category === 'tablets' || currentProduct.category === 'tablettes')
+                    {(currentProduct.category === 'phones' || currentProduct.category === 'tablets' || currentProduct.category === 'tablettes' || currentProduct.category === 'computers' || currentProduct.category === 'ordinateurs')
                       ? "Garantie 1 Mois"
                       : (currentProduct.warranty || "Garantie 12 Mois Certifiée")}
                   </div>
                 </div>
               </div>
 
-              {/* Conditions de Garantie Officielles Prince CFA pour Téléphones et Tablettes */}
-              {(currentProduct.category === 'phones' || currentProduct.category === 'tablets' || currentProduct.category === 'tablettes') && (
+              {/* Conditions de Garantie Officielles Prince CFA pour Téléphones, Tablettes et Ordinateurs */}
+              {(currentProduct.category === 'phones' || currentProduct.category === 'tablets' || currentProduct.category === 'tablettes' || currentProduct.category === 'computers' || currentProduct.category === 'ordinateurs') && (
                 <div className="col-span-1 sm:col-span-2 p-3.5 rounded-2xl bg-amber-500/[0.07] border border-amber-500/35 space-y-2">
                   <div className="flex items-center justify-between text-amber-900 text-xs font-bold uppercase tracking-wider">
                     <span className="flex items-center gap-1.5">

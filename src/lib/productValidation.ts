@@ -178,7 +178,7 @@ export function validateAndCleanProduct(raw: ProductInput): ValidationResult {
   const catConfig = getCategoryConfig(category);
 
   // Garantie & Accessoires
-  const defaultWarrantyForCategory = (category === "phones" || category === "tablets" || category === "tablettes")
+  const defaultWarrantyForCategory = (category === "phones" || category === "tablets" || category === "tablettes" || category === "computers" || category === "ordinateurs")
     ? "Garantie 1 Mois"
     : (catConfig?.defaultWarranty || "Garantie 12 Mois Certifiée");
   const warranty = (raw.warranty || "").trim() || defaultWarrantyForCategory;
@@ -426,12 +426,14 @@ export function normalizeProductSpecs(product: any): any {
     copy.colors = [];
   }
 
-  // Application de la garantie officielle 1 mois pour tous les téléphones (iPhones et Android) et tablettes
+  // Application de la garantie officielle 1 mois pour tous les téléphones (iPhones et Android), tablettes et ordinateurs
   if (
     copy.category === "phones" || 
     copy.category === "tablets" || 
     copy.category === "tablettes" ||
-    (copy.name && /iphone|samsung|galaxy|xiaomi|redmi|pixel|tablette|ipad/i.test(copy.name))
+    copy.category === "computers" || 
+    copy.category === "ordinateurs" ||
+    (copy.name && /iphone|samsung|galaxy|xiaomi|redmi|pixel|tablette|ipad|macbook|dell|hp|lenovo|asus|laptop/i.test(copy.name))
   ) {
     if (!copy.warranty || copy.warranty.includes("12 Mois") || copy.warranty.includes("12 mois") || copy.warranty.includes("2 Ans")) {
       copy.warranty = "Garantie 1 Mois";

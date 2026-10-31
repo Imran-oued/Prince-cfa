@@ -776,9 +776,10 @@ test("17. iPhone Single SIM configuration strictly limits options without phanto
   assert.equal(uniqueSimTypes.length, 1, "Un seul format SIM configuré dans l'admin ne doit pas en inventer d'autres");
 });
 
-test("18. Warranty rules: phones and tablets default to 1-month warranty with Prince CFA conditions", () => {
+test("18. Warranty rules: phones, tablets, and computers default to 1-month warranty with Prince CFA conditions", () => {
   assert.equal(PRODUCT_CATEGORIES.phones.defaultWarranty, "Garantie 1 Mois");
   assert.equal(PRODUCT_CATEGORIES.tablets.defaultWarranty, "Garantie 1 Mois");
+  assert.equal(PRODUCT_CATEGORIES.computers.defaultWarranty, "Garantie 1 Mois");
 
   // Phone without warranty specified
   const phoneRes = validateAndCleanProduct({
@@ -802,6 +803,25 @@ test("18. Warranty rules: phones and tablets default to 1-month warranty with Pr
   assert.equal(tabletRes.isValid, true);
   assert.equal(tabletRes.cleanedProduct.warranty, "Garantie 1 Mois");
 
+  // Computer without warranty specified
+  const computerRes = validateAndCleanProduct({
+    name: "MacBook Pro 16 M3 Max",
+    category: "computers",
+    brand: "Apple",
+    price: 1850000,
+    desc: "MacBook Pro haut de gamme.",
+    specs: {
+      computerType: "laptop",
+      processor: "Apple M3 Max",
+      ram: 36,
+      storageSize: "1 To",
+      storageType: "ssd_nvme",
+      os: "macos"
+    }
+  });
+  assert.equal(computerRes.isValid, true, `Validation ordinateur: ${computerRes.errorList?.join(", ")}`);
+  assert.equal(computerRes.cleanedProduct.warranty, "Garantie 1 Mois");
+
   // Existing phone normalized with legacy 12-month warranty is updated to 1 month
   const normalizedPhone = normalizeProductSpecs({
     name: "iPhone 11",
@@ -809,6 +829,14 @@ test("18. Warranty rules: phones and tablets default to 1-month warranty with Pr
     warranty: "Garantie 12 Mois Certifiée"
   });
   assert.equal(normalizedPhone.warranty, "Garantie 1 Mois");
+
+  // Existing computer normalized with legacy 12-month warranty is updated to 1 month
+  const normalizedComputer = normalizeProductSpecs({
+    name: "Dell XPS 15 9530",
+    category: "computers",
+    warranty: "Garantie 12 Mois Constructeur"
+  });
+  assert.equal(normalizedComputer.warranty, "Garantie 1 Mois");
 });
 
 

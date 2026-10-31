@@ -255,7 +255,7 @@ export default function MentionsLegalesPage() {
               En cas de défectuosité matérielle avérée constatée dans les délais impartis par notre politique de garantie, le client bénéficie d&apos;une prise en charge au service après-vente (SAV) de notre boutique à Ouagadougou (Koulouba).
             </p>
             <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-zinc-800 space-y-1.5">
-              <strong className="text-amber-950 block">Conditions de Garantie — Téléphones (iPhones & Android) et Tablettes :</strong>
+              <strong className="text-amber-950 block">Conditions de Garantie — Téléphones (iPhones & Android), Tablettes et Ordinateurs :</strong>
               <p>Durée légale contractuelle de la garantie : <strong>1 Mois</strong> à compter de la date d&apos;achat.</p>
               <p className="font-semibold text-zinc-700">La garantie ne couvre pas les cas suivants :</p>
               <ul className="list-disc list-inside space-y-0.5 text-zinc-700 pl-1">
