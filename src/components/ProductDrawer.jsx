@@ -53,7 +53,9 @@ export default function ProductDrawer({
   isOpen,
   onClose,
   product,
-  onAddToCart
+  onAddToCart,
+  onBuyNow,
+  onOpenCart
 }) {
   const [prevProduct, setPrevProduct] = useState(product);
   const [cachedProduct, setCachedProduct] = useState(product);
@@ -821,6 +823,80 @@ export default function ProductDrawer({
 
     const encoded = encodeURIComponent(message);
     window.open(`https://wa.me/${phoneNumber}?text=${encoded}`, '_blank');
+  };
+
+  const [justAdded, setJustAdded] = useState(false);
+  const addTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (addTimeoutRef.current) clearTimeout(addTimeoutRef.current);
+    };
+  }, []);
+
+  const isConfigIncomplete = Boolean(isIPhone && (!selectedSimType || !selectedCapacity));
+
+  const handleAddToCartClick = () => {
+    if (isConfigIncomplete) {
+      if (isIPhone && !selectedSimType) {
+        const el = document.getElementById('user-sim-type-select');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (isIPhone && !selectedCapacity) {
+        const el = document.getElementById('user-capacity-select');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    if (onAddToCart) {
+      onAddToCart(
+        currentProduct, 
+        isOtherPhone ? '' : activeColor, 
+        selectedCapacity, 
+        currentPrice, 
+        isOtherPhone ? '' : selectedSimType,
+        false
+      );
+    }
+
+    setJustAdded(true);
+    if (addTimeoutRef.current) clearTimeout(addTimeoutRef.current);
+    addTimeoutRef.current = setTimeout(() => {
+      setJustAdded(false);
+    }, 2500);
+  };
+
+  const handleBuyNowClick = () => {
+    if (isConfigIncomplete) {
+      if (isIPhone && !selectedSimType) {
+        const el = document.getElementById('user-sim-type-select');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (isIPhone && !selectedCapacity) {
+        const el = document.getElementById('user-capacity-select');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    if (onBuyNow) {
+      onBuyNow(
+        currentProduct, 
+        isOtherPhone ? '' : activeColor, 
+        selectedCapacity, 
+        currentPrice, 
+        isOtherPhone ? '' : selectedSimType
+      );
+    } else if (onAddToCart) {
+      onAddToCart(
+        currentProduct, 
+        isOtherPhone ? '' : activeColor, 
+        selectedCapacity, 
+        currentPrice, 
+        isOtherPhone ? '' : selectedSimType,
+        true
+      );
+      handleCleanClose();
+    }
   };
 
   if (!currentProduct) return null;
@@ -1599,60 +1675,159 @@ export default function ProductDrawer({
 
         </div>
 
-        {/* Barre d'Action Inférieure Fixée (Sticky Bottom Bar) */}
-        <div className="p-4 sm:p-5 border-t border-zinc-200 bg-white/95 backdrop-blur-md flex items-center justify-between gap-4 relative z-20">
-          <div className="flex flex-col pr-2">
-            <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-medium">
-              {isIPhone && (!selectedSimType || !selectedCapacity)
-                ? 'Configuration requise'
-                : `Total ${[selectedCapacity, !isOtherPhone && selectedSimType].filter(Boolean).join(' · ')}`
-              }
-            </span>
-            <span className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-600 to-amber-700 whitespace-nowrap">
-              {isIPhone && (!selectedSimType || !selectedCapacity)
-                ? `${(Number(currentProduct.price) || 0).toLocaleString('fr-FR')} `
-                : `${currentPrice.toLocaleString('fr-FR')} `
-              }
-              <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
-            </span>
+        {/* Barre d'Action Inférieure Fixée (Sticky Bottom Bar) - Style Amazon */}
+        <div className="p-3.5 sm:p-4 border-t border-zinc-200 bg-white/95 backdrop-blur-md flex flex-col gap-2.5 relative z-20 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+          {/* Ligne Prix & Statut Stock */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
+                {isConfigIncomplete
+                  ? 'Configuration requise'
+                  : `Total ${[selectedCapacity, !isOtherPhone && selectedSimType].filter(Boolean).join(' · ')}`
+                }
+              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-xl sm:text-2xl font-black text-zinc-950 whitespace-nowrap">
+                  {isConfigIncomplete
+                    ? `${(Number(currentProduct.price) || 0).toLocaleString('fr-FR')} `
+                    : `${currentPrice.toLocaleString('fr-FR')} `
+                  }
+                </span>
+                <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
+                <span className="text-[10px] text-zinc-400 font-medium ml-1">TVA incluse</span>
+              </div>
+            </div>
+
+            {/* Statut Stock Style Amazon */}
+            <div>
+              {isComingSoon ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                  Bientôt disponible
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-[#007600] bg-emerald-50 border border-emerald-200/60">
+                  <span className="w-2 h-2 rounded-full bg-[#007600]"></span>
+                  En stock
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Bouton d'action : Désactivé si bientôt disponible, sinon Ajout Panier */}
+          {/* Indication d'étape pour iPhone si incomplet */}
+          {isConfigIncomplete && (
+            <button 
+              type="button"
+              onClick={() => {
+                if (!selectedSimType) {
+                  const el = document.getElementById('user-sim-type-select');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else if (!selectedCapacity) {
+                  const el = document.getElementById('user-capacity-select');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }}
+              className="py-1 px-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold flex items-center justify-between cursor-pointer hover:bg-amber-100 transition-colors text-left"
+            >
+              <span>
+                {isIPhone && !selectedSimType
+                  ? '👉 Étape 1 : Choisissez le format SIM ci-dessus'
+                  : '👉 Étape 2 : Choisissez la capacité ci-dessus'}
+              </span>
+              <span className="text-[10px] underline font-bold">Choisir</span>
+            </button>
+          )}
+
+          {/* Notification visuelle si ajouté au panier */}
+          {justAdded && (
+            <div className="py-1.5 px-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center justify-between animate-in fade-in slide-in-from-bottom-1 duration-200">
+              <span className="flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
+                Article ajouté au panier !
+              </span>
+              <button 
+                type="button" 
+                onClick={() => {
+                  handleCleanClose();
+                  if (onOpenCart) onOpenCart();
+                }}
+                className="text-[11px] text-emerald-800 underline font-bold hover:text-emerald-950 cursor-pointer"
+              >
+                Voir le panier →
+              </button>
+            </div>
+          )}
+
+          {/* Boutons d'Action Style Amazon */}
           {isComingSoon ? (
             <button
               type="button"
               disabled
-              className="flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-400 font-extrabold uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center gap-2 cursor-not-allowed shadow-none"
+              className="w-full py-3 px-4 rounded-full border border-zinc-200 bg-zinc-100 text-zinc-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-not-allowed shadow-none"
             >
               <span className="text-sm">⏳</span>
               <span>Bientôt disponible</span>
             </button>
           ) : (
-            <button 
-              disabled={Boolean(isIPhone && (!selectedSimType || !selectedCapacity))}
-              onClick={() => {
-                if (isIPhone && (!selectedSimType || !selectedCapacity)) {
-                  return;
-                }
-                onAddToCart(currentProduct, isOtherPhone ? '' : activeColor, selectedCapacity, currentPrice, isOtherPhone ? '' : selectedSimType);
-                handleCleanClose();
-              }}
-              className={`flex-1 py-3.5 sm:py-4 px-6 rounded-2xl border font-extrabold uppercase tracking-widest text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
-                isIPhone && (!selectedSimType || !selectedCapacity)
-                  ? 'bg-zinc-200 border-zinc-300 text-zinc-400 cursor-not-allowed opacity-75'
-                  : 'border-gold/40 bg-gradient-to-r from-gold via-yellow-500 to-yellow-600 text-black hover:shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:brightness-105 active:scale-[0.98] cursor-pointer'
-              }`}
-            >
-              <ShoppingBag className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
-              <span>
-                {isIPhone && !selectedSimType
-                  ? '1. Choisissez le format SIM'
-                  : isIPhone && !selectedCapacity
-                  ? '2. Choisissez la capacité'
-                  : 'Ajouter au panier'}
-              </span>
-            </button>
+            <div className="flex flex-col gap-2 w-full">
+              {/* 1. Bouton Jaune Amazon : Ajouter au panier */}
+              <button
+                type="button"
+                onClick={handleAddToCartClick}
+                className={`w-full py-3 sm:py-3.5 px-5 rounded-full border text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 select-none ${
+                  isConfigIncomplete
+                    ? 'bg-zinc-200 border-zinc-300 text-zinc-400 cursor-not-allowed opacity-75'
+                    : justAdded
+                    ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm'
+                    : 'bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] border-[#FCD200] text-[#0F1111] shadow-sm hover:shadow active:scale-[0.99] cursor-pointer'
+                }`}
+              >
+                {justAdded ? (
+                  <>
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>Ajouté au panier !</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="w-4 h-4 stroke-[2.2]" />
+                    <span>Ajouter au panier</span>
+                  </>
+                )}
+              </button>
+
+              {/* 2. Bouton Orange Amazon : Acheter cet article */}
+              <button
+                type="button"
+                onClick={handleBuyNowClick}
+                className={`w-full py-3 sm:py-3.5 px-5 rounded-full border text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 select-none ${
+                  isConfigIncomplete
+                    ? 'bg-zinc-200 border-zinc-300 text-zinc-400 cursor-not-allowed opacity-75'
+                    : 'bg-[#FFA41C] hover:bg-[#FA8900] active:bg-[#EB7C00] border-[#FF8F00] text-[#0F1111] shadow-sm hover:shadow active:scale-[0.99] cursor-pointer'
+                }`}
+              >
+                <Zap className="w-4 h-4 fill-current stroke-[1.5]" />
+                <span>Acheter cet article</span>
+              </button>
+            </div>
           )}
+
+          {/* Réassurance sous les boutons (Style Amazon : Expéditeur, Retours, Paiement) */}
+          <div className="flex items-center justify-between text-[11px] text-zinc-500 pt-1 border-t border-zinc-100">
+            <span className="flex items-center gap-1">
+              <span className="text-zinc-400">Vendeur :</span>
+              <strong className="text-zinc-800 font-semibold">Prince CFA</strong>
+            </span>
+            <span className="text-zinc-300">•</span>
+            <span className="flex items-center gap-1">
+              <span className="text-zinc-400">Retours :</span>
+              <span className="text-zinc-700 font-medium">Garantie 100%</span>
+            </span>
+            <span className="text-zinc-300">•</span>
+            <span className="flex items-center gap-1">
+              <span className="text-zinc-400">Paiement :</span>
+              <span className="text-emerald-700 font-semibold">Sécurisé</span>
+            </span>
+          </div>
         </div>
       </aside>
     </>

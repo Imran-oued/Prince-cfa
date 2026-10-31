@@ -817,7 +817,8 @@ export default function Home() {
     color?: string, 
     capacity?: string, 
     customPrice?: number,
-    simType?: string
+    simType?: string,
+    openCart: boolean = false
   ) => {
     const isAndroid = isAndroidPhoneProduct(product);
     const chosenColor = isAndroid ? '' : (color || product.colors?.[0] || '');
@@ -842,7 +843,21 @@ export default function Home() {
         cartId 
       }];
     });
-    setIsCartOpen(true); // Ouvre le panier automatiquement
+
+    if (openCart) {
+      setIsCartOpen(true);
+    }
+  };
+
+  const handleBuyNow = (
+    product: Product, 
+    color?: string, 
+    capacity?: string, 
+    customPrice?: number,
+    simType?: string
+  ) => {
+    handleAddToCart(product, color, capacity, customPrice, simType, true);
+    setIsProductDrawerOpen(false);
   };
 
   const updateCartQuantity = (cartId: string, newQuantity: number) => {
@@ -1375,6 +1390,8 @@ export default function Home() {
         onClose={handleCloseProduct} 
         product={selectedProduct}
         onAddToCart={handleAddToCart}
+        onBuyNow={handleBuyNow}
+        onOpenCart={() => setIsCartOpen(true)}
       />
     </div>
   );
