@@ -2194,6 +2194,258 @@ export const products = [
       ram: 4
     },
     desc: 'Itel A06 : smartphone accessible et élégant avec écran 6.6 pouces, capteur d\'empreinte digitale sécurisé, déverrouillage facial et batterie 4000 mAh.'
+  },
+  {
+    id: 'p-1793454132122',
+    name: 'Inatel BT:IN018',
+    category: 'accessories',
+    brand: 'Inatel',
+    price: 12000,
+    image: '/products/accessories/p-1793454132122.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: 'Garantie 1 mois Mois Échange à Neuf',
+    images: [
+      '/products/accessories/p-1793454132122.jpg'
+    ],
+    specs: {
+          "connectionType": "bluetooth",
+          "compatibility": "Tous les appareils",
+          "model": "Inatel BT:IN018",
+          "accessoryType": "audio"
+    },
+    desc: '• Marque / Modèle : Inatel BT:IN018 (Smart ANC + ENC) • Type de produit : Écouteurs sans fil intra-auriculaires TWS (True Wireless Stereo) • Réduction de bruit : Smart ANC + ENC (Réduction Active du Bruit extérieure + Réduction du bruit environnemental pour les appels avec 4 micros/Quard Mic) • Qualité sonore : Son Super Bass avec effet sonore haute fidélité (Hi-Fi) et diaphragme biologique intégré • Autonomie de la batterie : +2 semaines d\'autonomie globale en veille avec l\'étui, idéale pour une utilisation prolongée • Version sans fil : Bluetooth V5.3 (Wireless V5.3) assurant une connexion rapide et stable • Microphone : Système à 4 microphones HD intégrés pour des appels téléphoniques limpides • Design & Confort : Design ergonomique (Ergonomic Design) garantissant un excellent maintien dans l\'oreille'
+  },
+  {
+    id: 'p-1793453840425',
+    name: 'Inatel IN-RP004',
+    category: 'accessories',
+    brand: 'Inatel',
+    price: 12000,
+    image: '/products/accessories/p-1793453840425.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: '1 mois',
+    images: [
+      '/products/accessories/p-1793453840425.jpg'
+    ],
+    specs: {
+          "model": "Inatel IN-RP004",
+          "connectionType": "bluetooth",
+          "compatibility": "Tous les appareils",
+          "accessoryType": "audio"
+    },
+    desc: '• Marque / Modèle : Inatel IN-RP004 • Type de produit : Écouteurs de sport sans fil à conduction aérienne • Technologie audio : OWS (Open Wireless Earphone) avec son Hi-Res Audio et basses puissantes • Technologie sonore : Directin Tone (technologie de transmission directionnelle du son pour minimiser les fuites de son vers l\'extérieur) • Autonomie de la batterie : 8 heures d\'écoute et d\'appels continus • Capacité des batteries : 	• Écouteurs : 60 mAh chacun 	• Boîtier de charge : 800 mAh • Version sans fil : Bluetooth 5.4 / V5.5 (connexion ultra-stable sans décalage) • Microphone : Microphone HD intégré pour des appels clairs • Design & Confort : Format ergonomique avec contour d\'oreille stable (Hook), idéal pour le sport, permettant de rester à l\'écoute de son environnement.'
+  },
+  {
+    id: 'p-1793436636409',
+    name: 'Inatel SP-IN007 (taille moyenne)',
+    category: 'accessories',
+    brand: 'Inatel',
+    price: 80000,
+    image: '/products/accessories/p-1793436636409.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: 'Garantie 1 Mois Échange à Neuf',
+    images: [
+      '/products/accessories/p-1793436636409.jpg'
+    ],
+    specs: {
+          "accessoryType": "speaker",
+          "model": "Inatel SP-IN007",
+          "connectionType": "bluetooth",
+          "compatibility": "Tous les appareils"
+    },
+    desc: 'L\'Inatel SP-IN007 Super Bass est une enceinte Bluetooth portable de type "boombox" conçue pour l\'extérieur, offrant un son puissant de 260W avec des basses profondes et une certification de haute fidélité Hi-Res Audio. Pensée pour les environnements exigeants, elle bénéficie d\'une étanchéité complète certifiée IPX7 Waterproof qui lui permet de résister entièrement à l\'eau. Équipée d\'une connectivité sans fil stable en Bluetooth 5.0, elle prend également en charge les entrées AUX, USB, carte mémoire et la radio FM. Sa structure robuste intègre une poignée de transport ergonomique supérieure en métal revêtue de silicone antidérapant, ainsi qu\'une batterie haute capacité dotée d\'une fonction Powerbank intégrée pour recharger vos appareils mobiles en déplacement.'
+  },
+  {
+    id: 'p-1793438013744',
+    name: 'Inatel SP-IN008 (grande taille)',
+    category: 'accessories',
+    brand: 'Inatel',
+    price: 120000,
+    image: '/products/accessories/p-1793438013744.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: 'Garantie 1 mois',
+    images: [
+      '/products/accessories/p-1793438013744.jpg'
+    ],
+    specs: {
+          "model": "Inatel SP-IN008",
+          "accessoryType": "speaker",
+          "connectionType": "bluetooth",
+          "compatibility": "Tous les appareils"
+    },
+    desc: 'L\'Inatel SP-IN008  s\'impose comme le modèle le plus imposant et le plus volumineux de la gamme, conçu pour sonoriser de grands espaces ou des événements festifs en extérieur grâce à une caisse de résonance élargie. Reprenant la structure haut de gamme et ultra-résistante de la marque, elle maximise l\'impact des basses fréquences tout en conservant les caractéristiques de protection et de connectivité de ses cadettes. Sa configuration massive s\'accompagne d\'une batterie renforcée à haute autonomie et d\'une puissance acoustique surmultipliée, pensée pour ceux qui recherchent le maximum de pression sonore et de profondeur dans les graves.'
+  },
+  {
+    id: 'p-1793438552357',
+    name: 'Inatel SP-IN009 ( petite taille)',
+    category: 'accessories',
+    brand: 'Inatel',
+    price: 62000,
+    image: '/products/accessories/p-1793438552357.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: 'Garantie 1 Mois Échange à Neuf',
+    images: [
+      '/products/accessories/p-1793438552357.jpg'
+    ],
+    specs: {
+          "connectionType": "bluetooth",
+          "compatibility": "Tous les appareils",
+          "model": "Inatel SP-IN009",
+          "accessoryType": "speaker"
+    },
+    desc: 'L’Inatel SP-IN009 privilégie la mobilité et l\'ambiance visuelle en proposant un format plus compact et moderne qui délivre une puissance de 160W Super Bass. Axée sur la fête, elle intègre des effets de lumières LED rythmées dynamiques sur ses radiateurs passifs latéraux, créant un spectacle lumineux synchronisé avec la musique. Adaptée aux déplacements réguliers, sa protection passe à une certification IPX6 qui lui assure une totale étanchéité face aux fortes projections d\'eau et aux intempéries, tout en conservant une connectivité universelle et le traitement sonore haute fidélité caractéristique de la marque.'
+  },
+  {
+    id: 'p-1793451231100',
+    name: 'Yosonda Y-S01 ( Format Mini )',
+    category: 'accessories',
+    brand: 'Yosonda',
+    price: 60000,
+    image: '/products/accessories/p-1793451231100.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: 'Garantie 1 Mois Échange à Neuf',
+    images: [
+      '/products/accessories/p-1793451231100.jpg'
+    ],
+    specs: {
+          "compatibility": "Tous les appareils",
+          "model": "Yosonda Y-S01",
+          "accessoryType": "speaker",
+          "connectionType": "bluetooth"
+    },
+    desc: '• Produit : Mini enceinte sans fil portable • Puissance maximale : 20W à 30W • Capacité de la batterie : 2 500 à 4 000 mAh • Fonctionnalités principales : Connectivité Bluetooth, appels mains libres (micro intégré), commandes simplifiées • Design : Format ultra-compact (moins de 25 cm), poids plume et mini poignée supérieure • Usage recommandé : Écoute de proximité, usage individuel en intérieur (chambre, bureau) ou petits déplacements'
+  },
+  {
+    id: 'p-1793452645875',
+    name: 'Yosonda Y-S01 (Le Petit Format)',
+    category: 'accessories',
+    brand: 'Yosonda',
+    price: 45000,
+    image: '/products/accessories/p-1793452645875.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: 'Garantie 1 mois',
+    images: [
+      '/products/accessories/p-1793452645875.jpg'
+    ],
+    specs: {
+          "model": "Yosonda Y-S01",
+          "connectionType": "bluetooth",
+          "accessoryType": "speaker",
+          "compatibility": "Tous les appareils"
+    },
+    desc: '• Puissance de sortie : 20 Watts à 30 Watts • Capacité de la batterie : 2 500 mAh - 4 000 mAh • Autonomie : Environ 4 à 6 heures d\'écoute continue • Connectivité : Bluetooth 5.3, carte TF (Micro SD), port USB, entrée AUX • Dimensions & Design : Ultra-compact (moins de 25 cm), équipé d\'une sangle ou mini-poignée intégrée • Usage idéal : Utilisation individuelle, bureau, chambre ou comme haut-parleur nomade léger'
+  },
+  {
+    id: 'p-1793451514805',
+    name: 'Yosonda Y-S02 ( Format standard )',
+    category: 'accessories',
+    brand: 'Yosonda',
+    price: 75000,
+    image: '/products/accessories/p-1793451514805.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: 'Garantie 6 Mois Échange à Neuf',
+    images: [
+      '/products/accessories/p-1793451514805.jpg'
+    ],
+    specs: {
+          "accessoryType": "speaker",
+          "compatibility": "Tous les appareils",
+          "model": "Yosonda Y-S02",
+          "connectionType": "bluetooth"
+    },
+    desc: '• Produit : Enceinte sans fil portable polyvalente • Puissance maximale : 50W à 90W • Capacité de la batterie : 6 000 à 8 000 mAh • Fonctionnalités principales : Effets de lumière LED RGB dynamiques, connectivité Bluetooth, fonction Powerbank (recharge de secours pour smartphone) • Design : Format intermédiaire robuste (30 à 35 cm) avec radiateurs passifs latéraux renforcés • Usage recommandé : Petites fêtes entre amis, soirées de salon, sorties sur la terrasse ou à la plage'
+  },
+  {
+    id: 'p-1793452841657',
+    name: 'Yosonda Y-S02 (Le Format Moyen)',
+    category: 'accessories',
+    brand: 'Yosonda',
+    price: 750000,
+    image: '/products/accessories/p-1793452841657.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: 'Garantie 1 Mois Échange à Neuf',
+    images: [
+      '/products/accessories/p-1793452841657.jpg'
+    ],
+    specs: {
+          "model": "Yosonda Y-S02",
+          "connectionType": "bluetooth",
+          "compatibility": "Tous les appareils",
+          "accessoryType": "speaker"
+    },
+    desc: '• Puissance de sortie : 50 Watts à 90 Watts • Capacité de la batterie : 6 000 mAh - 8 000 mAh • Autonomie : Environ 8 à 10 heures d\'autonomie • Fonctionnalité spéciale : Éclairage lumineux LED RGB dynamique sur les côtés et fonction Powerbank (permet de recharger votre téléphone) • Connectivité : Bluetooth 5.3, clé USB, carte mémoire TF, entrée AUX, appairage TWS • Dimensions & Design : Format moyen (30 à 35 cm) avec une large poignée de transport souple texturée • Usage idéal : Sorties à la plage, soirées en terrasse, petites fêtes entre amis ou salon'
+  },
+  {
+    id: 'p-1793453107207',
+    name: 'Yosonda Y-S03 (Le Grand Format)',
+    category: 'accessories',
+    brand: 'Yosonda',
+    price: 85000,
+    image: '/products/accessories/p-1793453107207.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: 'Garantie 1 mois',
+    images: [
+      '/products/accessories/p-1793453107207.jpg'
+    ],
+    specs: {
+          "connectionType": "bluetooth",
+          "accessoryType": "speaker",
+          "model": "Yosonda Y-S03",
+          "compatibility": "Tous les appareils"
+    },
+    desc: '• Puissance de sortie : 100 Watts à 120 Watts • Capacité de la batterie : 10 000 mAh • Autonomie : Environ 10 à 12 heures d\'autonomie • Fonctionnalité spéciale : Système sonore à double woofer pour des basses sismiques renforcées, livré fréquemment avec une option microphone pour le karaoké improvisé • Connectivité : Bluetooth 5.3, USB, carte TF, entrée Jack 3.5mm / Micro • Dimensions & Design : Format plus lourd et volumineux (plus de 40 cm) conçu pour une projection acoustique maximale • Usage idéal : Grandes animations en extérieur, réunions de famille et événements festifs'
+  },
+  {
+    id: 'p-1793451797408',
+    name: 'Yosonda Y-S06 ( Format Max )',
+    category: 'accessories',
+    brand: 'Yosonda',
+    price: 85000,
+    image: '/products/accessories/p-1793451797408.jpg',
+    rating: 4.8,
+    inStock: true,
+    stock: 99,
+    condition: 'neuf',
+    warranty: 'Garantie 1 Mois Échange à Neuf',
+    images: [
+      '/products/accessories/p-1793451797408.jpg'
+    ],
+    specs: {
+          "compatibility": "Tous les appareils",
+          "accessoryType": "speaker",
+          "model": "Yosonda Y-S06",
+          "connectionType": "bluetooth"
+    },
+    desc: '• Produit : Enceinte Karaoké / Haut-parleur sans fil portable • Puissance maximale : 350W (Puissance de pointe) • Capacité de la batterie : 16 000 mAh (Large Battery) • Fonctionnalités principales : Karaoké sans fil, connectivité Bluetooth, réglage de l\'écho et du volume du micro, entrées auxiliaires et guitare • Design : Format Boombox robuste avec poignée de transport fixe et ergonomique • Usage recommandé : Fêtes en plein air, grands rassemblements, soirées karaoké à la maison'
   }
 ];
-

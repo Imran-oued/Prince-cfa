@@ -11,7 +11,7 @@ interface ProductsCacheEntry {
 }
 
 let productsCache: ProductsCacheEntry | null = null;
-const PRODUCTS_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const PRODUCTS_TTL_MS = 30 * 1000; // 30 secondes pour une fraîcheur maximale (réactivité instantanée pour l'admin)
 
 function buildCacheEntry(products: any[], ttlMs: number): ProductsCacheEntry {
   const jsonString = JSON.stringify({ success: true, products });
@@ -44,6 +44,9 @@ function sanitizeProductMedia(product: any): any {
     if (product.id === "UOGdbGVosnh6CovWNOkD") {
       image = "/products/mobility/moto-electrique-1.jpg";
       modified = true;
+    } else if (String(product.id).startsWith("p-179")) {
+      image = `/products/accessories/${product.id}.jpg`;
+      modified = true;
     }
   }
 
@@ -53,6 +56,10 @@ function sanitizeProductMedia(product: any): any {
         if (product.id === "UOGdbGVosnh6CovWNOkD") {
           modified = true;
           return idx === 1 ? "/products/mobility/moto-electrique-2.jpg" : "/products/mobility/moto-electrique-1.jpg";
+        }
+        if (String(product.id).startsWith("p-179")) {
+          modified = true;
+          return `/products/accessories/${product.id}.jpg`;
         }
       }
       return img;

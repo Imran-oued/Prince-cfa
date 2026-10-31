@@ -47,18 +47,17 @@ export async function getProducts() {
   if (!isFirebaseConfigured()) return null;
 
   try {
-    const q = query(
-      collection(db, PRODUCTS_COLLECTION),
-      orderBy("name", "asc")
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => {
+    const snapshot = await getDocs(collection(db, PRODUCTS_COLLECTION));
+    const products = snapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,
         id: doc.id, // L'ID du document Firestore fait TOUJOURS autorité (évite les conflits d'ID imbriqués)
       };
     });
+    // Tri en mémoire ultra-rapide et résilient sans dépendance d'index Firestore
+    products.sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "fr", { sensitivity: "base" }));
+    return products;
   } catch (error) {
     console.error("Erreur lors du chargement des produits:", error);
     return null;

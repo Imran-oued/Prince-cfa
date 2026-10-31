@@ -475,9 +475,15 @@ export default function Home() {
     async function loadProducts() {
       try {
         // 1. Essayer l'API serveur optimisée avec cache mémoire (protection anti-épuisement des quotas Firestore)
-        const apiRes = await fetch("/api/products", { cache: "no-store" }).catch(() => null);
+        const apiRes = await fetch("/api/products", { 
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache"
+          }
+        }).catch(() => null);
         if (apiRes && apiRes.ok) {
-          const apiData = await apiRes.json();
+          const apiData = await apiRes.json().catch(() => null);
           if (apiData?.success && Array.isArray(apiData.products) && apiData.products.length > 0) {
             const valid = apiData.products.filter((p: any) => p && p.id && p.name && typeof p.price === 'number');
             if (valid.length > 0) {
@@ -496,7 +502,7 @@ export default function Home() {
         // 2. Repli direct sur Firebase SDK si l'API est indisponible (avec timeout de sécurité de 3 secondes)
         if (isFirebaseConfigured()) {
           const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error("Timeout Firestore")), 3000)
+            setTimeout(() => reject(new Error("Timeout Firestore")), 10000)
           );
           const [firebaseProducts, deletedIds] = (await Promise.race([
             Promise.all([
