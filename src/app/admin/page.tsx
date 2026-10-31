@@ -950,37 +950,16 @@ export default function AdminPage() {
                 </button>
               </div>
 
-              {index === 0 ? (
+              {index !== 0 && (
                 <button
                   type="button"
-                  onClick={() => handleRemoveImage(0)}
-                  className="w-full mt-1.5 py-1 px-2 rounded-lg bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white text-[10px] font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-red-500/20"
-                  title="Supprimer cette photo principale"
+                  onClick={() => handleSetMainImage(index)}
+                  className="w-full mt-1.5 py-1 px-2 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-[10px] text-zinc-300 font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-white/5"
+                  title="Définir comme photo principale"
                 >
-                  <Trash2 className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-                  <span>Supprimer</span>
+                  <Crown className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                  <span>Définir comme 1ère</span>
                 </button>
-              ) : (
-                <div className="grid grid-cols-2 gap-1.5 mt-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleSetMainImage(index)}
-                    className="py-1 px-1 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-[10px] text-zinc-300 font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-white/5 truncate"
-                    title="Définir comme photo principale"
-                  >
-                    <Crown className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-                    <span className="truncate">1ère</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(index)}
-                    className="py-1 px-1 rounded-lg bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white text-[10px] font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-red-500/20 truncate"
-                    title="Supprimer cette photo"
-                  >
-                    <Trash2 className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-                    <span className="truncate">Suppr.</span>
-                  </button>
-                </div>
               )}
             </div>
           ))}
@@ -4516,37 +4495,16 @@ export default function AdminPage() {
                               </button>
                             </div>
 
-                            {index === 0 ? (
+                            {index !== 0 && (
                               <button
                                 type="button"
-                                onClick={() => handleRemoveImage(0)}
-                                className="w-full mt-1.5 py-1 px-2 rounded-lg bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white text-[10px] font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-red-500/20"
-                                title="Supprimer cette photo principale"
+                                onClick={() => handleSetMainImage(index)}
+                                className="w-full mt-1.5 py-1 px-2 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-[10px] text-zinc-300 font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-white/5"
+                                title="Définir comme photo principale"
                               >
-                                <Trash2 className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-                                <span>Supprimer</span>
+                                <Crown className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                                <span>Définir comme 1ère</span>
                               </button>
-                            ) : (
-                              <div className="grid grid-cols-2 gap-1.5 mt-1.5">
-                                <button
-                                  type="button"
-                                  onClick={() => handleSetMainImage(index)}
-                                  className="py-1 px-1 rounded-lg bg-white/5 hover:bg-gold hover:text-black text-[10px] text-zinc-300 font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-white/5 truncate"
-                                  title="Définir comme photo principale"
-                                >
-                                  <Crown className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-                                  <span className="truncate">1ère</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveImage(index)}
-                                  className="py-1 px-1 rounded-lg bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white text-[10px] font-bold tracking-wider transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-red-500/20 truncate"
-                                  title="Supprimer cette photo"
-                                >
-                                  <Trash2 className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-                                  <span className="truncate">Suppr.</span>
-                                </button>
-                              </div>
                             )}
                           </div>
                         ))}
