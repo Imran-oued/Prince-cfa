@@ -52,6 +52,7 @@ import {
   Volume2,
   VolumeX
 } from "lucide-react";
+import { formatPrice } from "@/lib/formatPrice";
 import { 
   PRODUCT_CATEGORIES, 
   CATEGORIES_LIST, 
@@ -1149,7 +1150,7 @@ export default function AdminPage() {
   // Notification Push mobile et système (Option 2)
   const showSystemNotification = async (order: OrderRecord) => {
     const title = `🔔 Nouvelle commande : ${order.id}`;
-    const totalStr = (order.pricing?.total || 0).toLocaleString("fr-FR");
+    const totalStr = formatPrice(order.pricing?.total);
     const customerName = order.customer?.name || "Client";
     const body = `${customerName} vient de commander pour ${totalStr} FCFA. Touchez pour ouvrir la commande.`;
 
@@ -1714,7 +1715,7 @@ export default function AdminPage() {
     if (type === "payment_confirmed") {
       message = `👑 *PRINCE CFA - PAIEMENT CONFIRMÉ*\n\n` +
         `Bonjour *${order.customer.name}*,\n` +
-        `Nous vous confirmons la bonne réception de votre paiement de *${order.pricing?.total?.toLocaleString('fr-FR')} FCFA* pour votre commande *${order.id}*. ✅\n\n` +
+        `Nous vous confirmons la bonne réception de votre paiement de *${formatPrice(order.pricing?.total)} FCFA* pour votre commande *${order.id}*. ✅\n\n` +
         `Votre commande est désormais validée et en cours de préparation dans notre boutique !\n\n` +
         `📦 *Suivez votre commande en direct :*\n${trackingUrl}\n\n` +
         `Merci pour votre confiance !\n` +
@@ -1722,7 +1723,7 @@ export default function AdminPage() {
     } else if (type === "pending_payment") {
       message = `👑 *PRINCE CFA - SUIVI DE VOTRE COMMANDE*\n\n` +
         `Bonjour *${order.customer.name}*,\n` +
-        `Nous vous contactons au sujet de votre commande *${order.id}* d'un montant de *${order.pricing?.total?.toLocaleString('fr-FR')} FCFA* enregistrée chez PRINCE CFA.\n\n` +
+        `Nous vous contactons au sujet de votre commande *${order.id}* d'un montant de *${formatPrice(order.pricing?.total)} FCFA* enregistrée chez PRINCE CFA.\n\n` +
         `Souhaitez-vous finaliser votre règlement ou avez-vous besoin d'une assistance pour effectuer votre paiement Mobile Money (Orange Money / Wave) ? Notre équipe est à votre entière disposition pour vous accompagner.\n\n` +
         `📦 *Accédez à votre commande en direct :*\n${trackingUrl}\n\n` +
         `_L'équipe PRINCE CFA Ouagadougou_\n_Boutique Koulouba - Tél/WhatsApp : +226 77 78 87 40_`;
@@ -3161,7 +3162,7 @@ export default function AdminPage() {
               </div>
               <p className="text-sm sm:text-base font-extrabold text-zinc-950 mt-0.5">
                 <span className="font-mono text-gold bg-black px-2 py-0.5 rounded mr-1.5">{incomingOrderAlert.id}</span>
-                {incomingOrderAlert.customer?.name} ({incomingOrderAlert.customer?.phone}) • <span className="text-gold font-black">{(incomingOrderAlert.pricing?.total || 0).toLocaleString('fr-FR')} FCFA</span>
+                {incomingOrderAlert.customer?.name} ({incomingOrderAlert.customer?.phone}) • <span className="text-gold font-black">{formatPrice(incomingOrderAlert.pricing?.total)} FCFA</span>
               </p>
             </div>
           </div>
@@ -3212,7 +3213,7 @@ export default function AdminPage() {
 
           <div className="glass-panel p-5 rounded-2xl border border-zinc-200/80 border-l-4 border-l-gold shadow-sm relative overflow-hidden bg-white/90">
             <h3 className="text-gold text-xs uppercase tracking-wider mb-1 font-semibold">Chiffre Encaissé Réel</h3>
-            <p className="text-2xl sm:text-3xl font-black text-zinc-900">{totalCollectedRevenue.toLocaleString('fr-FR')} <span className="text-gold text-lg">F</span></p>
+            <p className="text-2xl sm:text-3xl font-black text-zinc-900">{formatPrice(totalCollectedRevenue)} <span className="text-gold text-lg">F</span></p>
             <span className="text-[11px] text-zinc-500 mt-1 inline-block font-medium">Fonds reçus et vérifiés</span>
           </div>
         </div>
@@ -3223,7 +3224,7 @@ export default function AdminPage() {
               <Coins className="w-24 h-24" aria-hidden="true" />
             </div>
             <h3 className="text-zinc-500 text-sm uppercase tracking-wider mb-2 font-semibold">Valeur du Catalogue</h3>
-            <p className="text-3xl font-black text-zinc-900">{totalCatalogValue.toLocaleString('fr-FR')} <span className="text-gold text-xl">FCFA</span></p>
+            <p className="text-3xl font-black text-zinc-900">{formatPrice(totalCatalogValue)} <span className="text-gold text-xl">FCFA</span></p>
             <span className="text-xs text-emerald-600 font-semibold mt-2 inline-block">Valeur marchande totale</span>
           </div>
           <div className="glass-panel p-6 rounded-2xl border border-zinc-200/80 shadow-sm relative overflow-hidden bg-white/90">
@@ -3376,7 +3377,7 @@ export default function AdminPage() {
                         )}
                       </td>
                       <td className="p-4 font-black text-zinc-900 whitespace-nowrap">
-                        {order.pricing?.total?.toLocaleString('fr-FR')} FCFA
+                        {formatPrice(order.pricing?.total)} FCFA
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
@@ -3492,8 +3493,8 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-zinc-500">{item.quantity} × {item.unitPrice.toLocaleString('fr-FR')} F</span>
-                      <div className="font-bold text-gold">{(item.quantity * item.unitPrice).toLocaleString('fr-FR')} FCFA</div>
+                      <span className="text-zinc-500">{item.quantity} × {formatPrice(item.unitPrice)} F</span>
+                      <div className="font-bold text-gold">{formatPrice(item.quantity * item.unitPrice)} FCFA</div>
                     </div>
                   </div>
                 ))}
@@ -3504,15 +3505,15 @@ export default function AdminPage() {
             <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2 text-xs mb-5">
               <div className="flex justify-between text-zinc-600">
                 <span>Sous-total produits</span>
-                <span className="font-medium text-zinc-800">{selectedOrder.pricing.subtotal.toLocaleString('fr-FR')} FCFA</span>
+                <span className="font-medium text-zinc-800">{formatPrice(selectedOrder.pricing.subtotal)} FCFA</span>
               </div>
               <div className="flex justify-between text-zinc-600">
                 <span>Frais de réception</span>
-                <span className="font-medium text-zinc-800">{selectedOrder.pricing.deliveryFee.toLocaleString('fr-FR')} FCFA</span>
+                <span className="font-medium text-zinc-800">{formatPrice(selectedOrder.pricing.deliveryFee)} FCFA</span>
               </div>
               <div className="pt-2 border-t border-zinc-200 flex justify-between font-bold text-sm">
                 <span className="text-zinc-900">Total Commande</span>
-                <span className="text-gold font-black">{selectedOrder.pricing.total.toLocaleString('fr-FR')} FCFA</span>
+                <span className="text-gold font-black">{formatPrice(selectedOrder.pricing.total)} FCFA</span>
               </div>
             </div>
 
@@ -3579,7 +3580,7 @@ export default function AdminPage() {
                   <div className="p-3 rounded-xl bg-amber-50 border border-amber-300/80 text-amber-950 text-[11px] leading-relaxed flex items-start gap-2.5 shadow-xs">
                     <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <div>
-                      <strong className="font-extrabold text-amber-950">Vérification obligatoire :</strong> Connectez-vous sur votre terminal Orange Money ou Wave et assurez-vous de la réception effective de <strong className="font-black text-amber-950 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300/60">{selectedOrder.pricing.total.toLocaleString('fr-FR')} FCFA</strong> avant de cliquer.
+                      <strong className="font-extrabold text-amber-950">Vérification obligatoire :</strong> Connectez-vous sur votre terminal Orange Money ou Wave et assurez-vous de la réception effective de <strong className="font-black text-amber-950 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300/60">{formatPrice(selectedOrder.pricing.total)} FCFA</strong> avant de cliquer.
                     </div>
                   </div>
 
@@ -3614,7 +3615,7 @@ export default function AdminPage() {
                     className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold uppercase tracking-widest text-xs transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
-                    <span>Confirmer la réception des fonds ({selectedOrder.pricing.total.toLocaleString('fr-FR')} F)</span>
+                    <span>Confirmer la réception des fonds ({formatPrice(selectedOrder.pricing.total)} F)</span>
                   </button>
 
                   <button
@@ -3994,12 +3995,12 @@ export default function AdminPage() {
                     <td className="p-4 font-bold text-zinc-900">
                       {product.salePrice ? (
                         <div>
-                          <span className="text-gold font-extrabold">{product.salePrice.toLocaleString('fr-FR')} FCFA</span>
-                          <span className="block text-[11px] text-zinc-400 line-through">{product.price.toLocaleString('fr-FR')} FCFA</span>
+                          <span className="text-gold font-extrabold">{formatPrice(product.salePrice)} FCFA</span>
+                          <span className="block text-[11px] text-zinc-400 line-through">{formatPrice(product.price)} FCFA</span>
                         </div>
                       ) : (
                         <div>
-                          {product.price.toLocaleString('fr-FR')} <span className="text-gold text-xs">FCFA</span>
+                          {formatPrice(product.price)} <span className="text-gold text-xs">FCFA</span>
                         </div>
                       )}
                     </td>
@@ -4307,10 +4308,10 @@ export default function AdminPage() {
                         {commonFormData.salePrice ? (
                           <>
                             <span className="text-2xl font-black text-gold">
-                              {Number(commonFormData.salePrice).toLocaleString("fr-FR")} FCFA
+                              {formatPrice(commonFormData.salePrice)} FCFA
                             </span>
                             <span className="text-xs text-zinc-500 line-through">
-                              {Number(commonFormData.price || 0).toLocaleString("fr-FR")} FCFA
+                              {formatPrice(commonFormData.price)} FCFA
                             </span>
                             <span className="px-2 py-0.5 rounded-md bg-red-500/20 text-red-400 text-[10px] font-bold">
                               PROMO
@@ -4318,7 +4319,7 @@ export default function AdminPage() {
                           </>
                         ) : (
                           <span className="text-2xl font-black text-gold">
-                            {Number(commonFormData.price || 0).toLocaleString("fr-FR")} FCFA
+                            {formatPrice(commonFormData.price)} FCFA
                           </span>
                         )}
                       </div>
@@ -4424,14 +4425,14 @@ export default function AdminPage() {
                                   Variantes de prix ({appleVariants.length} combinaisons) :
                                 </span>
                                 <span className="text-[10px] text-gold font-bold">
-                                  Min: {Math.min(...appleVariants.map(v => v.price)).toLocaleString("fr-FR")} F
+                                  Min: {formatPrice(Math.min(...appleVariants.map(v => v.price)))} F
                                 </span>
                               </div>
                               <div className="max-h-40 overflow-y-auto rounded-xl border border-white/10 divide-y divide-white/5 text-[11px]">
                                 {appleVariants.slice(0, 8).map(v => (
                                   <div key={v.id} className="p-2 flex items-center justify-between bg-black/40">
                                     <span className="text-zinc-300 font-medium">{v.storage} • {v.color} • <span className="text-zinc-500">{v.simType}</span></span>
-                                    <span className="text-gold font-bold">{v.price.toLocaleString("fr-FR")} FCFA</span>
+                                    <span className="text-gold font-bold">{formatPrice(v.price)} FCFA</span>
                                   </div>
                                 ))}
                                 {appleVariants.length > 8 && (
@@ -4476,7 +4477,7 @@ export default function AdminPage() {
                                 {storageItems.map((opt, i) => (
                                   <span key={i} className="px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white flex items-center gap-1.5">
                                     <span>{opt.capacity}</span>
-                                    <span className="text-gold text-[10px]">({Number(opt.price).toLocaleString("fr-FR")} F)</span>
+                                    <span className="text-gold text-[10px]">({formatPrice(opt.price)} F)</span>
                                   </span>
                                 ))}
                               </div>

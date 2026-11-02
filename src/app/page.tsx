@@ -9,6 +9,7 @@ import ProductDrawer from "@/components/ProductDrawer";
 import { getProducts, getDeletedProductIds } from "@/lib/firestore";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import { getProductImageBg, isAppleBrand } from "@/lib/productValidation";
+import { formatPrice } from "@/lib/formatPrice";
 import { SHOP_CONFIG } from "@/config/shop";
 import { 
   Star, 
@@ -404,10 +405,10 @@ function ProductCardItem({
             {product.salePrice && product.price && Number(product.salePrice) < Number(product.price) ? (
               <>
                 <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-amber-600 to-gold tracking-tight">
-                  {(Number(product.salePrice) || 0).toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
+                  {formatPrice(product.salePrice)} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
                 </span>
                 <span className="text-xs sm:text-sm text-zinc-400 line-through">
-                  {(Number(product.price) || 0).toLocaleString('fr-FR')} FCFA
+                  {formatPrice(product.price)} FCFA
                 </span>
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase bg-red-100 text-red-600 border border-red-200">
                   PROMO
@@ -415,7 +416,7 @@ function ProductCardItem({
               </>
             ) : (
               <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-600 to-yellow-600 tracking-tight">
-                {(Number(product.price) || 0).toLocaleString('fr-FR')} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
+                {formatPrice(product.price)} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
               </span>
             )}
           </div>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Package } from 'lucide-react';
 import MenuDrawer from '@/components/MenuDrawer';
+import { formatPrice } from '@/lib/formatPrice';
 
 /**
  * @param {{
@@ -225,7 +226,7 @@ export default function Navbar({
                           </div>
                           <div className="text-right flex-shrink-0">
                             <span className="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-gold to-yellow-600">
-                              {(Number(product.price) || 0).toLocaleString('fr-FR')} F
+                              {formatPrice(product.price)} F
                             </span>
                           </div>
                         </button>

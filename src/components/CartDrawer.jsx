@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { SHOP_CONFIG } from "@/config/shop";
 import { getProductImageBg } from "@/lib/productValidation";
+import { formatPrice } from "@/lib/formatPrice";
 import { 
   X, 
   ShieldCheck, 
@@ -222,12 +223,12 @@ export default function CartDrawer({
     o.items.forEach((item, idx) => {
       const details = [item.selectedCapacity, item.selectedSimType, item.selectedColor].filter(Boolean).join(" | ");
       msg += `${idx + 1}. *${item.name}* ${details ? `(${details})` : ""}\n`;
-      msg += `   ↳ Qté : ${item.quantity} × ${item.unitPrice.toLocaleString('fr-FR')} FCFA\n`;
+      msg += `   ↳ Qté : ${item.quantity} × ${formatPrice(item.unitPrice)} FCFA\n`;
     });
 
-    msg += `\n💰 *MONTANT TOTAL :* *${o.pricing.total.toLocaleString('fr-FR')} FCFA*\n`;
+    msg += `\n💰 *MONTANT TOTAL :* *${formatPrice(o.pricing.total)} FCFA*\n`;
     if (o.pricing.deliveryFee > 0) {
-      msg += `   _(Dont frais de livraison : ${o.pricing.deliveryFee.toLocaleString('fr-FR')} FCFA)_\n`;
+      msg += `   _(Dont frais de livraison : ${formatPrice(o.pricing.deliveryFee)} FCFA)_\n`;
     }
     msg += `═══════════════════════════\n\n`;
     msg += `Bonjour Prince CFA, j'ai enregistré ma commande *${o.id}* sur le site. Merci de vérifier la réception de mon paiement et de lancer la préparation !`;
@@ -471,7 +472,7 @@ export default function CartDrawer({
                             </div>
                             <div className="flex items-center justify-between mt-1">
                               <div className="text-xs font-black text-gold">
-                                {item.price.toLocaleString('fr-FR')} FCFA
+                                {formatPrice(item.price)} FCFA
                               </div>
                               <span className="text-[10px] text-zinc-500 group-hover/item:text-gold font-medium flex items-center gap-0.5 transition-colors pr-2">
                                 Voir détails →
@@ -571,7 +572,7 @@ export default function CartDrawer({
                       <Truck className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
                       <div className="text-left">
                         <span className="block text-xs leading-none">Livraison à domicile</span>
-                        <span className="text-[9px] text-zinc-500">+{SHOP_CONFIG.deliveryFee.toLocaleString('fr-FR')} F</span>
+                        <span className="text-[9px] text-zinc-500">+{formatPrice(SHOP_CONFIG.deliveryFee)} F</span>
                       </div>
                     </button>
 
@@ -727,7 +728,7 @@ export default function CartDrawer({
                         <div>
                           <span className="text-[9px] text-zinc-500 uppercase tracking-widest block font-medium">Montant net à régler</span>
                           <span className="text-base sm:text-lg font-black text-orange-600 font-mono">
-                            {totalPrice.toLocaleString('fr-FR')} FCFA
+                            {formatPrice(totalPrice)} FCFA
                           </span>
                         </div>
                         <button
@@ -828,7 +829,7 @@ export default function CartDrawer({
                         <div>
                           <span className="text-[9px] text-zinc-500 uppercase tracking-widest block font-medium">Montant net à transférer</span>
                           <span className="text-base sm:text-lg font-black text-cyan-700 font-mono">
-                            {totalPrice.toLocaleString('fr-FR')} FCFA
+                            {formatPrice(totalPrice)} FCFA
                           </span>
                         </div>
                         <button
@@ -944,7 +945,7 @@ export default function CartDrawer({
                       </span>
                     </div>
                     <span className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-600 to-yellow-600">
-                      {totalPrice.toLocaleString('fr-FR')} FCFA
+                      {formatPrice(totalPrice)} FCFA
                     </span>
                   </div>
 
@@ -957,7 +958,7 @@ export default function CartDrawer({
                     {isSubmitting ? (
                       <span className="animate-pulse">Enregistrement de votre commande...</span>
                     ) : (
-                      <span>Valider ma commande ({totalPrice.toLocaleString('fr-FR')} FCFA)</span>
+                      <span>Valider ma commande ({formatPrice(totalPrice)} FCFA)</span>
                     )}
                   </button>
 
@@ -1028,7 +1029,7 @@ export default function CartDrawer({
 
             {/* Récapitulatif montant & mode */}
             <div className="text-xs text-zinc-600 space-y-1">
-              <div>Montant attendu : <strong className="text-zinc-900">{confirmedOrder.pricing.total.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>Montant attendu : <strong className="text-zinc-900">{formatPrice(confirmedOrder.pricing.total)} FCFA</strong></div>
               <div>Mode sélectionné : <strong className="text-gold font-bold uppercase">{confirmedOrder.payment.method}</strong></div>
             </div>
 

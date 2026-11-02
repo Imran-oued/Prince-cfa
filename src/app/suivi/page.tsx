@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { SHOP_CONFIG } from "@/config/shop";
+import { formatPrice } from "@/lib/formatPrice";
 import { 
   X, 
   Check, 
@@ -502,8 +503,8 @@ function TrackingContent() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-zinc-500 text-[11px]">{item.quantity} × {item.unitPrice.toLocaleString("fr-FR")} F</div>
-                        <div className="font-black text-gold text-sm">{(item.quantity * item.unitPrice).toLocaleString("fr-FR")} FCFA</div>
+                        <div className="text-zinc-500 text-[11px]">{item.quantity} × {formatPrice(item.unitPrice)} F</div>
+                        <div className="font-black text-gold text-sm">{formatPrice(item.quantity * item.unitPrice)} FCFA</div>
                       </div>
                     </div>
                   ))}
@@ -512,15 +513,15 @@ function TrackingContent() {
                 <div className="pt-3 border-t border-zinc-200 space-y-1.5 text-xs">
                   <div className="flex justify-between text-zinc-500">
                     <span>Sous-total</span>
-                    <span>{order.pricing.subtotal.toLocaleString("fr-FR")} FCFA</span>
+                    <span>{formatPrice(order.pricing.subtotal)} FCFA</span>
                   </div>
                   <div className="flex justify-between text-zinc-500">
                     <span>Frais de réception ({order.customer.deliveryMethod === "delivery" ? "Livraison" : "Retrait"})</span>
-                    <span>{order.pricing.deliveryFee === 0 ? "Gratuit" : `${order.pricing.deliveryFee.toLocaleString("fr-FR")} FCFA`}</span>
+                    <span>{order.pricing.deliveryFee === 0 ? "Gratuit" : `${formatPrice(order.pricing.deliveryFee)} FCFA`}</span>
                   </div>
                   <div className="pt-2 border-t border-zinc-200 flex justify-between font-black text-sm">
                     <span className="text-zinc-950">Total réglé / attendu</span>
-                    <span className="text-gold text-base">{order.pricing.total.toLocaleString("fr-FR")} FCFA</span>
+                    <span className="text-gold text-base">{formatPrice(order.pricing.total)} FCFA</span>
                   </div>
                 </div>
               </div>

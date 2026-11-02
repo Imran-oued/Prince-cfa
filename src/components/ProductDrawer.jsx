@@ -5,6 +5,7 @@ import { SHOP_CONFIG } from '@/config/shop';
 import { Star, HardDrive, Check, Zap, Laptop, ShoppingBag, ChevronDown, ChevronLeft, ShieldCheck } from 'lucide-react';
 import { getCategoryConfig, isStorageVariantCategory } from '@/config/categories';
 import { getProductImageBg, isAppleBrand } from '@/lib/productValidation';
+import { formatPrice } from '@/lib/formatPrice';
 
 const SPEC_LABELS = {
   screen: 'Écran',
@@ -821,7 +822,7 @@ export default function ProductDrawer({
     if (activeColor && !isOtherPhone) {
       message += `▪ *Couleur sélectionnée* : ${activeColor}\n`;
     }
-    message += `▪ *Prix* : ${currentPrice.toLocaleString('fr-FR')} FCFA\n\n`;
+    message += `▪ *Prix* : ${formatPrice(currentPrice)} FCFA\n\n`;
     message += "Bonjour, je souhaite commander ce produit immédiatement !";
 
     const encoded = encodeURIComponent(message);
@@ -1062,8 +1063,8 @@ export default function ProductDrawer({
             <div className="flex flex-wrap items-baseline gap-3 pt-1">
               <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-600 to-amber-700">
                 {isIPhone && (!selectedSimType || !selectedCapacity)
-                  ? `À partir de ${(Number(currentProduct.price) || 0).toLocaleString('fr-FR')} FCFA`
-                  : `${currentPrice.toLocaleString('fr-FR')} FCFA`
+                  ? `À partir de ${formatPrice(currentProduct.price)} FCFA`
+                  : `${formatPrice(currentPrice)} FCFA`
                 }
               </span>
               {availableCapacities.length > 0 && selectedCapacity && (
@@ -1192,9 +1193,9 @@ export default function ProductDrawer({
                     )}
                     {availableSimTypes.map((sim) => {
                       const priceNote = sim.delta > 0 
-                        ? ` (+${sim.delta.toLocaleString('fr-FR')} FCFA)` 
+                        ? ` (+${formatPrice(sim.delta)} FCFA)` 
                         : sim.delta < 0 
-                        ? ` (${sim.delta.toLocaleString('fr-FR')} FCFA)` 
+                        ? ` (${formatPrice(sim.delta)} FCFA)` 
                         : '';
                       return (
                         <option key={sim.id || sim.label} value={sim.label}>
@@ -1244,7 +1245,7 @@ export default function ProductDrawer({
                           const itemWithSimPrice = item.price + currentSimDelta;
                           return (
                             <option key={item.capacity} value={item.capacity}>
-                              {item.capacity} — {itemWithSimPrice.toLocaleString('fr-FR')} FCFA
+                              {item.capacity} — {formatPrice(itemWithSimPrice)} FCFA
                             </option>
                           );
                         })}
@@ -1407,9 +1408,9 @@ export default function ProductDrawer({
                     >
                       {availableSimTypes.map((sim) => {
                         const priceNote = sim.delta > 0 
-                          ? ` (+${sim.delta.toLocaleString('fr-FR')} FCFA)` 
+                          ? ` (+${formatPrice(sim.delta)} FCFA)` 
                           : sim.delta < 0 
-                          ? ` (${sim.delta.toLocaleString('fr-FR')} FCFA)` 
+                          ? ` (${formatPrice(sim.delta)} FCFA)` 
                           : '';
                         return (
                           <option key={sim.id || sim.label} value={sim.label}>
@@ -1449,7 +1450,7 @@ export default function ProductDrawer({
                         const itemWithSimPrice = item.price + currentSimDelta;
                         return (
                           <option key={item.capacity} value={item.capacity}>
-                            {item.capacity} — {itemWithSimPrice.toLocaleString('fr-FR')} FCFA
+                            {item.capacity} — {formatPrice(itemWithSimPrice)} FCFA
                           </option>
                         );
                       })}
@@ -1658,8 +1659,8 @@ export default function ProductDrawer({
               <div className="flex items-baseline gap-1.5">
                 <span className="text-xl sm:text-2xl font-black text-zinc-950 whitespace-nowrap">
                   {isConfigIncomplete
-                    ? `${(Number(currentProduct.price) || 0).toLocaleString('fr-FR')} `
-                    : `${currentPrice.toLocaleString('fr-FR')} `
+                    ? `${formatPrice(currentProduct.price)} `
+                    : `${formatPrice(currentPrice)} `
                   }
                 </span>
                 <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>

@@ -6,3 +6,4 @@ export const VAPID_CONFIG = {
   privateKey: process.env.VAPID_PRIVATE_KEY || "jZ_kBPAaVYv7o_ztzEd3mpcFhvrlZl11ou1i4pA1g0c",
   subject: "mailto:contact@prince-cfa.com"
 };
+
