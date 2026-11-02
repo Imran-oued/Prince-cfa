@@ -12,6 +12,7 @@ test("2. SHOP_CONFIG defines dedicated Orange Money and Wave payment methods", (
   assert.ok(SHOP_CONFIG.paymentMethods.orange_money, "Orange Money method exists");
   assert.equal(SHOP_CONFIG.paymentMethods.orange_money.name, "Orange Money");
   assert.equal(SHOP_CONFIG.paymentMethods.orange_money.number, "8451921");
+  assert.equal(SHOP_CONFIG.paymentMethods.orange_money.recipientName, "SANA OMAR MALL DES IPHONES");
   assert.equal(SHOP_CONFIG.paymentMethods.orange_money.ussdCode, "*144*3*8451921*MONTANT#");
   assert.ok(SHOP_CONFIG.paymentMethods.orange_money.instructions.length > 10);
 

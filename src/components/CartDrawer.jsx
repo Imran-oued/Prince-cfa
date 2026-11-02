@@ -693,7 +693,7 @@ export default function CartDrawer({
                               Guichet Express Orange Money
                             </h4>
                             <span className="text-[10px] text-zinc-600">
-                              Bénéficiaire : <strong className="text-zinc-900">PRINCE CFA</strong>
+                              Bénéficiaire : <strong className="text-zinc-900">{SHOP_CONFIG.paymentMethods.orange_money?.recipientName || "SANA OMAR MALL DES IPHONES"}</strong>
                             </span>
                           </div>
                         </div>
@@ -794,7 +794,7 @@ export default function CartDrawer({
                               Transfert Rapide Wave
                             </h4>
                             <span className="text-[10px] text-zinc-600">
-                              Bénéficiaire : <strong className="text-zinc-900">PRINCE CFA</strong>
+                              Bénéficiaire : <strong className="text-zinc-900">{SHOP_CONFIG.paymentMethods.wave?.recipientName || "PRINCE CFA"}</strong>
                             </span>
                           </div>
                         </div>
