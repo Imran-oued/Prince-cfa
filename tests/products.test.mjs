@@ -421,7 +421,7 @@ test("10. Image Framing: Catalog Apple products and user-added photos get sleek 
   assert.equal(explicitWhite.isBlack, false);
   assert.equal(explicitWhite.containerClass, "bg-white");
 
-  const explicitBlack = getProductImageBg({ id: "pcfa-se3", imageBg: "black" });
+  const explicitBlack = getProductImageBg({ id: "pcfa-11", imageBg: "black" });
   assert.equal(explicitBlack.isBlack, true);
   assert.ok(explicitBlack.containerClass.includes("bg-black"));
 });

@@ -12,6 +12,7 @@ interface ProductsCacheEntry {
 
 let productsCache: ProductsCacheEntry | null = null;
 const PRODUCTS_TTL_MS = 30 * 1000; // 30 secondes pour une fraîcheur maximale (réactivité instantanée pour l'admin)
+const PERMANENTLY_EXCLUDED_IDS = new Set(["pcfa-promo-vip-pack", "pcfa-se3"]);
 
 function buildCacheEntry(products: any[], ttlMs: number): ProductsCacheEntry {
   const jsonString = JSON.stringify({ success: true, products });
@@ -128,13 +129,15 @@ async function loadProductsCacheEntry(): Promise<ProductsCacheEntry> {
     deletedSet = deletedIds instanceof Set ? deletedIds : new Set<string>();
 
     if (cloudProducts && Array.isArray(cloudProducts)) {
-      // 1. Exclure tout produit cloud qui aurait été marqué supprimé
-      const activeCloud = cloudProducts.filter((p: any) => !deletedSet.has(String(p.id)) && !p.isDeleted);
+      // 1. Exclure tout produit cloud qui aurait été marqué supprimé ou exclu définitivement
+      const activeCloud = cloudProducts.filter(
+        (p: any) => !deletedSet.has(String(p.id)) && !p.isDeleted && !PERMANENTLY_EXCLUDED_IDS.has(String(p.id))
+      );
 
       // 2. Fusionner avec les produits par défaut non présents ET non supprimés
       const existingIds = new Set(cloudProducts.map((p: any) => String(p.id)));
       const missingDefaults = (defaultProducts as any[]).filter(
-        dp => !existingIds.has(String(dp.id)) && !deletedSet.has(String(dp.id))
+        dp => !existingIds.has(String(dp.id)) && !deletedSet.has(String(dp.id)) && !PERMANENTLY_EXCLUDED_IDS.has(String(dp.id))
       );
       const combined = [...activeCloud, ...missingDefaults]
         .map(sanitizeProductMedia)
@@ -166,7 +169,7 @@ async function loadProductsCacheEntry(): Promise<ProductsCacheEntry> {
   } catch {}
 
   const fallback = (defaultProducts as any[])
-    .filter(dp => !deletedSet.has(String(dp.id)))
+    .filter(dp => !deletedSet.has(String(dp.id)) && !PERMANENTLY_EXCLUDED_IDS.has(String(dp.id)))
     .map(sanitizeProductMedia)
     .filter(Boolean);
   productsCache = buildCacheEntry(fallback, 60 * 1000);

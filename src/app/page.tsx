@@ -104,8 +104,14 @@ function isAndroidPhoneProduct(p?: any): boolean {
   return !isAppleBrand(p.brand) && !Boolean(p.name && String(p.name).toLowerCase().includes('iphone'));
 }
 
+// Liste des anciens produits définitivement supprimés / exclus
+const EXCLUDED_PRODUCT_IDS = new Set(["pcfa-promo-vip-pack", "pcfa-se3"]);
+
 function sanitizeCatalogProducts(prods: Product[]): Product[] {
-  return prods.map(p => {
+  if (!Array.isArray(prods)) return [];
+  return prods
+    .filter(p => p && p.id && !EXCLUDED_PRODUCT_IDS.has(String(p.id)) && !(p as any).isDeleted)
+    .map(p => {
     if (!p) return p;
     if (isAndroidPhoneProduct(p)) {
       const { selectedSimType, simPricing, ...rest } = p as any;
@@ -473,8 +479,31 @@ export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); // Produit actif pour le drawer
   const [isProductDrawerOpen, setIsProductDrawerOpen] = useState(false); // État d'ouverture du slide-over
   
-  const [localProducts, setLocalProducts] = useState<Product[]>(defaultProducts);
+  const [localProducts, setLocalProducts] = useState<Product[]>(() => {
+    return (defaultProducts as Product[]).filter(
+      p => p && p.id && !EXCLUDED_PRODUCT_IDS.has(String(p.id)) && !(p as any).isDeleted
+    );
+  });
   const isInitialCartMount = useRef(true);
+
+  // 0. Hydratation instantanée (0ms) depuis le cache localStorage
+  // Dès le rafraîchissement de la page, affiche directement le catalogue réel du marchand sans flash d'anciens produits
+  useEffect(() => {
+    try {
+      const savedProducts = localStorage.getItem("prince_cfa_products");
+      if (savedProducts) {
+        const parsed = JSON.parse(savedProducts);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const valid = parsed.filter((p: any) => p && p.id && p.name && typeof p.price === 'number');
+          if (valid.length > 0) {
+            setLocalProducts(sanitizeCatalogProducts(valid));
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Erreur lecture catalogue cache localStorage:", e);
+    }
+  }, []);
 
   // 1. Restauration du panier persistant depuis localStorage au chargement
   useEffect(() => {

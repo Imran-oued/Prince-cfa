@@ -89,9 +89,9 @@ test("5. Server-side price resolution overrides client-side price tampering", ()
     return Number(authentic.salePrice || authentic.price || 0);
   }
 
-  // Scénario d'attaque 1 : Le client tente d'acheter un iPhone SE (85 000 FCFA) à 1 FCFA
-  const tamperedPrice1 = resolveServerUnitPrice("pcfa-se3", null, 1);
-  assert.equal(tamperedPrice1, 85000, "Server overrides tampered 1 FCFA with authentic 85,000 FCFA");
+  // Scénario d'attaque 1 : Le client tente d'acheter un iPhone 11 (120 000 FCFA) à 1 FCFA
+  const tamperedPrice1 = resolveServerUnitPrice("pcfa-11", null, 1);
+  assert.equal(tamperedPrice1, 120000, "Server overrides tampered 1 FCFA with authentic 120,000 FCFA");
 
   // Scénario d'attaque 2 : Le client choisit l'iPhone 17 Pro Max 1 To (960 000 FCFA) et envoie 500 FCFA
   const tamperedPrice2 = resolveServerUnitPrice("pcfa-17promax", "1 To", 500);
@@ -137,7 +137,7 @@ test("7. Order creation input validation protects against malicious payloads", (
   assert.equal(validateOrderPayload({ name: "Jean", phone: "70001122" }, hugeCart).valid, false);
 
   // Commande valide acceptée
-  assert.equal(validateOrderPayload({ name: "Jean Ouédraogo", phone: "70001122" }, [{ productId: "pcfa-se3" }]).valid, true);
+  assert.equal(validateOrderPayload({ name: "Jean Ouédraogo", phone: "70001122" }, [{ productId: "pcfa-11" }]).valid, true);
 });
 
 test("8. Admin session token validation supports instant authentication checks", async () => {
