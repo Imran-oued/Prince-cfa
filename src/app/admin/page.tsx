@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { products as defaultProducts } from "@/data/products";
 import { 
@@ -47,7 +47,10 @@ import {
   ChevronDown,
   ChevronUp,
   FileText,
-  Plus
+  Plus,
+  Bell,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 import { 
   PRODUCT_CATEGORIES, 
@@ -321,6 +324,13 @@ export default function AdminPage() {
   const [selectedOrder, setSelectedOrder] = useState<OrderRecord | null>(null);
   const [orderSearchQuery, setOrderSearchQuery] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+
+  // Notifications push et alertes sonores en direct (Options 2 & 3)
+  const [notificationPermission, setNotificationPermission] = useState<string>("default");
+  const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
+  const [incomingOrderAlert, setIncomingOrderAlert] = useState<OrderRecord | null>(null);
+  const knownOrderIdsRef = useRef<Set<string>>(new Set());
+  const isInitialOrderLoadDoneRef = useRef<boolean>(false);
 
   // Formulaire de confirmation manuelle de paiement
   const [verifierName, setVerifierName] = useState("Prince CFA Admin");
@@ -1045,6 +1055,203 @@ export default function AdminPage() {
     checkAuthSession();
   }, []);
 
+  // 1. Initialisation du Service Worker et de l'état des notifications sur mobile/desktop
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if ("Notification" in window) {
+        setNotificationPermission(Notification.permission);
+      }
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").catch(() => {});
+      }
+      const savedSound = localStorage.getItem("prince_cfa_admin_sound");
+      if (savedSound !== null) {
+        setIsSoundEnabled(savedSound === "true");
+      }
+    }
+  }, []);
+
+  // Synthèse audio d'alerte carillon en direct (Option 3 - zéro fichier externe requis)
+  const playNewOrderSound = () => {
+    if (!isSoundEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      if (ctx.state === "suspended") {
+        ctx.resume().catch(() => {});
+      }
+
+      const playTone = (freq: number, start: number, duration: number, gainVal: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+        gain.gain.setValueAtTime(gainVal, ctx.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + duration);
+      };
+
+      // Carillon d'alerte prestige 4 notes (Do5 - Mi5 - Sol5 - Do6)
+      playTone(523.25, 0.00, 0.25, 0.35); // Do
+      playTone(659.25, 0.12, 0.25, 0.40); // Mi
+      playTone(783.99, 0.24, 0.30, 0.45); // Sol
+      playTone(1046.50, 0.38, 0.60, 0.50); // Do aigu
+    } catch (e) {
+      console.warn("Erreur lecture son audio:", e);
+    }
+  };
+
+  const toggleSound = () => {
+    const nextVal = !isSoundEnabled;
+    setIsSoundEnabled(nextVal);
+    try {
+      localStorage.setItem("prince_cfa_admin_sound", String(nextVal));
+    } catch {}
+    if (nextVal) {
+      playNewOrderSound();
+    }
+  };
+
+  // Notification Push mobile et système (Option 2)
+  const showSystemNotification = async (order: OrderRecord) => {
+    const title = `🔔 Nouvelle commande : ${order.id}`;
+    const totalStr = (order.pricing?.total || 0).toLocaleString("fr-FR");
+    const customerName = order.customer?.name || "Client";
+    const body = `${customerName} vient de commander pour ${totalStr} FCFA. Touchez pour ouvrir la commande.`;
+
+    // 1. Vibration haptique sur mobile
+    if (typeof window !== "undefined" && "vibrate" in navigator) {
+      try {
+        navigator.vibrate([300, 150, 300, 150, 500]);
+      } catch {}
+    }
+
+    // 2. Notification Push via Service Worker ou Notification API
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+      try {
+        if ("serviceWorker" in navigator) {
+          const reg = await navigator.serviceWorker.ready.catch(() => null);
+          if (reg && "showNotification" in reg) {
+            await reg.showNotification(title, {
+              body,
+              icon: "/icon-192.png",
+              badge: "/apple-touch-icon.png",
+              tag: `order-${order.id}`,
+              data: { url: "/admin", orderId: order.id }
+            });
+            return;
+          }
+        }
+        const notif = new Notification(title, {
+          body,
+          icon: "/icon-192.png",
+          badge: "/apple-touch-icon.png",
+          tag: `order-${order.id}`
+        });
+        notif.onclick = () => {
+          window.focus();
+          setSelectedOrder(order);
+        };
+      } catch (e) {
+        console.warn("Notification error:", e);
+      }
+    }
+  };
+
+  // Demande d'autorisation des notifications push
+  const handleRequestNotificationPermission = async () => {
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      alert("Votre navigateur ne supporte pas les notifications push.");
+      return;
+    }
+    try {
+      const perm = await Notification.requestPermission();
+      setNotificationPermission(perm);
+      if (perm === "granted") {
+        playNewOrderSound();
+        if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+        if ("serviceWorker" in navigator) {
+          const reg = await navigator.serviceWorker.ready.catch(() => null);
+          if (reg && "showNotification" in reg) {
+            await reg.showNotification("Prince CFA Admin 🔔", {
+              body: "Notifications activées avec succès ! Vous recevrez une alerte pour chaque nouvelle commande.",
+              icon: "/icon-192.png",
+              badge: "/apple-touch-icon.png",
+              tag: "test-notification"
+            });
+            return;
+          }
+        }
+        new Notification("Prince CFA Admin 🔔", {
+          body: "Notifications activées avec succès ! Vous recevrez une alerte pour chaque nouvelle commande.",
+          icon: "/icon-192.png",
+          badge: "/apple-touch-icon.png"
+        });
+      } else if (perm === "denied") {
+        alert("Les notifications ont été bloquées dans les paramètres de votre navigateur.");
+      }
+    } catch (e) {
+      console.warn("Permission request error:", e);
+    }
+  };
+
+  // Test complet des alertes (Son + Vibration + Push + Bannière)
+  const handleTestAlert = () => {
+    playNewOrderSound();
+    if (typeof window !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate([300, 150, 300]);
+    }
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+      new Notification("🔔 Test Alerte Commande : Prince CFA", {
+        body: "Test d'alerte réussi ! Le carillon et les notifications push fonctionnent parfaitement sur votre appareil.",
+        icon: "/icon-192.png",
+        badge: "/apple-touch-icon.png"
+      });
+    }
+    const mockOrder: OrderRecord = {
+      id: `CMD-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-TEST`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      orderStatus: "en_attente_paiement",
+      customer: {
+        name: "Test Client Prince CFA",
+        phone: "77434397",
+        deliveryMethod: "delivery",
+        city: "Ouagadougou",
+        neighborhood: "Koulouba"
+      },
+      items: [
+        {
+          productId: "test-prod",
+          name: "iPhone 15 Pro Max",
+          unitPrice: 420000,
+          quantity: 1,
+          selectedCapacity: "256 Go",
+          selectedColor: "Titane Naturel"
+        }
+      ],
+      pricing: {
+        subtotal: 420000,
+        deliveryFee: 1500,
+        total: 421500,
+        currency: "FCFA"
+      },
+      payment: {
+        method: "orange_money",
+        expectedAmount: 421500,
+        merchantNumber: "8451921",
+        status: "en_attente",
+        confirmedAt: null,
+        confirmedBy: null
+      }
+    };
+    setIncomingOrderAlert(mockOrder);
+  };
+
   // 2. Charger les commandes et les produits UNIQUEMENT quand l'administrateur est authentifié
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -1057,7 +1264,11 @@ export default function AdminPage() {
         });
         if (ordersRes.ok) {
           const ordersData = await ordersRes.json();
-          if (ordersData.orders) setOrdersList(ordersData.orders);
+          if (ordersData.orders) {
+            setOrdersList(ordersData.orders);
+            ordersData.orders.forEach((o: any) => o?.id && knownOrderIdsRef.current.add(String(o.id)));
+            isInitialOrderLoadDoneRef.current = true;
+          }
         }
       } catch (err) {
         console.warn("Erreur chargement commandes:", err);
@@ -1109,6 +1320,48 @@ export default function AdminPage() {
 
     loadDashboardData();
   }, [isAuthenticated, adminToken]);
+
+  // 3. Écoute / Polling en direct des nouvelles commandes (toutes les 8 secondes)
+  useEffect(() => {
+    if (!isAuthenticated || !adminToken) return;
+
+    const intervalId = setInterval(async () => {
+      try {
+        const ordersRes = await fetch("/api/admin/orders", {
+          headers: { Authorization: `Bearer ${adminToken}` }
+        });
+        if (ordersRes.ok) {
+          const data = await ordersRes.json();
+          if (Array.isArray(data.orders)) {
+            const freshOrders: OrderRecord[] = data.orders;
+
+            if (isInitialOrderLoadDoneRef.current) {
+              const brandNew = freshOrders.filter(
+                o => o && o.id && !knownOrderIdsRef.current.has(String(o.id))
+              );
+
+              if (brandNew.length > 0) {
+                const latest = brandNew[0];
+                playNewOrderSound();
+                showSystemNotification(latest);
+                setIncomingOrderAlert(latest);
+                brandNew.forEach(o => o?.id && knownOrderIdsRef.current.add(String(o.id)));
+              }
+            } else {
+              freshOrders.forEach(o => o?.id && knownOrderIdsRef.current.add(String(o.id)));
+              isInitialOrderLoadDoneRef.current = true;
+            }
+
+            setOrdersList(freshOrders);
+          }
+        }
+      } catch (e) {
+        // Ignorer silencieusement les erreurs de polling réseau
+      }
+    }, 8000);
+
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated, adminToken, isSoundEnabled]);
 
   // Connexion sécurisée côté serveur
   const handleLogin = async (e: React.FormEvent) => {
@@ -1210,7 +1463,10 @@ export default function AdminPage() {
       });
       if (ordersRes.ok) {
         const data = await ordersRes.json();
-        if (data.orders) setOrdersList(data.orders);
+        if (data.orders) {
+          setOrdersList(data.orders);
+          data.orders.forEach((o: any) => o?.id && knownOrderIdsRef.current.add(String(o.id)));
+        }
       }
     } catch (e) {
       console.warn("Erreur rechargement commandes:", e);
@@ -2708,6 +2964,102 @@ export default function AdminPage() {
         )}
       </div>
 
+      {/* BANNIÈRE D'ALERTE EN DIRECT QUAND UNE COMMANDE ARRIVE */}
+      {incomingOrderAlert && (
+        <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-gold/25 to-yellow-500/15 border-2 border-gold text-zinc-950 flex flex-wrap items-center justify-between gap-4 shadow-xl z-20 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-gold text-black flex items-center justify-center font-black flex-shrink-0 shadow-md animate-pulse">
+              <Bell className="w-6 h-6 text-black" aria-hidden="true" />
+            </div>
+            <div>
+              <div className="text-xs font-black uppercase tracking-wider text-amber-700 flex items-center gap-2">
+                <span>NOUVELLE COMMANDE REÇUE EN DIRECT !</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping inline-block" />
+              </div>
+              <p className="text-sm sm:text-base font-extrabold text-zinc-950 mt-0.5">
+                <span className="font-mono text-gold bg-black px-2 py-0.5 rounded mr-1.5">{incomingOrderAlert.id}</span>
+                {incomingOrderAlert.customer?.name} ({incomingOrderAlert.customer?.phone}) • <span className="text-gold font-black">{(incomingOrderAlert.pricing?.total || 0).toLocaleString('fr-FR')} FCFA</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => {
+                setSelectedOrder(incomingOrderAlert);
+                setIncomingOrderAlert(null);
+              }}
+              className="px-4 py-2 rounded-xl bg-gold hover:bg-yellow-500 text-black font-extrabold text-xs uppercase tracking-wider shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <Eye className="w-4 h-4" />
+              <span>Consulter</span>
+            </button>
+            <button
+              onClick={() => setIncomingOrderAlert(null)}
+              className="p-2 rounded-xl bg-white hover:bg-zinc-100 text-zinc-600 hover:text-black transition-colors cursor-pointer border border-zinc-200"
+              title="Fermer l'alerte"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* BARRE DE GESTION DES NOTIFICATIONS PUSH MOBILE & SON EN DIRECT (Options 2 & 3) */}
+      {activeTab === "orders" && (
+        <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/90 border border-zinc-200/90 shadow-sm mb-6 flex-wrap justify-between z-10">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-800">
+              <Bell className="w-4 h-4 text-gold" aria-hidden="true" />
+              <span>Alertes Nouvelles Commandes :</span>
+            </div>
+
+            {notificationPermission === "granted" ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Push Mobile Actif</span>
+              </span>
+            ) : notificationPermission === "denied" ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold" title="Autorisez les notifications dans les paramètres de votre navigateur pour recevoir les alertes sur mobile">
+                <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+                <span>Push bloqué par le navigateur</span>
+              </span>
+            ) : (
+              <button
+                onClick={handleRequestNotificationPermission}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold hover:bg-yellow-500 text-black text-xs font-extrabold tracking-wide uppercase transition-all shadow-sm cursor-pointer"
+              >
+                <Bell className="w-3.5 h-3.5" />
+                <span>Activer les notifications push</span>
+              </button>
+            )}
+
+            {/* Toggle Son */}
+            <button
+              onClick={toggleSound}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                isSoundEnabled 
+                  ? "bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100" 
+                  : "bg-zinc-100 text-zinc-500 border-zinc-200 hover:bg-zinc-200"
+              }`}
+              title={isSoundEnabled ? "Couper la sonnerie carillon" : "Activer la sonnerie carillon"}
+            >
+              {isSoundEnabled ? <Volume2 className="w-3.5 h-3.5 text-amber-600" /> : <VolumeX className="w-3.5 h-3.5 text-zinc-400" />}
+              <span>{isSoundEnabled ? "Sonnerie active" : "Sonnerie muette"}</span>
+            </button>
+          </div>
+
+          {/* Bouton Tester l'Alerte */}
+          <button
+            onClick={handleTestAlert}
+            className="px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold transition-all border border-zinc-200 cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
+            title="Tester le son carillon et la notification push sur ce mobile"
+          >
+            <Zap className="w-3.5 h-3.5 text-gold" />
+            <span>Tester l&apos;alerte (Son + Push)</span>
+          </button>
+        </div>
+      )}
+
       {/* DASHBOARD STATS */}
       {activeTab === "orders" ? (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6 mb-8 z-10">
@@ -2834,7 +3186,14 @@ export default function AdminPage() {
                   );
 
                   return (
-                    <tr key={order.id} className="hover:bg-zinc-50/80 transition-colors">
+                    <tr 
+                      key={order.id} 
+                      className={`transition-colors ${
+                        incomingOrderAlert?.id === order.id
+                          ? "bg-amber-100/80 border-l-4 border-l-gold shadow-sm font-semibold animate-pulse"
+                          : "hover:bg-zinc-50/80"
+                      }`}
+                    >
                       <td className="p-4 font-mono font-bold text-gold">{order.id}</td>
                       <td className="p-4 text-zinc-500">
                         {new Date(order.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
