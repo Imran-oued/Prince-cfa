@@ -1364,7 +1364,7 @@ export default function AdminPage() {
   // Notification 1-clic du client sur WhatsApp selon l'état de la commande
   const handleNotifyCustomerWhatsApp = (
     order: OrderRecord,
-    type: "payment_confirmed" | "shipping" | "ready_pickup" | "delivered" | "custom" = "custom"
+    type: "payment_confirmed" | "shipping" | "ready_pickup" | "delivered" | "pending_payment" | "custom" = "custom"
   ) => {
     if (!order.customer?.phone) {
       alert("Numéro de téléphone du client manquant.");
@@ -1388,6 +1388,13 @@ export default function AdminPage() {
         `📦 *Suivez votre commande en direct :*\n${trackingUrl}\n\n` +
         `Merci pour votre confiance !\n` +
         `_L'équipe PRINCE CFA Ouagadougou_`;
+    } else if (type === "pending_payment") {
+      message = `👑 *PRINCE CFA - SUIVI DE VOTRE COMMANDE*\n\n` +
+        `Bonjour *${order.customer.name}*,\n` +
+        `Nous vous contactons au sujet de votre commande *${order.id}* d'un montant de *${order.pricing?.total?.toLocaleString('fr-FR')} FCFA* enregistrée chez PRINCE CFA.\n\n` +
+        `Souhaitez-vous finaliser votre règlement ou avez-vous besoin d'une assistance pour effectuer votre paiement Mobile Money (Orange Money / Wave) ? Notre équipe est à votre entière disposition pour vous accompagner.\n\n` +
+        `📦 *Accédez à votre commande en direct :*\n${trackingUrl}\n\n` +
+        `_L'équipe PRINCE CFA Ouagadougou_\n_Boutique Koulouba - Tél/WhatsApp : +226 77 78 87 40_`;
     } else if (type === "shipping") {
       message = `👑 *PRINCE CFA - COMMANDE EN COURS DE LIVRAISON*\n\n` +
         `Bonjour *${order.customer.name}*,\n` +
@@ -2886,6 +2893,16 @@ export default function AdminPage() {
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
+                            type="button"
+                            onClick={() => handleNotifyCustomerWhatsApp(order, order.payment?.status === "confirme" ? "payment_confirmed" : "pending_payment")}
+                            title={order.payment?.status === "confirme" ? "Contacter le client sur WhatsApp (Paiement Validé)" : "Relancer / Contacter le client sur WhatsApp"}
+                            aria-label="Contacter le client sur WhatsApp"
+                            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-xs active:scale-95"
+                          >
+                            <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366]" />
+                            <span className="hidden xl:inline text-[11px]">WhatsApp</span>
+                          </button>
+                          <button
                             onClick={() => openOrderDetails(order)}
                             className="px-3 py-1.5 rounded-lg bg-gold/15 hover:bg-gold text-yellow-800 hover:text-black font-bold text-xs transition-all border border-gold/40 cursor-pointer whitespace-nowrap shadow-sm"
                           >
@@ -3110,6 +3127,15 @@ export default function AdminPage() {
                   >
                     <CheckCircle2 className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
                     <span>Confirmer la réception des fonds ({selectedOrder.pricing.total.toLocaleString('fr-FR')} F)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleNotifyCustomerWhatsApp(selectedOrder, "pending_payment")}
+                    className="w-full py-2.5 px-3.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all active:scale-98"
+                  >
+                    <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
+                    <span>Relancer / Contacter le client sur WhatsApp</span>
                   </button>
                 </div>
               )}
