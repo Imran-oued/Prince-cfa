@@ -5,7 +5,6 @@ import { SHOP_CONFIG } from "@/config/shop";
 import { getProductImageBg } from "@/lib/productValidation";
 import { 
   X, 
-  Crown, 
   ShieldCheck, 
   Store, 
   ShoppingBag, 
@@ -345,20 +344,15 @@ export default function CartDrawer({
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-zinc-200 bg-white/95 backdrop-blur-md">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gold/15 border border-gold/30 flex items-center justify-center text-gold">
-              <Crown className="w-4 h-4 text-gold" aria-hidden="true" />
-            </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-zinc-950 uppercase tracking-widest">
-                {step === "confirmed" ? "Commande Confirmée" : "Finaliser ma Commande"}
-              </h2>
-              {step !== "confirmed" && (
-                <span className="text-[10px] text-gold font-semibold block">
-                  Commande Express 1-Clic • Pas de formulaire complexe
-                </span>
-              )}
-            </div>
+          <div>
+            <h2 className="text-base sm:text-lg font-bold text-zinc-950 uppercase tracking-widest">
+              {step === "confirmed" ? "Commande Confirmée" : "Finaliser ma Commande"}
+            </h2>
+            {step !== "confirmed" && (
+              <span className="text-[10px] text-gold font-semibold block">
+                Commande Express 1-Clic • Pas de formulaire complexe
+              </span>
+            )}
           </div>
           <button 
             onClick={handleClose}
@@ -963,10 +957,7 @@ export default function CartDrawer({
                     {isSubmitting ? (
                       <span className="animate-pulse">Enregistrement de votre commande...</span>
                     ) : (
-                      <>
-                        <span>Valider ma commande ({totalPrice.toLocaleString('fr-FR')} FCFA)</span>
-                        <Crown className="w-4 h-4 text-black flex-shrink-0" aria-hidden="true" />
-                      </>
+                      <span>Valider ma commande ({totalPrice.toLocaleString('fr-FR')} FCFA)</span>
                     )}
                   </button>
 
@@ -999,8 +990,8 @@ export default function CartDrawer({
         {/* ======================================================== */}
         {step === "confirmed" && confirmedOrder && (
           <div className="flex-1 overflow-y-auto p-5 space-y-5 text-center flex flex-col items-center justify-center animate-in fade-in zoom-in-95">
-            <div className="w-20 h-20 rounded-full bg-gold/15 border-2 border-gold/40 flex items-center justify-center shadow-md animate-bounce">
-              <Crown className="w-10 h-10 text-gold" aria-hidden="true" />
+            <div className="w-20 h-20 rounded-full bg-emerald-500/15 border-2 border-emerald-500/40 flex items-center justify-center shadow-md animate-bounce">
+              <Check className="w-10 h-10 text-emerald-600" aria-hidden="true" />
             </div>
 
             <div>
