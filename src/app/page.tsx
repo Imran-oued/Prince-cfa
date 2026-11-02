@@ -727,12 +727,10 @@ export default function Home() {
           const cat = (p.category || '').toLowerCase();
           const isPromoCat = cat === 'promotion' || cat === 'promotions' || cat === 'promo';
           const hasDiscount = Boolean(
-            (p.salePrice && p.price && p.salePrice < p.price) ||
-            (p.oldPrice && p.oldPrice > p.price) ||
+            (p.salePrice && p.price && Number(p.salePrice) < Number(p.price)) ||
+            (p.oldPrice && p.price && Number(p.oldPrice) > Number(p.price)) ||
             (p as any).isPromo ||
-            (p as any).isPromotion ||
-            (p.desc && p.desc.toLowerCase().includes('promo')) ||
-            (p.name && p.name.toLowerCase().includes('promo'))
+            (p as any).isPromotion
           );
           return isPromoCat || hasDiscount;
         }

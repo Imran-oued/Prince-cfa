@@ -37,3 +37,15 @@ test('3. CSS utilities support invisible scrollbars for sleek aesthetics', () =>
   assert.match(content, /\.no-scrollbar/, 'globals.css must define .no-scrollbar utility');
   assert.match(content, /scrollbar-width:\s*none/, 'Must specify scrollbar-width: none');
 });
+
+test('4. Promotion filter strictly excludes products merely mentioning Apple ProMotion in description', () => {
+  const pagePath = path.join(projectRoot, 'src', 'app', 'page.tsx');
+  const content = fs.readFileSync(pagePath, 'utf8');
+
+  // Must not have crude desc.toLowerCase().includes('promo') that matches Apple ProMotion screen
+  assert.doesNotMatch(
+    content,
+    /\.desc\.toLowerCase\(\)\.includes\(['"]promo['"]\)/,
+    'page.tsx must not filter promotions via raw desc substring search to avoid ProMotion false positives'
+  );
+});
