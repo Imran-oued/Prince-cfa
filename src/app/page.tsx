@@ -38,7 +38,8 @@ import {
   Refrigerator,
   Package,
   Bike,
-  SunMedium
+  SunMedium,
+  Boxes
 } from "lucide-react";
 
 function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -82,7 +83,7 @@ type Product = {
 };
 
 const categories = [
-  { id: 'all', label: 'Toutes les collections', icon: Crown },
+  { id: 'all', label: 'Toutes les collections', icon: Boxes },
   { id: 'phones', label: 'Téléphones & Smartphones', icon: Smartphone },
   { id: 'computers', label: 'Ordinateurs & PC', icon: Laptop },
   { id: 'tablets', label: 'Tablettes & iPads', icon: Tablet },
@@ -1094,7 +1095,7 @@ export default function Home() {
                           isSelected
                             ? isPromo
                               ? 'text-white fill-white'
-                              : 'text-black fill-current'
+                              : 'text-black'
                             : isPromo
                               ? 'text-red-500 group-hover:scale-110'
                               : 'text-zinc-500 group-hover:text-gold group-hover:scale-110'

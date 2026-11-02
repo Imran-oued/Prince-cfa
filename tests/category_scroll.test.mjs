@@ -23,7 +23,7 @@ test('2. Categories have dedicated luxury icons and PROMOTION is styled with hig
   const content = fs.readFileSync(pagePath, 'utf8');
 
   // Verify categories array contains icons
-  assert.match(content, /Crown/, 'Tous category must use Crown icon');
+  assert.match(content, /Boxes/, 'Tous category must use Boxes icon');
   assert.match(content, /Smartphone/, 'Phones category must use Smartphone icon');
   assert.match(content, /Laptop/, 'Computers category must use Laptop icon');
   assert.match(content, /Flame/, 'Promotion category must use Flame icon');

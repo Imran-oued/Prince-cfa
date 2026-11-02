@@ -22,7 +22,8 @@ import {
   Compass,
   Refrigerator,
   Tablet,
-  Flame
+  Flame,
+  Boxes
 } from 'lucide-react';
 
 function WhatsAppIcon({ className = "w-4 h-4" }) {
@@ -76,7 +77,7 @@ export default function MenuDrawer({
   }, [isOpen]);
 
   const categories = [
-    { id: 'all', label: 'Toutes les collections', icon: Crown },
+    { id: 'all', label: 'Toutes les collections', icon: Boxes },
     { id: 'phones', label: 'Téléphones & Smartphones', icon: Smartphone },
     { id: 'computers', label: 'Ordinateurs & PC', icon: Laptop },
     { id: 'tablets', label: 'Tablettes & iPads', icon: Tablet },
