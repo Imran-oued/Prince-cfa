@@ -473,6 +473,49 @@ export default function Home() {
   const [isProductDrawerOpen, setIsProductDrawerOpen] = useState(false); // État d'ouverture du slide-over
   
   const [localProducts, setLocalProducts] = useState<Product[]>(defaultProducts);
+  const isInitialCartMount = useRef(true);
+
+  // 1. Restauration du panier persistant depuis localStorage au chargement
+  useEffect(() => {
+    try {
+      const savedCart = localStorage.getItem("prince_cfa_cart");
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setCartItems(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn("Erreur lecture panier localStorage:", e);
+    }
+  }, []);
+
+  // 2. Sauvegarde automatique du panier dans localStorage à chaque modification
+  useEffect(() => {
+    if (isInitialCartMount.current) {
+      isInitialCartMount.current = false;
+      return;
+    }
+    try {
+      if (cartItems.length > 0) {
+        localStorage.setItem("prince_cfa_cart", JSON.stringify(cartItems));
+      } else {
+        localStorage.removeItem("prince_cfa_cart");
+      }
+    } catch (e) {
+      console.warn("Erreur sauvegarde panier localStorage:", e);
+    }
+  }, [cartItems]);
+
+  // 3. Détection de l'ouverture automatique du panier via paramètre URL (?cart=open ou ?cart=1)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("cart") === "open" || params.get("cart") === "1") {
+        setIsCartOpen(true);
+      }
+    }
+  }, []);
 
   // Charger les produits : API en priorité, Firebase en repli, et fallback localStorage 100% sécurisé
   useEffect(() => {
@@ -897,7 +940,12 @@ export default function Home() {
         cartItems={cartItems}
         updateQuantity={updateCartQuantity}
         removeItem={removeCartItem}
-        onClearCart={() => setCartItems([])}
+        onClearCart={() => {
+          setCartItems([]);
+          try {
+            localStorage.removeItem("prince_cfa_cart");
+          } catch {}
+        }}
         onViewProduct={handleOpenProductFromCart}
       />
 

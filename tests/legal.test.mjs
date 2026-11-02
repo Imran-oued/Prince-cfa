@@ -75,3 +75,19 @@ test('5. A Propos page file exists, tells Prince CFA story, and is linked in Men
   const menuContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'MenuDrawer.jsx'), 'utf8');
   assert.ok(menuContent.includes('/a-propos'), 'MenuDrawer must link to /a-propos');
 });
+
+test('6. Cart drawer legal reader preserves checkout flow and legal pages link back to /?cart=open', () => {
+  const cartDrawerContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'CartDrawer.jsx'), 'utf8');
+  assert.ok(cartDrawerContent.includes('setLegalModal'), 'CartDrawer must provide embedded modal reader');
+  assert.ok(cartDrawerContent.includes('Retour à ma commande'), 'CartDrawer modal must allow easy return to order');
+
+  const mentionsContent = fs.readFileSync(path.join(projectRoot, 'src', 'app', 'mentions-legales', 'page.tsx'), 'utf8');
+  assert.ok(mentionsContent.includes('/?cart=open'), 'Mentions Légales must link back to /?cart=open');
+
+  const privacyContent = fs.readFileSync(path.join(projectRoot, 'src', 'app', 'politique-de-confidentialite', 'page.tsx'), 'utf8');
+  assert.ok(privacyContent.includes('/?cart=open'), 'Politique de Confidentialité must link back to /?cart=open');
+
+  const homeContent = fs.readFileSync(path.join(projectRoot, 'src', 'app', 'page.tsx'), 'utf8');
+  assert.ok(homeContent.includes('prince_cfa_cart'), 'Homepage must persist and restore cart in localStorage');
+  assert.ok(homeContent.includes('cart') && homeContent.includes('open'), 'Homepage must support auto-reopening cart via URL');
+});

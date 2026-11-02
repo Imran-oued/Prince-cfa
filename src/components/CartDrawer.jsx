@@ -21,7 +21,10 @@ import {
   Info, 
   AlertCircle, 
   Clock, 
-  ExternalLink 
+  ExternalLink,
+  ArrowLeft,
+  Scale,
+  Lock
 } from "lucide-react";
 
 function OrangeMoneyIcon({ className = "w-5 h-5" }) {
@@ -77,17 +80,40 @@ export default function CartDrawer({
   const [omTab, setOmTab] = useState("ussd"); // "ussd" | "app"
   const [copiedOrderId, setCopiedOrderId] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState(null);
+  const [legalModal, setLegalModal] = useState(null); // 'mentions' | 'confidentialite' | null
 
-  const [customer, setCustomer] = useState({
-    name: "",
-    phone: "",
-    city: "Ouagadougou",
-    neighborhood: "",
-    deliveryMethod: "delivery", // 'delivery' | 'pickup'
-    paymentMethod: "orange_money", // 'orange_money' | 'wave' | 'store_pickup'
-    transactionRef: "",
-    notes: ""
+  const [customer, setCustomer] = useState(() => {
+    const defaultCust = {
+      name: "",
+      phone: "",
+      city: "Ouagadougou",
+      neighborhood: "",
+      deliveryMethod: "delivery", // 'delivery' | 'pickup'
+      paymentMethod: "orange_money", // 'orange_money' | 'wave' | 'store_pickup'
+      transactionRef: "",
+      notes: ""
+    };
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("prince_cfa_customer");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return { ...defaultCust, ...parsed, transactionRef: "" };
+        }
+      } catch {}
+    }
+    return defaultCust;
   });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const toSave = { ...customer };
+        delete toSave.transactionRef;
+        localStorage.setItem("prince_cfa_customer", JSON.stringify(toSave));
+      } catch {}
+    }
+  }, [customer]);
 
   // Calculs financiers rigoureux
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -946,9 +972,21 @@ export default function CartDrawer({
 
                   <p className="text-[10px] text-center text-zinc-500 leading-tight">
                     En validant, vous acceptez nos{" "}
-                    <a href="/mentions-legales" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-gold underline">mentions légales</a>
+                    <button
+                      type="button"
+                      onClick={() => setLegalModal("mentions")}
+                      className="text-zinc-600 hover:text-gold underline cursor-pointer font-medium"
+                    >
+                      mentions légales
+                    </button>
                     {" "}et notre{" "}
-                    <a href="/politique-de-confidentialite" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-gold underline">politique de confidentialité</a>.
+                    <button
+                      type="button"
+                      onClick={() => setLegalModal("confidentialite")}
+                      className="text-zinc-600 hover:text-gold underline cursor-pointer font-medium"
+                    >
+                      politique de confidentialité
+                    </button>.
                   </p>
                 </div>
               </>
@@ -1061,6 +1099,147 @@ export default function CartDrawer({
           </div>
         )}
 
+        {/* ======================================================== */}
+        {/* LECTEUR MODAL INTÉGRÉ MENTIONS LÉGALES & CONFIDENTIALITÉ */}
+        {/* Permet de consulter les textes sans jamais perdre le     */}
+        {/* panier ni quitter la page de commande                    */}
+        {/* ======================================================== */}
+        {legalModal && (
+          <div className="absolute inset-0 z-50 bg-white flex flex-col animate-in fade-in slide-in-from-bottom-6 duration-200">
+            {/* Header du lecteur */}
+            <div className="p-3.5 sm:p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between gap-2 shadow-xs">
+              <button
+                type="button"
+                onClick={() => setLegalModal(null)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-zinc-200 text-xs font-bold text-zinc-800 hover:text-gold hover:border-gold/50 shadow-xs transition-all cursor-pointer active:scale-95"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
+                <span>Retour à ma commande</span>
+              </button>
+
+              <div className="flex items-center gap-1.5">
+                <a
+                  href={legalModal === "mentions" ? "/mentions-legales" : "/politique-de-confidentialite"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-zinc-500 hover:text-gold flex items-center gap-1 font-medium px-2 py-1 rounded hover:bg-zinc-100 transition-colors"
+                  title="Ouvrir dans un nouvel onglet"
+                >
+                  <span className="hidden sm:inline">Nouvel onglet</span>
+                  <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setLegalModal(null)}
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-800 hover:bg-zinc-100 transition-colors cursor-pointer"
+                  aria-label="Fermer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Contenu textuel avec défilement fluide */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 text-xs text-zinc-700 leading-relaxed">
+              {legalModal === "mentions" ? (
+                <>
+                  <div className="border-b border-zinc-100 pb-3">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-[10px] font-bold uppercase tracking-wider mb-2">
+                      <Scale className="w-3 h-3 text-gold" aria-hidden="true" />
+                      <span>Cadre Légal & Réglementaire</span>
+                    </div>
+                    <h3 className="text-base font-black text-zinc-950">Mentions Légales — PRINCE CFA</h3>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">Maison de prestige high-tech · Boutique à Koulouba, Ouagadougou</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                      <h4 className="font-bold text-zinc-900 text-xs">1. Identité de l&apos;Éditeur</h4>
+                      <p><strong>Enseigne :</strong> PRINCE CFA</p>
+                      <p><strong>Boutique physique :</strong> Secteur 4, Quartier Koulouba, Ouagadougou, Burkina Faso</p>
+                      <p><strong>Téléphone & WhatsApp Officiel :</strong> +226 77 78 87 40</p>
+                      <p><strong>Bénéficiaire Orange Money (8451921) :</strong> SANA OMAR MALL DES IPHONES</p>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                      <h4 className="font-bold text-zinc-900 text-xs">2. Prix & Devise</h4>
+                      <p>Tous les prix sont affichés en Francs CFA (XOF), TVA comprise. Aucun frais caché : le total affiché dans votre panier est exactement le montant à régler.</p>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1 text-amber-950">
+                      <h4 className="font-bold text-amber-900 text-xs">3. Conditions Officielles de Garantie (1 Mois)</h4>
+                      <p>Tous nos iPhones, smartphones Android, tablettes et ordinateurs bénéficient de la garantie contractuelle Prince CFA d&apos;une durée de <strong>1 Mois</strong>.</p>
+                      <p className="font-semibold text-zinc-800 pt-1">La garantie ne couvre pas les cas suivants :</p>
+                      <ul className="list-disc list-inside text-zinc-700 space-y-0.5 pl-1 font-medium">
+                        <li>Problème lié à l&apos;écran</li>
+                        <li>Dommage causé par un liquide</li>
+                        <li>Appareil qui ne s&apos;allume plus</li>
+                      </ul>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                      <h4 className="font-bold text-zinc-900 text-xs">4. Retrait & Livraison</h4>
+                      <p>Retrait sans frais directement dans notre boutique à Koulouba (Ouagadougou), ou livraison sécurisée à domicile (1 500 FCFA).</p>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                      <h4 className="font-bold text-zinc-900 text-xs">5. Service Après-Vente</h4>
+                      <p>En cas de besoin, notre équipe technique vous accueille directement en boutique ou vous répond instantanément sur notre canal WhatsApp dédié.</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="border-b border-zinc-100 pb-3">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 text-[10px] font-bold uppercase tracking-wider mb-2">
+                      <ShieldCheck className="w-3 h-3 text-emerald-600" aria-hidden="true" />
+                      <span>Protection & Confidentialité</span>
+                    </div>
+                    <h3 className="text-base font-black text-zinc-950">Politique de Confidentialité — PRINCE CFA</h3>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">Engagement de transparence et protection de vos données personnelles</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                      <h4 className="font-bold text-zinc-900 text-xs">1. Données Collectées</h4>
+                      <p>Nous collectons uniquement les informations indispensables à l&apos;exécution de votre commande : Nom, Numéro de téléphone / WhatsApp, et Quartier/Ville pour la livraison.</p>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 space-y-1 text-emerald-950">
+                      <h4 className="font-bold text-emerald-900 text-xs flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-emerald-700" aria-hidden="true" />
+                        <span>2. Zéro Code Secret ni Données Bancaires</span>
+                      </h4>
+                      <p><strong>PRINCE CFA ne vous demandera JAMAIS votre code secret Mobile Money, ni mot de passe ni identifiant bancaire.</strong> Les règlements se font directement sur votre propre téléphone via le code officiel USSD Orange Money (*144*3*8451921*montant#) ou l&apos;application Wave.</p>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                      <h4 className="font-bold text-zinc-900 text-xs">3. Aucune Cession ni Revente</h4>
+                      <p>Vos coordonnées personnelles restent strictement confidentielles et ne sont jamais vendues ni partagées avec des tiers publicitaires.</p>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                      <h4 className="font-bold text-zinc-900 text-xs">4. Protection de la Vie Privée</h4>
+                      <p>Sur notre interface de suivi en ligne, les numéros de téléphone sont masqués pour protéger l&apos;identité et la vie privée de nos clients.</p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Footer d'action rapide */}
+            <div className="p-3.5 sm:p-4 border-t border-zinc-200 bg-white shadow-lg">
+              <button
+                type="button"
+                onClick={() => setLegalModal(null)}
+                className="w-full py-3 px-4 rounded-xl bg-gold hover:bg-gold-light active:bg-gold-dark text-black font-extrabold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+              >
+                <Check className="w-4 h-4" aria-hidden="true" />
+                <span>J&apos;ai compris — Continuer ma commande</span>
+              </button>
+            </div>
+          </div>
+        )}
 
       </div>
     </>

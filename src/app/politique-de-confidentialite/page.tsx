@@ -58,11 +58,11 @@ export default function PolitiqueConfidentialitePage() {
 
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
-              href="/"
-              className="text-xs px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900 border border-zinc-200 transition-colors flex items-center gap-2 font-medium"
+              href="/?cart=open"
+              className="text-xs px-3.5 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-zinc-900 border border-gold/40 transition-colors flex items-center gap-2 font-bold shadow-xs"
             >
               <ArrowLeft className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
-              <span>Retour Boutique</span>
+              <span>Retour à ma commande</span>
             </Link>
 
             <a
@@ -313,6 +313,17 @@ export default function PolitiqueConfidentialitePage() {
               <span>Contacter sur WhatsApp</span>
             </a>
           </div>
+        </div>
+
+        {/* Bouton retour direct à la commande */}
+        <div className="text-center pt-2">
+          <Link
+            href="/?cart=open"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-zinc-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider shadow-md transition-all active:scale-98"
+          >
+            <ArrowLeft className="w-4 h-4 text-gold" aria-hidden="true" />
+            <span>Revenir à mon panier / Ma commande</span>
+          </Link>
         </div>
 
       </main>
