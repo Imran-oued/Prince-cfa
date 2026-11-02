@@ -343,6 +343,7 @@ export default function AdminPage() {
   const [incomingOrderAlert, setIncomingOrderAlert] = useState<OrderRecord | null>(null);
   const [isPushSubscribed, setIsPushSubscribed] = useState<boolean>(false);
   const [isSubscribingPush, setIsSubscribingPush] = useState<boolean>(false);
+  const [showAlertSettings, setShowAlertSettings] = useState<boolean>(false);
   const knownOrderIdsRef = useRef<Set<string>>(new Set());
   const isInitialOrderLoadDoneRef = useRef<boolean>(false);
 
@@ -2974,7 +2975,103 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 relative">
+          {/* Bouton discret Alertes & Notifications */}
+          <button
+            onClick={() => setShowAlertSettings(!showAlertSettings)}
+            className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 border cursor-pointer ${
+              showAlertSettings 
+                ? "bg-gold text-black border-yellow-500 shadow-sm" 
+                : "bg-zinc-100 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-200 border-zinc-200"
+            }`}
+            title="Paramètres des alertes et notifications push"
+          >
+            <Bell className="w-4 h-4 text-gold" aria-hidden="true" />
+            <span className="hidden sm:inline">Alertes</span>
+            {notificationPermission === "granted" && isPushSubscribed ? (
+              <span className="w-2 h-2 rounded-full bg-emerald-500" title="Push serveur actif" />
+            ) : (
+              <span className="w-2 h-2 rounded-full bg-amber-400" title="Configuration requise" />
+            )}
+          </button>
+
+          {/* Menu déroulant / Popover des alertes */}
+          {showAlertSettings && (
+            <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 p-4 rounded-2xl bg-white border border-zinc-200 shadow-2xl z-50 text-zinc-800">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-zinc-100">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-gold" />
+                  <span className="font-bold text-xs uppercase tracking-wider text-zinc-900">Alertes & Notifications</span>
+                </div>
+                <button 
+                  onClick={() => setShowAlertSettings(false)}
+                  className="p-1 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {/* Statut Push */}
+                <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100 text-xs">
+                  <div className="text-[11px] font-bold text-zinc-500 mb-1.5 uppercase">Notifications Push Mobile</div>
+                  {notificationPermission === "granted" && isPushSubscribed ? (
+                    <div className="flex items-center gap-2 text-emerald-700 font-bold">
+                      <Check className="w-4 h-4 text-emerald-600" />
+                      <span>Push Serveur Actif (Écran éteint OK)</span>
+                    </div>
+                  ) : notificationPermission === "granted" && !isPushSubscribed ? (
+                    <button
+                      onClick={subscribeToPushServer}
+                      disabled={isSubscribingPush}
+                      className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-gold hover:bg-yellow-500 text-black text-xs font-extrabold uppercase transition-all shadow-sm cursor-pointer"
+                    >
+                      <Bell className="w-3.5 h-3.5" />
+                      <span>{isSubscribingPush ? "Synchronisation..." : "Activer la réception écran éteint"}</span>
+                    </button>
+                  ) : notificationPermission === "denied" ? (
+                    <div className="flex items-center gap-2 text-red-600 font-bold">
+                      <AlertTriangle className="w-4 h-4 text-red-600" />
+                      <span>Bloqué par les réglages de votre mobile</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleRequestNotificationPermission}
+                      disabled={isSubscribingPush}
+                      className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-gold hover:bg-yellow-500 text-black text-xs font-extrabold uppercase transition-all shadow-sm cursor-pointer"
+                    >
+                      <Bell className="w-3.5 h-3.5" />
+                      <span>{isSubscribingPush ? "Activation..." : "Activer les notifications push"}</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Sonnerie et Test */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={toggleSound}
+                    className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                      isSoundEnabled 
+                        ? "bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100" 
+                        : "bg-zinc-100 text-zinc-500 border-zinc-200 hover:bg-zinc-200"
+                    }`}
+                  >
+                    {isSoundEnabled ? <Volume2 className="w-3.5 h-3.5 text-amber-600" /> : <VolumeX className="w-3.5 h-3.5 text-zinc-400" />}
+                    <span>{isSoundEnabled ? "Sonnerie active" : "Sonnerie muette"}</span>
+                  </button>
+
+                  <button
+                    onClick={handleTestAlert}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold transition-all border border-zinc-200 cursor-pointer shadow-sm active:scale-95"
+                  >
+                    <Zap className="w-3.5 h-3.5 text-gold" />
+                    <span>Tester l&apos;alerte</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <Link 
             href="/" 
             target="_blank" 
@@ -3078,71 +3175,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* BARRE DE GESTION DES NOTIFICATIONS PUSH MOBILE & SON EN DIRECT (Options 2 & 3) */}
-      {activeTab === "orders" && (
-        <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/90 border border-zinc-200/90 shadow-sm mb-6 flex-wrap justify-between z-10">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-800">
-              <Bell className="w-4 h-4 text-gold" aria-hidden="true" />
-              <span>Alertes Nouvelles Commandes :</span>
-            </div>
 
-            {notificationPermission === "granted" && isPushSubscribed ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Push Serveur Actif (Écran éteint OK)</span>
-              </span>
-            ) : notificationPermission === "granted" && !isPushSubscribed ? (
-              <button
-                onClick={subscribeToPushServer}
-                disabled={isSubscribingPush}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold hover:bg-yellow-500 text-black text-xs font-extrabold tracking-wide uppercase transition-all shadow-sm cursor-pointer"
-              >
-                <Bell className="w-3.5 h-3.5" />
-                <span>{isSubscribingPush ? "Synchronisation..." : "Activer la réception écran éteint"}</span>
-              </button>
-            ) : notificationPermission === "denied" ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold" title="Autorisez les notifications dans les paramètres de votre iPhone pour recevoir les alertes">
-                <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
-                <span>Push bloqué par l&apos;iPhone</span>
-              </span>
-            ) : (
-              <button
-                onClick={handleRequestNotificationPermission}
-                disabled={isSubscribingPush}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold hover:bg-yellow-500 text-black text-xs font-extrabold tracking-wide uppercase transition-all shadow-sm cursor-pointer"
-              >
-                <Bell className="w-3.5 h-3.5" />
-                <span>{isSubscribingPush ? "Activation..." : "Activer les notifications push"}</span>
-              </button>
-            )}
-
-            {/* Toggle Son */}
-            <button
-              onClick={toggleSound}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
-                isSoundEnabled 
-                  ? "bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100" 
-                  : "bg-zinc-100 text-zinc-500 border-zinc-200 hover:bg-zinc-200"
-              }`}
-              title={isSoundEnabled ? "Couper la sonnerie carillon" : "Activer la sonnerie carillon"}
-            >
-              {isSoundEnabled ? <Volume2 className="w-3.5 h-3.5 text-amber-600" /> : <VolumeX className="w-3.5 h-3.5 text-zinc-400" />}
-              <span>{isSoundEnabled ? "Sonnerie active" : "Sonnerie muette"}</span>
-            </button>
-          </div>
-
-          {/* Bouton Tester l'Alerte */}
-          <button
-            onClick={handleTestAlert}
-            className="px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold transition-all border border-zinc-200 cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
-            title="Tester le son carillon et la notification push sur ce mobile"
-          >
-            <Zap className="w-3.5 h-3.5 text-gold" />
-            <span>Tester l&apos;alerte (Son + Push)</span>
-          </button>
-        </div>
-      )}
 
       {/* DASHBOARD STATS */}
       {activeTab === "orders" ? (
