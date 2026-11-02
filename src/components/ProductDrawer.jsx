@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { SHOP_CONFIG } from '@/config/shop';
-import { Star, HardDrive, Check, Zap, Laptop, Refrigerator, Tablet, ShoppingBag, ChevronDown, ChevronLeft, ShieldCheck } from 'lucide-react';
+import { Star, HardDrive, Check, Zap, Laptop, ShoppingBag, ChevronDown, ChevronLeft, ShieldCheck } from 'lucide-react';
 import { getCategoryConfig, isStorageVariantCategory } from '@/config/categories';
 import { getProductImageBg, isAppleBrand } from '@/lib/productValidation';
 
@@ -1162,42 +1162,6 @@ export default function ProductDrawer({
           )}
 
 
-          {/* Badge de Spécifications Clés pour Électroménager */}
-          {(currentProduct.category === 'appliances' || currentProduct.category === 'electromenager') && currentProduct.specs && (
-            <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 space-y-2">
-              <div className="flex items-center justify-between text-cyan-600 text-xs font-bold uppercase tracking-wider">
-                <span className="flex items-center gap-1.5">
-                  <Refrigerator className="w-4 h-4 text-cyan-600" aria-hidden="true" />
-                  <span>Fiche Électroménager Officielle</span>
-                </span>
-                {currentProduct.specs.energyClass && (
-                  <span className="text-[10px] bg-cyan-500/15 text-cyan-700 px-2 py-0.5 rounded-full font-mono font-bold">
-                    {currentProduct.specs.energyClass}
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
-                {currentProduct.specs.capacity && (
-                  <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                    <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Capacité</span>
-                    <span className="text-xs font-black text-zinc-900">{currentProduct.specs.capacity}</span>
-                  </div>
-                )}
-                {currentProduct.specs.power && (
-                  <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                    <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Technologie</span>
-                    <span className="text-xs font-black text-gold">{currentProduct.specs.power}</span>
-                  </div>
-                )}
-                {currentProduct.specs.applianceType && (
-                  <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200 col-span-2 sm:col-span-1">
-                    <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Type</span>
-                    <span className="text-xs font-black text-emerald-600">{currentProduct.specs.applianceType}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* CAS IPHONE : FLUX STRICT (1. FORMAT SIM → 2. CAPACITÉ → 3. COULEURS DISPONIBLES) */}
           {isIPhone ? (
@@ -1816,23 +1780,6 @@ export default function ProductDrawer({
             </div>
           )}
 
-          {/* Réassurance sous les boutons (Style Amazon : Expéditeur, Retours, Paiement) */}
-          <div className="flex items-center justify-between text-[11px] text-zinc-500 pt-1 border-t border-zinc-100">
-            <span className="flex items-center gap-1">
-              <span className="text-zinc-400">Vendeur :</span>
-              <strong className="text-zinc-800 font-semibold">Prince CFA</strong>
-            </span>
-            <span className="text-zinc-300">•</span>
-            <span className="flex items-center gap-1">
-              <span className="text-zinc-400">Retours :</span>
-              <span className="text-zinc-700 font-medium">Garantie 100%</span>
-            </span>
-            <span className="text-zinc-300">•</span>
-            <span className="flex items-center gap-1">
-              <span className="text-zinc-400">Paiement :</span>
-              <span className="text-emerald-700 font-semibold">Sécurisé</span>
-            </span>
-          </div>
         </div>
       </aside>
     </>
