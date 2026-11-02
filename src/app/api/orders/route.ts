@@ -4,6 +4,7 @@ import { createOrder, checkStockAvailability, getProduct, getProducts } from "@/
 import { products as defaultProducts } from "@/data/products";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 import { getCachedProducts, invalidateOrdersCache } from "@/lib/serverCache";
+import { sendPushToAdmins } from "@/lib/serverPush";
 
 interface OrderItemInput {
   productId?: string | number;
@@ -267,6 +268,16 @@ export async function POST(request: Request) {
 
     // Invalider le cache des commandes pour mise à jour instantanée du suivi
     invalidateOrdersCache();
+
+    // Envoi de la notification Push Server vers tous les smartphones administrateurs (ex: iPhone sur écran d'accueil)
+    sendPushToAdmins({
+      title: `🔔 Nouvelle commande : ${result.order.id}`,
+      body: `${result.order.customer.name} vient de valider une commande de ${total.toLocaleString('fr-FR')} FCFA (${isDelivery ? "Livraison" : "Retrait Boutique"}).`,
+      url: `/admin`,
+      orderId: result.order.id
+    }).catch(err => {
+      console.warn("[Push] Note lors de l'envoi push admin:", err);
+    });
 
     return NextResponse.json(
       { 

@@ -831,3 +831,89 @@ export function isOrderExpired(order, expirationHours = ORDER_EXPIRATION_HOURS) 
   const ageMs = Date.now() - createdAtMs;
   return ageMs > expirationHours * 60 * 60 * 1000;
 }
+
+// --- GESTION DES ABONNEMENTS PUSH NOTIFICATIONS (VAPID / iOS / Android) ---
+export const PUSH_SUBSCRIPTIONS_COLLECTION = "push_subscriptions";
+const memoryPushSubscriptions = new Map();
+
+function hashEndpoint(endpoint) {
+  let hash = 0;
+  const str = String(endpoint || "");
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  const clean = str.replace(/[^a-zA-Z0-9]/g, "").slice(-30);
+  return `sub_${Math.abs(hash).toString(36)}_${clean}`;
+}
+
+/**
+ * Enregistre ou met à jour l'abonnement push d'un administrateur
+ */
+export async function savePushSubscription(subscription, userAgent = "") {
+  if (!subscription || !subscription.endpoint) return false;
+  const docId = hashEndpoint(subscription.endpoint);
+  const data = {
+    endpoint: subscription.endpoint,
+    keys: subscription.keys || {},
+    userAgent: String(userAgent || "").slice(0, 200),
+    updatedAt: new Date().toISOString()
+  };
+
+  memoryPushSubscriptions.set(docId, data);
+
+  if (!isFirebaseConfigured()) return true;
+
+  try {
+    const docRef = doc(db, PUSH_SUBSCRIPTIONS_COLLECTION, docId);
+    await setDoc(docRef, data, { merge: true });
+    return true;
+  } catch (error) {
+    console.warn("Erreur sauvegarde subscription push:", error);
+    return false;
+  }
+}
+
+/**
+ * Récupère tous les abonnements push enregistrés
+ */
+export async function getPushSubscriptions() {
+  if (!isFirebaseConfigured()) {
+    return Array.from(memoryPushSubscriptions.values());
+  }
+
+  try {
+    const snapshot = await getDocs(collection(db, PUSH_SUBSCRIPTIONS_COLLECTION));
+    const list = [];
+    snapshot.docs.forEach((d) => {
+      const data = d.data();
+      if (data && data.endpoint) {
+        list.push(data);
+      }
+    });
+    return list;
+  } catch (error) {
+    console.warn("Erreur récupération subscriptions push:", error);
+    return Array.from(memoryPushSubscriptions.values());
+  }
+}
+
+/**
+ * Supprime un abonnement push expiré ou révoqué
+ */
+export async function removePushSubscription(endpoint) {
+  if (!endpoint) return false;
+  const docId = hashEndpoint(endpoint);
+  memoryPushSubscriptions.delete(docId);
+
+  if (!isFirebaseConfigured()) return true;
+
+  try {
+    const docRef = doc(db, PUSH_SUBSCRIPTIONS_COLLECTION, docId);
+    await deleteDoc(docRef);
+    return true;
+  } catch (error) {
+    console.warn("Erreur suppression subscription push:", error);
+    return false;
+  }
+}

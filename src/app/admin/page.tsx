@@ -309,6 +309,18 @@ function generateProductId(): string {
   return `p-${Date.now()}`;
 }
 
+// Convertit la clé publique VAPID en BufferSource pour le PushManager (Standard RFC 7515)
+function urlBase64ToUint8Array(base64String: string): BufferSource {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = typeof window !== "undefined" ? window.atob(base64) : "";
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray as unknown as BufferSource;
+}
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -329,6 +341,8 @@ export default function AdminPage() {
   const [notificationPermission, setNotificationPermission] = useState<string>("default");
   const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
   const [incomingOrderAlert, setIncomingOrderAlert] = useState<OrderRecord | null>(null);
+  const [isPushSubscribed, setIsPushSubscribed] = useState<boolean>(false);
+  const [isSubscribingPush, setIsSubscribingPush] = useState<boolean>(false);
   const knownOrderIdsRef = useRef<Set<string>>(new Set());
   const isInitialOrderLoadDoneRef = useRef<boolean>(false);
 
@@ -1062,7 +1076,22 @@ export default function AdminPage() {
         setNotificationPermission(Notification.permission);
       }
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/sw.js").catch(() => {});
+        navigator.serviceWorker.register("/sw.js").then(async (reg) => {
+          if ("pushManager" in reg) {
+            const existingSub = await reg.pushManager.getSubscription().catch(() => null);
+            if (existingSub) {
+              setIsPushSubscribed(true);
+              // Ré-enregistrer l'abonnement pour garantir qu'il est synchronisé en base Firestore
+              fetch("/api/admin/push-subscription", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ subscription: existingSub })
+              }).catch(() => {});
+            }
+          }
+        }).catch((err) => {
+          console.warn("ServiceWorker register error:", err);
+        });
       }
       const savedSound = localStorage.getItem("prince_cfa_admin_sound");
       if (savedSound !== null) {
@@ -1162,7 +1191,48 @@ export default function AdminPage() {
     }
   };
 
-  // Demande d'autorisation des notifications push
+  // Enregistrement de l'abonnement Web Push VAPID vers le serveur
+  const subscribeToPushServer = async (): Promise<boolean> => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+      return false;
+    }
+    setIsSubscribingPush(true);
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      let sub = await reg.pushManager.getSubscription();
+
+      if (!sub) {
+        const resKey = await fetch("/api/admin/push-subscription");
+        const keyData = await resKey.json();
+        const vapidPublicKey = keyData.publicKey || "BKoj_69RaUCQNGXnhDd1SWI4X10dPEoqQpWuNxSaEVZkgYr4MfGtfsXMAASPiUL96vVr-GEMESngy0-Y0bIEZpw";
+
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+        });
+      }
+
+      if (sub) {
+        const resSave = await fetch("/api/admin/push-subscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscription: sub })
+        });
+        if (resSave.ok) {
+          setIsPushSubscribed(true);
+          return true;
+        }
+      }
+      return false;
+    } catch (err: any) {
+      console.warn("Erreur souscription PushManager:", err);
+      return false;
+    } finally {
+      setIsSubscribingPush(false);
+    }
+  };
+
+  // Demande d'autorisation des notifications push + abonnement VAPID serveur
   const handleRequestNotificationPermission = async () => {
     if (typeof window === "undefined" || !("Notification" in window)) {
       alert("Votre navigateur ne supporte pas les notifications push.");
@@ -1174,44 +1244,48 @@ export default function AdminPage() {
       if (perm === "granted") {
         playNewOrderSound();
         if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
-        if ("serviceWorker" in navigator) {
-          const reg = await navigator.serviceWorker.ready.catch(() => null);
-          if (reg && "showNotification" in reg) {
-            await reg.showNotification("Prince CFA Admin 🔔", {
-              body: "Notifications activées avec succès ! Vous recevrez une alerte pour chaque nouvelle commande.",
-              icon: "/icon-192.png",
-              badge: "/apple-touch-icon.png",
-              tag: "test-notification"
-            });
-            return;
-          }
+        
+        // Enregistrer l'abonnement VAPID auprès du serveur
+        const isRegistered = await subscribeToPushServer();
+        if (isRegistered) {
+          alert("✅ Notifications Push enregistrées avec succès ! Vous recevrez une alerte pour chaque nouvelle commande même lorsque votre écran est éteint.");
         }
-        new Notification("Prince CFA Admin 🔔", {
-          body: "Notifications activées avec succès ! Vous recevrez une alerte pour chaque nouvelle commande.",
-          icon: "/icon-192.png",
-          badge: "/apple-touch-icon.png"
-        });
       } else if (perm === "denied") {
-        alert("Les notifications ont été bloquées dans les paramètres de votre navigateur.");
+        alert("Les notifications ont été bloquées dans les paramètres de votre iPhone. Ouvrez Réglages > Notifications pour les autoriser.");
       }
     } catch (e) {
       console.warn("Permission request error:", e);
     }
   };
 
-  // Test complet des alertes (Son + Vibration + Push + Bannière)
-  const handleTestAlert = () => {
+  // Test complet des alertes (Son + Vibration + Push Serveur Réel + Bannière)
+  const handleTestAlert = async () => {
     playNewOrderSound();
     if (typeof window !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate([300, 150, 300]);
     }
-    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+
+    // Si abonné, déclencher un test serveur direct
+    if (isPushSubscribed && "serviceWorker" in navigator) {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await fetch("/api/admin/push-subscription", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ subscription: sub })
+          });
+        }
+      } catch {}
+    } else if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
       new Notification("🔔 Test Alerte Commande : Prince CFA", {
         body: "Test d'alerte réussi ! Le carillon et les notifications push fonctionnent parfaitement sur votre appareil.",
         icon: "/icon-192.png",
         badge: "/apple-touch-icon.png"
       });
     }
+
     const mockOrder: OrderRecord = {
       id: `CMD-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-TEST`,
       createdAt: new Date().toISOString(),
@@ -3013,23 +3087,33 @@ export default function AdminPage() {
               <span>Alertes Nouvelles Commandes :</span>
             </div>
 
-            {notificationPermission === "granted" ? (
+            {notificationPermission === "granted" && isPushSubscribed ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
                 <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Push Mobile Actif</span>
+                <span>Push Serveur Actif (Écran éteint OK)</span>
               </span>
+            ) : notificationPermission === "granted" && !isPushSubscribed ? (
+              <button
+                onClick={subscribeToPushServer}
+                disabled={isSubscribingPush}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold hover:bg-yellow-500 text-black text-xs font-extrabold tracking-wide uppercase transition-all shadow-sm cursor-pointer"
+              >
+                <Bell className="w-3.5 h-3.5" />
+                <span>{isSubscribingPush ? "Synchronisation..." : "Activer la réception écran éteint"}</span>
+              </button>
             ) : notificationPermission === "denied" ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold" title="Autorisez les notifications dans les paramètres de votre navigateur pour recevoir les alertes sur mobile">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold" title="Autorisez les notifications dans les paramètres de votre iPhone pour recevoir les alertes">
                 <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
-                <span>Push bloqué par le navigateur</span>
+                <span>Push bloqué par l&apos;iPhone</span>
               </span>
             ) : (
               <button
                 onClick={handleRequestNotificationPermission}
+                disabled={isSubscribingPush}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold hover:bg-yellow-500 text-black text-xs font-extrabold tracking-wide uppercase transition-all shadow-sm cursor-pointer"
               >
                 <Bell className="w-3.5 h-3.5" />
-                <span>Activer les notifications push</span>
+                <span>{isSubscribingPush ? "Activation..." : "Activer les notifications push"}</span>
               </button>
             )}
 
