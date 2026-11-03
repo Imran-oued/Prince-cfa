@@ -46,6 +46,10 @@ test("1. Category definitions are declarative, complete, and have units", () => 
   const pcConfig = getCategoryConfig("computers");
   const ramField = pcConfig.fields.find(f => f.key === "ram");
   assert.equal(ramField.unit, "Go", "Unité RAM = Go");
+  const osField = pcConfig.fields.find(f => f.key === "os");
+  assert.ok(osField, "Champ OS doit exister pour les ordinateurs");
+  assert.ok(osField.options.some(o => o.value === "win10_pro"), "Windows 10 Professionnel doit être proposé");
+  assert.ok(osField.options.some(o => o.value === "win11_pro"), "Windows 11 Professionnel doit être proposé");
 
   // Catégories éligibles aux variantes de stockage à prix multiples
   assert.equal(isStorageVariantCategory("phones"), true);

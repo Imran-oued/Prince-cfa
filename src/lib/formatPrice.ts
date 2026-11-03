@@ -11,3 +11,4 @@ export function formatPrice(price: number | string | null | undefined): string {
 }
 
 export default formatPrice;
+

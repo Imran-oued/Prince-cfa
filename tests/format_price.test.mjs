@@ -22,3 +22,4 @@ test("formatPrice handles string inputs and legacy values cleanly", () => {
   assert.equal(formatPrice(undefined), "0");
   assert.equal(formatPrice(""), "0");
 });
+

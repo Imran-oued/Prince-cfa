@@ -32,6 +32,21 @@ const SPEC_LABELS = {
   materials: 'Matériaux & Finition'
 };
 
+const OS_PRETTY_NAMES = {
+  win10_pro: 'Windows 10 Pro',
+  win10_home: 'Windows 10 Famille',
+  win11_pro: 'Windows 11 Pro',
+  win11_home: 'Windows 11 Famille',
+  win10_11_pro: 'Windows 10/11 Pro',
+  macos: 'macOS',
+  macos_other: 'macOS',
+  chromeos: 'ChromeOS',
+  linux: 'Linux',
+  win7_8_pro: 'Windows 7/8 Pro',
+  no_os: 'Sans OS',
+  other_os: 'Autre OS'
+};
+
 export const formatCleanSimLabel = (raw) => {
   if (!raw) return '';
   const s = String(raw).toLowerCase().trim();
@@ -1139,7 +1154,7 @@ export default function ProductDrawer({
                   <Laptop className="w-4 h-4 text-blue-600" aria-hidden="true" />
                   <span>Configuration Clé — Ordinateur</span>
                 </span>
-                <span className="text-[10px] text-zinc-500 font-mono">{currentProduct.specs.os || "OS"}</span>
+                <span className="text-[10px] text-zinc-500 font-medium">{OS_PRETTY_NAMES[currentProduct.specs.os] || currentProduct.specs.os || "OS"}</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                 <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
