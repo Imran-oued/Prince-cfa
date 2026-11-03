@@ -385,27 +385,27 @@ function ProductCardItem({
         ) : null}
       </div>
 
-      {/* 2. Colonne DROITE : Caractéristiques & Infos Style Amazon */}
-      <div className="flex-1 flex flex-col justify-center min-w-0 overflow-hidden py-1">
-        <div>
-          {/* Titre Produit */}
-          <h3 className="text-sm sm:text-base font-bold text-zinc-950 line-clamp-2 group-hover:text-gold transition-colors leading-snug">
+      {/* 2. Colonne DROITE : Caractéristiques & Infos centrées commençant en haut */}
+      <div className="flex-1 flex flex-col justify-start items-center text-center min-w-0 overflow-hidden py-1.5 sm:py-2.5 px-1 sm:px-2">
+        <div className="w-full flex flex-col items-center">
+          {/* Titre Produit - Police agrandie et mise en valeur */}
+          <h3 className="text-base sm:text-lg lg:text-xl font-extrabold text-zinc-950 line-clamp-2 group-hover:text-gold transition-colors leading-snug text-center tracking-tight">
             {product.name}
           </h3>
 
           {/* Sous-titre / Spécifications courtes */}
           {specsSnippet && (
-            <p className="text-[11px] sm:text-xs text-zinc-500 line-clamp-1 mt-0.5">
+            <p className="text-xs sm:text-sm text-zinc-500 line-clamp-1 mt-1 text-center font-medium">
               {specsSnippet}
             </p>
           )}
 
-          {/* Prix FCFA en grand format doré avec gestion promotionnelle sécurisée */}
-          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+          {/* Prix FCFA en grand format doré centré avec gestion promotionnelle sécurisée */}
+          <div className="mt-2.5 sm:mt-3 flex items-baseline justify-center gap-2 flex-wrap">
             {product.salePrice && product.price && Number(product.salePrice) < Number(product.price) ? (
               <>
-                <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-amber-600 to-gold tracking-tight">
-                  {formatPrice(product.salePrice)} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
+                <span className="text-xl sm:text-2xl lg:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-amber-600 to-gold tracking-tight">
+                  {formatPrice(product.salePrice)} <span className="text-sm sm:text-base text-gold font-bold">FCFA</span>
                 </span>
                 <span className="text-xs sm:text-sm text-zinc-400 line-through">
                   {formatPrice(product.price)} FCFA
@@ -415,14 +415,14 @@ function ProductCardItem({
                 </span>
               </>
             ) : (
-              <span className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-600 to-yellow-600 tracking-tight">
-                {formatPrice(product.price)} <span className="text-xs sm:text-sm text-gold font-bold">FCFA</span>
+              <span className="text-xl sm:text-2xl lg:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-600 to-yellow-600 tracking-tight">
+                {formatPrice(product.price)} <span className="text-sm sm:text-base text-gold font-bold">FCFA</span>
               </span>
             )}
           </div>
 
           {/* Mention Livraison & Retrait */}
-          <p className="text-[10px] sm:text-[11px] text-zinc-500 font-medium mt-1 flex items-center gap-2 flex-wrap">
+          <p className="text-[11px] sm:text-xs text-zinc-600 font-medium mt-2 flex items-center justify-center gap-2 flex-wrap text-center">
             <span className="text-zinc-700 flex items-center gap-1">
               <Truck className="w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
               <span>Livraison Express</span>
@@ -436,11 +436,11 @@ function ProductCardItem({
 
           {/* Pastilles de couleurs interactives style Amazon (sauf mode Autres marques / Android) */}
           {product.colors && product.colors.length > 0 && !isAndroidPhone && (
-            <div className="mt-2 pt-2 border-t border-zinc-100">
-              <div className="text-[10px] sm:text-[11px] text-zinc-500 mb-1">
+            <div className="mt-2.5 pt-2 border-t border-zinc-100 w-full flex flex-col items-center">
+              <div className="text-[11px] sm:text-xs text-zinc-500 mb-1 text-center">
                 Couleur : <strong className="text-zinc-900 font-semibold">{activeColor}</strong>
               </div>
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex items-center justify-center gap-1.5 flex-wrap">
                 {product.colors.map((colorName, idx) => {
                   const isCurrent = (product.colors && product.colors.length === 1) || activeColorIdx === idx;
                   const bgHex = getColorCode(colorName);
