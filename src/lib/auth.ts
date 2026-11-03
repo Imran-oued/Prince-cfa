@@ -6,17 +6,58 @@ function getAdminPassword(): string {
   return process.env.NODE_ENV === "production" ? "" : "admin";
 }
 
-const AUTH_SECRET =
-  process.env.ADMIN_JWT_SECRET ||
-  `${process.env.ADMIN_PASSWORD || "prince_cfa_salt_2026"}:prince_cfa_secure_key_2026`;
+/**
+ * Obtenir et valider le secret de signature JWT (ADMIN_JWT_SECRET).
+ * 
+ * Règles strictes :
+ * 1. En production (NODE_ENV === "production") :
+ *    - ADMIN_JWT_SECRET est strictement obligatoire.
+ *    - Doit contenir au minimum 32 caractères pour une entropie cryptographique suffisante.
+ *    - Toute valeur absente, vide ou < 32 caractères lève une exception explicite.
+ *    - Aucune dérivation de secours depuis ADMIN_PASSWORD n'est autorisée.
+ *    - Aucun secret statique par défaut n'est utilisé.
+ * 2. Hors production (tests unitaires, développement local) :
+ *    - Utilise ADMIN_JWT_SECRET s'il est configuré.
+ *    - Sinon, utilise une clé de test dédiée locale sans bloquer les suites de tests locales.
+ */
+export function getAuthSecret(): string {
+  const secret = process.env.ADMIN_JWT_SECRET;
+  const isProd = process.env.NODE_ENV === "production";
+
+  if (isProd) {
+    if (!secret || typeof secret !== "string" || secret.trim().length < 32) {
+      throw new Error(
+        "[SÉCURITÉ CRITIQUE] ADMIN_JWT_SECRET est absent, vide ou inférieur à 32 caractères en environnement de production. " +
+        "L'authentification administrateur est strictement bloquée pour empêcher tout secret faible."
+      );
+    }
+    return secret.trim();
+  }
+
+  // Hors production (tests / développement local)
+  if (secret && typeof secret === "string" && secret.trim().length > 0) {
+    return secret.trim();
+  }
+
+  return "dev_test_jwt_secret_only_local_32_chars_long_minimum!";
+}
+
 export const ADMIN_COOKIE_NAME = "prince_cfa_admin_auth";
 
 // Avertissement de sécurité au démarrage si la configuration de production est incomplète
-if (process.env.NODE_ENV === "production" && (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin")) {
-  console.warn(
-    "[SÉCURITÉ CRITIQUE] La variable ADMIN_PASSWORD n'est pas définie ou utilise 'admin' en production ! " +
-    "Veuillez définir un mot de passe robuste dans vos variables d'environnement Hostinger."
-  );
+if (process.env.NODE_ENV === "production") {
+  if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin" || process.env.ADMIN_PASSWORD.length < 8) {
+    console.warn(
+      "[SÉCURITÉ CRITIQUE] La variable ADMIN_PASSWORD n'est pas définie ou utilise 'admin' en production ! " +
+      "Veuillez définir un mot de passe robuste dans vos variables d'environnement Hostinger."
+    );
+  }
+  if (!process.env.ADMIN_JWT_SECRET || process.env.ADMIN_JWT_SECRET.trim().length < 32) {
+    console.warn(
+      "[SÉCURITÉ CRITIQUE] La variable ADMIN_JWT_SECRET est absente ou inférieure à 32 caractères en production ! " +
+      "L'authentification administrateur sera bloquée tant qu'un secret d'au moins 32 caractères n'est pas configuré."
+    );
+  }
 }
 
 // Durée de validité du token admin : 4 heures (session de travail sécurisée)
@@ -67,7 +108,8 @@ export function verifyAdminPassword(password: string): boolean {
  * Signer une chaîne avec HMAC-SHA256
  */
 function signPayload(payload: string): string {
-  return crypto.createHmac("sha256", AUTH_SECRET).update(payload).digest("hex");
+  const secret = getAuthSecret();
+  return crypto.createHmac("sha256", secret).update(payload).digest("hex");
 }
 
 /**
@@ -83,39 +125,51 @@ export function generateAdminToken(): string {
 }
 
 /**
- * Valider cryptographiquement un token d'administration
+ * Valider cryptographiquement un token d'administration.
+ * En production, aucun fallback dérivé de mot de passe n'est toléré.
  */
 export function validateAdminToken(token: string): boolean {
   if (!token || typeof token !== "string") return false;
 
-  // 1. Format moderne signé HMAC : adm.<timestamp>.<nonce>.<signature>
-  if (token.startsWith("adm.")) {
-    const parts = token.slice(4).split(".");
-    if (parts.length === 3) {
-      const [timestampStr, nonce, signature] = parts;
-      const timestamp = parseInt(timestampStr, 36);
+  try {
+    // 1. Format moderne signé HMAC : adm.<timestamp>.<nonce>.<signature>
+    if (token.startsWith("adm.")) {
+      const parts = token.slice(4).split(".");
+      if (parts.length === 3) {
+        const [timestampStr, nonce, signature] = parts;
+        const timestamp = parseInt(timestampStr, 36);
 
-      // Vérifier si le token n'a pas expiré (24h)
-      if (isNaN(timestamp) || Date.now() - timestamp > TOKEN_TTL_MS || timestamp > Date.now() + 60000) {
-        return false;
+        // Vérifier si le token n'a pas expiré (4h)
+        if (isNaN(timestamp) || Date.now() - timestamp > TOKEN_TTL_MS || timestamp > Date.now() + 60000) {
+          return false;
+        }
+
+        const expectedSignature = signPayload(`${timestampStr}.${nonce}`);
+        return timingSafeEqualString(signature, expectedSignature);
       }
-
-      const expectedSignature = signPayload(`${timestampStr}.${nonce}`);
-      return timingSafeEqualString(signature, expectedSignature);
     }
-  }
 
-  // 2. Rétrocompatibilité transitoire avec l'ancien format base64
-  const adminPwd = getAdminPassword();
-  if (adminPwd) {
-    const legacySecret = Buffer.from(`${adminPwd}:prince_cfa_salt_2026`).toString("base64");
-    const legacyToken = `adm_${legacySecret}`;
-    if (timingSafeEqualString(token, legacyToken)) {
-      return true;
+    // 2. Rétrocompatibilité transitoire avec l'ancien format base64
+    // STRICTEMENT INTERDIT EN PRODUCTION : aucun fallback dérivé du mot de passe en production
+    if (process.env.NODE_ENV !== "production") {
+      const adminPwd = getAdminPassword();
+      if (adminPwd) {
+        const legacySecret = Buffer.from(`${adminPwd}:prince_cfa_salt_2026`).toString("base64");
+        const legacyToken = `adm_${legacySecret}`;
+        if (timingSafeEqualString(token, legacyToken)) {
+          return true;
+        }
+      }
     }
-  }
 
-  return false;
+    return false;
+  } catch (error) {
+    console.error(
+      "[SÉCURITÉ] Échec de validation du token administrateur:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
 }
 
 /**

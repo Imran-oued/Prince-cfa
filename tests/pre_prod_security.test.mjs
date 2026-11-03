@@ -12,7 +12,8 @@ import {
   verifyAdminPassword, 
   generateAdminToken, 
   validateAdminToken, 
-  verifyAdminAuth 
+  verifyAdminAuth,
+  getAuthSecret
 } from "../src/lib/auth.ts";
 import { checkRateLimit } from "../src/lib/rateLimit.ts";
 import { VAPID_CONFIG } from "../src/config/vapid.ts";
@@ -145,3 +146,69 @@ test("Sec-PreProd 5: VAPID keys separation and security", () => {
   // Sujet de contact
   assert.ok(VAPID_CONFIG.subject.startsWith("mailto:") || VAPID_CONFIG.subject.startsWith("https://"));
 });
+
+test("Sec-PreProd 6: ADMIN_JWT_SECRET enforcement and no password fallback in production", () => {
+  const originalEnv = process.env.NODE_ENV;
+  const originalSecret = process.env.ADMIN_JWT_SECRET;
+  const originalPwd = process.env.ADMIN_PASSWORD;
+
+  try {
+    process.env.NODE_ENV = "production";
+    process.env.ADMIN_PASSWORD = "StrongAdminPassword2026!";
+
+    // 1. Secret absent en production : refus catégorique avec erreur explicite
+    delete process.env.ADMIN_JWT_SECRET;
+    assert.throws(
+      () => getAuthSecret(),
+      /ADMIN_JWT_SECRET est absent, vide ou inférieur à 32 caractères/i,
+      "Must throw when ADMIN_JWT_SECRET is missing in production"
+    );
+    assert.throws(
+      () => generateAdminToken(),
+      /ADMIN_JWT_SECRET/i,
+      "generateAdminToken must throw when ADMIN_JWT_SECRET is missing in production"
+    );
+    // validateAdminToken doit renvoyer false sans planter
+    assert.equal(validateAdminToken("adm.some.token.sig"), false, "Must return false when secret is absent in production");
+
+    // 2. Secret vide ou constitué uniquement d'espaces : refus
+    process.env.ADMIN_JWT_SECRET = "      ";
+    assert.throws(
+      () => getAuthSecret(),
+      /ADMIN_JWT_SECRET est absent, vide ou inférieur à 32 caractères/i,
+      "Must throw when ADMIN_JWT_SECRET is whitespace only in production"
+    );
+
+    // 3. Secret trop court (< 32 caractères) : refus
+    process.env.ADMIN_JWT_SECRET = "short_key_only_24_chars!";
+    assert.ok(process.env.ADMIN_JWT_SECRET.length < 32);
+    assert.throws(
+      () => getAuthSecret(),
+      /inférieur à 32 caractères/i,
+      "Must throw when ADMIN_JWT_SECRET is < 32 chars in production"
+    );
+
+    // 4. Aucun fallback dérivé de ADMIN_PASSWORD en production :
+    // Même si ADMIN_PASSWORD est défini avec un mot de passe fort, le token legacy dérivé est strictement refusé
+    delete process.env.ADMIN_JWT_SECRET;
+    const legacyToken = `adm_${Buffer.from("StrongAdminPassword2026!:prince_cfa_salt_2026").toString("base64")}`;
+    assert.equal(validateAdminToken(legacyToken), false, "Legacy password-derived token must be rejected in production");
+
+    // 5. Secret valide d'au moins 32 caractères : accepté
+    const robustSecret = "prince_cfa_super_robust_jwt_secret_key_32_characters_minimum_2026!";
+    process.env.ADMIN_JWT_SECRET = robustSecret;
+    assert.equal(getAuthSecret(), robustSecret, "Valid secret >= 32 chars must be accepted in production");
+
+    const validProdToken = generateAdminToken();
+    assert.ok(validProdToken.startsWith("adm."), "Token generated with robust secret must be valid");
+    assert.equal(validateAdminToken(validProdToken), true, "Generated token must validate successfully");
+
+  } finally {
+    process.env.NODE_ENV = originalEnv;
+    if (originalSecret !== undefined) process.env.ADMIN_JWT_SECRET = originalSecret;
+    else delete process.env.ADMIN_JWT_SECRET;
+    if (originalPwd !== undefined) process.env.ADMIN_PASSWORD = originalPwd;
+    else delete process.env.ADMIN_PASSWORD;
+  }
+});
+
