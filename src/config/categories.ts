@@ -205,7 +205,7 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
       },
       {
         key: "storageSize",
-        label: "Capacité de stockage principale",
+        label: "Capacité de stockage",
         type: "select",
         options: [
           { label: "256 Go", value: "256 Go" },
@@ -264,11 +264,10 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryDefinition> = {
         label: "Système d'exploitation",
         type: "select",
         options: [
-          { label: "Windows 10 Professionnel", value: "win10_pro" },
+          { label: "Windows 10 Pro", value: "win10_pro" },
+          { label: "Windows 11 Pro", value: "win11_pro" },
           { label: "Windows 10 Famille", value: "win10_home" },
-          { label: "Windows 11 Professionnel", value: "win11_pro" },
           { label: "Windows 11 Famille", value: "win11_home" },
-          { label: "Windows 10 / 11 Pro (Au choix)", value: "win10_11_pro" },
           { label: "macOS Sonoma / Sequoia", value: "macos" },
           { label: "macOS Ventura / Monterey / Antérieur", value: "macos_other" },
           { label: "ChromeOS (Google Chromebook)", value: "chromeos" },

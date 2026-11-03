@@ -197,10 +197,10 @@ export default function ProductDrawer({
       details.push({ label: 'Marque', value: currentProduct.brand });
     }
 
-    // 2. Modèle ou nom de produit
+    // 2. Modèle
     details.push({
-      label: 'Nom de modèle',
-      value: currentProduct.name
+      label: 'Modèle',
+      value: currentProduct.specs?.model || currentProduct.name
     });
 
     // 3. État / Condition
@@ -213,12 +213,13 @@ export default function ProductDrawer({
       details.push({ label: 'État du produit', value: condLabel });
     }
 
-    // 4. Capacité de stockage sélectionnée (SEULEMENT si la catégorie supporte les variantes)
+    // 4. Capacité de stockage (dynamique ou statique)
     const supportsStorage = isStorageVariantCategory(currentProduct.category) || currentProduct.category === 'phones';
-    if (supportsStorage && selectedCapacity) {
+    const effectiveCapacity = selectedCapacity || currentProduct.specs?.storageSize || currentProduct.specs?.storage;
+    if (supportsStorage && effectiveCapacity) {
       details.push({
         label: 'Capacité de stockage',
-        value: String(selectedCapacity)
+        value: String(effectiveCapacity)
       });
     }
 
@@ -227,6 +228,11 @@ export default function ProductDrawer({
     if (catConfig && catConfig.fields && currentProduct.specs) {
       catConfig.fields.forEach(field => {
         if (isOtherPhone && (field.key === 'simFormat' || field.key === 'sim')) return;
+
+        // Éviter les doublons de Modèle et de Capacité de stockage déjà affichés ci-dessus
+        if (field.key === 'model') return;
+        if ((field.key === 'storageSize' || field.key === 'storage') && details.some(d => d.label === 'Capacité de stockage')) return;
+
         const val = currentProduct.specs[field.key];
         if (val !== undefined && val !== null && String(val).trim() !== '') {
           let displayVal = String(val);
@@ -268,7 +274,14 @@ export default function ProductDrawer({
       details.push({ label: 'Accessoires inclus', value: currentProduct.accessories });
     }
 
-    return details;
+    // Déduplication finale par label normalisé (garantit zéro doublon)
+    const seen = new Set();
+    return details.filter(item => {
+      const key = item.label.toLowerCase().trim();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }, [currentProduct, selectedCapacity, isOtherPhone]);
 
   const visibleDetails = showAllSpecs ? technicalDetails : technicalDetails.slice(0, 7);
