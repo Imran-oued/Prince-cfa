@@ -6,8 +6,6 @@ import { products as defaultProducts } from "@/data/products";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import ProductDrawer from "@/components/ProductDrawer";
-import { getProducts, getDeletedProductIds } from "@/lib/firestore";
-import { isFirebaseConfigured } from "@/lib/firebase";
 import { getProductImageBg, isAppleBrand } from "@/lib/productValidation";
 import { formatPrice } from "@/lib/formatPrice";
 import { SHOP_CONFIG } from "@/config/shop";
@@ -538,11 +536,11 @@ export default function Home() {
     }
   }, []);
 
-  // Charger les produits : API en priorité, Firebase en repli, et fallback localStorage 100% sécurisé
+  // Charger les produits : API serveur en priorité (cache mémoire), puis fallback localStorage
   useEffect(() => {
     async function loadProducts() {
       try {
-        // 1. Essayer l'API serveur optimisée avec cache mémoire (protection anti-épuisement des quotas Firestore)
+        // 1. Essayer l'API serveur optimisée avec cache mémoire (protection et isolation complète de Firestore)
         const apiRes = await fetch("/api/products", { 
           cache: "no-store",
           headers: {
@@ -566,41 +564,11 @@ export default function Home() {
             }
           }
         }
-
-        // 2. Repli direct sur Firebase SDK si l'API est indisponible (avec timeout de sécurité de 3 secondes)
-        if (isFirebaseConfigured()) {
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error("Timeout Firestore")), 10000)
-          );
-          const [firebaseProducts, deletedIds] = (await Promise.race([
-            Promise.all([
-              getProducts().catch(() => null),
-              getDeletedProductIds().catch(() => new Set<string>())
-            ]),
-            timeoutPromise
-          ])) as [Product[] | null, Set<string> | null];
-
-          if (firebaseProducts && firebaseProducts.length > 0) {
-            const deletedSet = deletedIds instanceof Set ? deletedIds : new Set<string>();
-            const activeFirebase = firebaseProducts.filter((p: Product) => !deletedSet.has(String(p.id)));
-            // Fusionner Firebase avec les nouveaux produits par défaut non présents et non supprimés
-            const existingIds = new Set(firebaseProducts.map((p: Product) => String(p.id)));
-            const newDefaults = defaultProducts.filter(dp => !existingIds.has(String(dp.id)) && !deletedSet.has(String(dp.id)));
-            const combined = sanitizeCatalogProducts([...activeFirebase, ...newDefaults]);
-            setLocalProducts(combined);
-            try {
-              localStorage.setItem("prince_cfa_products", JSON.stringify(combined));
-            } catch (e) {
-              console.warn("Storage warning:", e);
-            }
-            return;
-          }
-        }
       } catch (err) {
-        console.warn("API/Firebase non disponible, utilisation du fallback local:", err);
+        console.warn("API serveur non disponible, utilisation du fallback local:", err);
       }
 
-      // 3. Fallback sécurisé : localStorage (protégé contre corruptions de cache)
+      // 2. Fallback sécurisé : localStorage (protégé contre corruptions de cache)
       try {
         const saved = typeof window !== "undefined" ? localStorage.getItem("prince_cfa_products") : null;
         if (saved) {

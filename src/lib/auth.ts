@@ -1,8 +1,21 @@
 import crypto from "crypto";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin";
-const AUTH_SECRET = process.env.ADMIN_JWT_SECRET || `${ADMIN_PASSWORD}:prince_cfa_secure_key_2026`;
+const IS_PROD = process.env.NODE_ENV === "production";
+
+// En production, interdiction formelle d'utiliser "admin" comme mot de passe par défaut
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || (IS_PROD ? "" : "admin");
+const AUTH_SECRET =
+  process.env.ADMIN_JWT_SECRET ||
+  `${ADMIN_PASSWORD || "dev_secret"}:prince_cfa_secure_key_2026`;
 export const ADMIN_COOKIE_NAME = "prince_cfa_admin_auth";
+
+// Avertissement de sécurité au démarrage si la configuration de production est incomplète
+if (IS_PROD && (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin")) {
+  console.warn(
+    "[SÉCURITÉ CRITIQUE] La variable ADMIN_PASSWORD n'est pas définie ou utilise 'admin' en production ! " +
+    "Veuillez définir un mot de passe robuste dans vos variables d'environnement Hostinger."
+  );
+}
 
 // Durée de validité du token admin : 4 heures (session de travail sécurisée)
 const TOKEN_TTL_MS = 4 * 60 * 60 * 1000;
@@ -32,10 +45,19 @@ export function timingSafeEqualString(a: string, b: string): boolean {
 }
 
 /**
- * Vérifier le mot de passe admin de façon cryptographiquement sûre
+ * Vérifier le mot de passe admin de façon cryptographiquement sûre.
+ * En production, le mot de passe "admin" est strictement refusé.
  */
 export function verifyAdminPassword(password: string): boolean {
   if (!password || typeof password !== "string") return false;
+  if (IS_PROD) {
+    if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin") {
+      console.error(
+        "[SÉCURITÉ] Connexion refusée : ADMIN_PASSWORD absent ou non sécurisé en environnement de production."
+      );
+      return false;
+    }
+  }
   return timingSafeEqualString(password, ADMIN_PASSWORD);
 }
 

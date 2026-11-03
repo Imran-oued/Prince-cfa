@@ -4,11 +4,17 @@ import { VAPID_CONFIG } from "@/config/vapid";
 import { savePushSubscription, removePushSubscription } from "@/lib/firestore";
 
 // Initialisation VAPID
-webpush.setVapidDetails(
-  VAPID_CONFIG.subject,
-  VAPID_CONFIG.publicKey,
-  VAPID_CONFIG.privateKey
-);
+if (VAPID_CONFIG.publicKey && VAPID_CONFIG.privateKey) {
+  try {
+    webpush.setVapidDetails(
+      VAPID_CONFIG.subject,
+      VAPID_CONFIG.publicKey,
+      VAPID_CONFIG.privateKey
+    );
+  } catch (err) {
+    console.warn("[push-subscription] Avertissement initialisation VAPID:", err);
+  }
+}
 
 export async function GET() {
   return NextResponse.json({

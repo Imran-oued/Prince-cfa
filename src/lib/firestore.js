@@ -12,6 +12,7 @@ import {
   runTransaction,
 } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "./firebase.js";
+import { getAdminFirestore } from "./firebaseAdmin.ts";
 
 const PRODUCTS_COLLECTION = "products";
 const DELETED_PRODUCTS_COLLECTION = "deleted_products";
@@ -27,6 +28,19 @@ const memoryDeletedProductIds = new Set();
  */
 export async function getDeletedProductIds() {
   const ids = new Set(memoryDeletedProductIds);
+
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      const snapshot = await adminDb.collection(DELETED_PRODUCTS_COLLECTION).get();
+      snapshot.docs.forEach((docSnap) => ids.add(String(docSnap.id)));
+      return ids;
+    } catch (error) {
+      console.warn("Avertissement Admin Firestore lors de la récupération des produits supprimés:", error);
+      return ids;
+    }
+  }
+
   if (!isFirebaseConfigured()) return ids;
 
   try {
@@ -44,6 +58,26 @@ export async function getDeletedProductIds() {
  * @returns {Promise<any[] | null>}
  */
 export async function getProducts() {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      const snapshot = await adminDb.collection(PRODUCTS_COLLECTION).get();
+      const products = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          ...data,
+          id: docSnap.id, // L'ID du document Firestore fait TOUJOURS autorité
+        };
+      });
+      // Tri en mémoire ultra-rapide et résilient sans dépendance d'index Firestore
+      products.sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "fr", { sensitivity: "base" }));
+      return products;
+    } catch (error) {
+      console.error("Erreur Admin Firestore lors du chargement des produits:", error);
+      return null;
+    }
+  }
+
   if (!isFirebaseConfigured()) return null;
 
   try {
@@ -70,12 +104,26 @@ export async function getProducts() {
  * @returns {Promise<any | null>}
  */
 export async function getProduct(id) {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      const docSnap = await adminDb.collection(PRODUCTS_COLLECTION).doc(id).get();
+      if (docSnap.exists) {
+        return { ...docSnap.data(), id: docSnap.id };
+      }
+      return null;
+    } catch (error) {
+      console.error("Erreur Admin Firestore lors du chargement du produit:", error);
+      return null;
+    }
+  }
+
   if (!isFirebaseConfigured()) return null;
 
   try {
     const docRef = doc(db, PRODUCTS_COLLECTION, id);
     const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
+    if (typeof docSnap.exists === "function" ? docSnap.exists() : docSnap.exists) {
       return { ...docSnap.data(), id: docSnap.id };
     }
     return null;
@@ -92,11 +140,39 @@ export async function addProduct(productData) {
   const targetId = productData?.id ? String(productData.id) : null;
   if (targetId) {
     memoryDeletedProductIds.delete(targetId);
-    if (isFirebaseConfigured()) {
-      try {
-        await deleteDoc(doc(db, DELETED_PRODUCTS_COLLECTION, targetId));
-      } catch {}
+  }
+
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      if (targetId) {
+        try {
+          await adminDb.collection(DELETED_PRODUCTS_COLLECTION).doc(targetId).delete();
+        } catch {}
+      }
+      const docRef = targetId
+        ? adminDb.collection(PRODUCTS_COLLECTION).doc(targetId)
+        : adminDb.collection(PRODUCTS_COLLECTION).doc();
+
+      const finalId = docRef.id;
+      await docRef.set({
+        ...productData,
+        id: finalId,
+        createdAt: productData.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+
+      return finalId;
+    } catch (error) {
+      console.error("Erreur Admin Firestore lors de l'ajout du produit:", error);
+      return null;
     }
+  }
+
+  if (targetId && isFirebaseConfigured()) {
+    try {
+      await deleteDoc(doc(db, DELETED_PRODUCTS_COLLECTION, targetId));
+    } catch {}
   }
 
   if (!isFirebaseConfigured()) return targetId || null;
@@ -130,6 +206,25 @@ export async function updateProduct(id, productData) {
   const strId = String(id);
   memoryDeletedProductIds.delete(strId);
 
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      try {
+        await adminDb.collection(DELETED_PRODUCTS_COLLECTION).doc(strId).delete();
+      } catch {}
+
+      await adminDb.collection(PRODUCTS_COLLECTION).doc(strId).set({
+        ...productData,
+        id: strId,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+      return true;
+    } catch (error) {
+      console.error("Erreur Admin Firestore lors de la mise à jour du produit:", error);
+      return false;
+    }
+  }
+
   if (isFirebaseConfigured()) {
     try {
       await deleteDoc(doc(db, DELETED_PRODUCTS_COLLECTION, strId));
@@ -161,6 +256,21 @@ export async function deleteProduct(id) {
   const strId = String(id);
   memoryDeletedProductIds.add(strId);
 
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      await adminDb.collection(PRODUCTS_COLLECTION).doc(strId).delete();
+      await adminDb.collection(DELETED_PRODUCTS_COLLECTION).doc(strId).set({
+        id: strId,
+        deletedAt: new Date().toISOString(),
+      });
+      return true;
+    } catch (error) {
+      console.error("Erreur Admin Firestore lors de la suppression du produit:", error);
+      return false;
+    }
+  }
+
   if (!isFirebaseConfigured()) return true;
 
   try {
@@ -188,6 +298,31 @@ export async function deleteProduct(id) {
  * - Met à jour ou insère chaque produit avec son ID stable
  */
 export async function seedProducts(productsToSync) {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      const batch = adminDb.batch();
+      for (const product of productsToSync) {
+        const { id, ...data } = product;
+        const strId = String(id);
+        memoryDeletedProductIds.delete(strId);
+        const prodRef = adminDb.collection(PRODUCTS_COLLECTION).doc(strId);
+        batch.set(prodRef, {
+          ...data,
+          updatedAt: new Date().toISOString(),
+        }, { merge: true });
+        const delRef = adminDb.collection(DELETED_PRODUCTS_COLLECTION).doc(strId);
+        batch.delete(delRef);
+      }
+      await batch.commit();
+      console.log(`✅ ${productsToSync.length} produits synchronisés (Admin SDK batch) dans Firestore.`);
+      return true;
+    } catch (error) {
+      console.error("Erreur Admin Firestore lors de la synchronisation:", error);
+      return false;
+    }
+  }
+
   if (!isFirebaseConfigured()) return false;
 
   try {
@@ -277,7 +412,10 @@ export async function createOrder(orderData) {
     };
 
     // 1. Sauvegarde dans Firestore si configuré
-    if (isFirebaseConfigured()) {
+    const adminDb = getAdminFirestore();
+    if (adminDb) {
+      await adminDb.collection(ORDERS_COLLECTION).doc(orderId).set(orderPayload);
+    } else if (isFirebaseConfigured()) {
       await setDoc(doc(db, ORDERS_COLLECTION, orderId), orderPayload);
     }
 
@@ -308,7 +446,16 @@ export async function createOrder(orderData) {
  * @returns {Promise<any[]>}
  */
 export async function getOrders() {
-  if (isFirebaseConfigured()) {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      const snapshot = await adminDb.collection(ORDERS_COLLECTION).orderBy("createdAt", "desc").get();
+      const cloudOrders = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      return cloudOrders;
+    } catch (err) {
+      console.warn("Erreur chargement Admin Firestore orders:", err);
+    }
+  } else if (isFirebaseConfigured()) {
     try {
       const q = query(
         collection(db, ORDERS_COLLECTION),
@@ -356,11 +503,21 @@ export async function getOrders() {
 export async function getOrderById(orderId) {
   if (!orderId) return null;
 
-  if (isFirebaseConfigured()) {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      const snap = await adminDb.collection(ORDERS_COLLECTION).doc(orderId).get();
+      if (snap.exists) {
+        return { id: snap.id, ...snap.data() };
+      }
+    } catch (err) {
+      console.warn("Erreur Admin Firestore getOrderById:", err);
+    }
+  } else if (isFirebaseConfigured()) {
     try {
       const docRef = doc(db, ORDERS_COLLECTION, orderId);
       const snap = await getDoc(docRef);
-      if (snap.exists()) {
+      if (typeof snap.exists === "function" ? snap.exists() : snap.exists) {
         return { id: snap.id, ...snap.data() };
       }
     } catch (err) {
@@ -436,7 +593,15 @@ export async function confirmOrderPayment(orderId, { confirmedBy, transactionRef
     ]
   };
 
-  if (isFirebaseConfigured()) {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      await adminDb.collection(ORDERS_COLLECTION).doc(orderId).set(updatedOrder, { merge: true });
+    } catch (err) {
+      console.error("Erreur Admin Firestore confirmOrderPayment:", err);
+      return { success: false, error: "Échec de sauvegarde Firestore." };
+    }
+  } else if (isFirebaseConfigured()) {
     try {
       await setDoc(doc(db, ORDERS_COLLECTION, orderId), updatedOrder, { merge: true });
     } catch (err) {
@@ -502,7 +667,15 @@ export async function cancelOrderPaymentConfirmation(orderId, { adminUser = "Adm
     ]
   };
 
-  if (isFirebaseConfigured()) {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      await adminDb.collection(ORDERS_COLLECTION).doc(orderId).set(updatedOrder, { merge: true });
+    } catch (err) {
+      console.error("Erreur Admin Firestore cancelOrderPaymentConfirmation:", err);
+      return { success: false, error: "Échec de sauvegarde Firestore." };
+    }
+  } else if (isFirebaseConfigured()) {
     try {
       await setDoc(doc(db, ORDERS_COLLECTION, orderId), updatedOrder, { merge: true });
     } catch (err) {
@@ -543,7 +716,15 @@ export async function deleteOrder(orderId) {
     }
   }
 
-  if (isFirebaseConfigured()) {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      await adminDb.collection(ORDERS_COLLECTION).doc(orderId).delete();
+    } catch (err) {
+      console.error("Erreur Admin Firestore deleteOrder:", err);
+      return { success: false, error: "Échec de suppression Firestore." };
+    }
+  } else if (isFirebaseConfigured()) {
     try {
       const docRef = doc(db, ORDERS_COLLECTION, orderId);
       await deleteDoc(docRef);
@@ -611,7 +792,15 @@ export async function updateOrderStatus(orderId, newStatus, adminUser, note = ""
     ]
   };
 
-  if (isFirebaseConfigured()) {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      await adminDb.collection(ORDERS_COLLECTION).doc(orderId).set(updatedOrder, { merge: true });
+    } catch (err) {
+      console.error("Erreur Admin Firestore updateOrderStatus:", err);
+      return { success: false, error: "Échec de sauvegarde Firestore." };
+    }
+  } else if (isFirebaseConfigured()) {
     try {
       await setDoc(doc(db, ORDERS_COLLECTION, orderId), updatedOrder, { merge: true });
     } catch (err) {
@@ -663,7 +852,15 @@ export async function updateOrderInternalTracking(orderId, trackingData = {}) {
     }
   };
 
-  if (isFirebaseConfigured()) {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      await adminDb.collection(ORDERS_COLLECTION).doc(orderId).set(updatedOrder, { merge: true });
+    } catch (err) {
+      console.error("Erreur Admin Firestore updateOrderInternalTracking:", err);
+      return { success: false, error: "Échec de sauvegarde Firestore." };
+    }
+  } else if (isFirebaseConfigured()) {
     try {
       await setDoc(doc(db, ORDERS_COLLECTION, orderId), updatedOrder, { merge: true });
     } catch (err) {
@@ -696,18 +893,18 @@ export async function updateOrderInternalTracking(orderId, trackingData = {}) {
 export async function checkAndReserveStock(items) {
   if (!items || !items.length) return { success: true };
 
-  // Si Firestore est configuré, on vérifie et décrémente de manière transactionnelle et atomique
-  if (isFirebaseConfigured()) {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
     try {
-      await runTransaction(db, async (transaction) => {
-        // Phase 1 : Toutes les lectures doivent être exécutées en premier (règle stricte Firestore)
+      await adminDb.runTransaction(async (transaction) => {
+        // Phase 1 : Toutes les lectures transactionnelles
         const updates = [];
         for (const item of items) {
           const prodId = String(item.productId);
-          const docRef = doc(db, PRODUCTS_COLLECTION, prodId);
+          const docRef = adminDb.collection(PRODUCTS_COLLECTION).doc(prodId);
           const snap = await transaction.get(docRef);
 
-          if (snap.exists()) {
+          if (snap.exists) {
             const data = snap.data();
             if (data.inStock === false) {
               throw new Error(`Stock insuffisant : le produit "${item.name}" est en rupture de stock.`);
@@ -733,6 +930,50 @@ export async function checkAndReserveStock(items) {
           });
         }
       });
+      return { success: true };
+    } catch (err) {
+      if (err.message && (err.message.includes("Stock insuffisant") || err.message.includes("rupture de stock"))) {
+        return { success: false, error: err.message };
+      }
+      console.warn("Avertissement gestion de stock Admin Firestore transactionnelle:", err);
+    }
+  } else if (isFirebaseConfigured()) {
+    try {
+      await runTransaction(db, async (transaction) => {
+        // Phase 1 : Toutes les lectures doivent être exécutées en premier (règle stricte Firestore)
+        const updates = [];
+        for (const item of items) {
+          const prodId = String(item.productId);
+          const docRef = doc(db, PRODUCTS_COLLECTION, prodId);
+          const snap = await transaction.get(docRef);
+
+          if (typeof snap.exists === "function" ? snap.exists() : snap.exists) {
+            const data = snap.data();
+            if (data.inStock === false) {
+              throw new Error(`Stock insuffisant : le produit "${item.name}" est en rupture de stock.`);
+            }
+            if (typeof data.stock === "number") {
+              if (data.stock < item.quantity) {
+                throw new Error(`Stock insuffisant pour "${item.name}". Disponible: ${data.stock}, demandé: ${item.quantity}.`);
+              }
+              updates.push({
+                docRef,
+                newStock: data.stock - item.quantity
+              });
+            }
+          }
+        }
+
+        // Phase 2 : Toutes les écritures atomiques
+        const now = new Date().toISOString();
+        for (const u of updates) {
+          transaction.update(u.docRef, {
+            stock: u.newStock,
+            updatedAt: now
+          });
+        }
+      });
+      return { success: true };
     } catch (err) {
       if (err.message && (err.message.includes("Stock insuffisant") || err.message.includes("rupture de stock"))) {
         return { success: false, error: err.message };
@@ -749,7 +990,28 @@ export async function checkAndReserveStock(items) {
  * @param {Array<{ productId: string|number, quantity: number }>} items
  */
 export async function restoreStock(items) {
-  if (!items || !items.length || !isFirebaseConfigured()) return;
+  if (!items || !items.length) return;
+
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      for (const item of items) {
+        const prodId = String(item.productId);
+        const prodDoc = await getProduct(prodId);
+        if (prodDoc && typeof prodDoc.stock === "number") {
+          await adminDb.collection(PRODUCTS_COLLECTION).doc(prodId).update({
+            stock: prodDoc.stock + item.quantity,
+            updatedAt: new Date().toISOString()
+          });
+        }
+      }
+      return;
+    } catch (err) {
+      console.warn("Erreur Admin restitution de stock:", err);
+    }
+  }
+
+  if (!isFirebaseConfigured()) return;
 
   try {
     for (const item of items) {
@@ -777,60 +1039,33 @@ export async function restoreStock(items) {
 export async function checkStockAvailability(items) {
   if (!items || !items.length) return { success: true };
 
-  if (isFirebaseConfigured()) {
-    try {
-      for (const item of items) {
-        const prodId = String(item.productId);
-        const prodDoc = await getProduct(prodId);
-        if (prodDoc) {
-          if (prodDoc.inStock === false) {
-            return {
-              success: false,
-              error: `Le produit "${item.name}" est actuellement en rupture de stock.`
-            };
-          }
-          if (typeof prodDoc.stock === "number" && prodDoc.stock <= 0) {
-            return {
-              success: false,
-              error: `Le produit "${item.name}" est en rupture de stock.`
-            };
-          }
+  try {
+    for (const item of items) {
+      const prodId = String(item.productId);
+      const prodDoc = await getProduct(prodId);
+      if (prodDoc) {
+        if (prodDoc.inStock === false) {
+          return {
+            success: false,
+            error: `Le produit "${item.name}" est actuellement en rupture de stock.`
+          };
+        }
+        if (typeof prodDoc.stock === "number" && prodDoc.stock <= 0) {
+          return {
+            success: false,
+            error: `Le produit "${item.name}" est en rupture de stock.`
+          };
         }
       }
-    } catch (err) {
-      console.warn("Avertissement contrôle disponibilité:", err);
     }
+  } catch (err) {
+    console.warn("Avertissement contrôle disponibilité:", err);
   }
 
   return { success: true };
 }
 
-/**
- * Délai par défaut en heures avant l'expiration d'une commande non payée (48h)
- */
-export const ORDER_EXPIRATION_HOURS = 48;
-
-/**
- * Vérifie si une commande est expirée (non payée après 48h)
- * @param {any} order
- * @param {number} [expirationHours=48]
- * @returns {boolean}
- */
-export function isOrderExpired(order, expirationHours = ORDER_EXPIRATION_HOURS) {
-  if (!order || !order.createdAt) return false;
-  // Si le paiement est confirmé, la commande est active et ne peut jamais expirer
-  if (order.payment?.status === "confirme") return false;
-  // Si la commande est déjà en cours de préparation, en livraison ou livrée
-  if (["paye_en_preparation", "en_livraison", "livre"].includes(order.orderStatus)) return false;
-  // Si déjà annulée manuellement
-  if (order.orderStatus === "annule") return false;
-
-  const createdAtMs = new Date(order.createdAt).getTime();
-  if (isNaN(createdAtMs) || createdAtMs <= 0) return false;
-
-  const ageMs = Date.now() - createdAtMs;
-  return ageMs > expirationHours * 60 * 60 * 1000;
-}
+export { ORDER_EXPIRATION_HOURS, isOrderExpired } from "./orderUtils.ts";
 
 // --- GESTION DES ABONNEMENTS PUSH NOTIFICATIONS (VAPID / iOS / Android) ---
 export const PUSH_SUBSCRIPTIONS_COLLECTION = "push_subscriptions";
@@ -862,6 +1097,17 @@ export async function savePushSubscription(subscription, userAgent = "") {
 
   memoryPushSubscriptions.set(docId, data);
 
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      await adminDb.collection(PUSH_SUBSCRIPTIONS_COLLECTION).doc(docId).set(data, { merge: true });
+      return true;
+    } catch (error) {
+      console.warn("Erreur Admin sauvegarde subscription push:", error);
+      return false;
+    }
+  }
+
   if (!isFirebaseConfigured()) return true;
 
   try {
@@ -878,6 +1124,24 @@ export async function savePushSubscription(subscription, userAgent = "") {
  * Récupère tous les abonnements push enregistrés
  */
 export async function getPushSubscriptions() {
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      const snapshot = await adminDb.collection(PUSH_SUBSCRIPTIONS_COLLECTION).get();
+      const list = [];
+      snapshot.docs.forEach((d) => {
+        const data = d.data();
+        if (data && data.endpoint) {
+          list.push(data);
+        }
+      });
+      return list;
+    } catch (error) {
+      console.warn("Erreur Admin récupération subscriptions push:", error);
+      return Array.from(memoryPushSubscriptions.values());
+    }
+  }
+
   if (!isFirebaseConfigured()) {
     return Array.from(memoryPushSubscriptions.values());
   }
@@ -905,6 +1169,17 @@ export async function removePushSubscription(endpoint) {
   if (!endpoint) return false;
   const docId = hashEndpoint(endpoint);
   memoryPushSubscriptions.delete(docId);
+
+  const adminDb = getAdminFirestore();
+  if (adminDb) {
+    try {
+      await adminDb.collection(PUSH_SUBSCRIPTIONS_COLLECTION).doc(docId).delete();
+      return true;
+    } catch (error) {
+      console.warn("Erreur Admin suppression subscription push:", error);
+      return false;
+    }
+  }
 
   if (!isFirebaseConfigured()) return true;
 

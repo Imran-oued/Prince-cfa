@@ -67,7 +67,7 @@ import {
   normalizeProductSpecs,
   isAppleBrand
 } from "@/lib/productValidation";
-import { isOrderExpired } from "@/lib/firestore";
+import { isOrderExpired } from "@/lib/orderUtils";
 
 function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (

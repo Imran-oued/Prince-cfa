@@ -3,11 +3,17 @@ import { VAPID_CONFIG } from "@/config/vapid";
 import { getPushSubscriptions, removePushSubscription } from "@/lib/firestore";
 
 // Initialiser VAPID pour l'envoi vers les serveurs Apple (web.push.apple.com) et Google (fcm.googleapis.com)
-webpush.setVapidDetails(
-  VAPID_CONFIG.subject,
-  VAPID_CONFIG.publicKey,
-  VAPID_CONFIG.privateKey
-);
+if (VAPID_CONFIG.publicKey && VAPID_CONFIG.privateKey) {
+  try {
+    webpush.setVapidDetails(
+      VAPID_CONFIG.subject,
+      VAPID_CONFIG.publicKey,
+      VAPID_CONFIG.privateKey
+    );
+  } catch (err) {
+    console.warn("[serverPush] Avertissement initialisation VAPID:", err);
+  }
+}
 
 export interface PushNotificationPayload {
   title: string;
