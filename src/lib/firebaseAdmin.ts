@@ -4,14 +4,17 @@ import { getFirestore, type Firestore } from "firebase-admin/firestore";
 let cachedApp: App | null = null;
 let cachedDb: Firestore | null = null;
 
+let hasLoggedProdWarning = false;
+
 /**
  * Détermine si les identifiants Firebase Admin sont configurés dans l'environnement serveur.
+ * Exige soit FIREBASE_SERVICE_ACCOUNT_KEY (JSON), soit FIREBASE_CLIENT_EMAIL ET FIREBASE_PRIVATE_KEY.
  */
 export function isAdminConfigured(): boolean {
   if (typeof window !== "undefined") return false;
   return Boolean(
     process.env.FIREBASE_SERVICE_ACCOUNT_KEY ||
-    (process.env.FIREBASE_CLIENT_EMAIL && (process.env.FIREBASE_PRIVATE_KEY || process.env.FIREBASE_PROJECT_ID))
+    (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY)
   );
 }
 
@@ -97,6 +100,14 @@ export function getAdminFirestore(): Firestore | null {
 
   const app = getAdminApp();
   if (!app) {
+    if (process.env.NODE_ENV === "production" && !hasLoggedProdWarning) {
+      hasLoggedProdWarning = true;
+      console.error(
+        "[SÉCURITÉ CRITIQUE] Firebase Admin n'est pas initialisé en production ! " +
+        "Veuillez définir FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL et FIREBASE_PRIVATE_KEY " +
+        "(ou FIREBASE_SERVICE_ACCOUNT_KEY) dans vos variables d'environnement Hostinger."
+      );
+    }
     return null;
   }
 
@@ -108,3 +119,4 @@ export function getAdminFirestore(): Firestore | null {
     return null;
   }
 }
+

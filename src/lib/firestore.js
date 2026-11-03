@@ -14,10 +14,12 @@ import {
 import { db, isFirebaseConfigured } from "./firebase.js";
 import { getAdminFirestore } from "./firebaseAdmin.ts";
 
+const isProduction = () => process.env.NODE_ENV === "production";
+
 const PRODUCTS_COLLECTION = "products";
 const DELETED_PRODUCTS_COLLECTION = "deleted_products";
 
-// Mémoire tampon en environnement serveur/test lorsque Firebase n'est pas configuré
+// Mémoire tampon en environnement de développement ou test (désactivée en production pour garantir la persistance réelle)
 const memoryOrders = new Map();
 const memoryDeletedProductIds = new Set();
 
@@ -41,16 +43,18 @@ export async function getDeletedProductIds() {
     }
   }
 
-  if (!isFirebaseConfigured()) return ids;
-
-  try {
-    const snapshot = await getDocs(collection(db, DELETED_PRODUCTS_COLLECTION));
-    snapshot.docs.forEach((docSnap) => ids.add(String(docSnap.id)));
-    return ids;
-  } catch (error) {
-    console.warn("Avertissement lors de la récupération des produits supprimés:", error);
-    return ids;
+  if (isFirebaseConfigured()) {
+    try {
+      const snapshot = await getDocs(collection(db, DELETED_PRODUCTS_COLLECTION));
+      snapshot.docs.forEach((docSnap) => ids.add(String(docSnap.id)));
+      return ids;
+    } catch (error) {
+      console.warn("Avertissement lors de la récupération des produits supprimés:", error);
+      return ids;
+    }
   }
+
+  return ids;
 }
 
 /**
@@ -66,7 +70,7 @@ export async function getProducts() {
         const data = docSnap.data();
         return {
           ...data,
-          id: docSnap.id, // L'ID du document Firestore fait TOUJOURS autorité
+          id: docSnap.id,
         };
       });
       // Tri en mémoire ultra-rapide et résilient sans dépendance d'index Firestore
@@ -78,24 +82,25 @@ export async function getProducts() {
     }
   }
 
-  if (!isFirebaseConfigured()) return null;
-
-  try {
-    const snapshot = await getDocs(collection(db, PRODUCTS_COLLECTION));
-    const products = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        ...data,
-        id: doc.id, // L'ID du document Firestore fait TOUJOURS autorité (évite les conflits d'ID imbriqués)
-      };
-    });
-    // Tri en mémoire ultra-rapide et résilient sans dépendance d'index Firestore
-    products.sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "fr", { sensitivity: "base" }));
-    return products;
-  } catch (error) {
-    console.error("Erreur lors du chargement des produits:", error);
-    return null;
+  if (isFirebaseConfigured()) {
+    try {
+      const snapshot = await getDocs(collection(db, PRODUCTS_COLLECTION));
+      const products = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          id: doc.id,
+        };
+      });
+      products.sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "fr", { sensitivity: "base" }));
+      return products;
+    } catch (error) {
+      console.error("Erreur lors du chargement des produits:", error);
+      return null;
+    }
   }
+
+  return null;
 }
 
 /**
@@ -118,19 +123,21 @@ export async function getProduct(id) {
     }
   }
 
-  if (!isFirebaseConfigured()) return null;
-
-  try {
-    const docRef = doc(db, PRODUCTS_COLLECTION, id);
-    const docSnap = await getDoc(docRef);
-    if (typeof docSnap.exists === "function" ? docSnap.exists() : docSnap.exists) {
-      return { ...docSnap.data(), id: docSnap.id };
+  if (isFirebaseConfigured()) {
+    try {
+      const docRef = doc(db, PRODUCTS_COLLECTION, id);
+      const docSnap = await getDoc(docRef);
+      if (typeof docSnap.exists === "function" ? docSnap.exists() : docSnap.exists) {
+        return { ...docSnap.data(), id: docSnap.id };
+      }
+      return null;
+    } catch (error) {
+      console.error("Erreur lors du chargement du produit:", error);
+      return null;
     }
-    return null;
-  } catch (error) {
-    console.error("Erreur lors du chargement du produit:", error);
-    return null;
   }
+
+  return null;
 }
 
 /**
@@ -175,28 +182,34 @@ export async function addProduct(productData) {
     } catch {}
   }
 
-  if (!isFirebaseConfigured()) return targetId || null;
+  if (isFirebaseConfigured()) {
+    try {
+      const docRef = targetId
+        ? doc(db, PRODUCTS_COLLECTION, targetId)
+        : doc(collection(db, PRODUCTS_COLLECTION));
 
-  try {
-    // Si un identifiant est déjà présent (généré côté client ou fourni), l'utiliser directement comme clé Firestore
-    // pour garantir une synchronisation parfaite entre l'ID du document et le champ interne id
-    const docRef = targetId
-      ? doc(db, PRODUCTS_COLLECTION, targetId)
-      : doc(collection(db, PRODUCTS_COLLECTION));
+      const finalId = docRef.id;
+      await setDoc(docRef, {
+        ...productData,
+        id: finalId,
+        createdAt: productData.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
 
-    const finalId = docRef.id;
-    await setDoc(docRef, {
-      ...productData,
-      id: finalId,
-      createdAt: productData.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }, { merge: true });
+      return finalId;
+    } catch (error) {
+      console.error("Erreur lors de l'ajout du produit:", error);
+      return null;
+    }
+  }
 
-    return finalId;
-  } catch (error) {
-    console.error("Erreur lors de l'ajout du produit:", error);
+  // Interdiction formelle du fallback factice en production
+  if (isProduction()) {
+    console.error("[SÉCURITÉ] addProduct refusé : base de données non connectée en production.");
     return null;
   }
+
+  return targetId || null;
 }
 
 /**
@@ -229,22 +242,28 @@ export async function updateProduct(id, productData) {
     try {
       await deleteDoc(doc(db, DELETED_PRODUCTS_COLLECTION, strId));
     } catch {}
+
+    try {
+      const docRef = doc(db, PRODUCTS_COLLECTION, strId);
+      await setDoc(docRef, {
+        ...productData,
+        id: strId,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du produit:", error);
+      return false;
+    }
   }
 
-  if (!isFirebaseConfigured()) return true;
-
-  try {
-    const docRef = doc(db, PRODUCTS_COLLECTION, strId);
-    await setDoc(docRef, {
-      ...productData,
-      id: strId,
-      updatedAt: new Date().toISOString(),
-    }, { merge: true });
-    return true;
-  } catch (error) {
-    console.error("Erreur lors de la mise à jour du produit:", error);
+  // Interdiction formelle du fallback factice en production
+  if (isProduction()) {
+    console.error("[SÉCURITÉ] updateProduct refusé : base de données non connectée en production.");
     return false;
   }
+
+  return true;
 }
 
 /**
@@ -271,25 +290,31 @@ export async function deleteProduct(id) {
     }
   }
 
-  if (!isFirebaseConfigured()) return true;
+  if (isFirebaseConfigured()) {
+    try {
+      const docRef = doc(db, PRODUCTS_COLLECTION, strId);
+      await deleteDoc(docRef);
 
-  try {
-    // 1. Supprimer le document de la collection des produits actifs
-    const docRef = doc(db, PRODUCTS_COLLECTION, strId);
-    await deleteDoc(docRef);
+      const deletedRef = doc(db, DELETED_PRODUCTS_COLLECTION, strId);
+      await setDoc(deletedRef, {
+        id: strId,
+        deletedAt: new Date().toISOString(),
+      });
 
-    // 2. Enregistrer l'ID dans la collection des produits supprimés (tombstone)
-    const deletedRef = doc(db, DELETED_PRODUCTS_COLLECTION, strId);
-    await setDoc(deletedRef, {
-      id: strId,
-      deletedAt: new Date().toISOString(),
-    });
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de la suppression du produit:", error);
+      return false;
+    }
+  }
 
-    return true;
-  } catch (error) {
-    console.error("Erreur lors de la suppression du produit:", error);
+  // Interdiction formelle du fallback factice en production
+  if (isProduction()) {
+    console.error("[SÉCURITÉ] deleteProduct refusé : base de données non connectée en production.");
     return false;
   }
+
+  return true;
 }
 
 /**
@@ -323,29 +348,31 @@ export async function seedProducts(productsToSync) {
     }
   }
 
-  if (!isFirebaseConfigured()) return false;
+  if (isFirebaseConfigured()) {
+    try {
+      for (const product of productsToSync) {
+        const { id, ...data } = product;
+        const strId = String(id);
+        memoryDeletedProductIds.delete(strId);
+        await setDoc(doc(db, PRODUCTS_COLLECTION, strId), {
+          ...data,
+          updatedAt: new Date().toISOString(),
+        }, { merge: true });
 
-  try {
-    for (const product of productsToSync) {
-      const { id, ...data } = product;
-      const strId = String(id);
-      memoryDeletedProductIds.delete(strId);
-      await setDoc(doc(db, PRODUCTS_COLLECTION, strId), {
-        ...data,
-        updatedAt: new Date().toISOString(),
-      }, { merge: true });
+        try {
+          await deleteDoc(doc(db, DELETED_PRODUCTS_COLLECTION, strId));
+        } catch {}
+      }
 
-      try {
-        await deleteDoc(doc(db, DELETED_PRODUCTS_COLLECTION, strId));
-      } catch {}
+      console.log(`✅ ${productsToSync.length} produits synchronisés (upsert sécurisé) dans Firestore.`);
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de la synchronisation Firestore:", error);
+      return false;
     }
-
-    console.log(`✅ ${productsToSync.length} produits synchronisés (upsert sécurisé) dans Firestore.`);
-    return true;
-  } catch (error) {
-    console.error("Erreur lors de la synchronisation Firestore:", error);
-    return false;
   }
+
+  return false;
 }
 
 // ==========================================
@@ -417,10 +444,18 @@ export async function createOrder(orderData) {
       await adminDb.collection(ORDERS_COLLECTION).doc(orderId).set(orderPayload);
     } else if (isFirebaseConfigured()) {
       await setDoc(doc(db, ORDERS_COLLECTION, orderId), orderPayload);
+    } else if (isProduction()) {
+      console.error("[SÉCURITÉ CRITIQUE] createOrder refusé : aucune base de données Firestore configurée en production. Interdiction formelle du fallback mémoire silencieux.");
+      return { 
+        success: false, 
+        error: "Service de commande temporairement indisponible (base de données non connectée en production)." 
+      };
     }
 
-    // Sauvegarde en mémoire vive pour le serveur de test/développement
-    memoryOrders.set(orderId, orderPayload);
+    // Sauvegarde en mémoire vive UNIQUEMENT en environnement de test/développement
+    if (!isProduction()) {
+      memoryOrders.set(orderId, orderPayload);
+    }
 
     // 2. Sauvegarde miroir dans localStorage pour résilience offline/client
     if (typeof window !== "undefined") {
@@ -454,6 +489,7 @@ export async function getOrders() {
       return cloudOrders;
     } catch (err) {
       console.warn("Erreur chargement Admin Firestore orders:", err);
+      if (isProduction()) return [];
     }
   } else if (isFirebaseConfigured()) {
     try {
@@ -475,7 +511,14 @@ export async function getOrders() {
       return cloudOrders;
     } catch (err) {
       console.warn("Erreur chargement Firestore orders, repli local:", err);
+      if (isProduction()) return [];
     }
+  }
+
+  // En production, refuser le repli silencieux si la base de données est absente
+  if (isProduction()) {
+    console.error("[SÉCURITÉ] getOrders : aucune base de données configurée en production.");
+    return [];
   }
 
   // Repli sur le cache local
@@ -510,8 +553,10 @@ export async function getOrderById(orderId) {
       if (snap.exists) {
         return { id: snap.id, ...snap.data() };
       }
+      return null;
     } catch (err) {
       console.warn("Erreur Admin Firestore getOrderById:", err);
+      if (isProduction()) return null;
     }
   } else if (isFirebaseConfigured()) {
     try {
@@ -520,9 +565,15 @@ export async function getOrderById(orderId) {
       if (typeof snap.exists === "function" ? snap.exists() : snap.exists) {
         return { id: snap.id, ...snap.data() };
       }
+      return null;
     } catch (err) {
       console.warn("Erreur Firestore getOrderById:", err);
+      if (isProduction()) return null;
     }
+  }
+
+  if (isProduction()) {
+    return null;
   }
 
   if (typeof window !== "undefined") {
@@ -608,6 +659,9 @@ export async function confirmOrderPayment(orderId, { confirmedBy, transactionRef
       console.error("Erreur Firestore confirmOrderPayment:", err);
       return { success: false, error: "Échec de sauvegarde Firestore." };
     }
+  } else if (isProduction()) {
+    console.error("[SÉCURITÉ] confirmOrderPayment refusé : base de données non connectée en production.");
+    return { success: false, error: "Opération impossible : base de données non disponible en production." };
   }
 
   if (typeof window !== "undefined") {
@@ -621,7 +675,9 @@ export async function confirmOrderPayment(orderId, { confirmedBy, transactionRef
     }
   }
 
-  memoryOrders.set(orderId, updatedOrder);
+  if (!isProduction()) {
+    memoryOrders.set(orderId, updatedOrder);
+  }
 
   return { success: true, order: updatedOrder };
 }
@@ -682,6 +738,9 @@ export async function cancelOrderPaymentConfirmation(orderId, { adminUser = "Adm
       console.error("Erreur Firestore cancelOrderPaymentConfirmation:", err);
       return { success: false, error: "Échec de sauvegarde Firestore." };
     }
+  } else if (isProduction()) {
+    console.error("[SÉCURITÉ] cancelOrderPaymentConfirmation refusé : base de données non connectée en production.");
+    return { success: false, error: "Opération impossible : base de données non disponible en production." };
   }
 
   if (typeof window !== "undefined") {
@@ -695,7 +754,9 @@ export async function cancelOrderPaymentConfirmation(orderId, { adminUser = "Adm
     }
   }
 
-  memoryOrders.set(orderId, updatedOrder);
+  if (!isProduction()) {
+    memoryOrders.set(orderId, updatedOrder);
+  }
 
   return { success: true, order: updatedOrder };
 }
@@ -732,6 +793,9 @@ export async function deleteOrder(orderId) {
       console.error("Erreur Firestore deleteOrder:", err);
       return { success: false, error: "Échec de suppression Firestore." };
     }
+  } else if (isProduction()) {
+    console.error("[SÉCURITÉ] deleteOrder refusé : base de données non connectée en production.");
+    return { success: false, error: "Opération impossible : base de données non disponible en production." };
   }
 
   if (typeof window !== "undefined") {
@@ -747,7 +811,9 @@ export async function deleteOrder(orderId) {
     }
   }
 
-  memoryOrders.delete(orderId);
+  if (!isProduction()) {
+    memoryOrders.delete(orderId);
+  }
 
   return { success: true };
 }
@@ -807,6 +873,9 @@ export async function updateOrderStatus(orderId, newStatus, adminUser, note = ""
       console.error("Erreur Firestore updateOrderStatus:", err);
       return { success: false, error: "Échec de sauvegarde Firestore." };
     }
+  } else if (isProduction()) {
+    console.error("[SÉCURITÉ] updateOrderStatus refusé : base de données non connectée en production.");
+    return { success: false, error: "Opération impossible : base de données non disponible en production." };
   }
 
   if (typeof window !== "undefined") {
@@ -820,7 +889,9 @@ export async function updateOrderStatus(orderId, newStatus, adminUser, note = ""
     }
   }
 
-  memoryOrders.set(orderId, updatedOrder);
+  if (!isProduction()) {
+    memoryOrders.set(orderId, updatedOrder);
+  }
 
   return { success: true, order: updatedOrder };
 }
@@ -867,6 +938,9 @@ export async function updateOrderInternalTracking(orderId, trackingData = {}) {
       console.error("Erreur Firestore updateOrderInternalTracking:", err);
       return { success: false, error: "Échec de sauvegarde Firestore." };
     }
+  } else if (isProduction()) {
+    console.error("[SÉCURITÉ] updateOrderInternalTracking refusé : base de données non connectée en production.");
+    return { success: false, error: "Opération impossible : base de données non disponible en production." };
   }
 
   if (typeof window !== "undefined") {
@@ -880,7 +954,9 @@ export async function updateOrderInternalTracking(orderId, trackingData = {}) {
     }
   }
 
-  memoryOrders.set(orderId, updatedOrder);
+  if (!isProduction()) {
+    memoryOrders.set(orderId, updatedOrder);
+  }
 
   return { success: true, order: updatedOrder };
 }
@@ -1011,21 +1087,21 @@ export async function restoreStock(items) {
     }
   }
 
-  if (!isFirebaseConfigured()) return;
-
-  try {
-    for (const item of items) {
-      const prodId = String(item.productId);
-      const prodDoc = await getProduct(prodId);
-      if (prodDoc && typeof prodDoc.stock === "number") {
-        await updateDoc(doc(db, PRODUCTS_COLLECTION, prodId), {
-          stock: prodDoc.stock + item.quantity,
-          updatedAt: new Date().toISOString()
-        });
+  if (isFirebaseConfigured()) {
+    try {
+      for (const item of items) {
+        const prodId = String(item.productId);
+        const prodDoc = await getProduct(prodId);
+        if (prodDoc && typeof prodDoc.stock === "number") {
+          await updateDoc(doc(db, PRODUCTS_COLLECTION, prodId), {
+            stock: prodDoc.stock + item.quantity,
+            updatedAt: new Date().toISOString()
+          });
+        }
       }
+    } catch (err) {
+      console.warn("Erreur restitution de stock:", err);
     }
-  } catch (err) {
-    console.warn("Erreur restitution de stock:", err);
   }
 }
 
@@ -1065,6 +1141,7 @@ export async function checkStockAvailability(items) {
   return { success: true };
 }
 
+// Re-exportation des utilitaires d'expiration pour la rétro-compatibilité
 export { ORDER_EXPIRATION_HOURS, isOrderExpired } from "./orderUtils.ts";
 
 // --- GESTION DES ABONNEMENTS PUSH NOTIFICATIONS (VAPID / iOS / Android) ---
@@ -1095,8 +1172,6 @@ export async function savePushSubscription(subscription, userAgent = "") {
     updatedAt: new Date().toISOString()
   };
 
-  memoryPushSubscriptions.set(docId, data);
-
   const adminDb = getAdminFirestore();
   if (adminDb) {
     try {
@@ -1108,16 +1183,25 @@ export async function savePushSubscription(subscription, userAgent = "") {
     }
   }
 
-  if (!isFirebaseConfigured()) return true;
+  if (isFirebaseConfigured()) {
+    try {
+      const docRef = doc(db, PUSH_SUBSCRIPTIONS_COLLECTION, docId);
+      await setDoc(docRef, data, { merge: true });
+      return true;
+    } catch (error) {
+      console.warn("Erreur sauvegarde subscription push:", error);
+      return false;
+    }
+  }
 
-  try {
-    const docRef = doc(db, PUSH_SUBSCRIPTIONS_COLLECTION, docId);
-    await setDoc(docRef, data, { merge: true });
-    return true;
-  } catch (error) {
-    console.warn("Erreur sauvegarde subscription push:", error);
+  // Interdiction du fallback mémoire silencieux en production
+  if (isProduction()) {
+    console.error("[SÉCURITÉ] savePushSubscription refusé : base de données non connectée en production.");
     return false;
   }
+
+  memoryPushSubscriptions.set(docId, data);
+  return true;
 }
 
 /**
@@ -1138,28 +1222,34 @@ export async function getPushSubscriptions() {
       return list;
     } catch (error) {
       console.warn("Erreur Admin récupération subscriptions push:", error);
+      if (isProduction()) return [];
       return Array.from(memoryPushSubscriptions.values());
     }
   }
 
-  if (!isFirebaseConfigured()) {
-    return Array.from(memoryPushSubscriptions.values());
+  if (isFirebaseConfigured()) {
+    try {
+      const snapshot = await getDocs(collection(db, PUSH_SUBSCRIPTIONS_COLLECTION));
+      const list = [];
+      snapshot.docs.forEach((d) => {
+        const data = d.data();
+        if (data && data.endpoint) {
+          list.push(data);
+        }
+      });
+      return list;
+    } catch (error) {
+      console.warn("Erreur récupération subscriptions push:", error);
+      if (isProduction()) return [];
+      return Array.from(memoryPushSubscriptions.values());
+    }
   }
 
-  try {
-    const snapshot = await getDocs(collection(db, PUSH_SUBSCRIPTIONS_COLLECTION));
-    const list = [];
-    snapshot.docs.forEach((d) => {
-      const data = d.data();
-      if (data && data.endpoint) {
-        list.push(data);
-      }
-    });
-    return list;
-  } catch (error) {
-    console.warn("Erreur récupération subscriptions push:", error);
-    return Array.from(memoryPushSubscriptions.values());
+  if (isProduction()) {
+    return [];
   }
+
+  return Array.from(memoryPushSubscriptions.values());
 }
 
 /**
@@ -1168,7 +1258,6 @@ export async function getPushSubscriptions() {
 export async function removePushSubscription(endpoint) {
   if (!endpoint) return false;
   const docId = hashEndpoint(endpoint);
-  memoryPushSubscriptions.delete(docId);
 
   const adminDb = getAdminFirestore();
   if (adminDb) {
@@ -1181,14 +1270,21 @@ export async function removePushSubscription(endpoint) {
     }
   }
 
-  if (!isFirebaseConfigured()) return true;
+  if (isFirebaseConfigured()) {
+    try {
+      const docRef = doc(db, PUSH_SUBSCRIPTIONS_COLLECTION, docId);
+      await deleteDoc(docRef);
+      return true;
+    } catch (error) {
+      console.warn("Erreur suppression subscription push:", error);
+      return false;
+    }
+  }
 
-  try {
-    const docRef = doc(db, PUSH_SUBSCRIPTIONS_COLLECTION, docId);
-    await deleteDoc(docRef);
-    return true;
-  } catch (error) {
-    console.warn("Erreur suppression subscription push:", error);
+  if (isProduction()) {
     return false;
   }
+
+  memoryPushSubscriptions.delete(docId);
+  return true;
 }

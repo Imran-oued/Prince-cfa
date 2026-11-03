@@ -1084,9 +1084,13 @@ export default function AdminPage() {
             if (existingSub) {
               setIsPushSubscribed(true);
               // Ré-enregistrer l'abonnement pour garantir qu'il est synchronisé en base Firestore
+              const curToken = adminToken || (typeof window !== "undefined" ? sessionStorage.getItem("prince_cfa_admin_token") : "");
               fetch("/api/admin/push-subscription", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                  "Content-Type": "application/json",
+                  ...(curToken ? { Authorization: `Bearer ${curToken}` } : {})
+                },
                 body: JSON.stringify({ subscription: existingSub })
               }).catch(() => {});
             }
@@ -1204,7 +1208,10 @@ export default function AdminPage() {
       let sub = await reg.pushManager.getSubscription();
 
       if (!sub) {
-        const resKey = await fetch("/api/admin/push-subscription");
+        const curToken = adminToken || (typeof window !== "undefined" ? sessionStorage.getItem("prince_cfa_admin_token") : "");
+        const resKey = await fetch("/api/admin/push-subscription", {
+          headers: curToken ? { Authorization: `Bearer ${curToken}` } : {}
+        });
         const keyData = await resKey.json();
         const vapidPublicKey = keyData.publicKey || "BKoj_69RaUCQNGXnhDd1SWI4X10dPEoqQpWuNxSaEVZkgYr4MfGtfsXMAASPiUL96vVr-GEMESngy0-Y0bIEZpw";
 
@@ -1215,9 +1222,13 @@ export default function AdminPage() {
       }
 
       if (sub) {
+        const curToken = adminToken || (typeof window !== "undefined" ? sessionStorage.getItem("prince_cfa_admin_token") : "");
         const resSave = await fetch("/api/admin/push-subscription", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            ...(curToken ? { Authorization: `Bearer ${curToken}` } : {})
+          },
           body: JSON.stringify({ subscription: sub })
         });
         if (resSave.ok) {
@@ -1273,9 +1284,13 @@ export default function AdminPage() {
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
         if (sub) {
+          const curToken = adminToken || (typeof window !== "undefined" ? sessionStorage.getItem("prince_cfa_admin_token") : "");
           await fetch("/api/admin/push-subscription", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              ...(curToken ? { Authorization: `Bearer ${curToken}` } : {})
+            },
             body: JSON.stringify({ subscription: sub })
           });
         }

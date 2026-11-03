@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { VAPID_CONFIG } from "@/config/vapid";
 import { savePushSubscription, removePushSubscription } from "@/lib/firestore";
+import { verifyAdminAuth } from "@/lib/auth";
 
 // Initialisation VAPID
 if (VAPID_CONFIG.publicKey && VAPID_CONFIG.privateKey) {
@@ -25,6 +26,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const isAuthorized = await verifyAdminAuth(request);
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { success: false, error: "Accès refusé. Session administrateur requise." },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { subscription } = body;
 
@@ -79,6 +88,14 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const isAuthorized = await verifyAdminAuth(request);
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { success: false, error: "Accès refusé. Session administrateur requise." },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { endpoint } = body;
 

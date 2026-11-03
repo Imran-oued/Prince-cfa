@@ -1,16 +1,18 @@
 import crypto from "crypto";
 
-const IS_PROD = process.env.NODE_ENV === "production";
-
 // En production, interdiction formelle d'utiliser "admin" comme mot de passe par défaut
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || (IS_PROD ? "" : "admin");
+function getAdminPassword(): string {
+  if (process.env.ADMIN_PASSWORD) return process.env.ADMIN_PASSWORD;
+  return process.env.NODE_ENV === "production" ? "" : "admin";
+}
+
 const AUTH_SECRET =
   process.env.ADMIN_JWT_SECRET ||
-  `${ADMIN_PASSWORD || "dev_secret"}:prince_cfa_secure_key_2026`;
+  `${process.env.ADMIN_PASSWORD || "prince_cfa_salt_2026"}:prince_cfa_secure_key_2026`;
 export const ADMIN_COOKIE_NAME = "prince_cfa_admin_auth";
 
 // Avertissement de sécurité au démarrage si la configuration de production est incomplète
-if (IS_PROD && (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin")) {
+if (process.env.NODE_ENV === "production" && (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin")) {
   console.warn(
     "[SÉCURITÉ CRITIQUE] La variable ADMIN_PASSWORD n'est pas définie ou utilise 'admin' en production ! " +
     "Veuillez définir un mot de passe robuste dans vos variables d'environnement Hostinger."
@@ -50,15 +52,15 @@ export function timingSafeEqualString(a: string, b: string): boolean {
  */
 export function verifyAdminPassword(password: string): boolean {
   if (!password || typeof password !== "string") return false;
-  if (IS_PROD) {
-    if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin") {
+  if (process.env.NODE_ENV === "production") {
+    if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin" || process.env.ADMIN_PASSWORD.length < 8) {
       console.error(
-        "[SÉCURITÉ] Connexion refusée : ADMIN_PASSWORD absent ou non sécurisé en environnement de production."
+        "[SÉCURITÉ] Connexion refusée : ADMIN_PASSWORD absent, trop court (<8 caractères) ou non sécurisé en environnement de production."
       );
       return false;
     }
   }
-  return timingSafeEqualString(password, ADMIN_PASSWORD);
+  return timingSafeEqualString(password, getAdminPassword());
 }
 
 /**
@@ -104,10 +106,13 @@ export function validateAdminToken(token: string): boolean {
   }
 
   // 2. Rétrocompatibilité transitoire avec l'ancien format base64
-  const legacySecret = Buffer.from(`${ADMIN_PASSWORD}:prince_cfa_salt_2026`).toString("base64");
-  const legacyToken = `adm_${legacySecret}`;
-  if (timingSafeEqualString(token, legacyToken)) {
-    return true;
+  const adminPwd = getAdminPassword();
+  if (adminPwd) {
+    const legacySecret = Buffer.from(`${adminPwd}:prince_cfa_salt_2026`).toString("base64");
+    const legacyToken = `adm_${legacySecret}`;
+    if (timingSafeEqualString(token, legacyToken)) {
+      return true;
+    }
   }
 
   return false;
