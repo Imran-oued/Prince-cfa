@@ -1248,7 +1248,7 @@ export default function Home() {
       </main>
 
       {/* Footer Luxueux */}
-      <footer id="about" className="w-full border-t border-zinc-200 bg-zinc-100/90 relative z-20 mt-16 pt-16 pb-12 px-4 sm:px-8 scroll-mt-8">
+      <footer id="about" className="w-full border-t border-zinc-200 bg-zinc-100/90 relative z-20 mt-16 pt-16 pb-36 sm:pb-16 px-4 sm:px-8 scroll-mt-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           
           {/* Col 1 : Marque */}
@@ -1309,7 +1309,11 @@ export default function Home() {
                 <Receipt className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
                 <span>Facture légale certifiée</span>
               </li>
-              <li className="pt-2 border-t border-zinc-200 flex items-center gap-2.5 text-[11px] text-zinc-500">
+              <li className="pt-2 border-t border-zinc-200 flex flex-wrap items-center gap-2.5 text-[11px] text-zinc-500">
+                <Link href="/a-propos" className="hover:text-gold transition-colors font-medium">
+                  À Propos
+                </Link>
+                <span>•</span>
                 <Link href="/mentions-legales" className="hover:text-gold transition-colors">
                   Mentions Légales
                 </Link>
@@ -1386,22 +1390,29 @@ export default function Home() {
 
         </div>
 
-        {/* Ligne Copyright & Liens Légaux */}
+        {/* Ligne Liens d'information & Copyright */}
         <div className="max-w-7xl mx-auto pt-8 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
-          <p>© 2026 PRINCE CFA. Tous droits réservés.</p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link href="/a-propos" className="hover:text-gold transition-colors">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <Link 
+              href="/a-propos" 
+              className="px-3.5 py-2 rounded-xl bg-white border border-zinc-200/90 text-zinc-800 hover:text-gold hover:border-gold/40 font-semibold transition-all shadow-xs"
+            >
               À Propos
             </Link>
-            <span>•</span>
-            <Link href="/mentions-legales" className="hover:text-gold transition-colors">
+            <Link 
+              href="/mentions-legales" 
+              className="px-3.5 py-2 rounded-xl bg-white border border-zinc-200/90 text-zinc-800 hover:text-gold hover:border-gold/40 font-semibold transition-all shadow-xs"
+            >
               Mentions Légales
             </Link>
-            <span>•</span>
-            <Link href="/politique-de-confidentialite" className="hover:text-gold transition-colors">
+            <Link 
+              href="/politique-de-confidentialite" 
+              className="px-3.5 py-2 rounded-xl bg-white border border-zinc-200/90 text-zinc-800 hover:text-gold hover:border-gold/40 font-semibold transition-all shadow-xs"
+            >
               Politique de Confidentialité
             </Link>
           </div>
+          <p className="text-zinc-500 text-xs text-center sm:text-right">© 2026 PRINCE CFA. Tous droits réservés.</p>
         </div>
       </footer>
 
