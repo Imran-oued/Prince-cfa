@@ -66,38 +66,61 @@ export default function AProposPage() {
         </div>
       </header>
 
-      {/* Contenu Principal Épuré (En attente de la rédaction ultérieure) */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-8 py-16 sm:py-24 flex flex-col items-center justify-center text-center space-y-8">
+      {/* Contenu Principal : Récit & Histoire officielle */}
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-8 py-12 sm:py-20 flex flex-col items-center justify-center text-center space-y-8">
         
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-bold uppercase tracking-widest">
           <Crown className="w-4 h-4 text-gold" aria-hidden="true" />
           <span>Maison PRINCE CFA • Koulouba, Ouagadougou</span>
         </div>
 
-        <div className="space-y-4 max-w-2xl">
+        <div className="space-y-3 max-w-2xl">
           <h1 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-tight leading-tight">
             À Propos • <span className="text-gold">L&apos;Histoire PRINCE CFA</span>
           </h1>
-          <p className="text-sm sm:text-base text-zinc-600 font-normal leading-relaxed">
-            Cette section est actuellement réservée. L&apos;histoire officielle et la présentation détaillée de notre Maison à Ouagadougou seront publiées ici lors d&apos;une prochaine mise à jour.
+          <p className="text-xs sm:text-sm text-zinc-500 font-medium uppercase tracking-wider">
+            Origine • Vision • Authenticité
           </p>
         </div>
 
-        <div className="p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm max-w-md w-full space-y-4 text-xs text-zinc-600">
+        {/* Carte de Récit & Biographie de Sana Omar (Prince CFA) */}
+        <div className="bg-white rounded-3xl border border-zinc-200/90 shadow-sm p-6 sm:p-10 max-w-3xl w-full text-left space-y-5 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-gold via-amber-500 to-yellow-600" />
+          
+          <div className="space-y-4 text-sm sm:text-base text-zinc-700 leading-relaxed font-normal">
+            <p>
+              Prince CFA, de son vrai nom Sana Omar, est un jeune entrepreneur et influenceur burkinabè originaire de Ouagadougou. Il s’est fait connaître grâce à son parcours entrepreneurial et à son succès dans le commerce de produits Apple.
+            </p>
+            <p>
+              Son histoire commence par le travail et les économies réalisées en travaillant aux côtés de son père et en effectuant de petits boulots. Il parvient ainsi à acheter son premier téléphone, puis un iPhone qu’il emporte partout avec lui, notamment lors de ses déplacements à vélo dans les rues de Ouagadougou. Cette image, devenue populaire sur les réseaux sociaux, lui vaut le surnom de « Prince CFA ».
+            </p>
+          </div>
+
+          <div className="pt-4 border-t border-zinc-100 flex items-center justify-between flex-wrap gap-3 text-xs text-zinc-500">
+            <span className="font-semibold text-zinc-900 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
+              Sana Omar • Fondateur de PRINCE CFA
+            </span>
+            <span className="text-zinc-400">Ouagadougou, Burkina Faso</span>
+          </div>
+        </div>
+
+        {/* Showroom & Horaires */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm max-w-xl w-full space-y-4 text-xs text-zinc-600 text-center">
           <div className="flex items-center justify-center gap-2 text-gold font-bold uppercase tracking-wider text-[11px]">
             <Store className="w-4 h-4" />
             <span>Showroom Ouagadougou</span>
           </div>
-          <p className="leading-relaxed">
-            Notre showroom physique reste ouvert à Koulouba pour vous accueillir, découvrir nos collections et essayer nos équipements.
+          <p className="leading-relaxed text-zinc-700 text-xs sm:text-sm">
+            Notre showroom physique vous accueille à Koulouba (Ouagadougou) pour découvrir nos collections, essayer nos équipements et bénéficier d&apos;un accompagnement personnalisé.
           </p>
           <div className="pt-3 border-t border-zinc-100 flex items-center justify-center gap-2 text-[11px] text-zinc-500">
-            <Clock className="w-3.5 h-3.5 text-gold" />
+            <Clock className="w-3.5 h-3.5 text-gold flex-shrink-0" />
             <span>Du Lundi au Samedi (9h - 19h) • Dimanche (10h - 16h)</span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <Link
             href="/"
             className="px-6 py-3 rounded-xl bg-gold text-black font-extrabold text-xs uppercase tracking-wider hover:bg-gold-hover transition-all shadow-md inline-flex items-center gap-2"
