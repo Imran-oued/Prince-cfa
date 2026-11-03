@@ -12,7 +12,6 @@ import { getProductImageBg, isAppleBrand } from "@/lib/productValidation";
 import { formatPrice } from "@/lib/formatPrice";
 import { SHOP_CONFIG } from "@/config/shop";
 import { 
-  Star, 
   Truck, 
   Store, 
   ArrowRight, 
@@ -398,21 +397,6 @@ function ProductCardItem({
             {specsSnippet}
           </p>
         )}
-
-        {/* Étoiles & Note clients Style Amazon */}
-        <div className="flex items-center gap-1.5 mt-1 text-left">
-          <span className="font-bold text-zinc-800 text-xs">
-            {product.rating ? Number(product.rating).toFixed(1).replace('.', ',') : '4,8'}
-          </span>
-          <div className="flex items-center text-amber-500 gap-0.5" aria-hidden="true">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
-            ))}
-          </div>
-          <span className="text-zinc-400 text-[10px] sm:text-[11px]">
-            ({Math.floor(((Number(product.price) % 900) + 120) / 10) + 12})
-          </span>
-        </div>
 
         {/* Prix FCFA en grand format doré style Amazon */}
         <div className="mt-1.5 flex items-baseline gap-1.5 flex-wrap text-left">
