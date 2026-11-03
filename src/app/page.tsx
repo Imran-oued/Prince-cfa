@@ -363,13 +363,6 @@ function ProductCardItem({
           </div>
         )}
 
-        {/* Badge discret nombre de photos */}
-        {images.length > 1 && (
-          <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-sm border border-white/20 text-[9px] font-bold text-white/90 shadow-sm pointer-events-none">
-            {activeColorIdx + 1}/{images.length}
-          </div>
-        )}
-
         {/* Badge Bientôt disponible ou PROMO */}
         {isComingSoon ? (
           <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-amber-500/95 text-[9px] font-black tracking-wider uppercase text-white shadow-md z-10 flex items-center gap-1 pointer-events-none">
