@@ -1,5 +1,6 @@
 import { getApps, initializeApp, cert, type App } from "firebase-admin/app";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
+import { ensureEnvLoaded } from "./envLoader.ts";
 
 let cachedApp: App | null = null;
 let cachedDb: Firestore | null = null;
@@ -12,6 +13,7 @@ let hasLoggedProdWarning = false;
  */
 export function isAdminConfigured(): boolean {
   if (typeof window !== "undefined") return false;
+  ensureEnvLoaded();
   return Boolean(
     process.env.FIREBASE_SERVICE_ACCOUNT_KEY ||
     (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY)
@@ -29,6 +31,8 @@ export function getAdminApp(): App | null {
     return null;
   }
 
+  ensureEnvLoaded();
+
   if (cachedApp) {
     return cachedApp;
   }
@@ -45,7 +49,7 @@ export function getAdminApp(): App | null {
   const projectId =
     process.env.FIREBASE_PROJECT_ID ||
     process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
-    "prince-cfa";
+    "price-cfa";
 
   // Option 1 : Compte de service fourni sous forme de chaîne JSON complète
   if (serviceAccountJson) {
@@ -119,4 +123,3 @@ export function getAdminFirestore(): Firestore | null {
     return null;
   }
 }
-

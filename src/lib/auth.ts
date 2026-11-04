@@ -1,7 +1,9 @@
 import crypto from "crypto";
+import { ensureEnvLoaded } from "./envLoader.ts";
 
 // En production, interdiction formelle d'utiliser "admin" comme mot de passe par défaut
 function getAdminPassword(): string {
+  ensureEnvLoaded();
   if (process.env.ADMIN_PASSWORD) return process.env.ADMIN_PASSWORD;
   return process.env.NODE_ENV === "production" ? "" : "admin";
 }
@@ -21,6 +23,7 @@ function getAdminPassword(): string {
  *    - Sinon, utilise une clé de test dédiée locale sans bloquer les suites de tests locales.
  */
 export function getAuthSecret(): string {
+  ensureEnvLoaded();
   const secret = process.env.ADMIN_JWT_SECRET;
   const isProd = process.env.NODE_ENV === "production";
 
@@ -46,6 +49,7 @@ export const ADMIN_COOKIE_NAME = "prince_cfa_admin_auth";
 
 // Avertissement de sécurité au démarrage si la configuration de production est incomplète
 if (process.env.NODE_ENV === "production") {
+  ensureEnvLoaded();
   if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin" || process.env.ADMIN_PASSWORD.length < 8) {
     console.warn(
       "[SÉCURITÉ CRITIQUE] La variable ADMIN_PASSWORD n'est pas définie ou utilise 'admin' en production ! " +
@@ -93,6 +97,7 @@ export function timingSafeEqualString(a: string, b: string): boolean {
  */
 export function verifyAdminPassword(password: string): boolean {
   if (!password || typeof password !== "string") return false;
+  ensureEnvLoaded();
   if (process.env.NODE_ENV === "production") {
     if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin" || process.env.ADMIN_PASSWORD.length < 8) {
       console.error(
