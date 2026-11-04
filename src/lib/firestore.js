@@ -821,6 +821,65 @@ export async function deleteOrder(orderId) {
 }
 
 /**
+ * Supprimer TOUTES les commandes (phase de nettoyage avant remise au client).
+ * Restaure également le stock si des commandes de test avaient débité le stock.
+ * @returns {Promise<{ success: boolean, deletedCount: number, error?: string }>}
+ */
+export async function clearAllOrders() {
+  const adminDb = getAdminFirestore();
+  let deletedCount = 0;
+
+  if (adminDb) {
+    try {
+      const snap = await adminDb.collection(ORDERS_COLLECTION).get();
+      for (const docSnap of snap.docs) {
+        const data = docSnap.data();
+        if (data.stockDebited && data.items && data.items.length > 0) {
+          await restoreStock(data.items);
+        }
+        await docSnap.ref.delete();
+        deletedCount++;
+      }
+    } catch (err) {
+      console.error("Erreur Admin Firestore clearAllOrders:", err);
+      return { success: false, deletedCount, error: "Échec de suppression globale Firestore." };
+    }
+  } else if (isFirebaseConfigured()) {
+    try {
+      const snap = await getDocs(collection(db, ORDERS_COLLECTION));
+      for (const docSnap of snap.docs) {
+        const data = docSnap.data();
+        if (data.stockDebited && data.items && data.items.length > 0) {
+          await restoreStock(data.items);
+        }
+        await deleteDoc(docSnap.ref);
+        deletedCount++;
+      }
+    } catch (err) {
+      console.error("Erreur Firestore clearAllOrders:", err);
+      return { success: false, deletedCount, error: "Échec de suppression globale Firestore." };
+    }
+  } else if (isProduction()) {
+    return { success: false, deletedCount: 0, error: "Base de données non disponible en production." };
+  }
+
+  // Nettoyage de la mémoire tampon
+  deletedCount += memoryOrders.size;
+  memoryOrders.clear();
+
+  // Nettoyage miroir localStorage côté client si appelé dans le navigateur
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem("prince_cfa_orders");
+    } catch (e) {
+      console.warn("Storage warning clearAllOrders:", e);
+    }
+  }
+
+  return { success: true, deletedCount };
+}
+
+/**
  * Mettre à jour le statut d'avancement d'une commande
  * @param {string} orderId
  * @param {'en_attente_paiement' | 'paye_en_preparation' | 'en_livraison' | 'livre' | 'annule'} newStatus

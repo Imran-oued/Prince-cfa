@@ -1675,6 +1675,48 @@ export default function AdminPage() {
     }
   };
 
+  // Supprimer toutes les commandes de test pour remise au client
+  const handleClearAllOrders = async () => {
+    if (ordersList.length === 0) {
+      alert("Il n'y a aucune commande à supprimer.");
+      return;
+    }
+    const confirmed = confirm(
+      `ATTENTION : Vous allez supprimer DÉFINITIVEMENT les ${ordersList.length} commande(s) de test.\n\n` +
+      `Cette action va réinitialiser la base des commandes pour remettre un tableau de bord vierge à votre client.\n\n` +
+      `Confirmez-vous la suppression totale ?`
+    );
+    if (!confirmed) return;
+
+    setIsUpdatingOrder(true);
+    try {
+      const res = await fetch("/api/admin/orders", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.error || "Erreur lors de la suppression des commandes.");
+        return;
+      }
+      setOrdersList([]);
+      setSelectedOrder(null);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem("prince_cfa_orders");
+        } catch {}
+      }
+      alert(data.message || "Toutes les commandes ont été supprimées avec succès !");
+    } catch (err) {
+      console.error(err);
+      alert("Erreur réseau lors de la suppression des commandes.");
+    } finally {
+      setIsUpdatingOrder(false);
+    }
+  };
+
   // Mise à jour du statut d'acheminement de la commande
   const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
     setIsUpdatingOrder(true);
@@ -3294,6 +3336,19 @@ export default function AdminPage() {
                 <option value="livre">Livré</option>
                 <option value="annule">Annulé</option>
               </select>
+
+              {ordersList.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearAllOrders}
+                  disabled={isUpdatingOrder}
+                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                  title="Supprimer toutes les commandes de test"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Vider les commandes ({ordersList.length})</span>
+                </button>
+              )}
             </div>
           </div>
 

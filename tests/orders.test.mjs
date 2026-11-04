@@ -230,3 +230,21 @@ test("10. Order 48-hour expiration lifecycle protects against fake/abandoned ord
   assert.equal(isOrderExpired(cancelledOrder), false, "Une commande annulée n'est pas marquée expirée");
 });
 
+
+
+test("7. clearAllOrders clears in-memory orders and resets count", async () => {
+  const { createOrder, clearAllOrders, getOrders } = await import("../src/lib/firestore.js");
+  
+  await createOrder({
+    customer: { name: "Test 1", phone: "70000001" },
+    items: [{ productId: "p1", name: "P1", unitPrice: 10000, quantity: 1 }],
+    pricing: { total: 10000 }
+  });
+
+  const clearRes = await clearAllOrders();
+  assert.equal(clearRes.success, true);
+  assert.ok(clearRes.deletedCount >= 1);
+
+  const afterOrders = await getOrders();
+  assert.equal(afterOrders.length, 0);
+});
