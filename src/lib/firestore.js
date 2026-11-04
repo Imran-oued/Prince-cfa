@@ -12,7 +12,7 @@ import {
   runTransaction,
 } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "./firebase.js";
-import { getAdminFirestore } from "./firebaseAdmin.ts";
+import { getAdminFirestore, getAdminInitError } from "./firebaseAdmin.ts";
 
 const isProduction = () => process.env.NODE_ENV === "production";
 
@@ -445,10 +445,12 @@ export async function createOrder(orderData) {
     } else if (isFirebaseConfigured()) {
       await setDoc(doc(db, ORDERS_COLLECTION, orderId), orderPayload);
     } else if (isProduction()) {
-      console.error("[SÉCURITÉ CRITIQUE] createOrder refusé : aucune base de données Firestore configurée en production. Interdiction formelle du fallback mémoire silencieux.");
+      const initErr = getAdminInitError();
+      const reason = initErr ? ` (${initErr})` : "";
+      console.error(`[SÉCURITÉ CRITIQUE] createOrder refusé : aucune base de données Firestore configurée en production${reason}. Interdiction formelle du fallback mémoire silencieux.`);
       return { 
         success: false, 
-        error: "Service de commande temporairement indisponible (base de données non connectée en production)." 
+        error: `Service de commande temporairement indisponible (base de données non connectée en production${reason}).` 
       };
     }
 

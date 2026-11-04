@@ -287,10 +287,11 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("API Orders error:", error);
+    const detail = error?.message ? ` (${error.message})` : "";
     return NextResponse.json(
-      { success: false, error: "Erreur interne du serveur lors de la commande." },
+      { success: false, error: `Erreur interne du serveur lors de la commande${detail}.` },
       { status: 500 }
     );
   }
