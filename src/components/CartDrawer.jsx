@@ -341,12 +341,12 @@ export default function CartDrawer({
       />
 
       {/* Drawer */}
-      <div className={`fixed top-0 right-0 h-full w-full sm:w-[520px] bg-white border-l border-zinc-200 shadow-[-20px_0_50px_rgba(0,0,0,0.15)] z-[110] transition-transform duration-300 ease-out flex flex-col will-change-transform ${slideIn && isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'}`}>
+      <div className={`fixed top-0 right-0 h-full w-full sm:w-[520px] bg-white border-l border-[#E8E4DC] shadow-[-20px_0_50px_rgba(0,0,0,0.15)] z-[110] transition-transform duration-300 ease-out flex flex-col will-change-transform ${slideIn && isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'}`}>
         
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-zinc-200 bg-white/95 backdrop-blur-md">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-[#E8E4DC] bg-white/95 backdrop-blur-md">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-zinc-950 uppercase tracking-widest">
+            <h2 className="text-base sm:text-lg font-bold text-zinc-900 uppercase tracking-widest">
               {step === "confirmed" ? "Commande Confirmée" : "Finaliser ma Commande"}
             </h2>
             {step !== "confirmed" && (
@@ -357,7 +357,7 @@ export default function CartDrawer({
           </div>
           <button 
             onClick={handleClose}
-            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-gold/20 text-zinc-600 hover:text-gold transition-colors cursor-pointer touch-manipulation"
+            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-white border border-[#E8E4DC] hover:bg-gold/20 text-zinc-600 hover:text-gold transition-colors cursor-pointer touch-manipulation shadow-sm"
             title="Fermer"
             aria-label="Fermer le panier"
           >
@@ -367,12 +367,12 @@ export default function CartDrawer({
 
         {/* Badges de réassurance */}
         {step !== "confirmed" && (
-          <div className="grid grid-cols-3 gap-2 px-4 py-2 bg-zinc-50 border-b border-zinc-200 text-[11px] text-zinc-600">
+          <div className="grid grid-cols-3 gap-2 px-4 py-2 bg-[#F5F3EE]/80 border-b border-[#E8E4DC] text-[11px] text-zinc-600">
             <div className="flex items-center justify-center gap-1.5 text-center">
               <ShieldCheck className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true" />
               <span>100% Authentique</span>
             </div>
-            <div className="flex items-center justify-center gap-1.5 text-center border-x border-zinc-200">
+            <div className="flex items-center justify-center gap-1.5 text-center border-x border-[#E8E4DC]">
               <OrangeMoneyIcon className="w-3.5 h-3.5 flex-shrink-0" />
               <WaveIcon className="w-3.5 h-3.5 flex-shrink-0" />
               <span>Paiement Direct</span>
@@ -396,8 +396,8 @@ export default function CartDrawer({
                 <div className="w-20 h-20 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mb-4 text-gold">
                   <ShoppingBag className="w-9 h-9 text-gold" aria-hidden="true" />
                 </div>
-                <h3 className="text-lg font-bold text-zinc-950 mb-2">Votre panier est vide</h3>
-                <p className="text-zinc-500 text-xs max-w-xs mb-6 font-light">
+                <h3 className="text-lg font-bold text-zinc-900 mb-2">Votre panier est vide</h3>
+                <p className="text-zinc-600 text-xs max-w-xs mb-6 font-light">
                   Découvrez nos smartphones, TV et équipements technologiques d&apos;exception.
                 </p>
                 <button 
@@ -412,18 +412,18 @@ export default function CartDrawer({
                 {/* 1. SECTION ARTICLES DU PANIER */}
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
                       <ShoppingBag className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
                       <span>1. Vos Articles ({cartItems.reduce((s, i) => s + i.quantity, 0)})</span>
                     </span>
-                    <span className="text-[11px] text-zinc-500 font-medium">Modifiable</span>
+                    <span className="text-[11px] text-zinc-600 font-medium">Modifiable</span>
                   </div>
 
                   <div className="space-y-2">
                     {cartItems.map((item) => (
                       <div 
                         key={item.cartId || `${item.id}-${item.selectedColor}-${item.selectedCapacity}`}
-                        className="p-3 rounded-2xl border border-zinc-200 flex gap-3 items-center relative group bg-zinc-50 hover:border-gold/40 hover:bg-zinc-100/60 transition-all shadow-sm"
+                        className="p-3 rounded-2xl border border-[#E8E4DC] flex gap-3 items-center relative group bg-white hover:border-gold/40 hover:bg-zinc-50 transition-all shadow-sm"
                       >
                         {/* Zone interactive produit cliquable pour voir les détails complets */}
                         <div 
@@ -439,7 +439,7 @@ export default function CartDrawer({
                             }
                           }}
                         >
-                          <div className={`w-14 h-14 rounded-xl ${getProductImageBg(item, item.image).containerClass} p-1 flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden border border-zinc-200 group-hover/item:border-gold/50 group-hover/item:scale-105 transition-all`}>
+                          <div className={`w-14 h-14 rounded-xl ${getProductImageBg(item, item.image).containerClass} p-1 flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden border border-[#E8E4DC] group-hover/item:border-gold/50 group-hover/item:scale-105 transition-all`}>
                             <img 
                               src={item.image} 
                               alt={item.name} 
@@ -448,7 +448,7 @@ export default function CartDrawer({
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <h4 className="text-xs sm:text-sm font-bold text-zinc-950 truncate group-hover/item:text-gold transition-colors">
+                              <h4 className="text-xs sm:text-sm font-bold text-zinc-900 truncate group-hover/item:text-gold transition-colors">
                                 {item.name}
                               </h4>
                               <ExternalLink className="w-3 h-3 text-zinc-400 opacity-0 group-hover/item:opacity-100 group-hover/item:text-gold transition-all flex-shrink-0" aria-hidden="true" />
@@ -474,7 +474,7 @@ export default function CartDrawer({
                               <div className="text-xs font-black text-gold">
                                 {formatPrice(item.price)} FCFA
                               </div>
-                              <span className="text-[10px] text-zinc-500 group-hover/item:text-gold font-medium flex items-center gap-0.5 transition-colors pr-2">
+                              <span className="text-[10px] text-zinc-600 group-hover/item:text-gold font-medium flex items-center gap-0.5 transition-colors pr-2">
                                 Voir détails →
                               </span>
                             </div>
@@ -482,7 +482,7 @@ export default function CartDrawer({
                         </div>
 
                         {/* Actions : suppression et ajustement quantité */}
-                        <div className="flex flex-col items-end gap-1.5 flex-shrink-0 pl-1 border-l border-zinc-200">
+                        <div className="flex flex-col items-end gap-1.5 flex-shrink-0 pl-1 border-l border-[#E8E4DC]">
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
@@ -495,7 +495,7 @@ export default function CartDrawer({
                             <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                           </button>
                           <div 
-                            className="flex items-center gap-1 bg-white border border-zinc-200 rounded-lg p-0.5 shadow-xs"
+                            className="flex items-center gap-1 bg-white border border-[#E8E4DC] rounded-lg p-0.5 shadow-sm"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <button 
@@ -503,7 +503,7 @@ export default function CartDrawer({
                                 e.stopPropagation();
                                 updateQuantity(item.cartId, item.quantity - 1);
                               }}
-                              className="w-5 h-5 flex items-center justify-center text-xs text-zinc-600 hover:text-zinc-950 rounded cursor-pointer touch-manipulation"
+                              className="w-5 h-5 flex items-center justify-center text-xs text-zinc-600 hover:text-zinc-900 rounded cursor-pointer touch-manipulation"
                             >
                               -
                             </button>
@@ -513,7 +513,7 @@ export default function CartDrawer({
                                 e.stopPropagation();
                                 updateQuantity(item.cartId, item.quantity + 1);
                               }}
-                              className="w-5 h-5 flex items-center justify-center text-xs text-zinc-600 hover:text-zinc-950 rounded cursor-pointer touch-manipulation"
+                              className="w-5 h-5 flex items-center justify-center text-xs text-zinc-600 hover:text-zinc-900 rounded cursor-pointer touch-manipulation"
                             >
                               +
                             </button>
@@ -525,8 +525,8 @@ export default function CartDrawer({
                 </div>
 
                 {/* 2. SECTION COORDONNÉES & LIVRAISON RAPIDE */}
-                <div className="space-y-3 pt-3 border-t border-zinc-200">
-                  <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="space-y-3 pt-3 border-t border-[#E8E4DC]">
+                  <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
                     <Truck className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
                     <span>2. Vos Coordonnées de Réception</span>
                   </span>
@@ -541,7 +541,7 @@ export default function CartDrawer({
                         value={customer.name}
                         onChange={e => setCustomer(prev => ({ ...prev, name: e.target.value }))}
                         placeholder="Ex: Ibrahim Ouédraogo"
-                        className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:bg-white transition-all"
+                        className="w-full bg-white border border-[#E8E4DC] rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:bg-white transition-all shadow-sm"
                       />
                     </div>
                     <div>
@@ -553,7 +553,7 @@ export default function CartDrawer({
                         value={customer.phone}
                         onChange={e => setCustomer(prev => ({ ...prev, phone: e.target.value }))}
                         placeholder="Ex: 07 77 87 40 ou +226..."
-                        className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:bg-white transition-all"
+                        className="w-full bg-white border border-[#E8E4DC] rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:bg-white transition-all shadow-sm"
                       />
                     </div>
                   </div>
@@ -566,13 +566,13 @@ export default function CartDrawer({
                       className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation ${
                         customer.deliveryMethod === "delivery" 
                           ? "bg-gold/15 border-gold text-gold font-extrabold shadow-sm" 
-                          : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+                          : "bg-white border-[#E8E4DC] text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 shadow-sm"
                       }`}
                     >
                       <Truck className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
                       <div className="text-left">
                         <span className="block text-xs leading-none">Livraison à domicile</span>
-                        <span className="text-[9px] text-zinc-500">+{formatPrice(SHOP_CONFIG.deliveryFee)} F</span>
+                        <span className="text-[9px] text-zinc-600">+{formatPrice(SHOP_CONFIG.deliveryFee)} F</span>
                       </div>
                     </button>
 
@@ -582,7 +582,7 @@ export default function CartDrawer({
                       className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation ${
                         customer.deliveryMethod === "pickup" 
                           ? "bg-gold/15 border-gold text-gold font-extrabold shadow-sm" 
-                          : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+                          : "bg-white border-[#E8E4DC] text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 shadow-sm"
                       }`}
                     >
                       <Store className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
@@ -605,7 +605,7 @@ export default function CartDrawer({
                           value={customer.city}
                           onChange={e => setCustomer(prev => ({ ...prev, city: e.target.value }))}
                           placeholder="Ex: Ouagadougou, Bobo-Dioulasso, Koudougou..."
-                          className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:bg-white transition-all"
+                          className="w-full bg-white border border-[#E8E4DC] rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:bg-white transition-all shadow-sm"
                         />
                       </div>
 
@@ -618,7 +618,7 @@ export default function CartDrawer({
                           value={customer.neighborhood}
                           onChange={e => setCustomer(prev => ({ ...prev, neighborhood: e.target.value }))}
                           placeholder="Ex: Ouaga 2000, Somgandé, face pharmacie..."
-                          className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:bg-white transition-all"
+                          className="w-full bg-white border border-[#E8E4DC] rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:bg-white transition-all shadow-sm"
                         />
                       </div>
                     </div>
@@ -648,8 +648,8 @@ export default function CartDrawer({
                 </div>
 
                 {/* 3. SECTION PAIEMENT INTÉGRÉE DIRECTEMENT DANS CETTE ZONE */}
-                <div className="space-y-3 pt-3 border-t border-zinc-200">
-                  <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="space-y-3 pt-3 border-t border-[#E8E4DC]">
+                  <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
                     <Zap className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
                     <span>3. Mode de Règlement Direct</span>
                   </span>
@@ -662,12 +662,12 @@ export default function CartDrawer({
                       className={`py-3 px-3 rounded-2xl border text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer touch-manipulation select-none ${
                         customer.paymentMethod === "orange_money" 
                           ? "bg-orange-50 border-orange-500 text-orange-600 shadow-sm scale-[1.02]" 
-                          : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+                          : "bg-white border-[#E8E4DC] text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 shadow-sm"
                       }`}
                     >
                       <OrangeMoneyIcon className="w-8 h-8 flex-shrink-0" />
                       <span className="font-extrabold text-sm pointer-events-none">Orange Money</span>
-                      <span className="text-[10px] text-zinc-500 pointer-events-none">Dépôt ou transfert</span>
+                      <span className="text-[10px] text-zinc-600 pointer-events-none">Dépôt ou transfert</span>
                     </button>
 
                     <button
@@ -676,12 +676,12 @@ export default function CartDrawer({
                       className={`py-3 px-3 rounded-2xl border text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer touch-manipulation select-none ${
                         customer.paymentMethod === "wave" 
                           ? "bg-cyan-50 border-cyan-500 text-cyan-700 shadow-sm scale-[1.02]" 
-                          : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+                          : "bg-white border-[#E8E4DC] text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 shadow-sm"
                       }`}
                     >
                       <WaveIcon className="w-8 h-8 flex-shrink-0" />
                       <span className="font-extrabold text-sm pointer-events-none">Wave</span>
-                      <span className="text-[10px] text-zinc-500 pointer-events-none">Application Wave</span>
+                      <span className="text-[10px] text-zinc-600 pointer-events-none">Application Wave</span>
                     </button>
                   </div>
 
@@ -693,7 +693,7 @@ export default function CartDrawer({
                       className={`w-full py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation ${
                         customer.paymentMethod === "store_pickup" 
                           ? "bg-gold/15 border-gold text-gold font-extrabold" 
-                          : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+                          : "bg-white border-[#E8E4DC] text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 shadow-sm"
                       }`}
                     >
                       <Store className="w-4 h-4 text-gold flex-shrink-0" aria-hidden="true" />
@@ -726,7 +726,7 @@ export default function CartDrawer({
                       {/* Montant exact avec bouton copier */}
                       <div className="bg-white rounded-xl p-3 border border-orange-200 flex items-center justify-between gap-2 shadow-sm">
                         <div>
-                          <span className="text-[9px] text-zinc-500 uppercase tracking-widest block font-medium">Montant net à régler</span>
+                          <span className="text-[9px] text-zinc-600 uppercase tracking-widest block font-medium">Montant net à régler</span>
                           <span className="text-base sm:text-lg font-black text-orange-600 font-mono">
                             {formatPrice(totalPrice)} FCFA
                           </span>
@@ -752,7 +752,7 @@ export default function CartDrawer({
 
                       {/* Code USSD direct pré-calculé */}
                       <div className="bg-white rounded-xl p-3 border border-orange-200 shadow-sm space-y-2">
-                        <span className="text-[10px] text-zinc-500 font-medium block">
+                        <span className="text-[10px] text-zinc-600 font-medium block">
                           Code USSD direct pré-calculé :
                         </span>
                         <div className="p-2 rounded-lg bg-orange-50 border border-orange-200 font-mono text-center text-xs font-black text-orange-700 tracking-wider select-all break-all">
@@ -769,7 +769,7 @@ export default function CartDrawer({
                           <button
                             type="button"
                             onClick={handleCopyUssd}
-                            className="py-2 px-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-xs flex items-center justify-center gap-1 border border-zinc-200 active:scale-95 transition-all cursor-pointer touch-manipulation"
+                            className="py-2 px-2 rounded-lg bg-white hover:bg-zinc-50 text-zinc-900 font-bold text-xs flex items-center justify-center gap-1 border border-[#E8E4DC] active:scale-95 transition-all cursor-pointer touch-manipulation shadow-sm"
                           >
                             {copiedUssd ? (
                               <>
@@ -778,7 +778,7 @@ export default function CartDrawer({
                               </>
                             ) : (
                               <>
-                                <Copy className="w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
+                                <Copy className="w-3.5 h-3.5 text-zinc-600" aria-hidden="true" />
                                 <span>Copier USSD</span>
                               </>
                             )}
@@ -796,7 +796,7 @@ export default function CartDrawer({
                           value={customer.transactionRef}
                           onChange={e => setCustomer(prev => ({ ...prev, transactionRef: e.target.value }))}
                           placeholder="Ex: CI260424... ou votre numéro Orange"
-                          className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-orange-500 transition-all font-mono"
+                          className="w-full bg-white border border-[#E8E4DC] rounded-xl px-3 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-orange-500 transition-all font-mono shadow-sm"
                         />
                       </div>
                     </div>
@@ -827,7 +827,7 @@ export default function CartDrawer({
                       {/* Montant exact avec bouton copier */}
                       <div className="bg-white rounded-xl p-3 border border-cyan-200 shadow-sm flex items-center justify-between gap-2">
                         <div>
-                          <span className="text-[9px] text-zinc-500 uppercase tracking-widest block font-medium">Montant net à transférer</span>
+                          <span className="text-[9px] text-zinc-600 uppercase tracking-widest block font-medium">Montant net à transférer</span>
                           <span className="text-base sm:text-lg font-black text-cyan-700 font-mono">
                             {formatPrice(totalPrice)} FCFA
                           </span>
@@ -854,7 +854,7 @@ export default function CartDrawer({
                       {/* Numéro officiel Wave */}
                       <div className="bg-white p-3 rounded-xl border border-cyan-200 shadow-sm flex items-center justify-between gap-2">
                         <div>
-                          <span className="text-[9px] text-zinc-500 uppercase tracking-widest block font-medium">Numéro officiel Wave</span>
+                          <span className="text-[9px] text-zinc-600 uppercase tracking-widest block font-medium">Numéro officiel Wave</span>
                           <span className="text-sm sm:text-base font-black text-zinc-900 font-mono tracking-wider">{activePaymentConfig.displayNumber}</span>
                         </div>
                         <button
@@ -897,7 +897,7 @@ export default function CartDrawer({
                           value={customer.transactionRef}
                           onChange={e => setCustomer(prev => ({ ...prev, transactionRef: e.target.value }))}
                           placeholder="Ex: W-123456789 ou votre numéro"
-                          className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-cyan-500 transition-all font-mono"
+                          className="w-full bg-white border border-[#E8E4DC] rounded-xl px-3 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-cyan-500 transition-all font-mono shadow-sm"
                         />
                       </div>
                     </div>
@@ -919,7 +919,7 @@ export default function CartDrawer({
                   )}
 
                   {/* Note de réassurance */}
-                  <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start gap-2 text-[11px] text-zinc-600">
+                  <div className="p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm flex items-start gap-2 text-[11px] text-zinc-600">
                     <Info className="w-3.5 h-3.5 text-gold flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <span>
                       Dès confirmation, votre commande sera scellée et instantanément partagée sur <strong>WhatsApp</strong> pour un suivi personnalisé avec notre équipe.
@@ -936,10 +936,10 @@ export default function CartDrawer({
                 </div>
 
                 {/* 4. TOTAL NET & BOUTON UNIQUE DE COMMANDE (Situé tout en bas du formulaire, non flottant) */}
-                <div className="pt-4 pb-8 border-t border-zinc-200 space-y-3 animate-in fade-in">
-                  <div className="glass-panel p-3.5 sm:p-4 rounded-2xl border border-zinc-200 bg-white shadow-sm flex items-center justify-between">
+                <div className="pt-4 pb-8 border-t border-[#E8E4DC] space-y-3 animate-in fade-in">
+                  <div className="glass-panel p-3.5 sm:p-4 rounded-2xl border border-[#E8E4DC] bg-white shadow-sm flex items-center justify-between">
                     <div>
-                      <span className="text-zinc-500 uppercase tracking-widest text-[10px] font-semibold block">Total Net à régler</span>
+                      <span className="text-zinc-600 uppercase tracking-widest text-[10px] font-semibold block">Total Net à régler</span>
                       <span className="text-[11px] text-zinc-600 font-normal">
                         {customer.deliveryMethod === "delivery" ? "Livraison incluse" : "Retrait gratuit en boutique"}
                       </span>
@@ -962,12 +962,12 @@ export default function CartDrawer({
                     )}
                   </button>
 
-                  <p className="text-[10px] text-center text-zinc-500 leading-tight">
+                  <p className="text-[10px] text-center text-zinc-600 leading-tight">
                     En validant, vous acceptez nos{" "}
                     <button
                       type="button"
                       onClick={() => setLegalModal("mentions")}
-                      className="text-zinc-600 hover:text-gold underline cursor-pointer font-medium"
+                      className="text-zinc-700 hover:text-gold underline cursor-pointer font-medium"
                     >
                       mentions légales
                     </button>
@@ -975,7 +975,7 @@ export default function CartDrawer({
                     <button
                       type="button"
                       onClick={() => setLegalModal("confidentialite")}
-                      className="text-zinc-600 hover:text-gold underline cursor-pointer font-medium"
+                      className="text-zinc-700 hover:text-gold underline cursor-pointer font-medium"
                     >
                       politique de confidentialité
                     </button>.
@@ -996,7 +996,7 @@ export default function CartDrawer({
             </div>
 
             <div>
-              <h3 className="text-xl font-black text-zinc-950">Commande Enregistrée !</h3>
+              <h3 className="text-xl font-black text-zinc-900">Commande Enregistrée !</h3>
               <p className="text-xs text-zinc-600 mt-1 max-w-xs mx-auto font-light">
                 Votre commande a été scellée sur le serveur. Voici votre numéro unique :
               </p>
@@ -1004,7 +1004,7 @@ export default function CartDrawer({
 
             {/* Identifiant unique de commande */}
             <div className="p-4 rounded-2xl bg-white border border-gold/40 w-full max-w-xs shadow-md">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-widest block font-medium">Référence de Commande</span>
+              <span className="text-[10px] text-zinc-600 uppercase tracking-widest block font-medium">Référence de Commande</span>
               <div className="flex items-center justify-center gap-2 mt-1">
                 <span className="text-lg font-black text-gold font-mono tracking-wider">{confirmedOrder.id}</span>
                 <button
@@ -1021,7 +1021,7 @@ export default function CartDrawer({
                   )}
                 </button>
               </div>
-              <div className="mt-2 pt-2 border-t border-zinc-100 flex items-center justify-center gap-1.5 text-[11px] text-amber-600 font-medium">
+              <div className="mt-2 pt-2 border-t border-[#E8E4DC] flex items-center justify-center gap-1.5 text-[11px] text-amber-600 font-medium">
                 <Clock className="w-3.5 h-3.5 text-amber-600" aria-hidden="true" />
                 <span>Statut : En attente de vérification</span>
               </div>
@@ -1055,8 +1055,8 @@ export default function CartDrawer({
             </a>
 
             {/* Solutions de secours en cas d'échec WhatsApp */}
-            <div className="w-full pt-3 border-t border-zinc-200 space-y-2 text-center">
-              <span className="text-[11px] text-zinc-500 block font-light">
+            <div className="w-full pt-3 border-t border-[#E8E4DC] space-y-2 text-center">
+              <span className="text-[11px] text-zinc-600 block font-light">
                 Si WhatsApp ne s&apos;ouvre pas automatiquement :
               </span>
               <div className="flex gap-2">
@@ -1066,7 +1066,7 @@ export default function CartDrawer({
                     const msg = generateWhatsAppMessage(confirmedOrder);
                     navigator.clipboard?.writeText(msg).then(() => alert("Message complet copié !"));
                   }}
-                  className="flex-1 py-2 px-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-semibold border border-zinc-200 transition-colors flex items-center justify-center gap-1.5 touch-manipulation"
+                  className="flex-1 py-2 px-3 rounded-xl bg-white hover:bg-zinc-50 text-zinc-900 text-xs font-semibold border border-[#E8E4DC] transition-colors flex items-center justify-center gap-1.5 touch-manipulation shadow-sm"
                 >
                   <Copy className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Copier le texte</span>
@@ -1084,7 +1084,7 @@ export default function CartDrawer({
             <button
               type="button"
               onClick={handleClose}
-              className="text-xs text-zinc-500 hover:text-zinc-900 underline transition-colors cursor-pointer pt-2 touch-manipulation"
+              className="text-xs text-zinc-600 hover:text-zinc-900 underline transition-colors cursor-pointer pt-2 touch-manipulation"
             >
               Fermer et continuer mes achats
             </button>
@@ -1099,11 +1099,11 @@ export default function CartDrawer({
         {legalModal && (
           <div className="absolute inset-0 z-50 bg-white flex flex-col animate-in fade-in slide-in-from-bottom-6 duration-200">
             {/* Header du lecteur */}
-            <div className="p-3.5 sm:p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between gap-2 shadow-xs">
+            <div className="p-3.5 sm:p-4 border-b border-[#E8E4DC] bg-[#F5F3EE]/80 flex items-center justify-between gap-2 shadow-xs">
               <button
                 type="button"
                 onClick={() => setLegalModal(null)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-zinc-200 text-xs font-bold text-zinc-800 hover:text-gold hover:border-gold/50 shadow-xs transition-all cursor-pointer active:scale-95"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#E8E4DC] text-xs font-bold text-zinc-900 hover:text-gold hover:border-gold/50 shadow-sm transition-all cursor-pointer active:scale-95"
               >
                 <ArrowLeft className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
                 <span>Retour à ma commande</span>
@@ -1114,7 +1114,7 @@ export default function CartDrawer({
                   href={legalModal === "mentions" ? "/mentions-legales" : "/politique-de-confidentialite"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[11px] text-zinc-500 hover:text-gold flex items-center gap-1 font-medium px-2 py-1 rounded hover:bg-zinc-100 transition-colors"
+                  className="text-[11px] text-zinc-600 hover:text-gold flex items-center gap-1 font-medium px-2 py-1 rounded hover:bg-zinc-100 transition-colors"
                   title="Ouvrir dans un nouvel onglet"
                 >
                   <span className="hidden sm:inline">Nouvel onglet</span>
@@ -1135,17 +1135,17 @@ export default function CartDrawer({
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 text-xs text-zinc-700 leading-relaxed">
               {legalModal === "mentions" ? (
                 <>
-                  <div className="border-b border-zinc-100 pb-3">
+                  <div className="border-b border-[#E8E4DC] pb-3">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-[10px] font-bold uppercase tracking-wider mb-2">
                       <Scale className="w-3 h-3 text-gold" aria-hidden="true" />
                       <span>Cadre Légal & Réglementaire</span>
                     </div>
-                    <h3 className="text-base font-black text-zinc-950">Mentions Légales — PRINCE CFA</h3>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">Maison de prestige high-tech · Boutique à Koulouba, Ouagadougou</p>
+                    <h3 className="text-base font-black text-zinc-900">Mentions Légales — PRINCE CFA</h3>
+                    <p className="text-[11px] text-zinc-600 mt-0.5">Maison de prestige high-tech · Boutique à Koulouba, Ouagadougou</p>
                   </div>
 
                   <div className="space-y-3">
-                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                    <div className="p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm space-y-1">
                       <h4 className="font-bold text-zinc-900 text-xs">1. Identité de l&apos;Éditeur</h4>
                       <p><strong>Enseigne :</strong> PRINCE CFA</p>
                       <p><strong>Boutique physique :</strong> Secteur 4, Quartier Koulouba, Ouagadougou, Burkina Faso</p>
@@ -1153,7 +1153,7 @@ export default function CartDrawer({
                       <p><strong>Bénéficiaire Orange Money (8451921) :</strong> SANA OMAR MALL DES IPHONES</p>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                    <div className="p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm space-y-1">
                       <h4 className="font-bold text-zinc-900 text-xs">2. Prix & Devise</h4>
                       <p>Tous les prix sont affichés en Francs CFA (XOF), TVA comprise. Aucun frais caché : le total affiché dans votre panier est exactement le montant à régler.</p>
                     </div>
@@ -1169,12 +1169,12 @@ export default function CartDrawer({
                       </ul>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                    <div className="p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm space-y-1">
                       <h4 className="font-bold text-zinc-900 text-xs">4. Retrait & Livraison</h4>
                       <p>Retrait sans frais directement dans notre boutique à Koulouba (Ouagadougou), ou livraison sécurisée à domicile (1 500 FCFA).</p>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                    <div className="p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm space-y-1">
                       <h4 className="font-bold text-zinc-900 text-xs">5. Service Après-Vente</h4>
                       <p>En cas de besoin, notre équipe technique vous accueille directement en boutique ou vous répond instantanément sur notre canal WhatsApp dédié.</p>
                     </div>
@@ -1182,17 +1182,17 @@ export default function CartDrawer({
                 </>
               ) : (
                 <>
-                  <div className="border-b border-zinc-100 pb-3">
+                  <div className="border-b border-[#E8E4DC] pb-3">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 text-[10px] font-bold uppercase tracking-wider mb-2">
                       <ShieldCheck className="w-3 h-3 text-emerald-600" aria-hidden="true" />
                       <span>Protection & Confidentialité</span>
                     </div>
-                    <h3 className="text-base font-black text-zinc-950">Politique de Confidentialité — PRINCE CFA</h3>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">Engagement de transparence et protection de vos données personnelles</p>
+                    <h3 className="text-base font-black text-zinc-900">Politique de Confidentialité — PRINCE CFA</h3>
+                    <p className="text-[11px] text-zinc-600 mt-0.5">Engagement de transparence et protection de vos données personnelles</p>
                   </div>
 
                   <div className="space-y-3">
-                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                    <div className="p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm space-y-1">
                       <h4 className="font-bold text-zinc-900 text-xs">1. Données Collectées</h4>
                       <p>Nous collectons uniquement les informations indispensables à l&apos;exécution de votre commande : Nom, Numéro de téléphone / WhatsApp, et Quartier/Ville pour la livraison.</p>
                     </div>
@@ -1205,12 +1205,12 @@ export default function CartDrawer({
                       <p><strong>PRINCE CFA ne vous demandera JAMAIS votre code secret Mobile Money, ni mot de passe ni identifiant bancaire.</strong> Les règlements se font directement sur votre propre téléphone via le code officiel USSD Orange Money (*144*3*8451921*montant#) ou l&apos;application Wave.</p>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                    <div className="p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm space-y-1">
                       <h4 className="font-bold text-zinc-900 text-xs">3. Aucune Cession ni Revente</h4>
                       <p>Vos coordonnées personnelles restent strictement confidentielles et ne sont jamais vendues ni partagées avec des tiers publicitaires.</p>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                    <div className="p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm space-y-1">
                       <h4 className="font-bold text-zinc-900 text-xs">4. Protection de la Vie Privée</h4>
                       <p>Sur notre interface de suivi en ligne, les numéros de téléphone sont masqués pour protéger l&apos;identité et la vie privée de nos clients.</p>
                     </div>
@@ -1220,7 +1220,7 @@ export default function CartDrawer({
             </div>
 
             {/* Footer d'action rapide */}
-            <div className="p-3.5 sm:p-4 border-t border-zinc-200 bg-white shadow-lg">
+            <div className="p-3.5 sm:p-4 border-t border-[#E8E4DC] bg-white shadow-lg">
               <button
                 type="button"
                 onClick={() => setLegalModal(null)}

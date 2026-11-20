@@ -19,9 +19,9 @@ function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 export default function AProposPage() {
   return (
-    <div className="min-h-screen bg-background text-zinc-950 flex flex-col selection:bg-gold selection:text-black">
+    <div className="min-h-screen bg-[#F5F3EE] text-[#18181B] flex flex-col selection:bg-gold selection:text-black">
       {/* Header Sticky Haut de Gamme */}
-      <header className="sticky top-0 z-40 glass-panel border-b border-zinc-200 bg-white/85 px-4 py-3 sm:px-8 shadow-sm">
+      <header className="sticky top-0 z-40 glass-panel border-b border-[#E8E4DC] bg-white/95 px-4 py-3 sm:px-8 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-12 h-12 sm:w-14 sm:h-14 group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_12px_rgba(212,175,55,0.3)]">
@@ -47,7 +47,7 @@ export default function AProposPage() {
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/"
-              className="text-xs px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900 border border-zinc-200 transition-colors flex items-center gap-2 font-medium"
+              className="text-xs px-3.5 py-2 rounded-xl bg-white hover:bg-zinc-50 text-zinc-700 hover:text-zinc-900 border border-[#E8E4DC] shadow-sm transition-colors flex items-center gap-2 font-medium"
             >
               <ArrowLeft className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
               <span>Boutique</span>
@@ -75,7 +75,7 @@ export default function AProposPage() {
         </div>
 
         <div className="space-y-3 max-w-2xl">
-          <h1 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-zinc-900 tracking-tight leading-tight">
             À Propos • <span className="text-gold">L&apos;Histoire PRINCE CFA</span>
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 font-medium uppercase tracking-wider">
@@ -84,7 +84,7 @@ export default function AProposPage() {
         </div>
 
         {/* Carte de Récit & Biographie de Sana Omar (Prince CFA) */}
-        <div className="bg-white rounded-3xl border border-zinc-200/90 shadow-sm p-6 sm:p-10 max-w-3xl w-full text-left space-y-5 relative overflow-hidden">
+        <div className="bg-white rounded-3xl border border-[#E8E4DC] shadow-sm p-6 sm:p-10 max-w-3xl w-full text-left space-y-5 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-gold via-amber-500 to-yellow-600" />
 
           <div className="space-y-4 text-sm sm:text-base text-zinc-700 leading-relaxed font-normal">
@@ -106,7 +106,7 @@ export default function AProposPage() {
         </div>
 
         {/* Showroom & Horaires */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm max-w-xl w-full space-y-4 text-xs text-zinc-600 text-center">
+        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#E8E4DC] shadow-sm max-w-xl w-full space-y-4 text-xs text-zinc-600 text-center">
           <div className="flex items-center justify-center gap-2 text-gold font-bold uppercase tracking-wider text-[11px]">
             <Store className="w-4 h-4" />
             <span>Showroom Ouagadougou</span>
@@ -132,7 +132,7 @@ export default function AProposPage() {
             href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=Bonjour%20Prince%20CFA`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-5 py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-xs uppercase tracking-wider border border-zinc-200 transition-all inline-flex items-center gap-2"
+            className="px-5 py-3 rounded-xl bg-white hover:bg-zinc-50 text-zinc-800 border border-[#E8E4DC] shadow-sm font-bold text-xs uppercase tracking-wider border border-zinc-200 transition-all inline-flex items-center gap-2"
           >
             <WhatsAppIcon className="w-4 h-4 text-emerald-600" />
             <span>Contact Conciergerie</span>
@@ -142,7 +142,7 @@ export default function AProposPage() {
       </main>
 
       {/* Footer Minimaliste & Épuré */}
-      <footer className="border-t border-zinc-200 bg-zinc-50 py-8 px-4 sm:px-8 mt-auto">
+      <footer className="border-t border-[#E8E4DC] bg-[#EBE8E1]/90 py-8 px-4 sm:px-8 mt-auto">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <p>© 2026 PRINCE CFA. Koulouba, Ouagadougou. Tous droits réservés.</p>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-zinc-600">

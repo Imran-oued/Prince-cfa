@@ -119,7 +119,7 @@ export default function Navbar({
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-gold/15 px-3 py-2.5 sm:px-8 sm:py-4 transition-all w-full max-w-full box-border">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#E8E4DC] shadow-sm px-3 py-2.5 sm:px-8 sm:py-4 transition-all w-full max-w-full box-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2.5 sm:gap-4">
 
           {/* Vrai Logo */}
@@ -153,7 +153,7 @@ export default function Navbar({
                       setIsDropdownOpen(true);
                     }
                   }}
-                  className="w-full bg-zinc-100/90 border border-zinc-200 rounded-full py-2 sm:py-2.5 pl-3.5 sm:pl-4 pr-12 sm:pr-16 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all shadow-inner"
+                  className="w-full bg-white border border-[#E8E4DC] rounded-full py-2 sm:py-2.5 pl-3.5 sm:pl-4 pr-12 sm:pr-16 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all shadow-sm"
                 />
 
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
@@ -189,13 +189,13 @@ export default function Navbar({
 
               {/* Menu déroulant instantané des résultats (Dropdown) */}
               {isDropdownOpen && searchQuery.trim().length > 0 && (
-                <div className="absolute left-0 right-0 sm:left-auto sm:right-0 sm:w-96 top-full mt-2 bg-white/95 backdrop-blur-2xl border border-gold/30 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="px-3.5 py-2 border-b border-zinc-100 flex items-center justify-between text-[11px] font-semibold text-zinc-500 uppercase tracking-wider bg-zinc-50/70">
+                <div className="absolute left-0 right-0 sm:left-auto sm:right-0 sm:w-96 top-full mt-2 bg-white backdrop-blur-2xl border border-[#E8E4DC] rounded-2xl shadow-md z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="px-3.5 py-2 border-b border-[#E8E4DC] flex items-center justify-between text-[11px] font-semibold text-zinc-600 uppercase tracking-wider bg-[#F5F3EE]/80">
                     <span>Aperçu rapide</span>
                     <span className="text-gold font-bold">{quickResults.length} trouvé{quickResults.length > 1 ? 's' : ''}</span>
                   </div>
 
-                  <div className="max-h-[300px] overflow-y-auto divide-y divide-zinc-100 p-1">
+                  <div className="max-h-[300px] overflow-y-auto divide-y divide-[#E8E4DC]/60 p-1">
                     {quickResults.length > 0 ? (
                       quickResults.map((product) => (
                         <button
@@ -209,7 +209,7 @@ export default function Navbar({
                           }}
                           className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-gold/10 hover:border hover:border-gold/30 text-left transition-all duration-200 group"
                         >
-                          <div className="relative w-11 h-11 bg-zinc-100 rounded-lg p-1 border border-zinc-200 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                          <div className="relative w-11 h-11 bg-white rounded-lg p-1 border border-[#E8E4DC] flex-shrink-0 flex items-center justify-center overflow-hidden">
                             <img
                               src={product.image}
                               alt={product.name}
@@ -220,7 +220,7 @@ export default function Navbar({
                             <h4 className="text-xs font-bold text-zinc-900 truncate group-hover:text-gold transition-colors">
                               {product.name}
                             </h4>
-                            <p className="text-[10px] text-zinc-500 truncate mt-0.5">
+                            <p className="text-[10px] text-zinc-600 truncate mt-0.5">
                               {product.brand || 'Prince CFA'} • {product.storageOptions?.[0]?.capacity || 'Haute Qualité'}
                             </p>
                           </div>
@@ -233,7 +233,7 @@ export default function Navbar({
                       ))
                     ) : (
                       <div className="py-6 px-4 text-center">
-                        <p className="text-xs text-zinc-500">Aucun produit ne correspond à &quot;{searchQuery}&quot;</p>
+                        <p className="text-xs text-zinc-600">Aucun produit ne correspond à &quot;{searchQuery}&quot;</p>
                       </div>
                     )}
                   </div>
@@ -241,7 +241,7 @@ export default function Navbar({
                   <button
                     type="button"
                     onClick={scrollToCollection}
-                    className="w-full py-2.5 px-4 text-center bg-gold/10 hover:bg-gold/20 text-gold text-xs font-bold border-t border-gold/20 transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-2.5 px-4 text-center bg-gold/10 hover:bg-gold/20 text-gold text-xs font-bold border-t border-[#E8E4DC] transition-colors flex items-center justify-center gap-2"
                   >
                     <span>Voir tous les résultats dans le catalogue</span>
                     <span>→</span>
@@ -253,7 +253,7 @@ export default function Navbar({
             {/* Bouton Suivi de Commande */}
             <Link
               href="/suivi"
-              className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-full border border-zinc-200 bg-zinc-100/80 hover:border-gold/50 hover:bg-gold/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.15)] active:scale-95 transition-all duration-300 text-xs font-bold text-zinc-700 hover:text-gold"
+              className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-full border border-[#E8E4DC] bg-white hover:border-gold/50 hover:bg-gold/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.15)] active:scale-95 transition-all duration-300 text-xs font-bold text-zinc-900 hover:text-gold shadow-sm"
               title="Suivre ma commande en direct"
             >
               <Package className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
@@ -263,12 +263,12 @@ export default function Navbar({
             {/* Bouton Panier */}
             <button
               onClick={onOpenCart}
-              className="hidden sm:flex relative p-2.5 sm:p-3 rounded-full border border-zinc-200 bg-zinc-100/80 hover:border-gold/50 hover:bg-gold/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.2)] active:scale-95 transition-all duration-300 group items-center justify-center flex-shrink-0 cursor-pointer"
+              className="hidden sm:flex relative p-2.5 sm:p-3 rounded-full border border-[#E8E4DC] bg-white hover:border-gold/50 hover:bg-gold/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.2)] active:scale-95 transition-all duration-300 group items-center justify-center flex-shrink-0 cursor-pointer shadow-sm"
               title="Voir mon panier"
               aria-label="Panier"
             >
               <svg
-                className="w-5 h-5 text-zinc-700 group-hover:text-gold transition-colors"
+                className="w-5 h-5 text-zinc-900 group-hover:text-gold transition-colors"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -285,7 +285,7 @@ export default function Navbar({
             {/* Bouton Hamburger Menu (Slide-over latéral) */}
             <button
               onClick={() => setIsMenuOpen(true)}
-              className="p-2.5 sm:p-3 rounded-full border border-gold/40 bg-zinc-100/90 hover:bg-gold/15 hover:border-gold hover:shadow-[0_0_15px_rgba(212,175,55,0.2)] active:scale-95 text-gold transition-all duration-300 flex items-center justify-center flex-shrink-0 group cursor-pointer"
+              className="p-2.5 sm:p-3 rounded-full border border-[#E8E4DC] bg-white hover:bg-gold/15 hover:border-gold hover:shadow-[0_0_15px_rgba(212,175,55,0.2)] active:scale-95 text-gold transition-all duration-300 flex items-center justify-center flex-shrink-0 group cursor-pointer shadow-sm"
               title="Ouvrir le menu de navigation"
               aria-label="Menu"
             >

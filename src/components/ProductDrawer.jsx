@@ -956,7 +956,7 @@ export default function ProductDrawer({
         onTouchMove={handleDrawerTouchMove}
         onTouchEnd={handleDrawerTouchEnd}
         onTouchCancel={handleDrawerTouchEnd}
-        className={`fixed top-0 right-0 h-full w-full sm:w-[540px] md:w-[620px] lg:w-[680px] bg-white border-l border-zinc-200 shadow-[-20px_0_50px_rgba(0,0,0,0.15),-5px_0_20px_rgba(212,175,55,0.1)] z-[150] transition-transform duration-300 ease-out flex flex-col overflow-hidden will-change-transform ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-[540px] md:w-[620px] lg:w-[680px] bg-white border-l border-[#E8E4DC] shadow-[-20px_0_50px_rgba(0,0,0,0.15),-5px_0_20px_rgba(212,175,55,0.1)] z-[150] transition-transform duration-300 ease-out flex flex-col overflow-hidden will-change-transform ${
           slideIn && isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'
         }`}
         role="dialog"
@@ -967,12 +967,12 @@ export default function ProductDrawer({
         <div className="absolute top-1/2 -translate-y-1/2 left-1.5 w-1 h-12 rounded-full bg-zinc-300/80 sm:hidden pointer-events-none z-30" />
 
         {/* Header du Drawer avec bouton retour */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-5 border-b border-zinc-200 bg-white/95 backdrop-blur-md relative z-20">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-5 border-b border-[#E8E4DC] bg-white/95 backdrop-blur-md relative z-20">
           {/* Bouton Retour rapide pour revenir en 1 tap aux catégories */}
           <button
             type="button"
             onClick={handleCleanClose}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-semibold border border-zinc-200/80 transition-all active:scale-95 cursor-pointer shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-zinc-50 text-zinc-900 text-xs font-semibold border border-[#E8E4DC] transition-all active:scale-95 cursor-pointer shadow-sm"
             title="Retour aux catégories (ou glisser vers la droite)"
             aria-label="Retour aux catégories"
           >
@@ -1004,7 +1004,7 @@ export default function ProductDrawer({
           <div className="space-y-3">
             {/* Boîte photo épurée avec glissement tactile au doigt */}
             <div 
-              className={`relative w-full h-80 sm:h-96 md:h-[420px] rounded-3xl ${currentImgBg.containerClass} ${currentImgBg.isBlack ? '' : 'border border-zinc-200/80'} overflow-hidden shadow-sm select-none touch-pan-y flex items-center justify-center cursor-grab active:cursor-grabbing`}
+              className={`relative w-full h-80 sm:h-96 md:h-[420px] rounded-3xl ${currentImgBg.containerClass} ${currentImgBg.isBlack ? '' : 'border border-[#E8E4DC]'} overflow-hidden shadow-sm select-none touch-pan-y flex items-center justify-center cursor-grab active:cursor-grabbing`}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
@@ -1078,7 +1078,7 @@ export default function ProductDrawer({
           {/* En-tête du produit (Titre, Note & Prix) */}
           <div className="space-y-3">
 
-            <h1 id="product-drawer-title" className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight leading-snug">
+            <h1 id="product-drawer-title" className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight leading-snug">
               {currentProduct.name}
             </h1>
 
@@ -1101,7 +1101,7 @@ export default function ProductDrawer({
                   <span>{selectedCapacity}</span>
                 </span>
               )}
-              <span className="text-xs text-zinc-500 uppercase tracking-widest font-semibold ml-auto">TVA incluse</span>
+              <span className="text-xs text-zinc-600 uppercase tracking-widest font-semibold ml-auto">TVA incluse</span>
             </div>
           </div>
 
@@ -1128,29 +1128,29 @@ export default function ProductDrawer({
                   <Zap className="w-4 h-4 text-gold" aria-hidden="true" />
                   <span>Performances Moto Électrique</span>
                 </span>
-                <span className="text-[10px] text-zinc-500">Écologique · 0% Carburant</span>
+                <span className="text-[10px] text-zinc-600">Écologique · 0% Carburant</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Moteur</span>
+                <div className="p-2 rounded-xl bg-white border border-[#E8E4DC] shadow-sm">
+                  <span className="text-[9px] text-zinc-600 uppercase font-semibold block">Moteur</span>
                   <span className="text-sm font-black text-zinc-900">
                     {currentProduct.specs.motorPower ? `${currentProduct.specs.motorPower} W` : "—"}
                   </span>
                 </div>
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Autonomie</span>
+                <div className="p-2 rounded-xl bg-white border border-[#E8E4DC] shadow-sm">
+                  <span className="text-[9px] text-zinc-600 uppercase font-semibold block">Autonomie</span>
                   <span className="text-sm font-black text-emerald-600">
                     {currentProduct.specs.rangeKm ? `${currentProduct.specs.rangeKm} km` : "—"}
                   </span>
                 </div>
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Vitesse</span>
+                <div className="p-2 rounded-xl bg-white border border-[#E8E4DC] shadow-sm">
+                  <span className="text-[9px] text-zinc-600 uppercase font-semibold block">Vitesse</span>
                   <span className="text-sm font-black text-gold">
                     {currentProduct.specs.maxSpeedKm ? `${currentProduct.specs.maxSpeedKm} km/h` : "—"}
                   </span>
                 </div>
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Batterie</span>
+                <div className="p-2 rounded-xl bg-white border border-[#E8E4DC] shadow-sm">
+                  <span className="text-[9px] text-zinc-600 uppercase font-semibold block">Batterie</span>
                   <span className="text-sm font-black text-zinc-900">
                     {currentProduct.specs.batteryCapacityWh ? `${currentProduct.specs.batteryCapacityWh} Wh` : (currentProduct.specs.batteryVoltage ? `${currentProduct.specs.batteryVoltage}V` : "—")}
                   </span>
@@ -1167,23 +1167,23 @@ export default function ProductDrawer({
                   <Laptop className="w-4 h-4 text-blue-600" aria-hidden="true" />
                   <span>Configuration Clé — Ordinateur</span>
                 </span>
-                <span className="text-[10px] text-zinc-500 font-medium">{OS_PRETTY_NAMES[currentProduct.specs.os] || currentProduct.specs.os || "OS"}</span>
+                <span className="text-[10px] text-zinc-600 font-medium">{OS_PRETTY_NAMES[currentProduct.specs.os] || currentProduct.specs.os || "OS"}</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">CPU</span>
+                <div className="p-2 rounded-xl bg-white border border-[#E8E4DC] shadow-sm">
+                  <span className="text-[9px] text-zinc-600 uppercase font-semibold block">CPU</span>
                   <span className="text-xs font-black text-zinc-900 line-clamp-1">{currentProduct.specs.processor || "—"}</span>
                 </div>
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">RAM</span>
+                <div className="p-2 rounded-xl bg-white border border-[#E8E4DC] shadow-sm">
+                  <span className="text-[9px] text-zinc-600 uppercase font-semibold block">RAM</span>
                   <span className="text-sm font-black text-gold">{currentProduct.specs.ram ? `${currentProduct.specs.ram} Go` : "—"}</span>
                 </div>
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Stockage</span>
+                <div className="p-2 rounded-xl bg-white border border-[#E8E4DC] shadow-sm">
+                  <span className="text-[9px] text-zinc-600 uppercase font-semibold block">Stockage</span>
                   <span className="text-xs font-black text-emerald-600">{currentProduct.specs.storageSize || "—"}</span>
                 </div>
-                <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200">
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Écran</span>
+                <div className="p-2 rounded-xl bg-white border border-[#E8E4DC] shadow-sm">
+                  <span className="text-[9px] text-zinc-600 uppercase font-semibold block">Écran</span>
                   <span className="text-xs font-black text-zinc-900">{currentProduct.specs.screenSize ? `${currentProduct.specs.screenSize}"` : "—"}</span>
                 </div>
               </div>
@@ -1194,7 +1194,7 @@ export default function ProductDrawer({
 
           {/* CAS IPHONE : FLUX STRICT (1. FORMAT SIM → 2. CAPACITÉ → 3. COULEURS DISPONIBLES) */}
           {isIPhone ? (
-            <div className="space-y-4 pt-3 border-t border-zinc-200">
+            <div className="space-y-4 pt-3 border-t border-[#E8E4DC]">
               {/* 1. Sélecteur Format de SIM */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
@@ -1202,9 +1202,9 @@ export default function ProductDrawer({
                     htmlFor="user-sim-type-select" 
                     className="text-xs text-zinc-600 uppercase tracking-wider font-bold"
                   >
-                    1. Format SIM {selectedSimType ? <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">: {selectedSimType}</span> : <span className="text-amber-600 text-[11px] font-semibold normal-case ml-1">(Étape 1 : Requis)</span>}
+                    1. Format SIM {selectedSimType ? <span className="text-zinc-900 font-extrabold normal-case text-sm ml-1">: {selectedSimType}</span> : <span className="text-amber-600 text-[11px] font-semibold normal-case ml-1">(Étape 1 : Requis)</span>}
                   </label>
-                  <span className="text-[11px] text-zinc-400 font-medium">
+                  <span className="text-[11px] text-zinc-600 font-medium">
                     {availableSimTypes.length} {availableSimTypes.length > 1 ? 'formats' : 'format'}
                   </span>
                 </div>
@@ -1214,7 +1214,7 @@ export default function ProductDrawer({
                     id="user-sim-type-select"
                     value={selectedSimType}
                     onChange={(e) => setSelectedSimType(e.target.value)}
-                    className="w-full bg-zinc-50 hover:bg-zinc-100 border-2 border-zinc-200 focus:border-gold rounded-2xl px-4 py-3 text-sm font-bold text-zinc-900 outline-none transition-all cursor-pointer appearance-none pr-10 shadow-sm"
+                    className="w-full bg-white hover:bg-zinc-50 border-2 border-[#E8E4DC] focus:border-gold rounded-2xl px-4 py-3 text-sm font-bold text-zinc-900 outline-none transition-all cursor-pointer appearance-none pr-10 shadow-sm"
                   >
                     {availableSimTypes.length > 1 && (
                       <option value="">— Veuillez choisir le format de SIM —</option>
@@ -1232,7 +1232,7 @@ export default function ProductDrawer({
                       );
                     })}
                   </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600">
                     <ChevronDown className="w-4 h-4" aria-hidden="true" />
                   </div>
                 </div>
@@ -1245,10 +1245,10 @@ export default function ProductDrawer({
                     htmlFor="user-capacity-select" 
                     className="text-xs text-zinc-600 uppercase tracking-wider font-bold"
                   >
-                    2. Capacité {selectedCapacity ? <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">: {selectedCapacity}</span> : <span className="text-amber-600 text-[11px] font-semibold normal-case ml-1">(Étape 2 : Requis)</span>}
+                    2. Capacité {selectedCapacity ? <span className="text-zinc-900 font-extrabold normal-case text-sm ml-1">: {selectedCapacity}</span> : <span className="text-amber-600 text-[11px] font-semibold normal-case ml-1">(Étape 2 : Requis)</span>}
                   </label>
                   {selectedSimType && (
-                    <span className="text-[11px] text-zinc-400 font-medium">{availableCapacities.length} options</span>
+                    <span className="text-[11px] text-zinc-600 font-medium">{availableCapacities.length} options</span>
                   )}
                 </div>
 
@@ -1260,8 +1260,8 @@ export default function ProductDrawer({
                     onChange={(e) => setSelectedCapacity(e.target.value)}
                     className={`w-full border-2 rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all appearance-none pr-10 shadow-sm ${
                       !selectedSimType
-                        ? 'bg-zinc-100/70 border-zinc-200 text-zinc-400 cursor-not-allowed'
-                        : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 focus:border-gold text-zinc-900 cursor-pointer'
+                        ? 'bg-zinc-100/70 border-[#E8E4DC] text-zinc-400 cursor-not-allowed'
+                        : 'bg-white hover:bg-zinc-50 border-[#E8E4DC] focus:border-gold text-zinc-900 cursor-pointer'
                     }`}
                   >
                     {!selectedSimType ? (
@@ -1280,7 +1280,7 @@ export default function ProductDrawer({
                       </>
                     )}
                   </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600">
                     <ChevronDown className="w-4 h-4" aria-hidden="true" />
                   </div>
                 </div>
@@ -1289,12 +1289,12 @@ export default function ProductDrawer({
               {/* 3. Sélecteur de Couleurs : Visible UNIQUEMENT si SIM ET Capacité sont choisies */}
               {selectedSimType && selectedCapacity ? (
                 availableColorsForSelection && availableColorsForSelection.length > 0 && (
-                  <div className="space-y-3 pt-3 border-t border-zinc-200">
+                  <div className="space-y-3 pt-3 border-t border-[#E8E4DC]">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-zinc-600 uppercase tracking-wider font-semibold">
-                        3. Couleur : <strong className="text-zinc-950 normal-case font-bold text-sm ml-1.5">{activeColor || 'Sélectionnez une couleur'}</strong>
+                        3. Couleur : <strong className="text-zinc-900 normal-case font-bold text-sm ml-1.5">{activeColor || 'Sélectionnez une couleur'}</strong>
                       </span>
-                      <span className="text-[11px] text-zinc-500 font-medium">
+                      <span className="text-[11px] text-zinc-600 font-medium">
                         {availableColorsForSelection.length} {availableColorsForSelection.length > 1 ? 'finitions disponibles' : 'finition disponible'}
                       </span>
                     </div>
@@ -1312,7 +1312,7 @@ export default function ProductDrawer({
                             className={`relative min-w-[90px] sm:min-w-[100px] p-2 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center text-center group flex-shrink-0 cursor-pointer ${
                               isSelected 
                                 ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(212,175,55,0.25)] scale-[1.03]' 
-                                : 'border-zinc-200 bg-zinc-50 hover:border-gold/40 hover:bg-zinc-100/70'
+                                : 'border-[#E8E4DC] bg-white hover:border-gold/40 hover:bg-zinc-50 shadow-sm'
                             }`}
                           >
                             {isSelected && (
@@ -1324,7 +1324,7 @@ export default function ProductDrawer({
                             <div className={`w-16 h-16 sm:w-18 sm:h-18 rounded-xl ${getProductImageBg(currentProduct, variantImg).containerClass} p-1 flex items-center justify-center overflow-hidden mb-2 shadow-inner`}>
                               {variantImg?.length > 4 ? (
                                 <img 
-                                  src={variantImg} 
+                                   src={variantImg} 
                                   alt={color} 
                                   className={`w-full h-full object-contain ${getProductImageBg(currentProduct, variantImg).isBlack ? '' : 'mix-blend-multiply'} group-hover:scale-105 transition-transform`}
                                 />
@@ -1344,10 +1344,10 @@ export default function ProductDrawer({
                 )
               ) : (
                 <div className="p-4 rounded-2xl bg-amber-500/[0.06] border border-amber-500/20 text-center space-y-1">
-                  <p className="text-xs font-bold text-zinc-800">
+                  <p className="text-xs font-bold text-zinc-900">
                     🎨 Finitions et Couleurs disponibles
                   </p>
-                  <p className="text-[11px] text-zinc-500">
+                  <p className="text-[11px] text-zinc-600">
                     Veuillez choisir le <strong>format de SIM</strong> et la <strong>capacité</strong> ci-dessus pour afficher les couleurs disponibles pour cet iPhone.
                   </p>
                 </div>
@@ -1358,12 +1358,12 @@ export default function ProductDrawer({
             <>
               {/* Sélecteur de Couleurs habituel */}
               {availableColorsForSelection && availableColorsForSelection.length > 0 && (
-                <div className="space-y-3 pt-3 border-t border-zinc-200">
+                <div className="space-y-3 pt-3 border-t border-[#E8E4DC]">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-zinc-600 uppercase tracking-wider font-semibold">
-                      Couleur : <strong className="text-zinc-950 normal-case font-bold text-sm ml-1.5">{activeColor}</strong>
+                      Couleur : <strong className="text-zinc-900 normal-case font-bold text-sm ml-1.5">{activeColor}</strong>
                     </span>
-                    <span className="text-[11px] text-zinc-500 font-medium">
+                    <span className="text-[11px] text-zinc-600 font-medium">
                       {availableColorsForSelection.length} {availableColorsForSelection.length > 1 ? 'finitions disponibles' : 'finition disponible'}
                     </span>
                   </div>
@@ -1381,7 +1381,7 @@ export default function ProductDrawer({
                           className={`relative min-w-[90px] sm:min-w-[100px] p-2 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center text-center group flex-shrink-0 cursor-pointer ${
                             isSelected 
                               ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(212,175,55,0.25)] scale-[1.03]' 
-                              : 'border-zinc-200 bg-zinc-50 hover:border-gold/40 hover:bg-zinc-100/70'
+                              : 'border-[#E8E4DC] bg-white hover:border-gold/40 hover:bg-zinc-50 shadow-sm'
                           }`}
                         >
                           {isSelected && (
@@ -1414,15 +1414,15 @@ export default function ProductDrawer({
 
               {/* Sélecteur Format de SIM si applicable (exclus pour les Android) */}
               {!isOtherPhone && availableSimTypes.length > 0 && (
-                <div className="space-y-2 pt-3 border-t border-zinc-200">
+                <div className="space-y-2 pt-3 border-t border-[#E8E4DC]">
                   <div className="flex items-center justify-between">
                     <label 
                       htmlFor="user-sim-type-select" 
                       className="text-xs text-zinc-600 uppercase tracking-wider font-bold"
                     >
-                      Format SIM : <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">{selectedSimType}</span>
+                      Format SIM : <span className="text-zinc-900 font-extrabold normal-case text-sm ml-1">{selectedSimType}</span>
                     </label>
-                    <span className="text-[11px] text-zinc-400 font-medium">
+                    <span className="text-[11px] text-zinc-600 font-medium">
                       {availableSimTypes.length} {availableSimTypes.length > 1 ? 'formats' : 'format'}
                     </span>
                   </div>
@@ -1432,7 +1432,7 @@ export default function ProductDrawer({
                       id="user-sim-type-select"
                       value={selectedSimType}
                       onChange={(e) => setSelectedSimType(e.target.value)}
-                      className="w-full bg-zinc-50 hover:bg-zinc-100 border-2 border-zinc-200 focus:border-gold rounded-2xl px-4 py-3 text-sm font-bold text-zinc-900 outline-none transition-all cursor-pointer appearance-none pr-10 shadow-sm"
+                      className="w-full bg-white hover:bg-zinc-50 border-2 border-[#E8E4DC] focus:border-gold rounded-2xl px-4 py-3 text-sm font-bold text-zinc-900 outline-none transition-all cursor-pointer appearance-none pr-10 shadow-sm"
                     >
                       {availableSimTypes.map((sim) => {
                         const priceNote = sim.delta > 0 
@@ -1447,7 +1447,7 @@ export default function ProductDrawer({
                         );
                       })}
                     </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600">
                       <ChevronDown className="w-4 h-4" aria-hidden="true" />
                     </div>
                   </div>
@@ -1456,15 +1456,15 @@ export default function ProductDrawer({
 
               {/* Sélecteur de Capacité si applicable */}
               {availableCapacities.length > 0 && (
-                <div className="space-y-2 pt-3 border-t border-zinc-200">
+                <div className="space-y-2 pt-3 border-t border-[#E8E4DC]">
                   <div className="flex items-center justify-between">
                     <label 
                       htmlFor="user-capacity-select" 
                       className="text-xs text-zinc-600 uppercase tracking-wider font-bold"
                     >
-                      {selectedCapacity && selectedCapacity.includes('RAM') ? 'Configuration (Stockage & RAM) :' : 'Capacité :'} <span className="text-zinc-950 font-extrabold normal-case text-sm ml-1">{selectedCapacity}</span>
+                      {selectedCapacity && selectedCapacity.includes('RAM') ? 'Configuration (Stockage & RAM) :' : 'Capacité :'} <span className="text-zinc-900 font-extrabold normal-case text-sm ml-1">{selectedCapacity}</span>
                     </label>
-                    <span className="text-[11px] text-zinc-400 font-medium">{availableCapacities.length} options</span>
+                    <span className="text-[11px] text-zinc-600 font-medium">{availableCapacities.length} options</span>
                   </div>
 
                   <div className="relative">
@@ -1472,7 +1472,7 @@ export default function ProductDrawer({
                       id="user-capacity-select"
                       value={selectedCapacity}
                       onChange={(e) => setSelectedCapacity(e.target.value)}
-                      className="w-full bg-zinc-50 hover:bg-zinc-100 border-2 border-zinc-200 focus:border-gold rounded-2xl px-4 py-3 text-sm font-bold text-zinc-900 outline-none transition-all cursor-pointer appearance-none pr-10 shadow-sm"
+                      className="w-full bg-white hover:bg-zinc-50 border-2 border-[#E8E4DC] focus:border-gold rounded-2xl px-4 py-3 text-sm font-bold text-zinc-900 outline-none transition-all cursor-pointer appearance-none pr-10 shadow-sm"
                     >
                       {availableCapacities.map((item) => {
                         const itemWithSimPrice = item.price + currentSimDelta;
@@ -1483,7 +1483,7 @@ export default function ProductDrawer({
                         );
                       })}
                     </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600">
                       <ChevronDown className="w-4 h-4" aria-hidden="true" />
                     </div>
                   </div>
@@ -1494,11 +1494,11 @@ export default function ProductDrawer({
 
           {/* Fiche Technique & Détails (Style Amazon épuré sans aucun emoji) */}
           {technicalDetails.length > 0 && (
-            <div className="space-y-4 pt-4 border-t border-zinc-200">
+            <div className="space-y-4 pt-4 border-t border-[#E8E4DC]">
 
               {/* Titre Détails */}
               <div className="pt-1">
-                <h3 className="text-base sm:text-lg font-bold text-zinc-950 tracking-tight">
+                <h3 className="text-base sm:text-lg font-bold text-zinc-900 tracking-tight">
                   Détails
                 </h3>
               </div>
@@ -1542,40 +1542,40 @@ export default function ProductDrawer({
           )}
 
           {/* Description du produit */}
-          <div className="space-y-2 pt-2 border-t border-zinc-200">
-            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Description</h3>
+          <div className="space-y-2 pt-2 border-t border-[#E8E4DC]">
+            <h3 className="text-xs font-bold text-zinc-600 uppercase tracking-wider">Description</h3>
             {currentProduct.shortDesc && (
               <p className="text-xs font-semibold text-zinc-900 bg-amber-500/[0.08] border border-gold/30 rounded-xl p-3 leading-relaxed">
                 {currentProduct.shortDesc}
               </p>
             )}
-            <p className="text-zinc-700 text-sm sm:text-base leading-relaxed border-l-2 border-gold/50 pl-4 py-1 bg-zinc-50/80 rounded-r-xl">
+            <p className="text-zinc-700 text-sm sm:text-base leading-relaxed border-l-2 border-gold/50 pl-4 py-1 bg-[#F5F3EE]/80 rounded-r-xl">
               {currentProduct.desc}
             </p>
           </div>
 
           {/* État de l'appareil, Garantie & Contenu du Coffret */}
-          <div className="space-y-2.5 pt-3 border-t border-zinc-200">
-            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">État, Garantie & Coffret</h3>
+          <div className="space-y-2.5 pt-3 border-t border-[#E8E4DC]">
+            <h3 className="text-xs font-bold text-zinc-600 uppercase tracking-wider">État, Garantie & Coffret</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-              <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center gap-2.5">
+              <div className="p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm flex items-center gap-2.5">
                 <svg className="w-5 h-5 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
                 <div>
-                  <div className="text-[10px] text-zinc-500 uppercase font-semibold">État de l&apos;Appareil</div>
+                  <div className="text-[10px] text-zinc-600 uppercase font-semibold">État de l&apos;Appareil</div>
                   <div className="font-bold text-zinc-900">
                     {currentProduct.condition === 'occasion' ? "Occasion Certifiée A+" : "Neuf sous blister scellé"}
                   </div>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center gap-2.5">
+              <div className="p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm flex items-center gap-2.5">
                 <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                  <div className="text-[10px] text-zinc-500 uppercase font-semibold">Garantie Vendeur</div>
+                  <div className="text-[10px] text-zinc-600 uppercase font-semibold">Garantie Vendeur</div>
                   <div className="font-bold text-zinc-900">
                     {(currentProduct.category === 'phones' || currentProduct.category === 'tablets' || currentProduct.category === 'tablettes' || currentProduct.category === 'computers' || currentProduct.category === 'ordinateurs')
                       ? "Garantie 1 Mois"
@@ -1599,7 +1599,7 @@ export default function ProductDrawer({
                   <p className="text-[11px] text-zinc-700 font-semibold">
                     La garantie ne couvre pas les cas suivants :
                   </p>
-                  <ul className="text-xs text-zinc-800 space-y-1.5 pl-1 font-medium">
+                  <ul className="text-xs text-zinc-900 space-y-1.5 pl-1 font-medium">
                     <li className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
                       <span>Problème lié à l&apos;écran</span>
@@ -1617,22 +1617,22 @@ export default function ProductDrawer({
               )}
 
               {currentProduct.accessories ? (
-                <div className="col-span-1 sm:col-span-2 p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start gap-2.5">
+                <div className="col-span-1 sm:col-span-2 p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm flex items-start gap-2.5">
                   <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                   <div>
-                    <div className="text-[10px] text-zinc-500 uppercase font-semibold">Accessoires Inclus dans le Coffret</div>
-                    <div className="font-medium text-zinc-800 mt-0.5">{currentProduct.accessories}</div>
+                    <div className="text-[10px] text-zinc-600 uppercase font-semibold">Accessoires Inclus dans le Coffret</div>
+                    <div className="font-medium text-zinc-900 mt-0.5">{currentProduct.accessories}</div>
                   </div>
                 </div>
               ) : (
-                <div className="col-span-1 sm:col-span-2 p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center gap-2.5">
+                <div className="col-span-1 sm:col-span-2 p-3 rounded-xl bg-white border border-[#E8E4DC] shadow-sm flex items-center gap-2.5">
                   <svg className="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                   <div>
-                    <div className="text-[10px] text-zinc-500 uppercase font-semibold">Coffret</div>
+                    <div className="text-[10px] text-zinc-600 uppercase font-semibold">Coffret</div>
                     <div className="font-medium text-zinc-700">Câble de charge d&apos;origine & documentation inclus</div>
                   </div>
                 </div>
@@ -1641,51 +1641,51 @@ export default function ProductDrawer({
           </div>
 
           {/* Avantages & Garanties Boutique VIP */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-zinc-200">
-            <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col gap-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-[#E8E4DC]">
+            <div className="p-3.5 rounded-xl bg-white border border-[#E8E4DC] shadow-sm flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-gold font-bold text-xs">
                 <svg className="w-4 h-4 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 <span>Expédition 24/48h</span>
               </div>
-              <span className="text-[11px] text-zinc-500">Livraison rapide et sécurisée</span>
+              <span className="text-[11px] text-zinc-600">Livraison rapide et sécurisée</span>
             </div>
-            <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col gap-1">
+            <div className="p-3.5 rounded-xl bg-white border border-[#E8E4DC] shadow-sm flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-gold font-bold text-xs">
                 <svg className="w-4 h-4 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
                 <span>Garantie Authentique</span>
               </div>
-              <span className="text-[11px] text-zinc-500">100% Produit certifié d&apos;origine</span>
+              <span className="text-[11px] text-zinc-600">100% Produit certifié d&apos;origine</span>
             </div>
-            <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col gap-1">
+            <div className="p-3.5 rounded-xl bg-white border border-[#E8E4DC] shadow-sm flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-gold font-bold text-xs">
                 <svg className="w-4 h-4 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 <span>Service VIP WhatsApp</span>
               </div>
-              <span className="text-[11px] text-zinc-500">Assistance directe 7j/7</span>
+              <span className="text-[11px] text-zinc-600">Assistance directe 7j/7</span>
             </div>
           </div>
 
         </div>
 
         {/* Barre d'Action Inférieure Fixée (Sticky Bottom Bar) - Style Amazon */}
-        <div className="p-3.5 sm:p-4 border-t border-zinc-200 bg-white/95 backdrop-blur-md flex flex-col gap-2.5 relative z-20 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+        <div className="p-3.5 sm:p-4 border-t border-[#E8E4DC] bg-white/95 backdrop-blur-md flex flex-col gap-2.5 relative z-20 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
           {/* Ligne Prix & Statut Stock */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
+              <span className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold">
                 {isConfigIncomplete
                   ? 'Configuration requise'
                   : `Total ${[selectedCapacity, !isOtherPhone && selectedSimType].filter(Boolean).join(' · ')}`
                 }
               </span>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-xl sm:text-2xl font-black text-zinc-950 whitespace-nowrap">
+                <span className="text-xl sm:text-2xl font-black text-zinc-900 whitespace-nowrap">
                   {isConfigIncomplete
                     ? `${formatPrice(currentProduct.price)} `
                     : `${formatPrice(currentPrice)} `

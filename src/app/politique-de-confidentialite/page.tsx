@@ -31,9 +31,9 @@ function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 export default function PolitiqueConfidentialitePage() {
   return (
-    <div className="min-h-screen bg-background text-zinc-950 flex flex-col selection:bg-gold selection:text-black">
+    <div className="min-h-screen bg-[#F5F3EE] text-[#18181B] flex flex-col selection:bg-gold selection:text-black">
       {/* Barre de Navigation Supérieure */}
-      <header className="sticky top-0 z-40 glass-panel border-b border-zinc-200 bg-white/85 px-4 py-3 sm:px-8 shadow-sm">
+      <header className="sticky top-0 z-40 glass-panel border-b border-[#E8E4DC] bg-white/95 px-4 py-3 sm:px-8 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-12 h-12 sm:w-14 sm:h-14 group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_12px_rgba(212,175,55,0.3)]">
@@ -87,7 +87,7 @@ export default function PolitiqueConfidentialitePage() {
             <ShieldCheck className="w-4 h-4 text-gold" aria-hidden="true" />
             <span>Vie Privée & Sécurité des Données</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-950 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-900 tracking-tight">
             Politique de <span className="text-gold">Confidentialité</span>
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
@@ -102,31 +102,31 @@ export default function PolitiqueConfidentialitePage() {
 
         {/* 3 Grands Piliers d'Engagement */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-2.5">
+          <div className="p-5 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-2.5">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
               <EyeOff className="w-4 h-4" aria-hidden="true" />
             </div>
-            <h2 className="text-sm font-bold text-zinc-950">Zéro Revente de Données</h2>
+            <h2 className="text-sm font-bold text-zinc-900">Zéro Revente de Données</h2>
             <p className="text-xs text-zinc-600 leading-relaxed">
               Vos coordonnées ne sont jamais vendues, louées ou cédées à des courtiers de données ou régies publicitaires externes.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-2.5">
+          <div className="p-5 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-2.5">
             <div className="w-9 h-9 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
               <Lock className="w-4 h-4" aria-hidden="true" />
             </div>
-            <h2 className="text-sm font-bold text-zinc-950">Chiffrement & Sécurité</h2>
+            <h2 className="text-sm font-bold text-zinc-900">Chiffrement & Sécurité</h2>
             <p className="text-xs text-zinc-600 leading-relaxed">
               Vos transactions et commandes sont sauvegardées sur une infrastructure Google Cloud sécurisée avec accès strictement restreint.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-2.5">
+          <div className="p-5 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-2.5">
             <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
               <UserCheck className="w-4 h-4" aria-hidden="true" />
             </div>
-            <h2 className="text-sm font-bold text-zinc-950">Contrôle Total</h2>
+            <h2 className="text-sm font-bold text-zinc-900">Contrôle Total</h2>
             <p className="text-xs text-zinc-600 leading-relaxed">
               Vous gardez le plein contrôle sur vos informations et pouvez exiger leur rectification ou suppression immédiate sur simple demande.
             </p>
@@ -137,10 +137,10 @@ export default function PolitiqueConfidentialitePage() {
         <div className="space-y-6">
 
           {/* Article 1 : Données collectées */}
-          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-4">
+          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-4">
             <div className="flex items-center gap-3">
               <Database className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-              <h2 className="text-base sm:text-lg font-bold text-zinc-950">
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900">
                 1. Quelles sont les Données que nous Collectons ?
               </h2>
             </div>
@@ -150,28 +150,28 @@ export default function PolitiqueConfidentialitePage() {
             <ul className="space-y-2.5 text-xs text-zinc-700">
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
-                <span><strong className="text-zinc-950">Identité & Contact :</strong> Nom, prénom, numéro de téléphone (utilisé pour les appels du livreur et les confirmations WhatsApp).</span>
+                <span><strong className="text-zinc-900">Identité & Contact :</strong> Nom, prénom, numéro de téléphone (utilisé pour les appels du livreur et les confirmations WhatsApp).</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
-                <span><strong className="text-zinc-950">Coordonnées de Livraison :</strong> Ville (ex : Ouagadougou), quartier, repères ou adresse pour la remise sécurisée en main propre.</span>
+                <span><strong className="text-zinc-900">Coordonnées de Livraison :</strong> Ville (ex : Ouagadougou), quartier, repères ou adresse pour la remise sécurisée en main propre.</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
-                <span><strong className="text-zinc-950">Détails de la Commande :</strong> Modèle d&apos;appareil choisi, capacité de stockage, couleur, montant en Francs CFA, date et heure d&apos;achat.</span>
+                <span><strong className="text-zinc-900">Détails de la Commande :</strong> Modèle d&apos;appareil choisi, capacité de stockage, couleur, montant en Francs CFA, date et heure d&apos;achat.</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
-                <span><strong className="text-zinc-950">Paiement Mobile Money / Boutique :</strong> Mode sélectionné (Orange Money, Wave, retrait en boutique) et référence de transaction fournie par le client pour validation comptable. <em>Nous ne demandons ni ne conservons jamais aucun code PIN ni identifiant bancaire secret.</em></span>
+                <span><strong className="text-zinc-900">Paiement Mobile Money / Boutique :</strong> Mode sélectionné (Orange Money, Wave, retrait en boutique) et référence de transaction fournie par le client pour validation comptable. <em>Nous ne demandons ni ne conservons jamais aucun code PIN ni identifiant bancaire secret.</em></span>
               </li>
             </ul>
           </section>
 
           {/* Article 2 : Finalités du traitement */}
-          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-4">
+          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-4">
             <div className="flex items-center gap-3">
               <BellRing className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-              <h2 className="text-base sm:text-lg font-bold text-zinc-950">
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900">
                 2. Pourquoi traitons-nous vos Données (Finalités) ?
               </h2>
             </div>
@@ -179,19 +179,19 @@ export default function PolitiqueConfidentialitePage() {
               Vos informations sont recueillies pour des objectifs précis et transparents :
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs text-zinc-700">
-              <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+              <div className="p-3.5 rounded-xl bg-zinc-50 border border-[#E8E4DC] space-y-1">
                 <span className="font-bold text-gold">Traitement & Expédition</span>
                 <p className="text-zinc-600">Préparation de vos colis, assignation aux coursiers officiels et livraison rapide à votre destination.</p>
               </div>
-              <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+              <div className="p-3.5 rounded-xl bg-zinc-50 border border-[#E8E4DC] space-y-1">
                 <span className="font-bold text-gold">Suivi de Commande en Temps Réel</span>
                 <p className="text-zinc-600">Accès à notre portail de suivi en ligne permettant de vérifier le statut de préparation et de transit de votre achat.</p>
               </div>
-              <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+              <div className="p-3.5 rounded-xl bg-zinc-50 border border-[#E8E4DC] space-y-1">
                 <span className="font-bold text-gold">Service Client & SAV VIP</span>
                 <p className="text-zinc-600">Assistance personnalisée par WhatsApp ou appel pour vos questions techniques, garanties et conseils d&apos;utilisation.</p>
               </div>
-              <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+              <div className="p-3.5 rounded-xl bg-zinc-50 border border-[#E8E4DC] space-y-1">
                 <span className="font-bold text-gold">Conformité Légale & Facturation</span>
                 <p className="text-zinc-600">Émission de votre facture officielle avec justificatif de garantie fabricant.</p>
               </div>
@@ -199,10 +199,10 @@ export default function PolitiqueConfidentialitePage() {
           </section>
 
           {/* Article 3 : Destinataires & Absence de revente */}
-          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-3">
+          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-3">
             <div className="flex items-center gap-3">
               <EyeOff className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-              <h2 className="text-base sm:text-lg font-bold text-zinc-950">
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900">
                 3. Destinataires des Données & Confidentialité
               </h2>
             </div>
@@ -215,10 +215,10 @@ export default function PolitiqueConfidentialitePage() {
           </section>
 
           {/* Article 4 : Durée de conservation */}
-          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-3">
+          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-3">
             <div className="flex items-center gap-3">
               <Database className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-              <h2 className="text-base sm:text-lg font-bold text-zinc-950">
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900">
                 4. Durée de Conservation des Données
               </h2>
             </div>
@@ -228,17 +228,17 @@ export default function PolitiqueConfidentialitePage() {
           </section>
 
           {/* Article 5 : Vos Droits et Contact DPO */}
-          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-4">
+          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-4">
             <div className="flex items-center gap-3">
               <Trash2 className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-              <h2 className="text-base sm:text-lg font-bold text-zinc-950">
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900">
                 5. Vos Droits (Accès, Rectification, Suppression)
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-zinc-700 leading-relaxed">
               Vous disposez à tout moment d&apos;un droit d&apos;accès, de consultation, de rectification ou de suppression des données personnelles vous concernant. Pour exercer ces droits, vous pouvez nous contacter directement par l&apos;un des canaux suivants :
             </p>
-            <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2 text-xs">
+            <div className="p-4 rounded-xl bg-zinc-50 border border-[#E8E4DC] space-y-2 text-xs">
               <p className="flex items-center gap-2">
                 <span className="text-gold font-bold">Via WhatsApp :</span>
                 <a 
@@ -264,10 +264,10 @@ export default function PolitiqueConfidentialitePage() {
           </section>
 
           {/* Article 6 : Cookies et Stockage Local */}
-          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-3">
+          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-3">
             <div className="flex items-center gap-3">
               <ShieldCheck className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-              <h2 className="text-base sm:text-lg font-bold text-zinc-950">
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900">
                 6. Cookies & Technologies de Stockage Local
               </h2>
             </div>
@@ -289,7 +289,7 @@ export default function PolitiqueConfidentialitePage() {
         {/* Liens transversaux & Assistance */}
         <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-gold/15 via-gold/5 to-white border border-gold/30 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-1.5 text-center sm:text-left">
-            <h3 className="text-lg font-black text-zinc-950">
+            <h3 className="text-lg font-black text-zinc-900">
               Une question concernant vos données ?
             </h3>
             <p className="text-xs text-zinc-600 max-w-xl">
@@ -299,7 +299,7 @@ export default function PolitiqueConfidentialitePage() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/mentions-legales"
-              className="px-5 py-3 rounded-xl bg-white hover:bg-zinc-100 text-zinc-800 font-bold text-xs uppercase tracking-wider border border-zinc-200 transition-all shadow-sm"
+              className="px-5 py-3 rounded-xl bg-white hover:bg-zinc-100 text-zinc-800 font-bold text-xs uppercase tracking-wider border border-[#E8E4DC] transition-all shadow-sm"
             >
               Mentions Légales
             </Link>
@@ -329,7 +329,7 @@ export default function PolitiqueConfidentialitePage() {
       </main>
 
       {/* Footer Minimaliste & Épuré */}
-      <footer className="border-t border-zinc-200 bg-zinc-50 py-8 px-4 sm:px-8 mt-12">
+      <footer className="border-t border-[#E8E4DC] bg-[#EBE8E1]/90 py-8 px-4 sm:px-8 mt-12">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <p>© 2026 PRINCE CFA. Koulouba, Ouagadougou. Tous droits réservés.</p>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-zinc-600">

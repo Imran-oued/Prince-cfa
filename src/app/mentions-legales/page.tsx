@@ -31,9 +31,9 @@ function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 export default function MentionsLegalesPage() {
   return (
-    <div className="min-h-screen bg-background text-zinc-950 flex flex-col selection:bg-gold selection:text-black">
+    <div className="min-h-screen bg-[#F5F3EE] text-[#18181B] flex flex-col selection:bg-gold selection:text-black">
       {/* Barre de Navigation Supérieure */}
-      <header className="sticky top-0 z-40 glass-panel border-b border-zinc-200 bg-white/85 px-4 py-3 sm:px-8 shadow-sm">
+      <header className="sticky top-0 z-40 glass-panel border-b border-[#E8E4DC] bg-white/95 px-4 py-3 sm:px-8 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-12 h-12 sm:w-14 sm:h-14 group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_12px_rgba(212,175,55,0.3)]">
@@ -87,7 +87,7 @@ export default function MentionsLegalesPage() {
             <Scale className="w-4 h-4 text-gold" aria-hidden="true" />
             <span>Cadre Légal & Réglementaire</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-950 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-900 tracking-tight">
             Mentions <span className="text-gold">Légales</span>
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
@@ -104,37 +104,37 @@ export default function MentionsLegalesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Carte 1 : Éditeur du Site */}
-          <div className="p-6 sm:p-7 rounded-2xl bg-white border border-zinc-200 hover:border-gold/30 shadow-sm transition-all space-y-4">
+          <div className="p-6 sm:p-7 rounded-2xl bg-white border border-[#E8E4DC] hover:border-gold/30 shadow-sm transition-all space-y-4">
             <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
               <Building2 className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-zinc-950">1. Éditeur de la Plateforme</h2>
+              <h2 className="text-lg font-bold text-zinc-900">1. Éditeur de la Plateforme</h2>
               <p className="text-xs text-zinc-500 mt-1">Identité de l&apos;entité exploitante</p>
             </div>
             <div className="space-y-2.5 text-xs text-zinc-700 leading-relaxed border-t border-zinc-100 pt-3">
               <p>
-                <strong className="text-zinc-950">Dénomination commerciale :</strong> PRINCE CFA
+                <strong className="text-zinc-900">Dénomination commerciale :</strong> PRINCE CFA
               </p>
               <p>
-                <strong className="text-zinc-950">Secteur d&apos;activité :</strong> Distribution spécialisée en téléphonie haut de gamme, smartphones certifiés, informatique, équipement électroménager et électronique grand public.
+                <strong className="text-zinc-900">Secteur d&apos;activité :</strong> Distribution spécialisée en téléphonie haut de gamme, smartphones certifiés, informatique, équipement électroménager et électronique grand public.
               </p>
               <p>
-                <strong className="text-zinc-950">Siège & Boutique physique :</strong> Koulouba, Ouagadougou, Burkina Faso.
+                <strong className="text-zinc-900">Siège & Boutique physique :</strong> Koulouba, Ouagadougou, Burkina Faso.
               </p>
               <p>
-                <strong className="text-zinc-950">Représentation légale :</strong> Direction Générale PRINCE CFA.
+                <strong className="text-zinc-900">Représentation légale :</strong> Direction Générale PRINCE CFA.
               </p>
             </div>
           </div>
 
           {/* Carte 2 : Coordonnées & Contact */}
-          <div className="p-6 sm:p-7 rounded-2xl bg-white border border-zinc-200 hover:border-gold/30 shadow-sm transition-all space-y-4">
+          <div className="p-6 sm:p-7 rounded-2xl bg-white border border-[#E8E4DC] hover:border-gold/30 shadow-sm transition-all space-y-4">
             <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
               <Phone className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-zinc-950">2. Contacts & Service Client</h2>
+              <h2 className="text-lg font-bold text-zinc-900">2. Contacts & Service Client</h2>
               <p className="text-xs text-zinc-500 mt-1">Lignes officielles & assistance</p>
             </div>
             <div className="space-y-2.5 text-xs text-zinc-700 leading-relaxed border-t border-zinc-100 pt-3">
@@ -146,11 +146,11 @@ export default function MentionsLegalesPage() {
               </p>
               <p className="flex items-center gap-2">
                 <span className="text-zinc-500">Ligne secondaire :</span>
-                <span className="text-zinc-950 font-medium">+226 64 76 91 30</span>
+                <span className="text-zinc-900 font-medium">+226 64 76 91 30</span>
               </p>
               <p className="flex items-center gap-2">
                 <span className="text-zinc-500">Ligne support :</span>
-                <span className="text-zinc-950 font-medium">+226 77 14 67 13</span>
+                <span className="text-zinc-900 font-medium">+226 77 14 67 13</span>
               </p>
               <p className="flex items-center gap-2">
                 <span className="text-zinc-500">WhatsApp VIP 7j/7 :</span>
@@ -171,42 +171,42 @@ export default function MentionsLegalesPage() {
           </div>
 
           {/* Carte 3 : Hébergement & Sécurité Technique */}
-          <div className="p-6 sm:p-7 rounded-2xl bg-white border border-zinc-200 hover:border-gold/30 shadow-sm transition-all space-y-4">
+          <div className="p-6 sm:p-7 rounded-2xl bg-white border border-[#E8E4DC] hover:border-gold/30 shadow-sm transition-all space-y-4">
             <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
               <Server className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-zinc-950">3. Hébergement & Infrastructure</h2>
+              <h2 className="text-lg font-bold text-zinc-900">3. Hébergement & Infrastructure</h2>
               <p className="text-xs text-zinc-500 mt-1">Serveurs et sécurisation du cloud</p>
             </div>
             <div className="space-y-2.5 text-xs text-zinc-700 leading-relaxed border-t border-zinc-100 pt-3">
               <p>
-                <strong className="text-zinc-950">Fournisseur d&apos;hébergement :</strong> Infrastructure Cloud distribuée à haute disponibilité (Vercel Inc. et Google Cloud Platform / Firebase).
+                <strong className="text-zinc-900">Fournisseur d&apos;hébergement :</strong> Infrastructure Cloud distribuée à haute disponibilité (Vercel Inc. et Google Cloud Platform / Firebase).
               </p>
               <p>
-                <strong className="text-zinc-950">Chiffrement & Protocoles :</strong> Tous les flux de communication sont sécurisés par certificat SSL/TLS 256 bits (HTTPS strict).
+                <strong className="text-zinc-900">Chiffrement & Protocoles :</strong> Tous les flux de communication sont sécurisés par certificat SSL/TLS 256 bits (HTTPS strict).
               </p>
               <p>
-                <strong className="text-zinc-950">Base de données :</strong> Google Cloud Firestore avec règles d&apos;accès sécurisées et cloisonnées.
+                <strong className="text-zinc-900">Base de données :</strong> Google Cloud Firestore avec règles d&apos;accès sécurisées et cloisonnées.
               </p>
             </div>
           </div>
 
           {/* Carte 4 : Paiements & Devises */}
-          <div className="p-6 sm:p-7 rounded-2xl bg-white border border-zinc-200 hover:border-gold/30 shadow-sm transition-all space-y-4">
+          <div className="p-6 sm:p-7 rounded-2xl bg-white border border-[#E8E4DC] hover:border-gold/30 shadow-sm transition-all space-y-4">
             <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
               <CreditCard className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-zinc-950">4. Devises & Règlements</h2>
+              <h2 className="text-lg font-bold text-zinc-900">4. Devises & Règlements</h2>
               <p className="text-xs text-zinc-500 mt-1">Transactions transparentes et vérifiées</p>
             </div>
             <div className="space-y-2.5 text-xs text-zinc-700 leading-relaxed border-t border-zinc-100 pt-3">
               <p>
-                <strong className="text-zinc-950">Devise officielle :</strong> Tous les prix affichés sur la boutique en ligne sont exprimés en <strong>Francs CFA (XOF / XAF)</strong>.
+                <strong className="text-zinc-900">Devise officielle :</strong> Tous les prix affichés sur la boutique en ligne sont exprimés en <strong>Francs CFA (XOF / XAF)</strong>.
               </p>
               <p>
-                <strong className="text-zinc-950">Moyens de paiement acceptés :</strong>
+                <strong className="text-zinc-900">Moyens de paiement acceptés :</strong>
               </p>
               <ul className="list-disc list-inside space-y-1 text-zinc-700 pl-1">
                 <li>Orange Money (dépôt ou transfert sécurisé)</li>
@@ -225,10 +225,10 @@ export default function MentionsLegalesPage() {
         <div className="space-y-6">
           
           {/* Section Propriété Intellectuelle */}
-          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-3">
+          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-3">
             <div className="flex items-center gap-3">
               <ShieldCheck className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-              <h2 className="text-base sm:text-lg font-bold text-zinc-950">
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900">
                 5. Propriété Intellectuelle & Droits d&apos;Auteur
               </h2>
             </div>
@@ -241,10 +241,10 @@ export default function MentionsLegalesPage() {
           </section>
 
           {/* Section Garantie & Authenticité */}
-          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-3">
+          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-3">
             <div className="flex items-center gap-3">
               <Lock className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-              <h2 className="text-base sm:text-lg font-bold text-zinc-950">
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900">
                 6. Garantie des Produits & Authenticité
               </h2>
             </div>
@@ -267,10 +267,10 @@ export default function MentionsLegalesPage() {
           </section>
 
           {/* Section Juridiction & Droit Applicable */}
-          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-3">
+          <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm space-y-3">
             <div className="flex items-center gap-3">
               <Scale className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
-              <h2 className="text-base sm:text-lg font-bold text-zinc-950">
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900">
                 7. Droit Applicable & Résolution des Différends
               </h2>
             </div>
@@ -287,7 +287,7 @@ export default function MentionsLegalesPage() {
         {/* Bannière de transition vers la Politique de Confidentialité */}
         <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-gold/15 via-gold/5 to-white border border-gold/30 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-1.5 text-center sm:text-left">
-            <h3 className="text-lg font-black text-zinc-950">
+            <h3 className="text-lg font-black text-zinc-900">
               Protection de votre Vie Privée
             </h3>
             <p className="text-xs text-zinc-600 max-w-xl">
@@ -316,7 +316,7 @@ export default function MentionsLegalesPage() {
       </main>
 
       {/* Footer Minimaliste & Épuré */}
-      <footer className="border-t border-zinc-200 bg-zinc-50 py-8 px-4 sm:px-8 mt-12">
+      <footer className="border-t border-[#E8E4DC] bg-[#EBE8E1]/90 py-8 px-4 sm:px-8 mt-12">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <p>© 2026 PRINCE CFA. Koulouba, Ouagadougou. Tous droits réservés.</p>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-zinc-600">

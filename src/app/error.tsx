@@ -38,7 +38,7 @@ export default function GlobalError({
           <AlertTriangle className="w-8 h-8 text-gold" aria-hidden="true" />
         </div>
 
-        <h1 className="text-xl sm:text-2xl font-black text-zinc-950 uppercase tracking-wider mb-2">
+        <h1 className="text-xl sm:text-2xl font-black text-zinc-900 uppercase tracking-wider mb-2">
           Chargement Interrompu
         </h1>
 
@@ -57,13 +57,13 @@ export default function GlobalError({
 
           <button
             onClick={handleClearCacheAndReload}
-            className="w-full py-2.5 px-4 rounded-xl bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 text-zinc-700 font-semibold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-zinc-50 border border-[#E8E4DC] text-zinc-700 shadow-sm font-semibold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5 text-zinc-500" />
             <span>Vider le cache local & Actualiser</span>
           </button>
 
-          <div className="pt-2 border-t border-zinc-200 flex items-center justify-center gap-4 text-xs text-zinc-500">
+          <div className="pt-2 border-t border-[#E8E4DC] flex items-center justify-center gap-4 text-xs text-zinc-500">
             <Link href="/" className="hover:text-gold transition-colors flex items-center gap-1">
               <Home className="w-3.5 h-3.5" />
               <span>Accueil</span>

@@ -41,7 +41,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: "#ffffff",
+  themeColor: "#F5F3EE",
 };
 
 export default function RootLayout({
@@ -60,7 +60,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Prince CFA Mall" />
         <meta name="application-name" content="Prince CFA Mall" />
       </head>
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground">
+      <body suppressHydrationWarning className="min-h-full flex flex-col bg-[#F5F3EE] text-[#18181B]">
         {children}
       </body>
     </html>

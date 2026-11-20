@@ -198,9 +198,9 @@ function TrackingContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-zinc-950 flex flex-col selection:bg-gold selection:text-black">
+    <div className="min-h-screen bg-[#F5F3EE] text-[#18181B] flex flex-col selection:bg-gold selection:text-black">
       {/* En-tête de la page */}
-      <header className="border-b border-zinc-200 bg-white/85 backdrop-blur-xl sticky top-0 z-30 shadow-sm">
+      <header className="border-b border-[#E8E4DC] bg-white/95 backdrop-blur-xl sticky top-0 z-30 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <Crown className="w-5 h-5 text-gold flex-shrink-0" aria-hidden="true" />
@@ -208,7 +208,7 @@ function TrackingContent() {
               <span className="font-black text-sm tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-600 to-yellow-600">
                 PRINCE CFA
               </span>
-              <span className="text-[9px] uppercase tracking-[0.2em] text-zinc-500 group-hover:text-gold transition-colors">
+              <span className="text-[9px] uppercase tracking-[0.2em] text-zinc-600 group-hover:text-gold transition-colors">
                 Boutique Officielle
               </span>
             </div>
@@ -217,7 +217,7 @@ function TrackingContent() {
           <div className="flex items-center gap-2">
             <Link
               href="/"
-              className="text-xs px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900 border border-zinc-200 transition-colors flex items-center gap-1.5"
+              className="text-xs px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-50 text-zinc-900 border border-[#E8E4DC] transition-colors flex items-center gap-1.5 shadow-sm"
             >
               <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Retour boutique</span>
@@ -244,7 +244,7 @@ function TrackingContent() {
             <Package className="w-3.5 h-3.5 text-gold" aria-hidden="true" />
             <span>Portail Suivi de Commande</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-black text-zinc-950 tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-black text-zinc-900 tracking-tight">
             Suivez votre appareil <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-yellow-600">en direct</span>
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 max-w-lg mx-auto font-normal">
@@ -259,7 +259,7 @@ function TrackingContent() {
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
                 placeholder="Référence (CMD-...) ou Téléphone"
-                className="w-full py-3.5 px-4 rounded-2xl bg-white border border-zinc-200 focus:border-gold text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition-all font-mono shadow-sm"
+                className="w-full py-3.5 px-4 rounded-2xl bg-white border border-[#E8E4DC] focus:border-gold text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition-all font-mono shadow-sm"
               />
             </div>
             <button
@@ -286,10 +286,10 @@ function TrackingContent() {
           )}
 
           {multipleOrders.length > 1 && (
-            <div className="p-4 rounded-2xl bg-white border border-gold/30 max-w-xl mx-auto space-y-2.5 animate-in fade-in text-left shadow-sm">
+            <div className="p-4 rounded-2xl bg-white border border-[#E8E4DC] max-w-xl mx-auto space-y-2.5 animate-in fade-in text-left shadow-sm">
               <div className="flex items-center justify-between text-xs text-zinc-700">
                 <span className="font-semibold text-gold">Plusieurs commandes associées ({multipleOrders.length})</span>
-                <span className="text-[10px] text-zinc-500">Cliquez pour basculer</span>
+                <span className="text-[10px] text-zinc-600">Cliquez pour basculer</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {multipleOrders.map((ord) => (
@@ -300,7 +300,7 @@ function TrackingContent() {
                     className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                       order?.id === ord.id
                         ? "bg-gold text-black shadow-sm"
-                        : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
+                        : "bg-white text-zinc-900 border border-[#E8E4DC] hover:bg-zinc-50 shadow-sm"
                     }`}
                   >
                     {ord.id}
@@ -316,17 +316,17 @@ function TrackingContent() {
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
             
             {/* Carte En-tête Statut */}
-            <div className="p-6 rounded-3xl bg-white border border-gold/30 shadow-md space-y-6">
+            <div className="p-6 rounded-3xl bg-white border border-[#E8E4DC] shadow-sm space-y-6">
               
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-zinc-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#E8E4DC]">
                 <div>
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold block">
+                  <span className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold block">
                     Référence Officielle PRINCE CFA
                   </span>
                   <div className="text-xl sm:text-2xl font-black text-gold font-mono tracking-wider">
                     {order.id}
                   </div>
-                  <span className="text-xs text-zinc-500 block mt-1">
+                  <span className="text-xs text-zinc-600 block mt-1">
                     Passée le {new Date(order.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
@@ -360,27 +360,27 @@ function TrackingContent() {
                       {/* Étape 1 */}
                       <div className="flex flex-col items-center">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md ${
-                          currentStep >= 1 ? "bg-gold text-black border-2 border-white" : "bg-zinc-100 text-zinc-400 border border-zinc-200"
+                          currentStep >= 1 ? "bg-gold text-black border-2 border-white" : "bg-white text-zinc-400 border border-[#E8E4DC]"
                         }`}>
                           {currentStep >= 1 ? <Check className="w-5 h-5 text-black stroke-[3]" aria-hidden="true" /> : "1"}
                         </div>
-                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 1 ? "text-gold" : "text-zinc-500"}`}>
+                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 1 ? "text-gold" : "text-zinc-600"}`}>
                           Enregistrée
                         </span>
-                        <span className="text-[9px] text-zinc-500 hidden sm:block">Commande reçue</span>
+                        <span className="text-[9px] text-zinc-600 hidden sm:block">Commande reçue</span>
                       </div>
 
                       {/* Étape 2 */}
                       <div className="flex flex-col items-center">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md ${
-                          currentStep >= 2 ? "bg-emerald-500 text-white border-2 border-white" : currentStep === 1 ? "bg-amber-100 text-amber-700 border-2 border-amber-400 animate-pulse" : "bg-zinc-100 text-zinc-400 border border-zinc-200"
+                          currentStep >= 2 ? "bg-emerald-500 text-white border-2 border-white" : currentStep === 1 ? "bg-amber-100 text-amber-700 border-2 border-amber-400 animate-pulse" : "bg-white text-zinc-400 border border-[#E8E4DC]"
                         }`}>
                           {currentStep >= 2 ? <Check className="w-5 h-5 text-white stroke-[3]" aria-hidden="true" /> : "2"}
                         </div>
-                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 2 ? "text-emerald-600" : currentStep === 1 ? "text-amber-600" : "text-zinc-500"}`}>
+                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 2 ? "text-emerald-600" : currentStep === 1 ? "text-amber-600" : "text-zinc-600"}`}>
                           Paiement
                         </span>
-                        <span className="text-[9px] text-zinc-500 hidden sm:block">
+                        <span className="text-[9px] text-zinc-600 hidden sm:block">
                           {currentStep >= 2 ? "Validé" : "Vérification"}
                         </span>
                       </div>
@@ -388,27 +388,27 @@ function TrackingContent() {
                       {/* Étape 3 */}
                       <div className="flex flex-col items-center">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md ${
-                          currentStep >= 3 ? "bg-cyan-600 text-white border-2 border-white" : currentStep === 2 ? "bg-cyan-100 text-cyan-700 border-2 border-cyan-400" : "bg-zinc-100 text-zinc-400 border border-zinc-200"
+                          currentStep >= 3 ? "bg-cyan-600 text-white border-2 border-white" : currentStep === 2 ? "bg-cyan-100 text-cyan-700 border-2 border-cyan-400" : "bg-white text-zinc-400 border border-[#E8E4DC]"
                         }`}>
                           {currentStep >= 3 ? <Check className="w-5 h-5 text-white stroke-[3]" aria-hidden="true" /> : "3"}
                         </div>
-                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 3 ? "text-cyan-600" : currentStep === 2 ? "text-cyan-700" : "text-zinc-500"}`}>
+                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 3 ? "text-cyan-600" : currentStep === 2 ? "text-cyan-700" : "text-zinc-600"}`}>
                           Préparation
                         </span>
-                        <span className="text-[9px] text-zinc-500 hidden sm:block">Colis scellé</span>
+                        <span className="text-[9px] text-zinc-600 hidden sm:block">Colis scellé</span>
                       </div>
 
                       {/* Étape 4 */}
                       <div className="flex flex-col items-center">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md ${
-                          currentStep >= 4 ? "bg-emerald-600 text-white border-2 border-white" : "bg-zinc-100 text-zinc-400 border border-zinc-200"
+                          currentStep >= 4 ? "bg-emerald-600 text-white border-2 border-white" : "bg-white text-zinc-400 border border-[#E8E4DC]"
                         }`}>
                           {currentStep >= 4 ? <Check className="w-5 h-5 text-white stroke-[3]" aria-hidden="true" /> : "4"}
                         </div>
-                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 4 ? "text-emerald-600" : "text-zinc-500"}`}>
+                        <span className={`text-[11px] font-bold mt-2 ${currentStep >= 4 ? "text-emerald-600" : "text-zinc-600"}`}>
                           {order.customer.deliveryMethod === "delivery" ? "Livrée" : "Remise"}
                         </span>
-                        <span className="text-[9px] text-zinc-500 hidden sm:block">
+                        <span className="text-[9px] text-zinc-600 hidden sm:block">
                           {order.customer.deliveryMethod === "delivery" ? "À destination" : "En Boutique"}
                         </span>
                       </div>
@@ -419,10 +419,10 @@ function TrackingContent() {
               )}
 
               {/* Message d'explication selon le statut */}
-              <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200">
+              <div className="p-4 rounded-2xl bg-white border border-[#E8E4DC] shadow-sm">
                 {(order.orderStatus === "expire" || order.isExpired) ? (
                   <div className="space-y-2 text-xs">
-                    <div className="text-zinc-800 font-bold flex items-center gap-1.5">
+                    <div className="text-zinc-900 font-bold flex items-center gap-1.5">
                       <Clock className="w-4 h-4 text-zinc-600 flex-shrink-0" aria-hidden="true" />
                       <span>Délai de paiement de 48 heures dépassé</span>
                     </div>
@@ -482,45 +482,45 @@ function TrackingContent() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               
               {/* Colonne 1 & 2 : Liste des articles */}
-              <div className="md:col-span-2 p-5 rounded-3xl bg-white border border-zinc-200 shadow-sm space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-zinc-800 flex items-center gap-2">
+              <div className="md:col-span-2 p-5 rounded-3xl bg-white border border-[#E8E4DC] shadow-sm space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-wider text-zinc-900 flex items-center gap-2">
                   <Smartphone className="w-4 h-4 text-gold" aria-hidden="true" />
                   <span>Articles commandés ({order.items.reduce((s, i) => s + i.quantity, 0)})</span>
                 </h3>
 
-                <div className="divide-y divide-zinc-100">
+                <div className="divide-y divide-[#E8E4DC]">
                   {order.items.map((item, idx) => (
                     <div key={idx} className="py-3 flex items-center justify-between gap-3 text-xs">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-200 p-1 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <div className="w-12 h-12 rounded-xl bg-white border border-[#E8E4DC] p-1 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-xs">
                           <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
                         </div>
                         <div>
-                          <div className="font-bold text-zinc-950 text-sm">{item.name}</div>
-                          <div className="text-[11px] text-zinc-500 mt-0.5">
+                          <div className="font-bold text-zinc-900 text-sm">{item.name}</div>
+                          <div className="text-[11px] text-zinc-600 mt-0.5">
                             {[item.selectedCapacity, item.selectedColor].filter(Boolean).join(" • ")}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-zinc-500 text-[11px]">{item.quantity} × {formatPrice(item.unitPrice)} F</div>
+                        <div className="text-zinc-600 text-[11px]">{item.quantity} × {formatPrice(item.unitPrice)} F</div>
                         <div className="font-black text-gold text-sm">{formatPrice(item.quantity * item.unitPrice)} FCFA</div>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="pt-3 border-t border-zinc-200 space-y-1.5 text-xs">
-                  <div className="flex justify-between text-zinc-500">
+                <div className="pt-3 border-t border-[#E8E4DC] space-y-1.5 text-xs">
+                  <div className="flex justify-between text-zinc-600">
                     <span>Sous-total</span>
                     <span>{formatPrice(order.pricing.subtotal)} FCFA</span>
                   </div>
-                  <div className="flex justify-between text-zinc-500">
+                  <div className="flex justify-between text-zinc-600">
                     <span>Frais de réception ({order.customer.deliveryMethod === "delivery" ? "Livraison" : "Retrait"})</span>
                     <span>{order.pricing.deliveryFee === 0 ? "Gratuit" : `${formatPrice(order.pricing.deliveryFee)} FCFA`}</span>
                   </div>
-                  <div className="pt-2 border-t border-zinc-200 flex justify-between font-black text-sm">
-                    <span className="text-zinc-950">Total réglé / attendu</span>
+                  <div className="pt-2 border-t border-[#E8E4DC] flex justify-between font-black text-sm">
+                    <span className="text-zinc-900">Total réglé / attendu</span>
                     <span className="text-gold text-base">{formatPrice(order.pricing.total)} FCFA</span>
                   </div>
                 </div>
@@ -530,14 +530,14 @@ function TrackingContent() {
               <div className="space-y-4">
                 
                 {/* Mode de réception */}
-                <div className="p-5 rounded-3xl bg-white border border-zinc-200 shadow-sm space-y-3 text-xs">
-                  <h4 className="font-black uppercase tracking-wider text-zinc-800 flex items-center gap-2">
+                <div className="p-5 rounded-3xl bg-white border border-[#E8E4DC] shadow-sm space-y-3 text-xs">
+                  <h4 className="font-black uppercase tracking-wider text-zinc-900 flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-gold" aria-hidden="true" />
                     <span>Mode de Réception</span>
                   </h4>
 
-                  <div className="p-3 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1">
-                    <div className="font-bold text-zinc-950 flex items-center gap-1.5">
+                  <div className="p-3 rounded-2xl bg-white border border-[#E8E4DC] space-y-1 shadow-sm">
+                    <div className="font-bold text-zinc-900 flex items-center gap-1.5">
                       {order.customer.deliveryMethod === "delivery" ? (
                         <>
                           <Truck className="w-4 h-4 text-gold" aria-hidden="true" />
@@ -562,9 +562,9 @@ function TrackingContent() {
                   </div>
 
                   <div className="text-[11px] text-zinc-600">
-                    Client : <strong className="text-zinc-950">{order.customer.name}</strong>
+                    Client : <strong className="text-zinc-900">{order.customer.name}</strong>
                     {order.customer.phoneMasked && (
-                      <span className="block font-mono text-[10px] text-zinc-500 mt-0.5">{order.customer.phoneMasked}</span>
+                      <span className="block font-mono text-[10px] text-zinc-600 mt-0.5">{order.customer.phoneMasked}</span>
                     )}
                   </div>
                 </div>
@@ -592,7 +592,7 @@ function TrackingContent() {
 
                   <a
                     href={`tel:${SHOP_CONFIG.phone}`}
-                    className="w-full py-2 px-3 rounded-xl bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold border border-zinc-200 flex items-center justify-center gap-2 transition-colors block"
+                    className="w-full py-2 px-3 rounded-xl bg-white hover:bg-zinc-50 text-zinc-900 text-xs font-semibold border border-[#E8E4DC] shadow-sm flex items-center justify-center gap-2 transition-colors block"
                   >
                     <Phone className="w-4 h-4 text-gold" aria-hidden="true" />
                     <span>Appeler {SHOP_CONFIG.displayPhone}</span>
@@ -603,7 +603,7 @@ function TrackingContent() {
                 <button
                   type="button"
                   onClick={() => fetchOrder(order.id, phone)}
-                  className="w-full py-2.5 px-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border border-zinc-200 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="w-full py-2.5 px-3 rounded-xl bg-white hover:bg-zinc-50 text-zinc-900 border border-[#E8E4DC] text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
                 >
                   <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Actualiser le statut</span>
@@ -619,7 +619,7 @@ function TrackingContent() {
       </main>
 
       {/* Footer minimaliste avec liens légaux */}
-      <footer className="border-t border-zinc-200 bg-zinc-50 py-6 px-4 text-center text-xs text-zinc-500 space-y-2">
+      <footer className="border-t border-[#E8E4DC] bg-[#EBE8E1]/90 py-6 px-4 text-center text-xs text-zinc-600 space-y-2">
         <p>© {new Date().getFullYear()} PRINCE CFA. Boutique Premium Ouagadougou. Tous droits réservés.</p>
         <div className="flex flex-wrap items-center justify-center gap-3 text-zinc-600 text-[11px]">
           <Link href="/a-propos" className="hover:text-gold transition-colors">À Propos</Link>
@@ -638,7 +638,7 @@ function TrackingContent() {
 export default function TrackingPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center text-gold font-bold">
+      <div className="min-h-screen bg-[#F5F3EE] flex items-center justify-center text-gold font-bold">
         Chargement du suivi de commande...
       </div>
     }>
